@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 1 — **CORE-001 slice verified; TERM-002 engine pins validated; `gpui` pin blocker + UI-001 remedy pending; CORE-002 in flight.**
+**Milestone:** Phase 1/2 — **ADR-003 Accepted (engine pins + `gpui` pin proven); UI-001 window runs; CORE-002 in flight.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)
@@ -9,7 +9,7 @@
 1. ~~Honest, timestamped evidence for all five reference videos + GoRex + official REX docs.~~ DONE
 2. ~~Verified toolchain inventory; no installs.~~ DONE
 3. Domain/dependency and protocol ADRs — DONE (**ADR-001/002 Accepted** after REVIEW-001 + ADR-FIX-001; `31bed30` + INT-007 `f474c83`).
-4. Terminal engine + GPUI pin ADR and spike — DONE phase 1 (spike + ADR-003 integrated `78b83f2`, `Proposed`); engine-level spike phase 2 pending (TERM-002 is the hard gate for the engine choice; UI-001 for the GPUI pin).
+4. Terminal engine + GPUI pin ADR and spike — **DONE**; ADR-003 **Accepted** (DEC-004): TERM-002 validated the engine pins, UI-001 resolved the `gpui = "=0.2.2"` build (libc 0.2.189 lockfile hold) and ran a real window (`09928db`).
 5. Smallest useful vertical slice (server-owned PTY, CLI-created session, terminal I/O, disconnect
    survives, reconnect recovers) — **DONE**, integrated `d3e0286` (INT-008); 104 tests pass, 5
    acceptance properties independently verified (`TESTS.md` 76–78).

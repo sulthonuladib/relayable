@@ -25,7 +25,7 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 |---|---|---|---|---|
 | 1 | TERM-002 — engine-level spike validates ADR-003's provisional pin | `spike/term-002-engine-validation` | TERM-001 | DONE — `60d4395`; engine pins accept; gpui pin blocked |
 | 2 | CORE-002 — reconnect/events + reattach-snapshot hardening | `core/core-002-reconnect-events` | CORE-001 | IN_PROGRESS |
-| 3 | UI-001/UI-002 — GPUI workspace against catalogue + tokens; UI-001 must prove a gpui-pin remedy before ADR-003 can be Accepted | TBD | UI evidence + ADR-003 | READY |
+| 3 | UI-001/UI-002 — GPUI workspace; UI-001 proves the gpui pin (DONE `09928db`); UI-002 = reference workspace | TBD | UI evidence + ADR-003 | UI-001 DONE; UI-002 READY |
 | 4 | QA-001 — smoke/CI scripts and build matrix | TBD | CORE-001 | READY |
 | 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | TBD | ADR-005, CORE-001 | READY |
 | 6 | ADR-004 (DEC-005 ownership/persistence) | TBD | CORE-002 | waiting |

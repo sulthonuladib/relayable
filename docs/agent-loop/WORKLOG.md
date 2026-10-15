@@ -77,6 +77,31 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 20 — UI-001 integrated; ADR-003 Accepted (2026-10-15)
+
+**Objective:** resolve the `gpui` pin blocker and prove a Linux window.
+
+**Deliverable:** UI-001 (`37272db`, 4 commits, 27 files, +10341) merged as INT-010 `09928db` — all
+inside `apps/linux/**` (its own workspace; root `Cargo.toml`/`Cargo.lock` and `crates/**` untouched).
+
+**Blocker resolved:** `cargo update -p libc --precise 0.2.189` in `apps/linux` downgrades `libc
+0.2.190 → 0.2.189` (lockfile hold; no `[patch.crates-io]` needed). Independently reproduced:
+`cargo check --locked` exit 0, `cargo test --locked` 9 passed, lockfile has exactly `libc 0.2.189` +
+`xattr 0.2.3`. A real Wayland window was launched (`hyprctl`: `class=relayable`, `title=Relayable`,
+`950x1030`) and screenshotted (`apps/linux/evidence/relayable-window.png`, a real PNG); Manager
+visually confirmed the render (dark `rgb(9,30,46)` surface + "Relayable" label).
+
+**Decisions:** **ADR-003 → Accepted** (DEC-004): engine pins validated by TERM-002, `gpui` pin proven
+by UI-001; reconsideration trigger 4 discharged. Recorded the forward `libc` lockfile-hold constraint
+(a future `apps/linux` dependency on a `libc = "=0.2.190"` crate would re-break `gpui`).
+
+**Also noted:** REF-004's palette conflict is confirmed real (`design-tokens.md` §204/§210/§212);
+`apps/linux/src/tokens.rs` encodes the measured range and documents the conflict without resolving it.
+
+**Next:** CORE-002 (`w1B`, in flight) → UI-002 → QA-001 → CTX-001 → ADR-004.
+
+---
+
 ## Checkpoint 19 — TERM-002 integrated; ADR-003 engine pins validated, GPUI pin blocked (2026-10-15)
 
 **Objective:** complete the engine-level spike and resolve ADR-003's engine gate.

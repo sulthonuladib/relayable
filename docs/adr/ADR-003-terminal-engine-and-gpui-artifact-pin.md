@@ -213,7 +213,7 @@ crates.io artifact (Option H) and these remain fallbacks.
 
 ## Decision
 
-**Status: Proposed — terminal-engine pins VALIDATED by TERM-002; the GPUI pin is NOT build-verified and awaits UI-001.** The engine-independent phase-1 spike validated PTY plumbing; the phase-2 engine-level spike (`spikes/terminal-engine-phase2/`, TERM-002) now drives the candidate engines behind a common adapter on real PTYs: `alacritty_terminal` 0.26.0 + `vte` 0.15.0 + `portable-pty` 0.9.0 pass **32 PASS / 1 documented UNSUPPORTED / 0 FAIL / 0 NOT_TESTED**, and no engine change is warranted (`vt100` lacks OSC 8 + resize reflow; `avt` lacks title/mouse/bracketed-paste/OSC 8). The `gpui = "=0.2.2"` pin **resolves but does not compile** on this host (transitive `xattr 0.2.3` → `libc 0.2.190` removed `ENOATTR`), so the GPUI half of this ADR needs a UI-001 remedy before it is relied on.
+**Status: Accepted — Manager acceptance 2026-10-15 (DEC-004).** Engine pins validated by TERM-002: `alacritty_terminal` 0.26.0 + `vte` 0.15.0 + `portable-pty` 0.9.0 pass **32 PASS / 1 documented UNSUPPORTED / 0 FAIL / 0 NOT_TESTED** on real PTYs, and no engine change is warranted (`vt100` lacks OSC 8 + resize reflow; `avt` lacks title/mouse/bracketed-paste/OSC 8). The `gpui = "=0.2.2"` pin **builds and runs** via the UI-001 remedy (hold `libc` at 0.2.189 in the `apps/linux` workspace lockfile); a real Wayland window (`class=relayable`, `title=Relayable`) was launched and screenshotted. Reconsideration trigger 4 is discharged.
 
 1. **Terminal engine:** pin `alacritty_terminal` **0.26.0** (`Apache-2.0`, version-level field) as the
    parser + screen/grid state engine.
@@ -226,9 +226,7 @@ crates.io artifact (Option H) and these remain fallbacks.
    GPUI types in shared crates (`full.md` §5.3). **TERM-002 caveat (blocking for the pin):** on this
    host `cargo check` for `gpui 0.2.2` exits 101 at `xattr 0.2.3` (`libc::ENOATTR` was removed in
    `libc 0.2.190`); 0.2.2 is the latest crates.io `gpui` and a 7-variant feature matrix does not help.
-   UI-001 must apply and prove a contained remedy — hold `libc` below 0.2.190
-   (`cargo update -p libc --precise 0.2.189`) or patch `xattr` — before the pin is relied on
-   (`spikes/terminal-engine-phase2/results/raw/gpui-followup/DIAGNOSIS.md`).
+   UI-001 applied and proved the remedy: `cargo update -p libc --precise 0.2.189` in the separate `apps/linux` workspace downgrades `libc 0.2.190 → 0.2.189` (`cargo check --locked`/`build`/`test`/`clippy` all exit 0) and a real window launches. `[patch.crates-io]` was not needed. Evidence: `apps/linux/evidence/TERM-002-remedy.md`, `spikes/terminal-engine-phase2/results/raw/gpui-followup/DIAGNOSIS.md`.
 5. **License obligation mitigation:** vendor the applicable `LICENSE-APACHE`/`LICENSE-MIT`/`LICENSE.md`
    texts into any Relayable distribution, and ship no `NOTICE` (none of the inspected artifacts ships
    one). For `alacritty_terminal` that means `LICENSE-APACHE` (Apache-2.0); for `vte` both
@@ -270,7 +268,8 @@ chunk-boundary invariance. Surviving limits (REPORT.md §8): `vte` is exercised 
 (no frontend); the mouse model approximates (`Press` vs `PressRelease`); bracketed-paste payload is an
 input-path property and UNSUPPORTED here; selection is golden-value tested only; there is no Android
 rendering, no GPU/renderer path, and no `TerminalOutput`/`TerminalSnapshot` protocol mapping yet; and
-`gpui` remains unbuilt and unrun. Nothing here claims otherwise.
+`gpui` was not built or run by this spike (UI-001 later built and ran the pin; see decision item 4).
+Nothing here claims otherwise.
 
 ---
 
@@ -287,6 +286,13 @@ rendering, no GPU/renderer path, and no `TerminalOutput`/`TerminalSnapshot` prot
   (e.g. `cargo deny`/`cargo metadata` + license fetch) over the lockfile before distributing.
   Only `vte` (`Apache-2.0 OR MIT`) and `unicode-width` (`MIT OR Apache-2.0`) are directly evidenced
   here.
+- **GPUI `libc` lockfile-hold (forward constraint).** UI-001 resolves the `gpui 0.2.2` build by holding
+  `libc` at 0.2.189 in the `apps/linux` workspace lockfile (`cargo update -p libc --precise 0.2.189`;
+  `apps/linux` is a separate workspace, so the core crates are unaffected). This is a **lockfile hold,
+  not a source fix**: if a future UI slice makes `apps/linux` path-depend on a core crate that pins
+  `libc = "=0.2.190"` (e.g. `relayable-server`), `libc` is forced back to 0.2.190 and the `ENOATTR`
+  failure returns (exit 101) — that slice must then add the `[patch.crates-io]` `xattr` fix, or depend
+  only on `libc`-neutral crates. Evidence: `apps/linux/evidence/TERM-002-remedy.md`.
 - **API-stability risk.** `alacritty_terminal` is a 0.x library with no semver guarantee for library
   consumers: its own `CHANGELOG.md` marks breaking changes in bold (*"**Breaking changes are written in
   bold style.**"*) and the README calls the software *"at a **beta** level of readiness"*. Pinning an

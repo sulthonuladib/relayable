@@ -213,3 +213,21 @@ title/mouse/bracketed-paste/OSC 8). `gpui` pin accepted only with the documented
 `Proposed` until UI-001 proves a contained remedy and a window build/run. Full report caveats: vte is
 exercised only transitively through `alacritty_terminal`; palette→RGB, Android rendering, and the
 `TerminalSnapshot` mapping are untested in this spike.
+
+## 2026-10-15 — UI-001 GPUI window: independent Manager validation (`09928db`)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Run in `apps/linux`
+(its own workspace).
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 82 | `cargo check --locked` | exit 0; only a transitive `proc-macro-error2` future-incompat warning (not from `relayable-linux`) | 0 |
+| 83 | `cargo test --locked` | `9 passed; 0 failed` | 0 |
+| 84 | `grep -A2 'name = "libc"' apps/linux/Cargo.lock` (and xattr) | exactly one `libc 0.2.189` and one `xattr 0.2.3` | 0 |
+| 85 | inspect `apps/linux/evidence/relayable-window.png` (`file` + read) | real PNG `950 x 1030`; Manager visually confirmed the Relayable window render (dark `rgb(9,30,46)` surface + "Relayable" label) | 0 |
+| 86 | `cargo check --workspace --offline` (repo root, post-merge) | exit 0 — the core workspace is unaffected by `apps/linux` | 0 |
+
+**Decisions recorded:** the `gpui = "=0.2.2"` build is resolved by a `libc 0.2.189` lockfile hold in the
+separate `apps/linux` workspace (no `[patch.crates-io]` needed); **ADR-003 → Accepted** (DEC-004)
+with reconsideration trigger 4 discharged. Forward constraint recorded in ADR-003 consequences: a
+future `apps/linux` dependency on a crate pinning `libc = "=0.2.190"` would re-break `gpui`.
