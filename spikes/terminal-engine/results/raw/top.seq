@@ -1,0 +1,619 @@
+# ---- provenance ----
+# command: payload file written by a spike binary listed in results/raw/*.summary.txt
+# exit_code: 0
+# utc_timestamp: 2026-10-15T17:05:39Z
+# git_head: b96da2766e8750a77feee3beec0d84c2ce28f2fc
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# host: Linux 7.2.5-3-omarchy x86_64
+# os: Omarchy
+# ---- output ----
+# decoded sequence listing for top
+# total raw bytes: 5771
+# category checklist:
+# CHECK alt_screen_1049_enter = NOT_OBSERVED
+# CHECK alt_screen_1049_leave = NOT_OBSERVED
+# CHECK alt_screen_47_enter = NOT_OBSERVED
+# CHECK alt_screen_47_leave = NOT_OBSERVED
+# CHECK alt_screen_1047_enter = NOT_OBSERVED
+# CHECK alt_screen_1047_leave = NOT_OBSERVED
+# CHECK mouse_1000_enable = NOT_OBSERVED
+# CHECK mouse_1000_disable = NOT_OBSERVED
+# CHECK mouse_1002_enable = NOT_OBSERVED
+# CHECK mouse_1002_disable = NOT_OBSERVED
+# CHECK mouse_1003_enable = NOT_OBSERVED
+# CHECK mouse_1003_disable = NOT_OBSERVED
+# CHECK mouse_1005_enable = NOT_OBSERVED
+# CHECK mouse_1005_disable = NOT_OBSERVED
+# CHECK mouse_1006_enable = NOT_OBSERVED
+# CHECK mouse_1006_disable = NOT_OBSERVED
+# CHECK mouse_1015_enable = NOT_OBSERVED
+# CHECK mouse_1015_disable = NOT_OBSERVED
+# CHECK bracketed_paste_enable = NOT_OBSERVED
+# CHECK bracketed_paste_disable = NOT_OBSERVED
+# CHECK osc_title = NOT_OBSERVED
+# CHECK osc_hyperlink = NOT_OBSERVED
+# CHECK osc_color = NOT_OBSERVED
+# CHECK cursor_hide = OBSERVED count=1 first_offset=7 first_bytes=[1b 5b 3f 32 35 6c] CSI prefix="?" params=?25 inters="" final='l' [mode 25]
+# CHECK cursor_show = OBSERVED count=1 first_offset=5762 first_bytes=[1b 5b 3f 32 35 68] CSI prefix="?" params=?25 inters="" final='h' [mode 25]
+# CHECK decscusr = NOT_OBSERVED
+# CHECK sgr = OBSERVED count=335 first_offset=19 first_bytes=[1b 5b 6d] CSI prefix="" params= inters="" final='m'
+# all decoded sequences:
+offset=       0 len=  5 category=cursor_keys_application      CSI prefix="?" params=?1 inters="" final='h' [mode 1]
+offset=       5 len=  2 category=esc_other                    ESC '=' 1b 3d
+offset=       7 len=  6 category=cursor_hide                  CSI prefix="?" params=?25 inters="" final='l' [mode 25]
+offset=      13 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='H'
+offset=      16 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=      19 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=      94 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=      97 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     100 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     108 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     111 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     114 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     122 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=     127 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     130 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     139 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     142 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     145 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     153 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     162 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     165 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     168 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     176 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     179 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     188 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     191 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     194 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     202 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     209 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     212 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     215 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     223 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     226 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     237 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     240 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     243 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     251 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     260 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     263 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     266 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     274 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     277 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     286 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     289 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     292 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     300 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     307 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     310 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     313 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     321 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     324 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     335 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     338 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     341 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     349 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     356 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     359 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     362 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     370 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     373 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     384 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     387 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     390 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     398 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     405 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     408 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     411 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     419 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     422 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     431 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     434 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     437 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     445 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     448 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     451 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     459 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=     464 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     467 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     478 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     481 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     484 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     492 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     502 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     505 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     508 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     516 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     519 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     525 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     528 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     531 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     539 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     549 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     552 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     555 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     563 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     566 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     572 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     575 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     578 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     586 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     596 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     599 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     602 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     610 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     613 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     619 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     622 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     625 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     633 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     643 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     646 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     649 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     657 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     660 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     666 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     669 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     672 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     680 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     690 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     693 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     696 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     704 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     707 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     713 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     716 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     719 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     727 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     737 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     740 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     743 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     751 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     754 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     760 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     763 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     766 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     774 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     784 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     787 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     790 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     798 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     801 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     807 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     810 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     813 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     821 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     831 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     834 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     837 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     845 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     848 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     853 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     856 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     859 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     867 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     870 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     874 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     877 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     880 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     888 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     891 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     894 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     902 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=     907 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     910 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     922 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     925 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     928 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     936 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=     950 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     953 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     956 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     964 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     967 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     976 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=     979 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=     982 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=     990 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1004 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1007 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1010 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1018 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1021 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1029 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1032 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1035 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1043 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1057 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1060 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1063 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1071 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1074 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1082 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1085 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1088 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1096 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1110 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1113 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1116 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1124 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1127 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1140 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1143 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1146 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1154 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1157 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1161 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1164 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1167 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1175 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1178 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1185 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1188 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1191 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1199 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1202 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1205 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1213 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1218 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1221 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1233 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1236 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1239 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1247 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1261 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1264 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1267 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1275 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1278 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1287 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1290 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1293 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1301 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1315 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1318 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1321 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1329 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1332 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1340 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1343 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1346 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1354 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1368 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1371 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1374 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1382 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1385 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1393 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1396 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1399 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1407 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1421 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1424 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1427 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1435 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1438 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1451 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1454 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1457 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1465 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1468 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1471 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1479 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1484 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1489 len=  4 category=sgr                          CSI prefix="" params=7 inters="" final='m'
+offset=    1573 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1576 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1579 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1587 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1592 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1595 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1598 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    1682 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1685 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1688 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1696 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1701 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1704 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1787 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1790 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1793 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1801 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1806 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1809 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1892 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1895 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1898 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    1906 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    1911 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    1914 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    1997 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2000 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2003 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2011 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2016 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2019 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2102 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2105 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2108 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2116 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2121 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2124 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2207 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2210 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2213 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2221 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2226 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2229 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2312 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2315 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2318 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2326 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2331 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2334 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2417 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2420 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2423 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2431 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2436 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2439 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2522 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2525 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2528 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2536 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2541 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2544 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2627 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2630 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2633 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2641 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2646 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2649 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2732 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2735 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2738 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2746 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2751 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2754 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2837 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2840 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2843 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2851 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2856 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2859 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2942 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2945 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    2948 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    2956 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    2961 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    2964 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3047 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3050 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3053 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3061 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3066 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3069 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3152 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3155 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3158 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3166 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3171 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3174 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3257 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3260 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3263 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3271 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3276 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3279 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3362 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3365 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3368 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3376 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3379 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='H'
+offset=    3382 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3385 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3460 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3463 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3466 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3474 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3477 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3480 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3488 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3495 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3498 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3509 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3512 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3515 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3523 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3533 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3536 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3539 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3547 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3550 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3556 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3559 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3562 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3570 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3580 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3583 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3586 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3594 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3597 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3603 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3606 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3609 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3617 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3627 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3630 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3633 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3641 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3644 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3650 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3653 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3656 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3664 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3674 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3677 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3680 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3688 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3691 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3697 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3700 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3703 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3711 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3721 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3724 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3727 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3735 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3738 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3744 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3747 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3750 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3758 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3768 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3771 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3774 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3782 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3785 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3791 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3794 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3797 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3805 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3815 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3818 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3821 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3829 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3832 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3838 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3841 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3844 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3852 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    3862 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3865 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3868 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3876 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3879 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3884 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3887 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3890 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3898 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3901 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3905 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3908 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3911 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3919 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3922 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3925 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    3933 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3942 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    3949 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    3952 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    3955 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    4039 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4042 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4045 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4053 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4058 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4061 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4144 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4147 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4150 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4158 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4163 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4166 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4249 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4252 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4255 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4263 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4268 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4271 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4354 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4357 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4360 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4368 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4373 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4376 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4459 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4462 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4465 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4473 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4478 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4481 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4564 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4567 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4570 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4578 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4583 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4586 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4669 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4672 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4675 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4683 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4688 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4691 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4774 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4777 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4780 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4788 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4793 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4796 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4879 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4882 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4885 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4893 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    4898 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4901 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4984 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    4987 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    4990 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    4998 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5003 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5006 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5089 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5092 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5095 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5103 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5108 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5111 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5114 len=  4 category=sgr                          CSI prefix="" params=1 inters="" final='m'
+offset=    5198 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5201 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5204 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5212 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5217 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5220 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5303 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5306 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5309 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5317 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5322 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5325 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5408 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5411 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5414 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5422 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5427 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5430 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5513 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5516 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5519 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5527 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5532 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5535 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5618 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5621 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5624 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5632 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5637 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5640 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5723 len=  2 category=esc_other                    ESC '(' 1b 28
+offset=    5726 len=  3 category=sgr                          CSI prefix="" params= inters="" final='m'
+offset=    5729 len=  8 category=sgr                          CSI prefix="" params=39;49 inters="" final='m'
+offset=    5737 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'
+offset=    5740 len=  5 category=cursor_keys_normal           CSI prefix="?" params=?1 inters="" final='l' [mode 1]
+offset=    5745 len=  2 category=esc_other                    ESC '>' 1b 3e
+offset=    5747 len=  7 category=csi_cursor_or_erase          CSI prefix="" params=25;1 inters="" final='H'
+offset=    5756 len=  6 category=private_mode_other           CSI prefix="?" params=?12 inters="" final='l' [mode 12]
+offset=    5762 len=  6 category=cursor_show                  CSI prefix="?" params=?25 inters="" final='h' [mode 25]
+offset=    5768 len=  3 category=csi_cursor_or_erase          CSI prefix="" params= inters="" final='K'

@@ -1,0 +1,49 @@
+# Relayable terminal-engine spike (TERM-001 / ADR-003, phase 1).
+#
+# Engine-INDEPENDENT ground truth only: real PTY lifecycle, real window-size
+# changes, raw child byte streams, and a scrollback/RSS observation.  This crate
+# deliberately depends on no terminal-emulation engine.
+#
+# The empty `[workspace]` table below makes this crate its own workspace root so
+# that a future root workspace cannot silently absorb it (AGENTS.md path rules;
+# full.md §5.4 requires a short benchmark/test app before choosing an engine).
+
+[package]
+name = "relayable-terminal-engine-spike"
+version = "0.0.0"
+edition = "2021"
+# Mapped to the verified toolchain on this host: rustc/cargo 1.98.1
+# (docs/operations/toolchain-audit.md, "Installation and build").
+rust-version = "1.98"
+publish = false
+license = "Apache-2.0"
+description = "Engine-independent PTY/byte-stream evidence harness for Relayable ADR-003"
+
+# NOTE: intentionally no `[profile]` overrides. The spike records debug-profile
+# builds only and does not claim benchmark-grade performance numbers, so a
+# release profile would be unjustified (full.md §12: measure before setting
+# targets).
+
+[dependencies]
+# PTY syscalls (posix_openpt/grantpt/unlockpt/ptsname_r) and file opening.
+nix = { version = "0.31", features = ["term", "process", "signal", "fs"] }
+# Raw ioctl(TIOCGWINSZ/TIOCSWINSZ), setsid/killpg, and tty constants.
+libc = "0.2"
+
+[workspace]
+
+[[bin]]
+name = "pty_size"
+path = "src/bin/pty_size.rs"
+
+[[bin]]
+name = "capture_stream"
+path = "src/bin/capture_stream.rs"
+
+[[bin]]
+name = "scrollback_mem"
+path = "src/bin/scrollback_mem.rs"
+
+[[bin]]
+name = "esc_selftest"
+path = "src/bin/esc_selftest.rs"

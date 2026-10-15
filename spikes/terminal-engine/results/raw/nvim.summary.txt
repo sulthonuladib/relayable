@@ -1,0 +1,56 @@
+# ---- provenance ----
+# command: ./target/debug/capture_stream --name nvim --out /home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine/results/raw --timeout-ms 8000 --send 2000::qa!\r -- nvim --clean
+# exit_code: 0
+# utc_timestamp: 2026-10-15T17:05:26Z
+# git_head: b96da2766e8750a77feee3beec0d84c2ce28f2fc
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# host: Linux 7.2.5-3-omarchy x86_64
+# os: Omarchy
+# ---- output ----
+== capture_stream: nvim ==
+PROGRAM=nvim
+PROGRAM_ARGS=["--clean"]
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+TIMEOUT_MS=8000
+SEND_AT_MS=2000 SPEC_ESCAPED=":qa!^M\n"
+CHILD_PID=3225909
+SLAVE_DEVICE=/dev/pts/9
+BYTES_RECEIVED=12725
+CHILD_EXIT_CODE=Some(0)
+CHILD_EXIT_SIGNAL=None
+
+CATEGORY_CHECKLIST
+CHECK alt_screen_1049_enter = OBSERVED count=1 first_offset=0 first_bytes=[1b 5b 3f 31 30 34 39 68]
+CHECK alt_screen_1049_leave = OBSERVED count=1 first_offset=12702 first_bytes=[1b 5b 3f 31 30 34 39 6c]
+CHECK alt_screen_47_enter = NOT_OBSERVED
+CHECK alt_screen_47_leave = NOT_OBSERVED
+CHECK alt_screen_1047_enter = NOT_OBSERVED
+CHECK alt_screen_1047_leave = NOT_OBSERVED
+CHECK mouse_1000_enable = NOT_OBSERVED
+CHECK mouse_1000_disable = NOT_OBSERVED
+CHECK mouse_1002_enable = OBSERVED count=2 first_offset=2120 first_bytes=[1b 5b 3f 31 30 30 32 68]
+CHECK mouse_1002_disable = OBSERVED count=2 first_offset=12550 first_bytes=[1b 5b 3f 31 30 30 32 6c]
+CHECK mouse_1003_enable = NOT_OBSERVED
+CHECK mouse_1003_disable = NOT_OBSERVED
+CHECK mouse_1005_enable = NOT_OBSERVED
+CHECK mouse_1005_disable = NOT_OBSERVED
+CHECK mouse_1006_enable = OBSERVED count=2 first_offset=2128 first_bytes=[1b 5b 3f 31 30 30 36 68]
+CHECK mouse_1006_disable = OBSERVED count=2 first_offset=12558 first_bytes=[1b 5b 3f 31 30 30 36 6c]
+CHECK mouse_1015_enable = NOT_OBSERVED
+CHECK mouse_1015_disable = NOT_OBSERVED
+CHECK bracketed_paste_enable = OBSERVED count=1 first_offset=31 first_bytes=[1b 5b 3f 32 30 30 34 68]
+CHECK bracketed_paste_disable = OBSERVED count=1 first_offset=12671 first_bytes=[1b 5b 3f 32 30 30 34 6c]
+CHECK osc_title = NOT_OBSERVED
+CHECK osc_hyperlink = NOT_OBSERVED
+CHECK osc_color = OBSERVED count=2 first_offset=106 first_bytes=[1b 5d 31 31 3b 3f 07]
+CHECK cursor_hide = OBSERVED count=7 first_offset=134 first_bytes=[1b 5b 3f 32 35 6c]
+CHECK cursor_show = OBSERVED count=9 first_offset=117 first_bytes=[1b 5b 3f 32 35 68]
+CHECK decscusr = OBSERVED count=7 first_offset=2115 first_bytes=[1b 5b 31 20 71]
+CHECK sgr = OBSERVED count=337 first_offset=82 first_bytes=[1b 5b 30 6d]
+
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine/results/raw/nvim.bin
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine/results/raw/nvim.esc
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine/results/raw/nvim.seq
+VERDICT=PASS

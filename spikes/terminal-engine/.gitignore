@@ -1,0 +1,3 @@
+# Build output for this standalone crate (the repository-root .gitignore only
+# anchors `/target/` at the repo root, so this nested ignore is required).
+/target/
