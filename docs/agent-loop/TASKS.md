@@ -30,10 +30,11 @@ the evidence is integrated.
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-004 | Fix `design-tokens.md:210` mixed attribution (29 px palette rows) + queued calibration items from `open-questions.md` | REF-003 | branch TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
-| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | research/doc-002 | BLOCKED — evidence committed `2ff3447`; matrix repair needs one writer pass |
+| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | TBD | BLOCKED — evidence integrated on `master` `a1f1719`; matrix repair needs one writer pass |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
 | INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
-| INT-002 | Review and integrate Wave 2 branches into `master` | DOC-002, ADR-001, ADR-002, ADR-003, TERM-001 | Manager | DONE for `term-001` `78b83f2` + `adr-001-002` `31bed30`; `doc-002` not merged (repair pending) |
+| INT-002 | Review and integrate Wave 2 branches into `master` | DOC-002, ADR-001, ADR-002, ADR-003, TERM-001 | Manager | DONE for `term-001` `78b83f2` + `adr-001-002` `31bed30` |
+| INT-003 | Integrate `research/doc-002` evidence onto `master`; retire the branch/worktree for a clean start | DOC-002 | Manager | DONE — `a1f1719` (evidence on `master`; repair still pending) |
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | research/adr-001-002 | DONE — integrated `31bed30` (Proposed) |
 | ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | research/adr-001-002 | DONE — integrated `31bed30` (Proposed; DEC-006 recommendation only) |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | research/term-001-adr-003 | DONE (Proposed) — integrated `78b83f2`; engine-level phase 2 pending as TERM-002 |
@@ -49,12 +50,12 @@ the evidence is integrated.
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
 (parallel, disjoint paths) → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →
-`QA-001`, with DOC-002 fixing the matrix citations alongside. Status at the Wave 2 handoff: ADR-001/002
-and TERM-001/ADR-003 integrated on `master` (`31bed30`, `78b83f2`); DOC-002 evidence committed on
-`research/doc-002` (`2ff3447`) but the repair needs one writer pass; TERM-002 (engine-level spike) is
-open. CORE-001 is the first engineering slice: server-owned PTY, CLI-created session, terminal I/O,
-reconnection, with an automated integration test — using the ADR-001/002 interface contract; the
-verified reference UI remains the UI acceptance gate.
+`QA-001`, with DOC-002 fixing the matrix citations alongside. Status at the Wave 2/clean-start handoff: ADR-001/002, TERM-001/ADR-003, and the DOC-002 audit
+evidence are all integrated on `master` (`31bed30`, `78b83f2`, `a1f1719`); the DOC-002 matrix repair
+still needs one writer pass (evidence at `docs/compatibility/doc-002-audit/`); TERM-002 (engine-level
+spike) is open. CORE-001 is the first engineering slice: server-owned PTY, CLI-created session,
+terminal I/O, reconnection, with an automated integration test — using the ADR-001/002 interface
+contract; the verified reference UI remains the UI acceptance gate.
 
 ## Acceptance criteria and validation (per task)
 

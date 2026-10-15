@@ -77,6 +77,36 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 9 — Clean-start handoff: `doc-002` evidence merged; worktrees retired (2026-10-15)
+
+**Objective:** the user asked why `research/doc-002` was not on `master` and directed that it be
+merged so the project starts clean and new agents can use fresh worktrees.
+
+**Finding reported to the user:** the only branch not contained in `master` was `research/doc-002`
+(the DOC-002 audit evidence + a master merge). `research/adr-001-002` and `research/term-001-adr-003`
+were already merged (`31bed30`, `78b83f2`); they merely still had local branches/worktrees because
+`remove_worktree` needs interactive confirmation.
+
+**Actions:**
+
+1. Verified with `git branch --merged/--no-merged master`: only `research/doc-002` was unmerged.
+2. `git merge --no-ff research/doc-002` → `a1f1719` (INT-003). `master` now carries
+   `docs/compatibility/doc-002-audit/**` (README, `citation-audit.md`, `citation-raw.tsv`,
+   `fetch-report.md`, scripts, fetch log).
+3. All three Wave 2 branches are merged; their worktrees were removed (`remove_worktree`; branches
+   and Pi sessions preserved) so Herdsman can hand out fresh worktrees for the next wave.
+4. Updated `STATUS.md`, `TASKS.md` (INT-003), `BACKLOG.md`, `TESTS.md`, `NEXT.md`.
+
+**Result on `master`:** `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
+`spikes/terminal-engine/**`, `docs/compatibility/doc-002-audit/**`, plus all Wave 1 research.
+
+**Commands:** `TESTS.md` rows 61–64.
+
+**Next tasks:** see `NEXT.md` — REVIEW-001, DOC-002 writer pass, TERM-002, CORE-001, then CORE-002 →
+UI-001/UI-002 → QA-001, on fresh worktrees.
+
+---
+
 ## Checkpoint 8 — Wave 2 handoff: INT-002 merged; DOC-002 blocked; wind-down (2026-10-15)
 
 **Objective:** the user directed a wind-down — no new delegation, finish in-flight work, checkpoint,

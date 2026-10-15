@@ -9,12 +9,12 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
   (TERM-001 PTY spike + ADR-003).
 - **On `master` now:** `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
   `spikes/terminal-engine/**` (58 files), plus all Wave 1 research.
-- **Live agents:** none — all three Wave 2 Leads stopped after integration (user wind-down). The
-  `research/doc-002` worktree is retained (branch not merged). The `research/adr-001-002` and
-  `research/term-001-adr-003` branches are merged, but their **worktrees remain**: `remove_worktree`
-  requires interactive user confirmation and was cancelled twice.
-- **Blocked:** DOC-002 matrix repair needs one writer pass; evidence is committed at `2ff3447`
-  (`docs/compatibility/doc-002-audit/` on `research/doc-002`).
+- **Live agents:** none — all three Wave 2 Leads stopped after integration (user wind-down). All
+  three branches (`research/{doc-002,adr-001-002,term-001-adr-003}`) are now merged into `master`
+  (`a1f1719`, `31bed30`, `78b83f2`); their worktrees were removed (`remove_worktree`, branches
+  preserved) so new agents start on fresh worktrees.
+- **Blocked:** DOC-002 matrix repair needs one writer pass; the full audit evidence is integrated on
+  `master` at `docs/compatibility/doc-002-audit/` (merge `a1f1719`).
 - **Approval gates:** Android SDK/emulator install + project JDK pin (AND-001) — Android work only.
 - **Failing tests:** none — no workspace/test suite yet; the standalone spike crate builds with
   `cargo build`, `cargo clippy --all-targets`, `cargo fmt --check` all exit 0 (raw logs committed).
@@ -24,7 +24,7 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 
 | Rank | Task | Branch | Depends on | State |
 |---|---|---|---|---|
-| 1 | DOC-002 writer pass — apply `citation-audit.md` to the matrix | `research/doc-002` | evidence `2ff3447` | BLOCKED (needs writer) |
+| 1 | DOC-002 writer pass — apply `citation-audit.md` to the matrix | TBD | evidence on `master` `a1f1719` | BLOCKED (needs writer) |
 | 2 | TERM-002 — engine-level spike phase 2 validates ADR-003's provisional pin | TBD | TERM-001 | READY |
 | 3 | CORE-001 — server-owned PTY + CLI session + terminal I/O + reconnect | TBD | ADR-001/002 interface contract | READY |
 | 4 | CORE-002 — disconnect survival + reattach snapshot | TBD | CORE-001 | waiting |

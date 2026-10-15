@@ -122,6 +122,10 @@ Host/repo: Linux `falcon` x86_64 (omarchy), rustc/cargo 1.98.1, `master` @ `f096
 | 58 | `git push origin research/doc-002` | `* [new branch] research/doc-002` | 0 |
 | 59 | `stop_lead` ×3 (doc-002, term-001, adr-001-002) | all three stopped; project work preserved | 0 |
 | 60 | `remove_worktree research/adr-001-002` and `research/term-001-adr-003` (×2 attempts) | `cancelled; no changes made` — interactive confirmation declined; worktrees remain | — |
+| 61 | `git branch --merged master` / `git branch --no-merged master` | merged: `adr-001-002`, `term-001-adr-003`, Wave 1 branches; unmerged: only `research/doc-002` | 0 |
+| 62 | `git merge --no-ff research/doc-002 -m "INT-003: …"` | merge `a1f1719`; `docs/compatibility/doc-002-audit/**` added to `master` | 0 |
+| 63 | `git branch --merged master \| grep -E 'doc-002\|adr-001-002\|term-001'` | all three Wave 2 branches now merged | 0 |
+| 64 | `remove_worktree` ×3 (`research/doc-002`, `research/adr-001-002`, `research/term-001-adr-003`) | all three `removed checkout …; assignment retired. Git branch and Pi conversation preserved.`; `git worktree list` shows only the primary checkout | 0 |
 
 **Not run / not claimed:** the spike's engine-level phase 2 did not run (cancelled by wind-down); the
 DOC-002 matrix repair was not applied (the Lead session had no edit tools and wind-down forbade a new

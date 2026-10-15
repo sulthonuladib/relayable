@@ -2,7 +2,7 @@
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
 **Milestone:** Phase 0 — **Wave 2 architecture integrated (ADR-001/002/003, TERM-001 phase 1); DOC-002 repair pending; CORE-001 is next.**
-**Updated:** Wave 2 handoff — see `WORKLOG.md` Checkpoint 8 and `NEXT.md`.
+**Updated:** Clean-start handoff — see `WORKLOG.md` Checkpoint 9 and `NEXT.md`.
 
 ## Objective (current)
 
@@ -31,12 +31,12 @@ INT-001 complete. Wave 1 branches were removed with their worktrees during the u
 |---|---|---|
 | `research/adr-001-002` | ADR-001, ADR-002 | COMPLETE — integrated `31bed30` (ADR-001/002 + `docs/architecture/interface-contract.md`, +1244) |
 | `research/term-001-adr-003` | TERM-001, ADR-003 | COMPLETE phase 1 — integrated `78b83f2` (PTY spike + ADR-003, +8300); ADR-003 `Proposed`, engine-level phase 2 pending |
-| `research/doc-002` | DOC-002 | BLOCKED — evidence complete and committed `2ff3447`; the matrix repair is **not** applied (needs a writer pass) |
+| `research/doc-002` | DOC-002 | MERGED (INT-003 `a1f1719`) — evidence at `docs/compatibility/doc-002-audit/` on `master`; the matrix repair is **not** applied (needs a writer pass) |
 
-`master` now contains `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`, and
-`spikes/terminal-engine/**` (58 files). INT-002 is complete for the two committed branches;
-`research/doc-002` is not merged (no repair yet) and its worktree is retained for resumption. All
-three Wave 2 Leads were stopped after integration.
+`master` now contains `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
+`spikes/terminal-engine/**` (58 files), and `docs/compatibility/doc-002-audit/**`. INT-002/INT-003 are
+complete: all three Wave 2 branches are merged and their worktrees removed (branches and Pi sessions
+preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were stopped.
 
 ## Context-window policy (DEC-008)
 
