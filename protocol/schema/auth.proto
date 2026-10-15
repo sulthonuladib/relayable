@@ -1,0 +1,10 @@
+// Relayable protocol v1 — authentication/authorization.
+//
+// No messages in CORE-001: authentication/authorization and the meaning of the
+// `principal` field are deferred (docs/architecture/interface-contract.md §6,
+// §7; matrix §13 records the reference mechanism as unknown). No wire shape is
+// invented here.
+
+syntax = "proto3";
+
+package relayable.protocol.v1;

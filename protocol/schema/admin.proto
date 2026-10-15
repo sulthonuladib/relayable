@@ -1,0 +1,10 @@
+// Relayable protocol v1 — administration/discovery.
+//
+// No messages in CORE-001: admin/discovery operations are deferred
+// (docs/architecture/interface-contract.md "What this contract deliberately
+// does not decide": the first-release method list belongs to the server-API
+// task). No wire shape is invented here.
+
+syntax = "proto3";
+
+package relayable.protocol.v1;

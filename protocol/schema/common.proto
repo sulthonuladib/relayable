@@ -1,0 +1,123 @@
+// Relayable protocol v1 — common envelope, handshake, request/response, errors.
+//
+// Sources:
+// - `docs/architecture/interface-contract.md` §3 (request/event envelope),
+//   §6 (error representation): `Envelope`, `Handshake`, `ServerHello`,
+//   `Limits`, `Heartbeat`, `Request`, `Response`, `Error`, and the error-code
+//   set are described there.
+// - `Handshake`, `ServerHello`, `Limits`, `Heartbeat`, `Request`, `Response`,
+//   `Error` and every method name are Relayable-defined (no REX evidence): the
+//   reference docs do not document a transport/wire format
+//   (matrix §8.3 records the transport as unknown).
+// See `protocol/compatibility/core-001-method-set.md` for the frozen CORE-001
+// method/message set.
+
+syntax = "proto3";
+
+package relayable.protocol.v1;
+
+import "control.proto";
+import "terminal.proto";
+import "events.proto";
+
+message Envelope {
+  string protocol_version = 1;
+  optional uint64 request_id = 2;
+  uint64 stream_id = 3;
+  optional uint64 sequence = 4;
+  optional string trace_id = 5;
+  optional int64 timestamp_unix_millis = 6;
+  oneof body {
+    Handshake handshake = 10;
+    Request request = 11;
+    Response response = 12;
+    Event event = 13;
+    TerminalOutput terminal_data = 14;
+    FlowControl flow_control = 15;
+    Heartbeat heartbeat = 16;
+  }
+}
+
+message Handshake {
+  string client_kind = 1;
+  string platform = 2;
+  string client_version = 3;
+  string protocol_version = 4;
+  repeated string capabilities = 5;
+}
+
+message ServerHello {
+  string protocol_version = 1;
+  repeated string capabilities = 2;
+  Limits limits = 3;
+}
+
+message Limits {
+  uint32 max_frame_bytes = 1;
+  uint32 max_concurrent_streams = 2;
+  uint32 credit_window_bytes = 3;
+  uint32 heartbeat_interval_millis = 4;
+  uint32 idle_timeout_millis = 5;
+}
+
+message Heartbeat {
+  optional uint64 sequence = 1;
+}
+
+message Request {
+  string method = 1;
+  oneof operation {
+    SessionCreateRequest session_create = 10;
+    SessionListRequest session_list = 11;
+    SessionSnapshotRequest session_view = 12;
+    SessionCloseRequest session_close = 13;
+    BlockAttachRequest block_attach = 14;
+    BlockDetachRequest block_detach = 15;
+    TerminalInput terminal_input = 16;
+    TerminalResize terminal_resize = 17;
+  }
+}
+
+message Response {
+  uint64 request_id = 1;
+  oneof result {
+    Error error = 2;
+    ServerHello hello = 3;
+    SessionCreateResponse session_create = 10;
+    SessionListResponse session_list = 11;
+    SessionSnapshotResponse session_view = 12;
+    SessionCloseResponse session_close = 13;
+    BlockAttachResponse block_attach = 14;
+    BlockDetachResponse block_detach = 15;
+    TerminalInputAccepted terminal_input = 16;
+    TerminalResizeAccepted terminal_resize = 17;
+  }
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+  map<string, string> details = 3;
+  bool retryable = 4;
+}
+
+// Enum value names carry the `ERROR_CODE_` prefix because proto3 enum values
+// are package-scoped and must not collide across enums in this package.
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_BAD_REQUEST = 1;
+  ERROR_CODE_METHOD_NOT_FOUND = 2;
+  ERROR_CODE_INCOMPATIBLE_VERSION = 3;
+  ERROR_CODE_UNAUTHENTICATED = 4;
+  ERROR_CODE_UNAUTHORIZED = 5;
+  ERROR_CODE_UNKNOWN_ENTITY = 6;
+  ERROR_CODE_AMBIGUOUS_TARGET = 7;
+  ERROR_CODE_STALE_SEQUENCE = 8;
+  ERROR_CODE_SNAPSHOT_REQUIRED = 9;
+  ERROR_CODE_DUPLICATE_REQUEST = 10;
+  ERROR_CODE_INPUT_NOT_OWNED = 11;
+  ERROR_CODE_TIMEOUT = 12;
+  ERROR_CODE_CANCELLED = 13;
+  ERROR_CODE_RATE_LIMITED = 14;
+  ERROR_CODE_INTERNAL = 15;
+}

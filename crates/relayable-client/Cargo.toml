@@ -1,0 +1,15 @@
+[package]
+name = "relayable-client"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Relayable client library: connection lifecycle, RPC, and terminal stream reads"
+
+[dependencies]
+# Client -> {model, protocol} only (ADR-001 §7 dependency direction).
+relayable-model = { workspace = true }
+# The local Unix-domain socket transport is feature-gated; this client is a
+# Unix-socket client (DEC-010).
+relayable-protocol = { workspace = true, features = ["transport-unix"] }

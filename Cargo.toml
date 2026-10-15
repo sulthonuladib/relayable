@@ -1,0 +1,46 @@
+# Relayable workspace root (CORE-001 foundation slice).
+#
+# Design constraints:
+# - Sync/threads-only: no async runtime is introduced anywhere in this slice
+#   (ADR-002; full.md §5.2 model purity). Server/client work is thread-based.
+# - Dependencies are pinned to exact versions so `cargo build --offline`
+#   resolves deterministically against the verified local registry
+#   (docs/operations/toolchain-audit.md).
+# - `spikes/terminal-engine` declares its own empty `[workspace]` table and is
+#   therefore a separate workspace root; `exclude = ["spikes"]` is explicit so
+#   the root workspace never absorbs or rebuilds spike artifacts.
+
+[workspace]
+resolver = "2"
+members = ["crates/*", "tests"]
+exclude = ["spikes"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+# Mirrors the verified host toolchain (rustc/cargo 1.98.1); prost 0.14 needs >=1.85.
+rust-version = "1.98"
+license = "Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+relayable-model = { path = "crates/relayable-model" }
+relayable-protocol = { path = "crates/relayable-protocol" }
+relayable-pty = { path = "crates/relayable-pty" }
+relayable-server = { path = "crates/relayable-server" }
+relayable-client = { path = "crates/relayable-client" }
+anyhow = "=1.0.104"
+bytes = "=1.12.1"
+portable-pty = "=0.9.0"
+prost = "=0.14.4"
+prost-types = "=0.14.4"
+serde_json = "=1.0.154"
+tempfile = "=3.27.0"
+thiserror = "=2.0.21"
+uuid = "=1.28.0"
+
+[workspace.dependencies.prost-build]
+version = "=0.14.4"
+# No `format` feature: generated code is written to OUT_DIR and never needs
+# prettyprinting; dropping it also avoids pulling the syn/prettyplease stack.
+default-features = false

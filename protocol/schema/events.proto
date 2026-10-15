@@ -1,0 +1,36 @@
+// Relayable protocol v1 — event envelope variant.
+//
+// Sources: `docs/architecture/interface-contract.md` §3 (envelope `Event`
+// body) and §2 (snapshot/sequence model).
+//
+// No events are emitted by the CORE-001 slice (event dispatch is deferred);
+// these messages exist only so the `Envelope.body` `Event` variant required by
+// the frozen contract §3 has a concrete type. Event type names in the contract
+// (`client_connection_changed`, `session_...`) are reused from the matrix §10
+// Events; the payload shapes here are Relayable-defined (no REX evidence).
+
+syntax = "proto3";
+
+package relayable.protocol.v1;
+
+import "control.proto";
+
+message Event {
+  uint64 sequence = 1;
+  uint64 revision = 2;
+  string session_id = 3;
+  oneof event {
+    ClientConnectionStateChanged client_connection_state_changed = 10;
+    SessionStateChanged session_state_changed = 11;
+  }
+}
+
+message ClientConnectionStateChanged {
+  string client_id = 1;
+  string connection_state = 2;
+}
+
+message SessionStateChanged {
+  string session_id = 1;
+  SessionState state = 2;
+}
