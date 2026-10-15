@@ -1,7 +1,7 @@
-date_utc=2026-10-15T20:26:45Z
+date_utc=2026-10-15T20:38:25Z
 session=XDG_SESSION_TYPE=wayland WAYLAND_DISPLAY=wayland-1 DISPLAY=:0
 run_command=./target/debug/relayable
-app_pid=3809106
+app_pid=3849381
 ran_seconds=6
 status_after_6s=ALIVE
 Name:	relayable
@@ -15,13 +15,13 @@ grim_window_exit=0
 command: grim evidence/relayable-window-fullscreen.png
 grim_fullscreen_exit=0
 --- artifacts ---
--rw-r--r-- 1 sulthonuladib sulthonuladib 53734 Oct 16 03:26 evidence/relayable-window.png
+-rw-r--r-- 1 sulthonuladib sulthonuladib 53929 Oct 16 03:38 evidence/relayable-window.png
 evidence/relayable-window.png: PNG image data, 950 x 1030, 8-bit/color RGB, non-interlaced
-evidence/relayable-window.png PNG 950x1030 950x1030+0+0 8-bit sRGB 53734B 0.000u 0:00.000
--rw-r--r-- 1 sulthonuladib sulthonuladib 259225 Oct 16 03:26 evidence/relayable-window-fullscreen.png
+evidence/relayable-window.png PNG 950x1030 950x1030+0+0 8-bit sRGB 53929B 0.000u 0:00.000
+-rw-r--r-- 1 sulthonuladib sulthonuladib 255509 Oct 16 03:38 evidence/relayable-window-fullscreen.png
 evidence/relayable-window-fullscreen.png: PNG image data, 1920 x 1080, 8-bit/color RGB, non-interlaced
-evidence/relayable-window-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 259225B 0.000u 0:00.000
-command: kill -TERM 3809106
+evidence/relayable-window-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 255509B 0.000u 0:00.000
+command: kill -TERM 3849381
 kill_exit=0
 wait_exit=143
 final=TERMINATED

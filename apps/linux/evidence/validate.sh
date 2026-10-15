@@ -21,6 +21,7 @@ echo "clippy_version=$(cargo clippy --version 2>&1)"
 echo "rustfmt_version=$(cargo fmt --version 2>&1)"
 
 run check        cargo check
+run test         cargo test
 run build        cargo build
 run fmt_check    cargo fmt --check
 run clippy       cargo clippy --all-targets

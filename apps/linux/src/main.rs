@@ -7,11 +7,19 @@
 //! The structure follows the crate's own `examples/hello_world.rs` (read from
 //! `~/.cargo/registry/src/.../gpui-0.2.2/examples/hello_world.rs`); no GPUI API
 //! here is invented.
+//!
+//! The window exercises two tokens from the (GPUI-free) library token sheet
+//! [`relayable_linux::tokens`]: the documented V1 pane-header/surface background
+//! (`colors::PANE_HEADER_SURFACE_V1`, confidence **high**) and the documented
+//! primary-text colour (`colors::PRIMARY_TEXT`, confidence **medium**). This is
+//! a deliberate token smoke test, not the UI-002 workspace UI.
 
 use gpui::{
     div, prelude::*, px, rgb, size, App, Application, Bounds, Context, Render, SharedString,
     Window, WindowBounds, WindowOptions,
 };
+
+use relayable_linux::tokens::colors;
 
 /// Root view: a single branded placeholder label.
 struct RelayableRoot {
@@ -26,9 +34,11 @@ impl Render for RelayableRoot {
             .size_full()
             .justify_center()
             .items_center()
-            .bg(rgb(0x101014))
+            // Documented V1 pane-header/surface colour (confidence high).
+            .bg(rgb(colors::PANE_HEADER_SURFACE_V1.value.to_u32_0xRRGGBB()))
             .text_xl()
-            .text_color(rgb(0xffffff))
+            // Documented primary-text colour (confidence medium).
+            .text_color(rgb(colors::PRIMARY_TEXT.value.to_u32_0xRRGGBB()))
             .child(self.label.clone())
     }
 }

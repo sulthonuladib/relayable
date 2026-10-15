@@ -196,7 +196,7 @@
     "title": "Relayable",
     "initialClass": "relayable",
     "initialTitle": "Relayable",
-    "pid": 3809106,
+    "pid": 3849381,
     "xwayland": false,
     "pinned": false,
     "pinFullscreened": false,
@@ -213,5 +213,5 @@
     "xdgDescription": "",
     "contentType": "none",
     "tearingHint": false,
-    "stableId": "1800015f"
+    "stableId": "18000160"
 }]

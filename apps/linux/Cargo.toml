@@ -18,6 +18,12 @@ publish = false
 license = "Apache-2.0"
 description = "Relayable Linux desktop app (GPUI), UI-001 minimal window"
 
+[lib]
+# The token sheet / app logic is a reusable, deliberately GPUI-free library so a
+# future framework revision cannot drag GPUI types through it (`full.md` §5.3).
+name = "relayable_linux"
+path = "src/lib.rs"
+
 [[bin]]
 name = "relayable"
 path = "src/main.rs"
