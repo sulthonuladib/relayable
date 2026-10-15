@@ -12,6 +12,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-005 | Local/remote process ownership and persistence guarantees | Pending | `docs/adr/ADR-004` |
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Pending — ADR + tests required (§8.1) | `docs/adr/ADR-005` |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
+| DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -40,6 +41,48 @@ code. The Manager reviews each diff and integrates into `master` (INT-001) befor
 reviewable step; Wave 2 (ADRs, terminal spike, CORE-001) waits on integrated evidence.
 **Reconsider if:** the streams turn out to share files, or branch isolation costs more than one
 integrated research worktree would save.
+
+## DEC-008 — Context-window policy (no compaction; repository-authoritative state)
+
+**Context:** The user requires project knowledge to survive in repository files rather than
+conversation summaries, and context exhaustion must never silently lose work (§15.3 checkpoint
+discipline; §19.14 resumability from files alone).
+
+**Decision:**
+
+- Automatic compaction is disabled for this project: `compaction.enabled: false` in
+  `.pi/settings.json`. The user-level `~/.pi/agent/settings.json` already had the same value and is
+  left unchanged.
+- `/compact` is never invoked unless the user explicitly requests it.
+- Work state is authoritative in `docs/agent-loop/{STATUS,TASKS,BACKLOG,DECISIONS,TESTS,WORKLOG,NEXT}.md`;
+  every checkpoint records branches/worktrees, uncommitted changes, running agents, blocked tasks,
+  failing tests, and the next integration step.
+- Bounded work goes to fresh agent sessions; handoffs are concise (files changed, commands actually
+  run, findings/decisions, risks, remaining work). Full research reports and `full.md` are not
+  injected into every task brief; recipients read repository paths.
+- At usable-context pressure: finish a safe checkpoint, stop launching new work, record background
+  results and repository changes, and produce a short handoff instead of compacting.
+- A resumed Lead reads `full.md`, repository instructions, `NEXT.md`, `BACKLOG.md`, `DECISIONS.md`,
+  and Git state, then continues at the next incomplete acceptance criterion.
+
+**Verified facts (2026-10-15):**
+
+- Pi 1.2.0 supports `compaction.enabled` (default `true`); project `.pi/settings.json` overrides
+  agent-directory settings; changes take effect on `/reload` or a new Pi process.
+- `SettingsManager.create(cwd).getSettings()` exposes the merged effective settings for verification.
+- pi-herdsman 0.27.0 defaults `contextRetirement` to `true` (`config.json` overrides only
+  `spawnPlacement`): assigned managed-agent sessions retire at automatic context pressure instead of
+  threshold compaction.
+- No extension other than pi-herdsman registers compaction hooks; the global `herdr-agent-state.ts`
+  extension does not touch compaction.
+
+**Consequences:** long-lived sessions must manage context explicitly through checkpoints and fresh
+sessions; no conversation summary is a dependency of the project. Settings changes apply at process
+start/reload, so a running session may retain its startup configuration until reloaded; this is
+reported rather than worked around by restarting processes.
+
+**Reconsider if:** the user explicitly asks for compaction, or repository-file discipline proves
+insufficient for a bounded session.
 
 ## Open questions requiring evidence (not yet decidable)
 

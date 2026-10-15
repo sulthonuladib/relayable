@@ -16,8 +16,23 @@ Durable product specification **and** agent-loop instruction: **`full.md`** (rea
 
 ## Work state lives in files, not chat
 
-`docs/agent-loop/` — `STATUS.md`, `TASKS.md`, `DECISIONS.md`, `WORKLOG.md`, `NEXT.md` (§15).
-At the start of a resumed run, trust these artifacts over prior conversation.
+`docs/agent-loop/` — `STATUS.md`, `TASKS.md`, `BACKLOG.md`, `DECISIONS.md`, `TESTS.md`,
+`WORKLOG.md`, `NEXT.md` (§15). At the start of a resumed run, trust these artifacts over prior
+conversation.
+
+## Context-window policy
+
+- Automatic compaction is disabled (`.pi/settings.json` → `compaction.enabled: false`). Never
+  invoke `/compact` unless the user explicitly asks.
+- Project knowledge lives in the `docs/agent-loop/` files above, not in conversation summaries.
+- Delegate bounded work to fresh agent sessions. Handoffs must be concise: files changed, validation
+  actually run, findings/decisions, risks, remaining work. Do not inject full research reports or
+  `full.md` into task briefs; point at repository paths instead.
+- Before context pressure risks unfinished work: finish a safe checkpoint, stop launching new work,
+  record agent results and repository changes, then write a short handoff. Do not compact to keep a
+  session alive.
+- A resumed session reads `full.md`, repository instructions, `NEXT.md`, `BACKLOG.md`,
+  `DECISIONS.md`, and Git state, then continues at the next incomplete acceptance criterion.
 
 ## Loop (summary of §15)
 
