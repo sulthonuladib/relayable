@@ -73,7 +73,7 @@ repository.
 | Build all | `go build ./...` | exit 0 (downloads deps into the Go module cache only) |
 | Build binary | `go build -o /tmp/gorex-review-bin .` | exit 0, 20,617,576 bytes |
 | Launch (Xvfb, X11) | `Xvfb :96 -screen 0 1440x900x24` + `env -u WAYLAND_DISPLAY GDK_BACKEND=x11 DISPLAY=:96 LIBGL_ALWAYS_SOFTWARE=1 /tmp/gorex-review-bin` | process stayed alive; window rendered; app log: `mygo: native UI draws without the GPU: Unable to create a GL context` |
-| Empty Xvfb capture without `GDK_BACKEND=x11` | same but with inherited `WAYLAND_DISPLAY` | uniform/blank captures (296-byte PNGs) — capture was not usable in that mode |
+| Empty Xvfb capture without `GDK_BACKEND=x11` | same but with inherited `WAYLAND_DISPLAY` | unusable captures (two 296-byte uniform blanks; `run-02-ffmpeg.png` is a 6,118-byte black frame with a cursor artifact) — capture was not usable in that mode |
 
 **This is a genuine run of the reference application, not a mock.** No global installs, no
 `sudo`, no system configuration changes were made. The GTK/MyGo window is not reproducible on
@@ -97,7 +97,8 @@ instrumentation, used here only to drive and capture the running app.
 | `05-unzoom.png` | app window after un-zooming (same tree as `03`) |
 | `06-palette.png` | app window with the command palette open over split panes |
 | `06b-palette-root.png` | root capture of the palette state |
-| `run-01-welcome.png`, `run-02.png`, `run-02-ffmpeg.png` | blank/unusable captures from the first (Wayland-inherited) attempts — kept only as negative evidence |
+| `run-01-welcome.png`, `run-02.png` | 296-byte uniform blank captures from the first (Wayland-inherited) attempts — kept only as negative evidence |
+| `run-02-ffmpeg.png` | 6,118-byte black frame with a cursor artifact from the same attempts — not usable as reference evidence |
 
 No screenshots are committed to git; the repo `.gitignore` also ignores
 `docs/research/**/evidence/`, but screenshots were kept outside the repository by policy.
@@ -126,8 +127,10 @@ No screenshots are committed to git; the repo `.gitignore` also ignores
   jump targets first (`fish ~` with a `Tab 1` badge) then commands, each with a leading ⌘
   glyph and a right-aligned shortcut badge (`Ctrl+Shift+T`, `Ctrl+Shift+D`, `Ctrl+Shift+E`,
   `Ctrl+Shift+Enter`, `Ctrl+Shift+W`, `Ctrl+PageDown`); selected row is a steel-blue
-  highlight; roughly 10 rows visible at ≈28 px pitch; panel is ≈560 px wide, top edge ≈80 px
-  below the content top (approximate, measured from the capture).
+  highlight; roughly 10 rows visible at 34 px pitch (source constant: palette row height 34
+  in `commands.go`; frame measurement: selected row y=129–162 in `06-palette.png`); panel
+  is ≈560 px wide, top edge ≈80 px below the content top (approximate, measured from the
+  capture).
 - The application log line about CPU drawing (`mygo: native UI draws without the GPU`) and
   the successful CPU fallback rendering.
 - The `-server` subcommand, `GOREX_DIR`, `layout.json`/`settings.json`, socket at mode 0600
@@ -159,8 +162,8 @@ No screenshots are committed to git; the repo `.gitignore` also ignores
 
 ### 4.3 `unknown`
 
-- Pixel-exact palette row height/pitch, panel width, and typography metrics (approximated from
-  the capture, not measured with a tool).
+- Panel width and typography metrics (approximated from the capture, not measured with a
+  tool); palette row pitch is measured at 34 px (see §4.1).
 - Focus ring/hover rendering under a real compositor/window manager (Xvfb had no WM).
 - Notification presentation on Linux (MyGo/portal-dependent).
 - Behaviour with multiple simultaneous clients, reconnection, or server crash recovery.
@@ -214,7 +217,8 @@ Overlays: command palette panel; host popover; error banner pinned bottom-centre
 (`errorBanner`: dot `#ef4444`, radius 12, panel background, close button); rename text field
 inside the tab pill.
 
-## 6. Typography and colour tokens (source `style.go`, verified in dark capture)
+## 6. Typography and colour tokens (source `style.go`; 120 ms transition constants from
+`view.go` ≈119/≈150; verified in dark capture)
 
 - Embedded **JetBrains Mono** (Regular/Bold/Italic/BoldItalic) is registered at startup; the
   terminal family string is `JetBrains Mono, SF Mono, Menlo, monospace`; default size 11.6 px.
@@ -418,3 +422,7 @@ git status --short
   behaviour/layout catalogue only.
 - Capture a host-popper, tab-context-menu, rename and light-appearance state if a later
   research pass needs those specifics; they are not required to start Relayable's GPUI shell.
+
+## Revision
+
+Revised after independent audit (`result:audit-gorex#1`): palette pitch corrected ≈28 → 34 px (source constant + frame measurement), 120 ms transition attribution corrected to `view.go`, `run-02-ffmpeg.png` framing corrected.
