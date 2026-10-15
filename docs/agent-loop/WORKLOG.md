@@ -91,8 +91,12 @@ background `bash` on every prompt and caused `agent_pane_busy`; disabling the pl
 stop it. The hook stays commented (DEC-009 option A).
 
 **Action:** `herdr plugin disable herdr-automatic-rename` → result `plugin_disabled`, `enabled:false`;
-`herdr plugin list` now shows `disabled`. Reversible with `herdr plugin enable herdr-automatic-rename`.
-No uninstall was performed.
+`herdr plugin list` showed `disabled`. This was then upgraded to a full **uninstall** on the user's
+instruction: `herdr plugin uninstall herdr-automatic-rename` → `No plugins installed.` Herdr left the
+checkout (~1.4 MB, git `b90c4086…`) and an empty config dir behind, so both were moved to
+`/tmp/herdr-automatic-rename-removed/` and the stale lock removed; `ls ~/.config/herdr/plugins/github`
+is now empty and the `config.fish` glob matches 0 files. Reinstall from
+`github:qu8n/herdr-automatic-rename@b90c4086…` if ever wanted.
 
 **Files changed:** `docs/agent-loop/{DECISIONS,STATUS,NEXT,TESTS,WORKLOG}.md`.
 
