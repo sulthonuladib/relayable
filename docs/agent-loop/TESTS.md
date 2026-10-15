@@ -136,3 +136,19 @@ Host/repo: Linux `falcon` x86_64 (omarchy), rustc/cargo 1.98.1, `master` @ `f096
 **Not run / not claimed:** the spike's engine-level phase 2 did not run (cancelled by wind-down); the
 DOC-002 matrix repair was not applied (the Lead session had no edit tools and wind-down forbade a new
 writer); no workspace-wide `cargo test` exists because no Cargo workspace exists yet.
+
+## 2026-10-15 — Manager independent re-check of the DOC-002 matrix repair + REVIEW-001 findings recorded
+
+Environment: Linux `falcon` x86_64, repo `/home/sulthonuladib/work/relayable`, `master` @ `a1091e5`
+(before the review-record commit), python3 from the host.
+
+| # | Command / action | Observed result | Exit |
+|---|---|---|---|
+| 71 | `cp docs/compatibility/doc-002-audit/audit.py /tmp/doc002/recheck.py`; `sed` MATRIX→ the repaired branch copy; `sed` output tsv→`/tmp/doc002/recheck-raw.tsv`; `python3 /tmp/doc002/recheck.py` | **TOTAL 433 links: MATCH 298 / NO_LINE_REF 125 / SHIFT 8 / AMBIGUOUS 1 / NOT_FOUND 1** among the remaining numeric citations — the repair is incomplete; 10 defective rows identified and returned to the DOC-002 Lead with a re-run recipe | 0 |
+| 72 | `awk -F'\t' '$7=="SHIFT"||$7=="NOT_FOUND"||$7=="AMBIGUOUS"' /tmp/doc002/recheck-raw.tsv` | matrix lines 85 (cli.md:81), 85 (server-api.md:85–86), 219 (server-api.md:63–71), 299 (lua.md:125–132, AMBIGUOUS), 304 (lua.md:313–327), 475 (program-status.md:79–81), 490 (program-status.md:110–111), 528 (program-status.md:168), 529 (program-status.md:169), 594 (events.md:71, NOT_FOUND) | 0 |
+| 73 | read `docs/reviews/REVIEW-001-adr-review.md` (review worktree) | verdicts: ADR-001 accept-with-nits (A-1 blocking for CORE-001 model code); ADR-002 accept-with-nits (B-1/B-2/B-3 blocking for DEC-003 acceptance); ADR-003 keep `Proposed` (TERM-002 gates engine, UI-001 gates gpui pin); ADR-002 Unverified: 9/10 settled, #10 Android QUIC open | 0 |
+| 74 | `edit docs/architecture/interface-contract.md` (`PtyId` → `PtyProcessId`) | A-1 reconciled; the only review item blocking CORE-001 model code | 0 |
+| 75 | `commit` + `git push origin master` | `446fe5b review-001: record verdicts; reconcile PTY ID newtype (A-1) unblocking CORE-001` | 0 |
+
+**Not yet verified:** REVIEW-001 branch not committed/merged at re-check time; TERM-002 and CORE-001
+in flight; `ADR-FIX-001` (ADR-002 B-1/B-2/B-3 + ADR-001 nits) not started.
