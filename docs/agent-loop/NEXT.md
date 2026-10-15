@@ -63,8 +63,10 @@ retrieval log + "as-of" timestamps, and commits.
 
 ## Cleanup performed at this handoff
 
-- All three Wave 2 Leads stopped; merged worktrees removed (`research/adr-001-002`,
-  `research/term-001-adr-003`). Branches and Pi sessions preserved.
+- All three Wave 2 Leads stopped (`stop_lead`); branches and Pi sessions preserved.
+- **Merged worktrees NOT removed:** `research/adr-001-002` and `research/term-001-adr-003` worktrees
+  still exist. `remove_worktree` requires interactive user confirmation and was cancelled twice. The
+  user must confirm removal interactively (or run `git worktree remove` themselves) to finish cleanup.
 - **`research/doc-002` worktree retained** — its branch is not merged and holds the DOC-002 evidence;
   resume it for the writer pass.
 - DEC-009 remains resolved (option A: automatic-rename fish hook sourcing disabled); wake daemon stopped.

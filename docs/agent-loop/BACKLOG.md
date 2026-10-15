@@ -10,8 +10,9 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **On `master` now:** `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
   `spikes/terminal-engine/**` (58 files), plus all Wave 1 research.
 - **Live agents:** none — all three Wave 2 Leads stopped after integration (user wind-down). The
-  `research/doc-002` worktree is retained (branch not merged); `research/adr-001-002` and
-  `research/term-001-adr-003` worktrees were removed after their branches merged.
+  `research/doc-002` worktree is retained (branch not merged). The `research/adr-001-002` and
+  `research/term-001-adr-003` branches are merged, but their **worktrees remain**: `remove_worktree`
+  requires interactive user confirmation and was cancelled twice.
 - **Blocked:** DOC-002 matrix repair needs one writer pass; evidence is committed at `2ff3447`
   (`docs/compatibility/doc-002-audit/` on `research/doc-002`).
 - **Approval gates:** Android SDK/emulator install + project JDK pin (AND-001) — Android work only.

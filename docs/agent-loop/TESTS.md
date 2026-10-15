@@ -118,6 +118,10 @@ Host/repo: Linux `falcon` x86_64 (omarchy), rustc/cargo 1.98.1, `master` @ `f096
 | 54 | `git merge --no-ff research/adr-001-002` | merge `31bed30`; clean (disjoint) | 0 |
 | 55 | copy `/tmp/doc002/{citation-audit.md,citation-raw.tsv,fetch-report.md,audit.py,adjudicate.py,urls.txt,fetch.sh,fetch.log}` → `research/doc-002:docs/compatibility/doc-002-audit/`; commit | `2ff3447` (316 KB evidence, durable; matrix repair still NOT applied) | 0 |
 | 56 | `git merge master` into `research/doc-002` | merge `669cb84`; branch now current | 0 |
+| 57 | `git push origin master` (after `3c3d5ff`) | `f096f23..3c3d5ff master -> master` | 0 |
+| 58 | `git push origin research/doc-002` | `* [new branch] research/doc-002` | 0 |
+| 59 | `stop_lead` ×3 (doc-002, term-001, adr-001-002) | all three stopped; project work preserved | 0 |
+| 60 | `remove_worktree research/adr-001-002` and `research/term-001-adr-003` (×2 attempts) | `cancelled; no changes made` — interactive confirmation declined; worktrees remain | — |
 
 **Not run / not claimed:** the spike's engine-level phase 2 did not run (cancelled by wind-down); the
 DOC-002 matrix repair was not applied (the Lead session had no edit tools and wind-down forbade a new
