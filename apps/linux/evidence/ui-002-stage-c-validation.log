@@ -1,0 +1,38 @@
+# UI-002 Stage C — validation re-run (README + comparison + commit stage)
+# date_utc=2026-10-15T23:31:08Z
+# host=Linux 7.2.5-3-omarchy x86_64
+# every exit= is the command's own status (not a pipeline status)
+
+$ cargo fmt --check
+
+exit=0
+
+$ cargo clippy --all-targets --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+exit=0
+
+$ cargo test --locked
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+exit=0
+
+$ cargo check --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+exit=0
+
+##### from repository root #####
+
+$ cargo check --workspace --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+exit=0
+
+##### lib unit-test summary (the 'running 0 tests' above is the doc-test phase) #####
+
+$ cargo test --locked   # lib target result
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
