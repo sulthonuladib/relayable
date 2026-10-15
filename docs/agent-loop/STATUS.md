@@ -66,6 +66,9 @@ three Wave 2 Leads were stopped after integration.
   DOC-002 found ~142 further wrong line citations beyond `events.md` (audit committed on `doc-002`).
 - No build/test suite or workspace exists yet; Phase 0 exit gate still requires the first vertical
   slice. The only in-repo Rust code is the standalone `spikes/terminal-engine` crate (not a workspace).
+- **Independent review gap (REVIEW-001):** ADR-001/002/003 and the spike were merged without an
+  independent reviewer pass (wind-down forbade new agents); ADR-002 also carries in-file UNVERIFIED
+  external claims. Review before CORE-001 builds on them.
 
 ## Guarantees that must NOT be claimed
 

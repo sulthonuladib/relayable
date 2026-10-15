@@ -41,6 +41,7 @@ the evidence is integrated.
 | UI-001 | GPUI minimal Linux window build/run proof | ENV-001, ADR-003 | Lead/UI | BACKLOG |
 | TERM-001 | Terminal engine candidate prototype (TUI/input/resize spike) | ENV-001 | research/term-001-adr-003 | DONE phase 1 — integrated `78b83f2` (PTY/SIGWINCH/byte-stream/RSS harness) |
 | TERM-002 | Engine-level spike phase 2: per-engine adapters validate ADR-003's provisional pin | TERM-001 | TBD | READY |
+| REVIEW-001 | Independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike (`2e41da4`) before CORE-001 builds on them — no independent review was possible during wind-down | ADR-001, ADR-002, ADR-003 | TBD | READY |
 | AND-001 | Android project scaffold checks + `scripts/android-check.sh` (toolchain inventory delivered by ENV-001) | ENV-001 | Build/Test | BACKLOG |
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | Lead | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |

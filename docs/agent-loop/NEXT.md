@@ -51,6 +51,10 @@ retrieval log + "as-of" timestamps, and commits.
 
 ## Review gates (do not skip)
 
+- **Independent-review gap (REVIEW-001):** ADR-001/002/003 and the TERM-001 spike were integrated
+  without an independent reviewer pass (wind-down forbade new agents); the ADR-002 Lead also flagged
+  its own in-file UNVERIFIED items. Run a `reviewer` pass over `69e5600` and `2e41da4` before
+  building CORE-001 on them. Confirm ADR-001/002/003 are still the intended decisions (`Proposed`).
 - No REX wire/binary compatibility claims (`full.md` §3); no GoRex source/asset reuse (§2.6).
 - UI fidelity: catalogue + design tokens are the acceptance gate; unverified states stay labelled.
 - Android Studio is not a dependency; commit a Gradle wrapper when Android work starts (§10).
