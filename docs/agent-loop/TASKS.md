@@ -48,7 +48,7 @@ the evidence is integrated.
 | ADR-FIX-001 | Apply REVIEW-001 corrections: ADR-002 Unverified-table refresh (B-1) + coverage-row fix (B-2) + D11 no-reserialize test (B-3) + D7 TLS/provider disclosure (B-4/B-5), `protoc` note (B-6), and ADR-001 nits A-2–A-10. Manager-owned `docs/adr/**` + `docs/architecture/interface-contract.md` | REVIEW-001 | `adr/review-001-fixes` | DONE — integrated `f474c83` (INT-007); 3 files +135/−86; no decision changed |
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | `core/core-001-vertical-slice` | DONE — integrated `d3e0286` (INT-008); 53 files/+12010; `cargo test --workspace` 104 pass; 5 acceptance properties verified independently |
 | CTX-001 | Context-resolution test + set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005 Decision 2 + the §8.1 test) | ADR-005, CORE-001 | TBD | BACKLOG |
-| CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |
+| CORE-002 | Client disconnect leaves session alive; reattach snapshot + event stream/resume | CORE-001 | `core/core-002-reconnect-events` | IN_PROGRESS (2026-10-15) — owns `crates/**` (except `relayable-model`) + `tests/**` + `protocol/**`; no model/contract edits |
 | QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
