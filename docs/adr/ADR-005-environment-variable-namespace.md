@@ -182,7 +182,7 @@ marked **Relayable-defined (no REX evidence)** inline.
 
 ## Decision
 
-**Status: Proposed — Lead decision.**
+**Status: Accepted — Manager acceptance 2026-10-15 (DEC-006).**
 
 1. **Namespace.** Relayable's environment-variable namespace is **`RELAYABLE_*` only**. The exact names
    are `RELAYABLE_SESSION`, `RELAYABLE_BLOCK`, `RELAYABLE_SERVER`, and `RELAYABLE_CLIENT`. No `REX_*`

@@ -10,7 +10,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-003 | Protocol serialization + transport | **Proposed** — ADR-002 integrated `31bed30`; REVIEW-001 verdict accept-with-nits (blocking B-1/B-2/B-3 tracked as ADR-FIX-001 before recording Accepted) | `docs/adr/ADR-002-protocol-schema-and-transport.md` |
 | DEC-004 | Terminal engine selection | **Proposed** — ADR-003 integrated `78b83f2`; REVIEW-001 confirms keep `Proposed` — TERM-002 (engine-level spike) is a hard gate for the engine choice, UI-001 gates the `gpui` pin | `docs/adr/ADR-003-terminal-engine-and-gpui-artifact-pin.md` |
 | DEC-005 | Local/remote process ownership and persistence guarantees | Pending | `docs/adr/ADR-004` |
-| DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Recommended by ADR-002 D14 as `RELAYABLE_*`-only; Manager approval pending | — |
+| DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | **Accepted** — `RELAYABLE_*`-only, no `REX_*` aliases; `ADR-005` integrated `74e7e20` | `docs/adr/ADR-005-environment-variable-namespace.md` |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
 | DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — hook disabled + plugin uninstalled 2026-10-15** | — |
@@ -147,7 +147,7 @@ mobile.
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).
-- Env namespace: `RELAYABLE_*` vs REX-compatible aliases vs both (§8.1).
+- Env namespace: **RESOLVED 2026-10-15** — `RELAYABLE_*`-only, no `REX_*` aliases (DEC-006 → ADR-005, integrated `74e7e20`).
 - **Android SDK/emulator install — DEFERRED (DEC-010):** ENV-001 found no SDK/emulator/images/licenses
   and no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified). Android work is out of current
   scope, so no install/approval is needed now. Evidence: `docs/operations/android-toolchain.md`.

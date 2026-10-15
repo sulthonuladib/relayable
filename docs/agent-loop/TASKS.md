@@ -39,7 +39,7 @@ the evidence is integrated.
 | ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | research/adr-001-002 | DONE — integrated `31bed30` (Proposed; DEC-006 recommendation only) |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | research/term-001-adr-003 | DONE (Proposed) — integrated `78b83f2`; engine-level phase 2 pending as TERM-002 |
 | ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | Lead | BACKLOG |
-| ADR-005 | Environment-variable namespace (`RELAYABLE_*` vs `REX_*` aliases vs both) | ADR-002 D14 | `adr/adr-005-env-namespace` | IN_PROGRESS (2026-10-15) — launched; new file `docs/adr/ADR-005-environment-variable-namespace.md` |
+| ADR-005 | Environment-variable namespace (`RELAYABLE_*` vs `REX_*` aliases vs both) | ADR-002 D14 | `adr/adr-005-env-namespace` | DONE — integrated `74e7e20` (INT-006); `RELAYABLE_*`-only; DEC-006 Accepted |
 | UI-001 | GPUI minimal Linux window build/run proof | ENV-001, ADR-003 | Lead/UI | BACKLOG |
 | TERM-001 | Terminal engine candidate prototype (TUI/input/resize spike) | ENV-001 | research/term-001-adr-003 | DONE phase 1 — integrated `78b83f2` (PTY/SIGWINCH/byte-stream/RSS harness) |
 | TERM-002 | Engine-level spike phase 2: per-engine adapters validate ADR-003's provisional pin | TERM-001 | `spike/term-002-engine-validation` | IN_PROGRESS (2026-10-15) — launched; owned path `spikes/terminal-engine-phase2/**` |

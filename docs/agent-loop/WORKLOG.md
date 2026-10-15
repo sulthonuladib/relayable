@@ -77,6 +77,23 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 16 — ADR-005 integrated; DEC-006 Accepted (2026-10-15)
+
+**Objective:** resolve the environment-variable namespace.
+
+**Result:** ADR-005 (`8585d08`, 365 lines) reviewed and accepted. Decision: `RELAYABLE_*`-only — exact
+names `RELAYABLE_SESSION`, `RELAYABLE_BLOCK`, `RELAYABLE_SERVER`, `RELAYABLE_CLIENT`; no `REX_*` alias
+is read or written; explicit flags beat env context; missing context fails with a documented non-zero
+exit code (no guessing). Grounded in `full.md` §0.1/§3/§8.1, ADR-002 D14, matrix §7.3/§8.3. Test plan
+proposed (not created); `tests/**` is CORE-001-owned.
+
+**Commands:** `git merge --no-ff adr/adr-005-env-namespace` → INT-006 `74e7e20`; ADR status set to
+Accepted; DECISIONS DEC-006 → Accepted; TASKS/STATUS updated; pushed.
+
+**Still in flight:** ADR-FIX-001 (`w19`), CORE-001 (`w18`), TERM-002 (`w17`).
+
+---
+
 ## Checkpoint 15 — DOC-002 integrated; recheck false positive corrected (2026-10-15)
 
 **Objective:** settle the DOC-002 citation repair.
