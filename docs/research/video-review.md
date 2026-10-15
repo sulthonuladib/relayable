@@ -65,7 +65,9 @@ ffmpeg -i 5/dl.mp4 -vf fps=1/5 -q:v 3 evidence/video5/f%03d.jpg          # exit 
 # plus targeted `-ss` stills and 2x/3x lanczos upscales/crops for legibility.
 ```
 
-Total media downloaded ≈ **34 MB** (cache) plus ≈ 15 MB extracted stills — far below the 1.5 GB cap.
+Total media downloaded ≈ **34 MB** (cache) plus ≈ 15 MB extracted stills — within the
+operator-imposed 1.5 GB capture budget for this run (a per-run capture budget, not a `full.md` or
+repository requirement).
 No video or image file was committed (see §1.4).
 
 ### 1.3 Audio and vision inspection statement
@@ -105,7 +107,7 @@ and must never be committed or bundled (`full.md` §2.3, §2.6).
 - Creator: Mitchell Hashimoto · published 2026-09-02 · duration 2:53 · no chapters (metadata)
 - Access route: metadata + auto-captions + downloaded 480p video, frames visually inspected.
 - Frame evidence: `docs/research/evidence/video1/` (`f001`–`f043` at 4 s spacing, 14 targeted
-  stills, tab-bar crops, 3x upscales).
+  stills, 5 tab-bar crops (`topbar-*`), 2 tab crops (`tabs-*`); no upscale files in this directory).
 
 ### 2.1 Spoken timeline (caption timestamps)
 
@@ -130,7 +132,7 @@ and must never be committed or bundled (`full.md` §2.3, §2.6).
 | 0:24 | App window on screen, terminal shows macOS login banner and date; workspace appears as a single full-window terminal. | high (frame) |
 | 0:42–0:47 | **Title/tab bar:** macOS traffic lights, a small window/sidebar control, then a horizontal row of tabs, each with a `>_` terminal glyph and a label; `+` control at the right end. Visible labels: `btop`, `htop`, `~` (frame `tabs-0047`). Active tab has a lighter pill/segment background. Below the tab row a thin **pane header** row shows a small icon and the pane's cwd/program (`~`). | high (frame) |
 | 0:47 | Terminal content: `Last login: Fri 28 Aug 14:23:18 on ttys003`, prompt, typed `cd ~/Documents/ghostty`, and a right-aligned `Fri 28 Aug 14:23:19 -07:00` line. | high (frame) |
-| 0:55–0:58 | Counter block: a single column of incrementing numbers (…24, 25, 26…) in a plain shell pane; tab strip now `btop`, `htop`, `~/Documents/ghostty`-style labels (`tabs-0058`). | high (frame) |
+| 0:55–0:58 | Counter block: a single column of incrementing numbers (…24, 25, 26…) in a plain shell pane; tab strip now `btop`, `htop`, `~/Documents/ghostty`-style labels (`still-0058`). | high (frame) |
 | 1:33–1:40 | Four tabs visible: `btop`, `htop`, two `~/Documents/ghostty`-label shells distinguished by a numeric suffix (frame `tabs-0133`, e.g. `~/Documents/ghostty-1`). One tab runs Neovim on a Zig source file (mouse_state/gesture code; status line shows NORMAL mode and a file path). Pane header shows cwd+program (`~/Documents/ghostty-nvim`). | medium-high (label suffix read from a 3x crop; medium for exact directory string) |
 | 1:40 | **Session switcher palette** opened over the terminal: rounded dark popup with a search field placeholder `Filter or create...`, first row highlighted with a checkmark: `✓ Demo`; further rows include `New Session`, an `Add Remote Host...` entry (full list partly occluded by the cursor). | high (frame `topbar-0140`) |
 | 2:03 | Scrollback view: long column of counter output, prompt `degn@r:~`-style, and a **native scrollbar** visible at the right edge. | medium-high (frame) |
@@ -360,8 +362,9 @@ Zellij critique (wasm plugins per tab, memory not reclaimed after closing tabs).
 - Access route: metadata + auto-captions + downloaded 480p video, frames visually inspected.
 - Frame evidence: `docs/research/evidence/video5/`.
 - **Important alignment caveat:** in this video the on-screen terminal clock advances far more slowly
-  than the caption timeline in the middle section (e.g. frames at caption 4:25 and 5:35 show
-  on-screen clocks 15:03:37/15:03:48). Caption timing and frame content are therefore only loosely
+  than the caption timeline in the middle section (e.g. `up-0425` at caption 4:25 shows on-screen
+  clock 15:02:01; `up-0535` at caption 5:35 shows 15:03:37; the `up-0600` JSON output at caption
+  ≈6:00 shows 15:03:48). Caption timing and frame content are therefore only loosely
   aligned; command evidence below cites the frame when a command is visible and the caption when a
   statement is heard. Do not treat either timestamp as exact for this video.
 
@@ -386,7 +389,7 @@ substitution is **inferred** from the `(which htop)` shape and the shell context
 medium confidence. The `rex new` form is `rex new <label> -- <command>`, and `rex split` uses
 `-s <session> --label <label> -- <command> [args]`.
 
-`rex session inspect Video` output (frame, on-screen 15:01:39):
+`rex session inspect Video` output (frame `up-0348`, on-screen 15:01:39):
 
 ```text
 session: session:01a0a1ee-3d84-779d-8fe4-bbdb65f194fc
@@ -411,7 +414,10 @@ WINDOW ID  FLAVOR                            LABEL  PLACEMENT
 2     19144e  com.superlogical.terminal.shell  shell  placed
 ```
 
-Method call and JSON output (frames ~4:25 and ~5:35; on-screen 15:03:37/15:03:48):
+Method call and JSON output (`rex block inspect …` typed with blank output in `up-0425`,
+caption ~4:25, clock 15:02:01; `rex block call …` being typed with no output in `up-0535`,
+caption ~5:35, clock 15:03:37; JSON output plus `rex block close -s Video sleep` in `up-0600`,
+caption ≈6:00, clock 15:03:48):
 
 ```text
 $ rex block call -s Video -b sleep process

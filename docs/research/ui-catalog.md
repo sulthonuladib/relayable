@@ -11,15 +11,20 @@ was actually observed in the five reference videos.
 - Supplemental source: `docs/research/gorex-review.md` (commit `a7e14a3`), a behaviour-only review of
   the third-party GoRex clone. There is **no GoRex licence**; anything from it is tagged
   `[clone-derived]` and is never treated as original-product evidence.
+- Measured source (Wave 3): `docs/research/design-tokens.md` (commit `e0e61c8`), pixel measurements
+  from re-captured 1080p VP9 frames with per-value method and confidence. Measured values are cited
+  inline as `(measured: design-tokens.md §…)`. V1 and V4 exports have different scales, so absolute
+  pixel values are **not comparable across videos**; colours are video-compression approximations.
 - Frames live under `docs/research/evidence/video1..video5/**` (332 JPEGs, gitignored by
   `.gitignore:11`; read-only for this task, never staged). Paths below are relative to the repo root.
 - Video 2 (architecture) and Video 3 (memory benchmarks) contain **no product UI** and are not UI
   evidence. Video numbers are V1…V5 as in `video-review.md` §1.1.
 - Confidence labels: **high** (legible frame + consistent across frames), **medium-high**,
   **medium**, **low** (`video-review.md` uses the same vocabulary).
-- Geometry: no pixel-exact measurement was possible from 480p JPEGs (`video-review.md` §1.3). Every
-  proportion/number below is an estimate read off the cited frame; those are marked
-  `[low-confidence estimate, 480p]`. Rounded values are **not** implementation constants.
+- Geometry: values not superseded by a measurement remain estimates read off the cited 480p frames
+  and keep the `[low-confidence estimate, 480p]` marker (`video-review.md` §1.3); measured values cite
+  `design-tokens.md` inline. All values are frame pixels, not logical points (`design-tokens.md`
+  §2.3). Rounded values are **not** implementation constants.
 - State categories: for each screen the entry lists empty / loading / error / disconnected / focused /
   selected. `not observed` means the evidence does not show that state; nothing is invented for it.
 - Implementation paths are **proposed Phase-1 locations** subject to the lead's architecture
@@ -42,7 +47,7 @@ was actually observed in the five reference videos.
 | 9 | `desktop/split-layout` | V4 0:58, 4:49 | `video4/up-0058.jpg`, `video4/still-0058.jpg`, `video4/up-0449.jpg` |
 | 10 | `desktop/remote-host` | V4 0:58, 4:11, 4:49 | `video4/up-0058.jpg`, `video4/up-0411.jpg`, `video4/up-0449.jpg` |
 | 11 | `desktop/reconnect-after-quit` | V4 3:59 → 4:11 | `video4/still-0359.jpg`, `video4/up-0411.jpg` |
-| 12 | `desktop/cli-client-terminal` | V5 1:04–2:28 (on-screen 14:59–15:00), 4:25, 5:35 | `video5/still-0104.jpg`, `video5/up-0425.jpg`, `video5/up-0535.jpg` |
+| 12 | `desktop/cli-client-terminal` | V5 1:04–2:28 (on-screen 14:59–15:00), 4:25, 5:35, ≈6:00 | `video5/still-0104.jpg`, `video5/up-0348.jpg`, `video5/up-0425.jpg`, `video5/up-0535.jpg`, `video5/up-0600.jpg` |
 | 13 | `desktop/cli-help` | V5 7:04 | `video5/still-0704.jpg`, `video5/up-0704.jpg` |
 
 `desktop/disconnected` as an in-app state, `desktop/settings`, and `desktop/inspector` were **not
@@ -58,7 +63,9 @@ observed**; see Coverage and limitations at the end.
   Top bar at window top containing (left→right) macOS traffic lights, then the tab strip, then `+`
   at the far right. Below the top bar: per-pane header strip, then terminal body filling the rest of
   the window. No footer/status bar and no sidebar in this frame.
-  - Top bar height ≈ 3.5–4.5% of window height `[low-confidence estimate, 480p]`.
+  - Top bar height **40 px** plus a 1–2 px separator (measured: `design-tokens.md` §3.1, V1 0:24/0:47
+    `v1-t0024`/`v1-t0047`, confidence high; supersedes the earlier 480p percentage estimate; measured
+    at the 1170-px frame scale, so not comparable across videos).
   - Terminal body occupies the remainder; one pane only.
 - **Interaction/state transitions:** app launched from Dock (V1 0:13, `still-0013.jpg`) → interactive
   prompt (0:24). Counter keeps running while the client quits/relaunches (V1 0:52–1:30, spoken;
@@ -70,8 +77,10 @@ observed**; see Coverage and limitations at the end.
   - error: `not observed`; disconnected: `not observed`;
   - focused: terminal cursor/prompt visible in the single pane (high);
   - selected: only one pane/tab at this timestamp — selected treatment not distinguishable.
-- **Confidence/unresolved:** high for structure; medium-low for proportions. Unresolved: exact window
-  size, window-scale/local font, background colour value.
+- **Confidence/unresolved:** high for structure; medium-low for proportions. Top bar background
+  measured rgb(4, 27, 46) (high, `design-tokens.md` §3.2; compression approximation). Unresolved:
+  logical window size (video-pixel window bounds ≈1099×706 measured at medium confidence,
+  `design-tokens.md` §3.1), window-scale/local font, terminal background translucency value.
 - **Relayable mapping:** planned `apps/linux/src/ui/workspace.rs` (proposed); test
   `screenshot_workspace_default`.
 - **GoRex cross-reference:** GoRex runs at 1000×620 min 560×340 with a 44 px title bar
@@ -118,8 +127,10 @@ observed**; see Coverage and limitations at the end.
   tabs are flat/darker. One observed tab count per frame: 3 (V1 0:47: `btop`, `htop`, `~`), 4
   (V1 ~1:33: `btop`, `htop`, two `~/Documents/ghostty` shells with numeric suffix), 4 in V1 2:22, 1
   in V4 0:58/4:11/4:49, 1 in V5 7:04.
-  - Tab pill height ≈ 35–40 px at 480p upscale `[low-confidence estimate, 480p]`; pill radius fully
-    rounded in `tabs-0047`.
+  - Active tab pill **205 × 30 px** with fill rgb(19, 41, 62) (measured: `design-tokens.md` §3.1–§3.2,
+    V1 0:47 `v1-t0047`, confidence high; supersedes the earlier 480p 35–40 px estimate; measured at
+    the 1170-px frame scale, not comparable across videos; colour is a video-compression
+    approximation). Pill radius ≈ 8–10 px (low; compression softens corners).
   - In V1 0:47 the active tab is the third (`~`); in V4 the single tab is active.
 - **Interaction/state transitions:** switching tabs updates the pane content; duplicate cwd creates
   a `-1`-suffixed label (V1 ~1:33, medium-high from a 3x crop — write `-1` as observed convention,
@@ -151,8 +162,10 @@ observed**; see Coverage and limitations at the end.
   above the terminal body. Left: a small program/terminal icon plus the pane's cwd or program name
   (`~`, `~/Documents/ghostty-nvim`-style per video-review §2.2; V4 shows `shell`). Right side of the
   **focused** pane: four icon buttons (split-right, split-down, zoom, close `×`); the unfocused pane's
-  header shows no buttons (V4 `up-0058`, `up-0449`). Header height ≈ 30–36 px at 480p
-  `[low-confidence estimate, 480p]`.
+  header shows no buttons (V4 `up-0058`, `up-0449`). Header height ≈ **40–42 px** (measured:
+  `design-tokens.md` §3.1, V4 0:58 `v4-t0058`, confidence medium; supersedes the earlier 480p
+  30–36 px estimate). V1 pane-header height remains `not measurable` — the header and terminal body
+  share the same colour (`design-tokens.md` §4).
 - **Interaction/state transitions:** focus moves between split panes (V4 0:58 two panes; only left
   header shows buttons). In V1 the pane header label follows the pane's program/cwd
   (`btop`/`nvim` context).
@@ -160,7 +173,8 @@ observed**; see Coverage and limitations at the end.
   medium confidence (3x crop).
 - **States:**
   - empty/loading/error/disconnected: `not observed`;
-  - focused: buttons visible + lighter pane card (V4, high);
+  - focused: buttons visible + lighter pane card (V4, high); focused/unfocused surfaces measured
+    rgb(0,36,53) vs rgb(6,27,38) (medium-high, `design-tokens.md` §3.2; compression approximation);
   - selected: pane selection is the focus state; no separate selected appearance observed.
 - **Confidence/unresolved:** high for structure and focused/unfocused difference; medium for exact
   labels beyond `~`/`shell`. Unresolved: icon-by-icon button identity/order (read as split-right,
@@ -176,7 +190,11 @@ observed**; see Coverage and limitations at the end.
 - **Source:** V1 0:47 (`video1/still-0047.jpg`), 0:55–0:58 (`video1/still-0058.jpg`), 1:33–1:40
   (`video1/still-0133.jpg`), 2:03 (`video1/still-0203.jpg`).
 - **Component hierarchy and geometry (observed):** fills the pane below the pane header, edge to
-  edge, dark navy background; monospace text with ANSI prompt colours; block cursor; right-aligned
+  edge, dark navy background (measured vertical ramp: top ≈ rgb(10,29,43) → lower ≈ rgb(17,27,35),
+  medium, may be wallpaper bleed-through if the window is translucent — `design-tokens.md` §3.2);
+  monospace text with ANSI prompt colours; block cursor; V1 terminal row pitch **17.0–17.5 px** (mean
+  ≈17.25 over 49 rows; measured: `design-tokens.md` §3.1, `v1-t0140`, confidence high; at the
+  1170-px frame scale); right-aligned
   clock/date line inside the terminal (`Fri 28 Aug 14:23:19 -07:00`). V1 2:03 shows a long
   scrollback column with a native scrollbar on the right edge. Neovim (V1 1:33–1:40) draws its own
   full-pane UI (line numbers, `NORMAL` status line) — the product chrome does not change around it.
@@ -192,9 +210,12 @@ observed**; see Coverage and limitations at the end.
   - focused: block cursor in the focused pane (high);
   - selected: terminal text selection not captured — `not observed`; native scrollbar visible (2:03,
     medium-high).
-- **Confidence/unresolved:** high for content and scrollbar; medium for prompt badge semantics;
-  background colours unmeasured. Unresolved: terminal theme/palette values, cursor style, scrollback
-  loading visual, selection colour.
+- **Confidence/unresolved:** high for content and scrollbar; medium for prompt badge semantics.
+  Background and prompt colours are now measured but with caveats: background ramp above (medium,
+  possible translucency), local prompt p95 rgb(125,128,207) and remote prompt p95 rgb(128,203,167)
+  (`design-tokens.md` §3.2, low-medium/medium; compression approximations). Unresolved: font family
+  and exact type sizes, cursor style, scrollback loading visual, selection colour, and scrollbar
+  colours — `not measurable` from the current frames (`design-tokens.md` §4).
 - **Relayable mapping:** planned `apps/linux/src/ui/terminal.rs` (proposed); tests
   `screenshot_terminal_default`, `screenshot_terminal_scrollback`.
 - **GoRex cross-reference:** GoRex terminal font JetBrains Mono 11.6 px, dark bg `#1e1e22`
@@ -206,8 +227,10 @@ observed**; see Coverage and limitations at the end.
 - **Component hierarchy and geometry (observed):** small rounded dark popup over the terminal, near
   the top of the window. Top: search field with placeholder `Filter or create...`. Below: list rows;
   first row highlighted with a leading checkmark: `✓ Demo`. Further rows include `New Session` and
-  `Add Remote Host...` (list partly occluded by the cursor). Popup width is a small minority of the
-  window width (well under half) `[low-confidence estimate, 480p]`.
+  `Add Remote Host...` (list partly occluded by the cursor). Popup **183 px wide ≈ 17 % of window
+  width** (183/1081), ≈ 137–142 px tall (measured: `design-tokens.md` §3.1, V1 1:40 `v1-t0140`,
+  confidence medium; supersedes the earlier "well under half" 480p estimate; bottom edge soft —
+  shadow).
 - **Interaction/state transitions:** opened over the terminal; current session marked with `✓`;
   `New Session` creates a session (Video 1 1:36–1:52, spoken: session named `work`, then switched
   back to `ghosty`); `Add Remote Host...` is the remote entry point reused in V4.
@@ -217,9 +240,11 @@ observed**; see Coverage and limitations at the end.
   - empty session list: `not observed`; loading: `not observed`; error: `not observed`;
     disconnected: `not observed`;
   - focused: cursor visible in the search field (high);
-  - selected: `Demo` row highlighted with checkmark (high).
-- **Confidence/unresolved:** high for placeholder/rows; medium for exact popup geometry and whether
-  extra rows exist. Unresolved: popup width/position rules, keyboard shortcuts, "create" behaviour.
+  - selected: `Demo` row highlighted with checkmark (high); fill measured p50 rgb(68, 156, 255)
+    (`design-tokens.md` §3.2, confidence high; compression approximation).
+- **Confidence/unresolved:** high for placeholder/rows; popup width/height measured at medium
+  confidence, selected-fill colour high. Unresolved: popup position rules, keyboard shortcuts,
+  "create" behaviour, and whether extra rows exist.
 - **Relayable mapping:** planned `apps/linux/src/ui/session_picker.rs` (proposed); test
   `screenshot_session_picker_open`.
 - **GoRex cross-reference:** GoRex has one combined command palette, not a separate session picker
@@ -246,8 +271,9 @@ observed**; see Coverage and limitations at the end.
   - selected: if the horizontal active-pill convention carries over, the active vertical row is
     expected lighter — `not observed` to high confidence.
 - **Confidence/unresolved:** medium-high for the two palette rows; low for sidebar geometry/row
-  states. Unresolved: sidebar width, icon/label layout, per-row active/hover/close affordances,
-  keyboard toggle binding on Linux.
+  states. No new 1080p measurement this pass (`design-tokens.md` §5 records the V1 2:22 frame as
+  captured but not scanned). Unresolved: sidebar width, icon/label layout, per-row active/hover/close
+  affordances, keyboard toggle binding on Linux.
 - **Relayable mapping:** planned `apps/linux/src/ui/vertical_tabs.rs` (proposed); test
   `screenshot_vertical_tabs`.
 - **GoRex cross-reference:** GoRex has no vertical-tabs mode `[clone-derived]` — the video is the
@@ -261,9 +287,12 @@ observed**; see Coverage and limitations at the end.
   `Search commands...`. Then a scrollable command list, with a group header `Pane` before the pane
   commands. Rows right-align shortcut badges; the selected row is filled and shows the current value
   plus a trailing chevron (`Change Session` → `cosmic-summit` → `>`).
-  - Panel width ≈ 28% of window width (~390 px in a 1448 px-wide capture) `[low-confidence estimate,
-    480p]`; row pitch ≈ 29 px `[low-confidence estimate, 480p]`; panel top ≈ 80–90 px below the
-    window top `[low-confidence estimate, 480p]`; roughly 18 rows visible including the `Pane` header.
+  - Panel **442 × 667 px** ≈ 28.4% of window width (measured: `design-tokens.md` §3.1, V4 0:30
+    `v4-t0030`, confidence high; the earlier 480p "≈28%" estimate is consistent and now exact at the
+    1624-px capture); row pitch **37.5 px** (high; 11 consecutive text rows, range 36.0–38.0; the
+    group header `Pane` breaks the rhythm; supersedes the earlier ≈29 px estimate); panel top ≈
+    **99 px** below the window top (medium; supersedes the earlier 80–90 px estimate); selected row
+    height ≈ 35 px (high); roughly 18 rows visible including the `Pane` header.
 - **Interaction/state transitions:** opened with `⇧⌘P` (key overlay `⇧⌘P` shown bottom-centre in the
   same frame, high). Typing filters (search field). Arrow keys move the selected row (inferred from
   fill + chevron, medium). Commands observed in the list include the session, tab, window, and pane
@@ -280,15 +309,19 @@ observed**; see Coverage and limitations at the end.
   - empty (no results): `not observed`; loading: `not observed`; error: `not observed`;
     disconnected: `not observed`;
   - focused: text cursor in the search field (high);
-  - selected: `Change Session` row filled (mint/green in this frame; V1 session picker used blue —
-    exact palette unmeasured), with trailing chevron (high).
-- **Confidence/unresolved:** high for structure, placeholder, and command names; low-medium for
-  geometry and for specific shortcut readings. Unresolved: fuzzy-match behaviour, empty-results
-  state, palette colour token, whether `Pane` is the only group.
+  - selected: `Change Session` row filled mint/green, measured p50 rgb(33, 150, 137)
+    (`design-tokens.md` §3.2, confidence high) — distinct from the V1 session-picker blue
+    rgb(68, 156, 255) (high); compression approximations; with trailing chevron (high).
+- **Confidence/unresolved:** high for structure, placeholder, and command names; panel size, row
+  pitch, and selected fill now measured at high confidence, remaining geometry at medium; low-medium
+  for specific shortcut readings. Unresolved: fuzzy-match behaviour, empty-results state, whether
+  `Pane` is the only group; panel background rgb(10,29,41) and border rgb(85–102,109–116,113–125) are
+  measured at medium confidence (`design-tokens.md` §3.2) but remain compression approximations.
 - **Relayable mapping:** planned `apps/linux/src/ui/command_palette.rs` (proposed); tests
   `screenshot_command_palette_open`, `screenshot_command_palette_selected`.
 - **GoRex cross-reference:** GoRex palette placeholder is `Type a command, or the name of a pane…`
-  and it mixes pane jump targets with commands, ≈560 px wide, ~28 px rows `[clone-derived]`.
+  and it mixes pane jump targets with commands, ≈560 px wide, ~34 px rows `[clone-derived]`
+  (frame-measured and source-constant-verified, `gorex-review.md` §4.1).
   **Discrepancy:** placeholder and pane-jump rows differ; prefer the video's `Search commands...`.
   GoRex Linux accelerators (`Ctrl+Shift+P`, etc.) are clone-derived conventions, not REX evidence.
 
@@ -300,15 +333,18 @@ observed**; see Coverage and limitations at the end.
   the four right-side buttons and a lighter card; the unfocused pane header shows only icon + `shell`
   and a darker card. Created over one connection ("I could open a split and I have two now, and this
   is over the same connection", V4 spoken, 0:58).
-  - Gap between panes ≈ 8–12 px at 480p upscale `[low-confidence estimate, 480p]`; split is ~50/50 at
-    creation (consistent with the spoken "split" action; exact ratio unmeasured).
+  - Gap between panes ≈ **8–11 px** between card outer edges (measured: `design-tokens.md` §3.1,
+    V4 0:58 `v4-t0058`, confidence high; supersedes the earlier 480p 8–12 px estimate; not the drag
+    target); split ≈ **50/50** at creation (pane1 ≈757 px vs pane2 ≈767 px, medium-high;
+    supersedes the earlier unmeasured statement) — consistent with the spoken "split" action.
   - Pane card corner radius and border present but unmeasured.
 - **Interaction/state transitions:** pane content independent (left runs `loginctl list-sessions`;
   right idle prompt). V4 4:49 shows `uname -a` in the left pane and `cd /` in the right on the same
   remote host. Split commands from the palette: `Split Pane Left/Right/Up` (V4 0:30). Focus movement
   between panes is visible as the button/card change; the exact key binding is not shown.
 - **Exact labels:** `shell` (both pane headers, high); `loginctl list-sessions` and its output
-  (high); `[mitchellh@hill:~]$` prompt (high); `uname -a` → `Linux hill 6.18.48 #1-NixOS SMP
+  (high); `[mitchellh@hill:~]$` prompt (high; colour measured p95 rgb(128,203,167), medium,
+  `design-tokens.md` §3.2 — compression approximation); `uname -a` → `Linux hill 6.18.48 #1-NixOS SMP
   PREEMPT_DYNAMIC Fri Aug 28 06:22:54 UTC 2026 x86_64 GNU/Linux` (high); `cd /` → `[mitchellh@hill:/]$`
   (high).
 - **States:**
@@ -392,8 +428,9 @@ observed**; see Coverage and limitations at the end.
 
 ### desktop/cli-client-terminal
 
-- **Source:** V5 1:04–2:28 (on-screen 14:59–15:00; caption/clock misalignment caveat), 4:25, 5:35.
-  Frames `video5/still-0104.jpg`, `video5/up-0425.jpg`, `video5/up-0535.jpg`.
+- **Source:** V5 1:04–2:28 (on-screen 14:59–15:00; caption/clock misalignment caveat), 4:25, 5:35,
+  ≈6:00. Frames `video5/still-0104.jpg`, `video5/up-0348.jpg`, `video5/up-0425.jpg`,
+  `video5/up-0535.jpg`, `video5/up-0600.jpg`.
 - **Component hierarchy and geometry (observed):** the standard workspace chrome is unchanged
   (session pill `Ghostty`, tab `~/Documents/ghostty`, pane header, terminal) and `rex` CLI commands
   run **inside a client terminal**; output appears in the same scrollback and propagates live to the
