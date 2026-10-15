@@ -77,6 +77,59 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 3 — Wave 1 execution blocked by Herdr agent-provisioning fault (2026-10-15)
+
+**Objective:** let the three resumed Wave 1 research projects execute and produce their evidence.
+
+### What happened
+
+- All three projects were resumed (sequential `resume_project`; the Herdr pane-busy state was
+  cleared by a bounded background loop that sent empty `Enter` to the target pane during launch).
+- All three Leads ran. `research/ui-reference` and `research/protocol-compat` then delegated to
+  writer Agents; every `delegate_agent` failed identically at `stage: agent_start` with Herdr
+  `agent_pane_busy` / `agent target pane <id> is not an available shell`, and Herdsman rolled each
+  attempt back (`rollback: true`, `list_agents` = 0). `research/env-audit` hit the same fault.
+- Each Lead reported blocked with **no repo writes**; all three branches remain at `3db73c2`. The
+  Leads stopped retrying to avoid leaking panes; they hold for Manager instruction.
+
+### Root cause (evidence in `TESTS.md` rows 15–23)
+
+The `herdr-automatic-rename` plugin's fish hook (sourced from `~/.config/fish/config.fish` lines
+40–43) spawns background `bash automatic-rename.sh` on every `fish_preexec`/`fish_postexec`.
+Herdr's `agent start` requires the pane to be at its prompt with the shell alone in the foreground;
+the hook's live `bash` children cause `agent_pane_busy`. A controlled A/B test in a throwaway tab
+(hook active = busy with two bash children; hook functions removed = available with only `fish`)
+confirms the causation. `pane run`, which Herdsman uses as its readiness marker, always triggers
+the hook immediately before `agent start`.
+
+### Current state
+
+- Three project assignments preserved; three Leads alive but idle/holding (`runtime_state: done`).
+- No research files or commits on any research branch.
+- Test tabs closed; no leaked panes (`herdr pane list --workspace wZ` shows only `wZ:p1`).
+- No Herdr restart, no global config change, and no tool install was performed.
+
+### Options (pending user decision = approval gate)
+
+- **A (recommended, needs approval):** stop sourcing the automatic-rename fish hook in
+  `~/.config/fish/config.fish` (lines 40–43). New panes then start agents reliably and no Herdr or
+  Lead restart is needed. Cost: live per-command tab auto-renaming stops (cosmetic; event-based
+  naming still works). Reversible by restoring the lines.
+- **B (no global config change):** add a project-local `managed-lead` overlay granting Leads
+  bash/edit/write, then `stop_lead` + `resume_project` each Lead so they execute their research
+  directly. Reversible; changes the in-repo delegation model while the environment is faulty.
+- **C:** update/reinstall the plugin (unproven) or report the hook behavior upstream.
+
+### Next tasks
+
+1. Obtain the user's decision on A/B/C (approval gate).
+2. Apply the chosen fix and message the Leads to retry delegation (Option A) or restart them with
+   write tools (Option B).
+3. Resume Wave 1 review/integration (INT-001) and then Wave 2 (`TERM-001`/`ADR-003`,
+   `ADR-001`/`ADR-002`, `CORE-001`).
+
+---
+
 ## Checkpoint 2 — Context-window policy implementation + Wave 1 delegation recovery (2026-10-15)
 
 **Objective:** implement and verify the user's strict context-window policy (no automatic/manual

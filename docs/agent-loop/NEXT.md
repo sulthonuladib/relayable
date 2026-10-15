@@ -25,15 +25,25 @@ cd /home/sulthonuladib/work/relayable && git status --short --branch && git log 
 
 ## Current phase and state
 
-Phase 0 — Wave 1 research is **launched but not running**. The first three `delegate_project`
-attempts failed at pane launch (`agent target pane wX|wY|wZ:p1 is not an available shell`) **after**
-creating the three branches/worktrees. Herdsman persisted the three assignments, so recovery is:
+Phase 0 — Wave 1 research is **blocked by an environment fault at an approval gate**. All three
+Leads are alive and holding; their `delegate_agent` calls fail at `stage: agent_start` because
+Herdr reports `agent_pane_busy` for programmatically provisioned panes. Root cause (A/B-confirmed):
+the `herdr-automatic-rename` fish hook spawns background bash on every prompt, while Herdr requires
+the shell alone in the foreground. Evidence: `TESTS.md` rows 15–23; `WORKLOG.md` Checkpoint 3.
 
-1. `resume_project` with `research/ui-reference`, then verify the Lead actually starts.
-2. If it starts, `resume_project` `research/protocol-compat` and `research/env-audit` sequentially.
-3. If resume fails again with a pane error, capture `herdr pane list` /
-   `herdr pane process-info --pane <id>` evidence for the target pane and root-cause before retrying;
-   do not remove worktrees without explicit user confirmation.
+Recovery options (do not apply without the user's decision — DEC-009):
+
+- **A (recommended):** stop sourcing the hook in `~/.config/fish/config.fish` lines 40–43. New panes
+  then start agents reliably; no Herdr or Lead restart is needed; live per-command tab auto-renaming
+  stops (cosmetic; event-based naming still works). Reversible.
+- **B:** add a project-local `managed-lead` overlay granting Leads bash/edit/write, then
+  `stop_lead` + `resume_project` each Lead so they execute directly. Repo-only and reversible;
+  changes the in-repo delegation model while the environment is faulty.
+- **C:** update/reinstall the plugin (unproven) or report upstream.
+
+Until a fix is applied, any Herdsman agent start needs a pane wake: run a bounded background loop
+that sends `herdr pane send-keys <pane> Enter` every ~0.3 s during the launch, or expect
+`agent_pane_busy`. Do not remove worktrees or restart Herdr without explicit user confirmation.
 
 | Branch | Worktree | Produces | Exclusive paths |
 |---|---|---|---|
@@ -41,13 +51,12 @@ creating the three branches/worktrees. Herdsman persisted the three assignments,
 | `research/protocol-compat` | `~/.herdr/worktrees/relayable/research-protocol-compat` (wY) | `docs/compatibility/reference-behavior-matrix.md` | `docs/compatibility/**` |
 | `research/env-audit` | `~/.herdr/worktrees/relayable/research-env-audit` (wZ) | `docs/operations/toolchain-audit.md` (+ optional `android-toolchain.md`) | `docs/operations/**` |
 
-The research branches were fast-forwarded to the policy commit so their worktrees include
-`.pi/settings.json` and the updated loop docs. They contain **no** research commits yet.
+The branches are at `3db73c2` (policy + evidence commits) and contain **no** research commits yet.
 
 ## Next actions (in order)
 
-1. Resume the three research projects sequentially and confirm each Lead is live before starting the
-   next.
+1. Apply the user's chosen fix; with Option A, message each Lead to retry delegation without
+   restarting it; with Option B, `stop_lead` + `resume_project` each Lead so the overlay applies.
 2. When reports arrive: review each diff (`git log --stat`, `git show`), verify honesty (access
    routes, confidence, no invented values), confirm no out-of-scope edits; then INT-001 merge into
    `master` (paths are disjoint, conflicts should be zero).

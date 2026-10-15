@@ -2,7 +2,7 @@
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
 **Milestone:** Phase 0 exit gate (§16): evidence status clear, ADRs recorded, buildable minimal shell exists.
-**Updated:** Context-window policy implemented (DEC-008); Wave 1 research branches exist but Leads are not yet running after a pane-launch failure (see `BACKLOG.md`, `WORKLOG.md` Checkpoint 2).
+**Updated:** Wave 1 Leads resumed but blocked by a fleet-wide Herdr agent-provisioning fault; remediation awaits user approval (see `BACKLOG.md`, `WORKLOG.md` Checkpoint 3).
 
 ## Objective (current)
 
@@ -27,18 +27,19 @@ Stand up the evidence base and the first working vertical slice:
 
 | Branch | Worktree | Scope | State |
 |---|---|---|---|
-| `research/ui-reference` | wX | five videos + GoRex catalogue (`docs/research/**`) | assignment persisted; Lead not running |
-| `research/protocol-compat` | wY | official REX behavior matrix (`docs/compatibility/**`) | assignment persisted; Lead not running |
-| `research/env-audit` | wZ | toolchain audit (`docs/operations/**`) | assignment persisted; Lead not running |
+| `research/ui-reference` | wX | five videos + GoRex catalogue (`docs/research/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
+| `research/protocol-compat` | wY | official REX behavior matrix (`docs/compatibility/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
+| `research/env-audit` | wZ | toolchain audit (`docs/operations/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
 
-The three delegations failed at pane launch (`agent target pane wX|wY|wZ:p1 is not an available
-shell`) after the branches/worktrees were created. Recovery is `resume_project <branch>`; resume one
-project, verify the Lead starts, then resume the others. Worktrees were fast-forwarded to the policy
-commit so they contain `.pi/settings.json` and the current loop docs. No research files exist on the
-branches yet.
+All three Leads were resumed and bound; their Agent delegations fail at `stage: agent_start` with
+Herdr `agent_pane_busy` because the `herdr-automatic-rename` fish hook spawns background bash on
+every prompt (A/B-confirmed; `TESTS.md` rows 15–23). No research files exist on the branches.
 
-The Manager reviews and integrates each branch into `master` (INT-001) before Wave 2 (ADRs, terminal
-spike, CORE-001).
+Remediation options (approval gate): **A** — stop sourcing the fish hook in
+`~/.config/fish/config.fish` (recommended, cosmetic effect only); **B** — project-local
+`managed-lead` overlay granting Leads bash/edit/write so they execute directly; **C** —
+update/reinstall the plugin. The Manager applies the approved fix, then the Leads retry delegation
+and the Manager integrates (INT-001) before Wave 2.
 
 ## Repository state
 
@@ -53,9 +54,12 @@ spike, CORE-001).
 
 ## Blockers
 
-- **Lead launch (recoverable):** the first Wave 1 delegations failed at Herdr pane readiness. The
-  assignments and worktrees persist; `resume_project` is the next step. This blocks REF-001..003,
-  DOC-001, ENV-001 only until resumed.
+- **Agent provisioning (fleet-wide, remediation pending approval):** Herdr's `agent start` reports
+  `agent_pane_busy` for programmatically provisioned panes because the automatic-rename fish hook
+  spawns background bash on every prompt. All three Wave 1 Leads are blocked in `delegate_agent`;
+  no research files were written. Evidence: `TESTS.md` rows 15–23; options and recommendation in
+  `WORKLOG.md` Checkpoint 3. Option A (recommended) needs approval to edit
+  `~/.config/fish/config.fish`; Option B is repo-only.
 
 ## Known risks
 

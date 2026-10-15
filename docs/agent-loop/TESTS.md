@@ -35,3 +35,34 @@ Node 26.8.2, repo `/home/sulthonuladib/work/relayable`.
   (branches `research/reference-ui`, `research/protocol-matrix`, `audit/build-env`). That checkout no
   longer exists; no live Lead owns them.
 - No build or test suite exists yet, so no pass/fail suite results are claimed.
+
+## 2026-10-15 — Herdr agent-provisioning blocker diagnosis (pane busy)
+
+Symptom: every programmatic agent launch fails at `stage: agent_start` with Herdr
+`agent_pane_busy` / `agent target pane <id> is not an available shell`. This affects Manager→Lead
+resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
+
+| # | Command / action | Observed result | Exit |
+|---|---|---|---|
+| 15 | `herdr pane process-info --pane wX:p1` | foreground processes `[fish, bash(defunct)]` while Herdr reports busy | 0 |
+| 16 | `herdr agent start probe --kind pi --pane wX:p1 --timeout 4000 -- --version` | `agent_pane_busy` | 1 |
+| 17 | `herdr pane send-keys wX:p1 Enter`, then the same probe | `timeout waiting for agent startup` (= pane accepted; `pi --version` launched) | 1 |
+| 18 | `herdr pane run wY:p1 "echo __TIMING__"`, probes every 5 s for 50 s | `agent_pane_busy` for ≥50 s | 1 |
+| 19 | A/B test in throwaway tab `wZ:tD`: `pane run` marker with plugin hook active | `agent_pane_busy`; process-info `[fish, bash, bash]` | 1 |
+| 20 | A/B test: `functions -e _har_preexec _har_precmd`, then `pane run` marker, then `agent start --timeout 4000` | `timeout waiting for agent startup` (= accepted); process-info `[fish]` only | 1 |
+| 21 | `herdr tab create ... --env HERDR_PANE_ID=`, marker + probe | Hooks still ran (`[fish, bash, bash]`), busy — Herdr overrides the env var; env simulation inconclusive | 1 |
+| 22 | `herdr tab close wZ:tD` / `wZ:tE`; `herdr pane list --workspace wZ` | test tabs removed; workspace shows only `wZ:p1` | 0 |
+| 23 | `resume_project` ui-reference / protocol-compat / env-audit with a background pane wake loop (empty `Enter` every 0.25–0.4 s during launch) | all three Leads started; ui-reference and protocol-compat bound as Herdr agents (`working`), env-audit needed a second resume | 0 |
+
+**Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
+fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`
+(`automatic-rename.sh`) on every command/prompt. Herdr's `agent start` requires the pane to be at
+its prompt with only the shell in the foreground; the hook's live `bash` children make it report
+`agent_pane_busy`. Herdsman's readiness marker (`pane run`) always triggers the hook immediately
+before `agent start`.
+
+**Remediation options:** A — stop sourcing the fish hook in `~/.config/fish/config.fish`
+(recommended, needs user approval; cosmetic loss of live per-command tab renaming); B — add a
+project-local `managed-lead` overlay granting Leads bash/edit/write so they execute directly
+(repo-only, reversible, changes the delegation model); C — update/reinstall the plugin (unproven)
+or report upstream. See `WORKLOG.md` Checkpoint 3.

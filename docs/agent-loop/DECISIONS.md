@@ -13,6 +13,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Pending — ADR + tests required (§8.1) | `docs/adr/ADR-005` |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
+| DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | Pending — user approval required | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -90,3 +91,8 @@ insufficient for a bounded session.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).
 - Env namespace: `RELAYABLE_*` vs REX-compatible aliases vs both (§8.1).
 - Whether any REX wire protocol is documented enough to attempt interoperability (currently assumed **not**).
+- **DEC-009 (approval gate):** which remediation for the Herdr agent-provisioning fault — A) stop
+  sourcing the automatic-rename fish hook in `~/.config/fish/config.fish` (recommended; cosmetic
+  loss of live tab renaming), B) project-local `managed-lead` overlay granting Leads bash/edit/write
+  so they execute directly (repo-only, changes the delegation model), or C) update/reinstall the
+  plugin. Diagnosis and A/B evidence: `WORKLOG.md` Checkpoint 3, `TESTS.md` rows 15–23.
