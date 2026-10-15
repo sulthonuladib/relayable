@@ -7,7 +7,8 @@
 - **Host / user:** `falcon` / `sulthonuladib`.
 - **Scope:** Rust toolchain + cargo/mise, GPUI crates.io/GitHub evidence, Linux + systemd user mode, display/host facts, GPUI system libraries.
 - **Excluded (other worker / out of scope):** Android CLI, `adb`, JDK, SDK, Gradle, emulator (worker B owns `docs/operations/android-toolchain.md`).
-- **Method:** strictly read-only. No installs, no `sudo`, no service enable/start/stop, no port/firewall or config changes, no builds, no `cargo fetch`/`build`/`search`/`add`, no writes outside this file. Commands were time-boxed; none hung. Exit codes captured immediately after each command. Raw output is trimmed only of obvious noise (long HTTP header dumps, `head`-truncated listings noted inline).
+- **Method:** strictly read-only. No installs, no `sudo`, no service enable/start/stop, no port/firewall or config changes, no builds, no `cargo fetch`/`build`/`search`/`add`, no writes outside this file. Commands were time-boxed; none hung. Exit codes were captured after each command; the seven HTTP probe rows whose exit codes were added in the 2026-10-15 remediation pass are re-captures (see remediation provenance below). Raw output is trimmed only of obvious noise (long HTTP header dumps, `head`-truncated listings noted inline).
+- **Remediation provenance (2026-10-15):** the seven A2 HTTP probe rows flagged as missing exit codes in the independent ENV-001 verification were re-captured in a follow-up read-only pass on 2026-10-15 by re-running the same GETs with the recorded descriptive `User-Agent`; HTTP statuses and bodies matched (byte counts 21647 / 2702 / 109692 / 5975; license endpoint `HTTP 404`). The two `| head -40` rows report the shell pipeline exit; `curl`'s own pipe status is annotated inline (it varies when `head` closes the pipe).
 
 ## Header block (raw)
 
@@ -290,6 +291,7 @@ version: 0.2.1       | created: 2025-10-14T04:50:51.658529Z | rust_version: None
 version: 0.2.1-test3 | created: 2025-10-14T04:07:15.753179Z | rust_version: None | license: Apache-2.0 | yanked: True
 version: 0.2.0       | created: 2025-10-09T04:28:33.248962Z | rust_version: None | license: Apache-2.0 | yanked: False
 version: 0.2.0-test.4| created: 2025-10-06T01:11:03.634185Z | rust_version: None | license: Apache-2.0 | yanked: True
+EXIT: 0            # HTTP 200; bytes and fields matched in the 2026-10-15 re-run
 ```
 
 ```text
@@ -305,6 +307,7 @@ created_at: 2025-10-22T03:56:29.835700Z
 yanked: False
 rust_version: None
 features: ['default', 'inspector', 'leak-detection', 'macos-blade', 'runtime_shaders', 'screen-capture', 'test-support', 'wayland', 'windows-manifest', 'x11']
+EXIT: 0            # HTTP 200; bytes and fields matched in the 2026-10-15 re-run
 ```
 
 Sparse index cross-check (same metadata, raw JSON lines):
@@ -319,6 +322,7 @@ version: 0.2.2       | yanked: False
 # from the tail of the 0.2.2 line:
 "features":{"default":["font-kit","wayland","x11","windows-manifest"],
             "test-support":[...], "x11":[...]}
+EXIT: 0            # HTTP 200; byte count (109692) and yank flags matched in the 2026-10-15 re-run
 ```
 
 ### `github.com/Glass-HQ/gpui` (the repo linked in full.md §20)
@@ -349,6 +353,7 @@ size: 7331
 license.spdx_id: None          # GitHub reports no detected license
 parent.full_name: None         # not a GitHub fork
 source.full_name: None
+EXIT: 0            # HTTP 200; bytes and fields matched in the 2026-10-15 re-run
 ```
 
 README (first lines) — shows the repository carries Zed's GPUI readme:
@@ -363,6 +368,7 @@ for Rust, designed to support a wide variety of applications.
 ...
 GPUI is still in active development as we work on the Zed code editor, and is still pre-1.0.
 There will often be breaking changes between versions. ...
+EXIT: 0            # pipeline (head); curl's own pipe status varies (0, or 23 when `head` closes the pipe)
 ```
 
 Crate manifest in that repo — declares Apache-2.0 and points back to Zed:
@@ -384,6 +390,7 @@ homepage = "https://gpui.rs"
 default = ["font-kit", "wayland", "x11", "windows-manifest"]
 wayland = [ "bitflags" ]
 x11 = ["scap?/x11"]
+EXIT: 0            # pipeline (head); curl's own pipe status varies (0, or 23 when `head` closes the pipe)
 ```
 
 Repository-root license file check (HTTP statuses):
@@ -396,6 +403,7 @@ LICENSE.md    -> HTTP 404
 COPYING       -> HTTP 404
 $ curl -s -o /dev/null -w '%{http_code}' ... https://api.github.com/repos/Glass-HQ/gpui/license
 HTTP 404
+EXIT: 0
 ```
 
 ### Local cache presence for `gpui`

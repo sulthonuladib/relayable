@@ -11,6 +11,18 @@ that could mutate user/system state (`android init`, `android sdk install/remove
 `android update`, `gradle`) were deliberately **not** run; only their `-h` text is recorded.
 `android sdk list` was also not run: it may fetch/update repository metadata (state write).
 
+**Remediation provenance (2026-10-15, ~23:18 +07):** the 36 rows flagged as missing exit codes
+in the independent ENV-001 verification were re-captured in a follow-up read-only pass on
+2026-10-15 by re-running the same commands. Outputs matched, with these divergences: the
+header `date -Is` (re-run `2026-10-15T23:18:07+07:00`) and `git rev-parse HEAD` (re-run
+`1b62c50a44dc8e3e3263dee05c01a0574a168b21`) are time/HEAD dependent, so the audit-time values
+are retained in the header block below with their re-captured exit status; B1.5's listings are
+now raw remediation-time output (the original was elided); and the B3 `find … | head -20`
+re-run emitted two stderr `Permission denied` lines that were absent from the original record
+while stdout stayed empty (`find` rc=1, `head` rc=0). No `android` CLI command was re-run, so
+no CLI bookkeeping timestamps changed (`last_update_check`/`last_upload_time` remain
+`2026-10-15 23:05:15 +07`).
+
 ## Header context (applies to every row below)
 
 | Field | Value |
@@ -30,24 +42,31 @@ Raw header commands:
 ```
 $ pwd
 /home/sulthonuladib/.herdr/worktrees/relayable/research-env-audit
+exit=0
 
 $ git status --short --branch
 ## research/env-audit
+exit=0
 
 $ git rev-parse HEAD
 3db73c2d28c6b7a98e424456768299e8d51b694d
+exit=0            # re-captured; re-run returned 1b62c50a44dc8e3e3263dee05c01a0574a168b21
 
 $ date -Is
 2026-10-15T23:05:14+07:00
+exit=0            # re-captured; re-run returned 2026-10-15T23:18:07+07:00
 
 $ hostname
 falcon
+exit=0
 
 $ uname -a
 Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+exit=0
 
 $ whoami
 sulthonuladib
+exit=0
 ```
 
 ---
@@ -69,12 +88,15 @@ exit=0
 
 $ ls -l /home/sulthonuladib/.local/bin/android
 -rwx--x--x 1 sulthonuladib sulthonuladib 5041744 Oct 14 20:41 /home/sulthonuladib/.local/bin/android
+exit=0
 
 $ readlink -f /home/sulthonuladib/.local/bin/android
 /home/sulthonuladib/.local/bin/android
+exit=0
 
 $ file "$(readlink -f /home/sulthonuladib/.local/bin/android)"
 /home/sulthonuladib/.local/bin/android: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.24, not stripped
+exit=0
 ```
 
 ### B1.2 `android -h` (full help text; this is how subcommands/flags were discovered)
@@ -245,19 +267,51 @@ modify those directories.
 
 ```
 $ ls -la ~/.android/cli
-drwxr-xr-x ... analytics
-drwxr-xr-x ... bundles
--rw-r--r-- ... last_update_check
-drwxr-xr-x ... skills
--rw-r--r-- ... tos_displayed
+total 8
+drwxr-xr-x 1 sulthonuladib sulthonuladib 104 Oct 14 20:44 .
+drwxr-x--- 1 sulthonuladib sulthonuladib  96 Oct 14 20:42 ..
+drwxr-xr-x 1 sulthonuladib sulthonuladib  46 Oct 14 20:42 analytics
+drwxr-xr-x 1 sulthonuladib sulthonuladib  88 Oct 14 20:42 bundles
+-rw-r--r-- 1 sulthonuladib sulthonuladib  10 Oct 15 23:05 last_update_check
+drwxr-xr-x 1 sulthonuladib sulthonuladib 426 Oct 14 20:44 skills
+-rw-r--r-- 1 sulthonuladib sulthonuladib   1 Oct 14 20:42 tos_displayed
+exit=0
 
 $ cat ~/.android/cli/skills/version
 1.0.16500706
+exit=0
 
 $ ls -la ~/.android/cli/skills
-... .agents, build-system, camera, cars, device-ai, devtools, identity,
-    jetpack-compose, media, navigation, performance, play, profilers,
-    security, system, testing, tv, wear, xr, README.md, LICENSE.txt
+total 24
+drwxr-xr-x 1 sulthonuladib sulthonuladib   426 Oct 14 20:44 .
+drwxr-xr-x 1 sulthonuladib sulthonuladib   104 Oct 14 20:44 ..
+drwxr-xr-x 1 sulthonuladib sulthonuladib    14 Oct 14 20:44 .agents
+drwxr-xr-x 1 sulthonuladib sulthonuladib     6 Oct 14 20:44 build-system
+drwxr-xr-x 1 sulthonuladib sulthonuladib    14 Oct 14 20:44 camera
+drwxr-xr-x 1 sulthonuladib sulthonuladib    56 Oct 14 20:44 cars
+drwxr-xr-x 1 sulthonuladib sulthonuladib    54 Oct 14 20:44 .claude-plugin
+drwxr-xr-x 1 sulthonuladib sulthonuladib    22 Oct 14 20:44 .codex-plugin
+-rw-r--r-- 1 sulthonuladib sulthonuladib    19 Oct 14 20:44 dac_skills.etag
+drwxr-xr-x 1 sulthonuladib sulthonuladib    82 Oct 14 20:44 device-ai
+drwxr-xr-x 1 sulthonuladib sulthonuladib    22 Oct 14 20:44 devtools
+drwxr-xr-x 1 sulthonuladib sulthonuladib    46 Oct 14 20:44 .github
+drwxr-xr-x 1 sulthonuladib sulthonuladib    66 Oct 14 20:44 identity
+drwxr-xr-x 1 sulthonuladib sulthonuladib   102 Oct 14 20:44 jetpack-compose
+-rw-r--r-- 1 sulthonuladib sulthonuladib 11357 Oct 14 20:44 LICENSE.txt
+drwxr-xr-x 1 sulthonuladib sulthonuladib    46 Oct 14 20:44 media
+drwxr-xr-x 1 sulthonuladib sulthonuladib    56 Oct 14 20:44 navigation
+drwxr-xr-x 1 sulthonuladib sulthonuladib    22 Oct 14 20:44 performance
+drwxr-xr-x 1 sulthonuladib sulthonuladib   156 Oct 14 20:44 play
+drwxr-xr-x 1 sulthonuladib sulthonuladib    32 Oct 14 20:44 profilers
+-rw-r--r-- 1 sulthonuladib sulthonuladib  2994 Oct 14 20:44 README.md
+drwxr-xr-x 1 sulthonuladib sulthonuladib   102 Oct 14 20:44 security
+drwxr-xr-x 1 sulthonuladib sulthonuladib    72 Oct 14 20:44 system
+drwxr-xr-x 1 sulthonuladib sulthonuladib    26 Oct 14 20:44 testing
+drwxr-xr-x 1 sulthonuladib sulthonuladib    64 Oct 14 20:44 tv
+-rw-r--r-- 1 sulthonuladib sulthonuladib    12 Oct 14 20:44 version
+drwxr-xr-x 1 sulthonuladib sulthonuladib    54 Oct 14 20:44 wear
+drwxr-xr-x 1 sulthonuladib sulthonuladib    88 Oct 14 20:44 xr
+exit=0
 ```
 
 Bundled CLI runtime (not the project JDK): `~/.android/cli/bundles/7fef4dcca7bb46abf2b7ed3c99fa94f3f7369afd/`
@@ -272,6 +326,7 @@ Captured 2026-10-15 ~23:06 +07 on `falcon`.
 ```
 $ pgrep -a adb || echo none
 51405 adb -L tcp:5037 fork-server server --reply-fd 4
+exit=0            # pgrep matched, rc=0
 
 $ adb version
 Android Debug Bridge version 1.0.41
@@ -286,6 +341,7 @@ exit=0
 
 $ pgrep -a adb || echo none
 51405 adb -L tcp:5037 fork-server server --reply-fd 4
+exit=0            # pgrep matched, rc=0
 ```
 
 **adb server side effect:** none from this audit. The server (PID 51405) was already running
@@ -299,8 +355,10 @@ exit=0
 
 $ cat ~/.android/adb.5037
 /usr/bin/adb
-mtime=2026-10-14 18:27:38 +0700
+exit=0
 ```
+
+(`~/.android/adb.5037` mtime: `2026-10-14 18:27:38 +0700`.)
 
 The same PID existed before and after `adb version` / `adb devices -l`; the audit did not
 start, stop, or reconfigure it. No physical devices or emulators are attached
@@ -316,6 +374,7 @@ Captured 2026-10-15 ~23:06–23:07 +07 on `falcon`.
 ```
 $ echo "ANDROID_HOME=[$ANDROID_HOME] ANDROID_SDK_ROOT=[$ANDROID_SDK_ROOT] XDG_DATA_HOME=[$XDG_DATA_HOME]"
 ANDROID_HOME=[] ANDROID_SDK_ROOT=[] XDG_DATA_HOME=[/home/sulthonuladib/.local/share]
+exit=0
 
 $ ls -la /home/sulthonuladib/Android/Sdk
 ls: cannot access '/home/sulthonuladib/Android/Sdk': No such file or directory
@@ -331,10 +390,13 @@ exit=2
 
 $ command -v sdkmanager || echo "sdkmanager: not on PATH"
 sdkmanager: not on PATH
+exit=0            # chain; command -v rc=1, fallback echo rc=0
 $ command -v avdmanager || echo "avdmanager: not on PATH"
 avdmanager: not on PATH
+exit=0            # chain; command -v rc=1, fallback echo rc=0
 $ command -v emulator || echo "emulator: not on PATH"
 emulator: not on PATH
+exit=0            # chain; command -v rc=1, fallback echo rc=0
 
 $ find /home/sulthonuladib/Android/Sdk -maxdepth 3 \( -name sdkmanager -o -name avdmanager \) -print
 (no output)
@@ -345,13 +407,16 @@ ls: cannot access '/home/sulthonuladib/Android/Sdk/cmdline-tools': No such file 
 exit=2
 
 $ timeout 30 find /home/sulthonuladib /opt /usr/local -maxdepth 6 -name 'sdkmanager*' -print | head -20
-(no output)
+find: ‘/home/sulthonuladib/.docker-data/postgresql’: Permission denied
+find: ‘/opt/containerd’: Permission denied
+exit=0            # pipeline (head); PIPESTATUS: find=1 head=0; no stdout matches
 
 $ for d in /home/sulthonuladib/Android /usr/lib/android-sdk /usr/share/android-sdk /home/sulthonuladib/.local/share/android; do ls -la "$d"; done
 ls: cannot access '/home/sulthonuladib/Android': No such file or directory
 ls: cannot access '/usr/lib/android-sdk': No such file or directory
 ls: cannot access '/usr/share/android-sdk': No such file or directory
 ls: cannot access '/home/sulthonuladib/.local/share/android': No such file or directory
+exit=2
 ```
 
 **Result:** no Android SDK is installed on this host at the CLI-reported path (`android info`)
@@ -373,6 +438,7 @@ Captured 2026-10-15 ~23:07 +07 on `falcon`.
 ```
 $ command -v emulator || echo "emulator: not on PATH"
 emulator: not on PATH
+exit=0            # chain; command -v rc=1, fallback echo rc=0
 
 $ ls -la ~/.android/avd
 ls: cannot access '/home/sulthonuladib/.android/avd': No such file or directory
@@ -401,22 +467,28 @@ exit=0
 
 $ test -r /dev/kvm && echo "readable" || echo "NOT readable"
 readable
+exit=0
 $ test -w /dev/kvm && echo "writable" || echo "NOT writable"
 writable
+exit=0
 
 $ id
 uid=1000(sulthonuladib) gid=1000(sulthonuladib) groups=1000(sulthonuladib),966(docker),998(wheel)
+exit=0
 
 $ id | grep -o kvm || echo "kvm group: no"
 kvm group: no
+exit=0            # chain; grep rc=1, fallback echo rc=0
 
 $ grep -m1 -oE 'vmx|svm' /proc/cpuinfo || echo "no vmx/svm found"
 vmx
+exit=0
 
 $ lsmod | grep kvm
 kvm_intel             532480  0
 kvm                  1511424  1 kvm_intel
 irqbypass              16384  1 kvm
+exit=0
 ```
 
 **Result:** `/dev/kvm` exists and is world-readable/-writable (`crw-rw-rw-`), so the current
@@ -439,6 +511,7 @@ exit=0
 
 $ echo "JAVA_HOME=[$JAVA_HOME]"
 JAVA_HOME=[/home/sulthonuladib/.local/share/mise/installs/java/temurin-25.0.4+101.0.LTS]
+exit=0
 
 $ command -v java
 /home/sulthonuladib/.local/share/mise/installs/java/temurin-25/bin/java
@@ -512,12 +585,15 @@ $ ls -la gradlew gradlew.bat gradle/wrapper
 ls: cannot access 'gradlew': No such file or directory
 ls: cannot access 'gradlew.bat': No such file or directory
 ls: cannot access 'gradle/wrapper': No such file or directory
+exit=2
 
 $ find . -maxdepth 4 -name 'gradle-wrapper*' -not -path './.git/*'
 (no output)
+exit=0
 
 $ ls -la apps
 ls: cannot access 'apps': No such file or directory
+exit=2
 ```
 
 **Result (matches `AGENTS.md`):** system Gradle is absent, no mise Gradle is installed, and
@@ -608,6 +684,7 @@ Captured 2026-10-15 ~23:07 +07 on `falcon`.
 ```
 $ command -v studio || echo "studio: not on PATH"
 studio: not on PATH
+exit=0            # chain; command -v rc=1, fallback echo rc=0
 
 $ for d in /opt/android-studio /usr/local/android-studio "$HOME/android-studio" \
            "$HOME/.local/share/JetBrains" /opt/google/android-studio /snap/android-studio; do ls -d "$d"; done
@@ -617,6 +694,7 @@ ls: cannot access '/home/sulthonuladib/android-studio': No such file or director
 ls: cannot access '/home/sulthonuladib/.local/share/JetBrains': No such file or directory
 ls: cannot access '/opt/google/android-studio': No such file or directory
 ls: cannot access '/snap/android-studio': No such file or directory
+exit=2
 
 $ for c in adb studio emulator sdkmanager avdmanager gradle java; do printf '%-12s: ' "$c"; command -v "$c" || echo "not found"; done
 adb         : /usr/bin/adb
@@ -626,6 +704,7 @@ sdkmanager  : not found
 avdmanager  : not found
 gradle      : not found
 java        : /home/sulthonuladib/.local/share/mise/installs/java/temurin-25/bin/java
+exit=0            # chain; last iteration (java) found, command -v rc=0
 ```
 
 **Result:** Android Studio is not installed in any common location and is not on `PATH`. Per
