@@ -30,7 +30,7 @@ the evidence is integrated.
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-004 | Fix `design-tokens.md:210` mixed attribution (29 px palette rows) + queued calibration items from `open-questions.md` | REF-003 | branch TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
-| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | TBD | BLOCKED — evidence integrated on `master` `a1f1719`; matrix repair needs one writer pass |
+| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | `docs/doc-002-matrix-repair` | IN_PROGRESS (2026-10-15) — writer pass launched on fresh branch; evidence integrated on `master` `a1f1719` |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
 | INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
 | INT-002 | Review and integrate Wave 2 branches into `master` | DOC-002, ADR-001, ADR-002, ADR-003, TERM-001 | Manager | DONE for `term-001` `78b83f2` + `adr-001-002` `31bed30` |
@@ -41,8 +41,8 @@ the evidence is integrated.
 | ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | Lead | BACKLOG |
 | UI-001 | GPUI minimal Linux window build/run proof | ENV-001, ADR-003 | Lead/UI | BACKLOG |
 | TERM-001 | Terminal engine candidate prototype (TUI/input/resize spike) | ENV-001 | research/term-001-adr-003 | DONE phase 1 — integrated `78b83f2` (PTY/SIGWINCH/byte-stream/RSS harness) |
-| TERM-002 | Engine-level spike phase 2: per-engine adapters validate ADR-003's provisional pin | TERM-001 | TBD | READY |
-| REVIEW-001 | Independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike (`2e41da4`) before CORE-001 builds on them — no independent review was possible during wind-down | ADR-001, ADR-002, ADR-003 | TBD | READY |
+| TERM-002 | Engine-level spike phase 2: per-engine adapters validate ADR-003's provisional pin | TERM-001 | `spike/term-002-engine-validation` | IN_PROGRESS (2026-10-15) — launched; owned path `spikes/terminal-engine-phase2/**` |
+| REVIEW-001 | Independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike (`2e41da4`) before CORE-001 builds on them — no independent review was possible during wind-down | ADR-001, ADR-002, ADR-003 | `review/review-001-adr-pass` | IN_PROGRESS (2026-10-15) — launched; report at `docs/reviews/REVIEW-001-adr-review.md` |
 | AND-001 | Android project scaffold checks + `scripts/android-check.sh` (toolchain inventory delivered by ENV-001) | ENV-001 | Build/Test | DEFERRED (DEC-010) — no Android work in current scope |
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | Lead | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |

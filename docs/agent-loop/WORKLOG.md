@@ -77,6 +77,42 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 12 — Post-Android-deferral: REVIEW-001 + DOC-002 repair + TERM-002 launched (2026-10-15)
+
+**Objective:** resume the ordered Linux work after the DEC-010 Android deferral, with REVIEW-001
+before CORE-001 per `NEXT.md`. Three independent, disjoint-path projects launched from `master`
+`a1091e5` (verified clean and level with `origin/master`).
+
+**Commands run and observed results**
+
+| # | Command / action | Observed result | Exit |
+|---|---|---|---|
+| 71 | `git status --short --branch`; `git rev-parse HEAD` | `## master...origin/master` clean; `a1091e58f32d363ceb2614ab4915329b5de6a869` | 0 |
+| 72 | `git worktree list`; `git branch -a` | only the primary checkout; 5 preserved research branches + `origin/master` | 0 |
+| 73 | `command -v protoc`; `protoc --version` | `/usr/bin/protoc` → `libprotoc 36.1` (symlink to `protoc-36.1.0`) | 0 |
+| 74 | `cargo --version`; `rustc --version` | cargo `1.98.1`; rustc `1.98.1` | 0 |
+| 75 | `delegate_project` REVIEW-001 (base `master`) | `ok:true`; session `34ddd30b-ba3b-4c11-94aa-2c0b1f1ceeb3`; workspace `w15`; branch `review/review-001-adr-pass` | 0 |
+| 76 | `delegate_project` DOC-002 writer pass | `ok:true`; session `6d07f391-a261-4d5e-97d6-efefbc0c2330`; workspace `w16`; branch `docs/doc-002-matrix-repair` | 0 |
+| 77 | `delegate_project` TERM-002 | `ok:true`; session `549ef32a-fef9-4919-95e8-352a3ff02975`; workspace `w17`; branch `spike/term-002-engine-validation` | 0 |
+| 78 | `list_staff` | all three Leads active (`runtime_state` done/working); w15 2 Agents, w16 1 Agent, w17 working directly; no `agent_start` failures | observation |
+
+**Note on `protoc`:** DEC-009's remediation holds — all three `delegate_project` calls succeeded on the
+first attempt, no `agent_pane_busy`. Also, `/usr/bin/protoc` = `libprotoc 36.1` is present, which
+addresses ADR-002's "`protoc` presence on this host is unverified" build-time prerequisite (the
+reviewer is asked to confirm it independently).
+
+**Owned paths (one writer each, disjoint):** REVIEW-001 → `docs/reviews/**` (read-only everywhere
+else); DOC-002 → `docs/compatibility/reference-behavior-matrix.md` only; TERM-002 →
+`spikes/terminal-engine-phase2/**` only (standalone, not a workspace, phase-1 spike untouched).
+
+**CORE-001 is held** until REVIEW-001 findings are recorded and any blocking issues are resolved, per
+`NEXT.md`/`TASKS.md`.
+
+**Next tasks:** await the three Lead reports; review diffs; integrate DOC-002 and TERM-002; decide
+ADR-001/002/003 status (Proposed → Accepted) using REVIEW-001; then launch CORE-001.
+
+---
+
 ## Checkpoint 11 — Scope: Android client deferred (DEC-010, user direction) (2026-10-15)
 
 **Objective:** the user directed that Android apps are not needed for now and that the remaining
