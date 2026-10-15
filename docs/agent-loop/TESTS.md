@@ -59,6 +59,8 @@ resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
 | 27 | Restart bounded stopgap for the full wave: stop old daemon via `/tmp/relayable-wake-daemon.stop`, then `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 wX wY wZ` | old daemon exited; new daemon pid 2781970 running (expires ~00:05) | 0 |
 | 28 | Fresh supervision snapshot after the retry window | all three Leads have 2 active Agents each (`ui-reference` 2, `protocol-compat` 2, `env-audit` 2); the Leads' earlier "fleet-wide blocked" escalations are superseded by this result | observation |
 | 29 | `herdr pane list` after rollbacks (earlier check) | no leaked panes: only the four base panes and the transient agent panes existed; Herdsman rollback cleans up failed attempts | 0 |
+| 30 | `ui-reference` Lead report after the retry instruction | wave 1 Agents started on the first attempt with no rollback: `ref-video` (session `01a1404e-6f78-704c-9851-9401bd0ee55d`) → `docs/research/video-review.md`, `gorex` (session `01a1404e-7db4-7182-826f-8f8615acf878`) → `docs/research/gorex-review.md`; wave 2 (`ui-catalog.md`, `open-questions.md`) queued | observation |
+| 31 | `message_staff` extension notice to all three Leads (window to ~00:05) | all returned `ok: true` (ids `8833d7ec…`, `1fb42be9…`, `4dd29d78…`) | 0 |
 
 **Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
 fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`

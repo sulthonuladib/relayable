@@ -105,8 +105,13 @@ pre-retry state and are superseded by this result; their "pane leak" caution is 
 
 **Window extended:** the 30-minute instance was replaced with a fresh 3600 s instance (pid 2781970,
 stop file unchanged, expires ~00:05) so the planned workers → writer → reviewer waves are covered.
-Stop it with `touch /tmp/relayable-wake-daemon.stop` once the permanent fix is applied or the wave
-settles.
+All three Leads were notified of the extension.
+
+**Wave 1 started:** `ui-reference`'s two writer Agents started on the first attempt with no rollback —
+`ref-video` (session `01a1404e-6f78-704c-9851-9401bd0ee55d`) and `gorex` (session
+`01a1404e-7db4-7182-826f-8f8615acf878`). `env-audit` has its two audit Agents running; `protocol-compat`
+has two Agents running. Stop the daemon with `touch /tmp/relayable-wake-daemon.stop` once the
+permanent fix is applied or the wave settles.
 
 **Next:** collect the Leads' retry results; if agents start, review/integrate Wave 1 (INT-001). If
 `agent_start` still fails, stop the daemon (`touch /tmp/relayable-wake-daemon.stop`) and report the
