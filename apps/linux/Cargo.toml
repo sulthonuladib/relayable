@@ -28,7 +28,27 @@ path = "src/lib.rs"
 name = "relayable"
 path = "src/main.rs"
 
+# GPUI-free live-proof binary (UI-002 stage A): connects to the real server,
+# creates a session, attaches a writer, drives a `TerminalModel` and proves a
+# resize via `stty size`. Kept out of `src/main.rs` so it never links GPUI.
+[[bin]]
+name = "live-probe"
+path = "src/bin/live-probe.rs"
+
 [dependencies]
 gpui = "=0.2.2"
+
+# Core crates consumed as PATH dependencies into the repository's main
+# workspace. `apps/linux` keeps its own `Cargo.lock`/`[workspace]`, so these
+# additions cannot change the core crates or the root workspace's resolution.
+relayable-client = { path = "../../crates/relayable-client" }
+relayable-model = { path = "../../crates/relayable-model" }
+relayable-protocol = { path = "../../crates/relayable-protocol", features = ["transport-unix"] }
+
+# ADR-003 terminal-engine pins (exact). Both are present in the local registry
+# cache; `ansi` is required to name `vte::ansi` directly (alacritty_terminal
+# already enables it, so this adds no new crates).
+alacritty_terminal = "=0.26.0"
+vte = { version = "=0.15.0", features = ["ansi"] }
 
 [workspace]

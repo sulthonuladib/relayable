@@ -1,0 +1,74 @@
+# UI-002 stage A — live probe transcript (raw)
+
+Host: Linux `falcon` x86_64; rustc/cargo 1.98.1; single monitor 1920x1080 @ scale 1.
+Date (UTC): 2026-10-15T22:00:49Z
+
+## Commands and exit codes
+
+```
+$ cd <repo> && cargo build -p relayable-server --locked        # root workspace
+exit 0
+$ cd apps/linux && cargo build --bin live-probe --locked
+exit 0
+$ # scratch server only, never the user server:
+$ RELAYABLE_SERVER=/tmp/relayable-ui002-probe/relayable.sock SHELL=/bin/bash \
+      ./target/debug/relayable-server run 2>/tmp/ui002-server.log &
+$ RELAYABLE_SERVER=/tmp/relayable-ui002-probe/relayable.sock timeout 60 \
+      ./apps/linux/target/debug/live-probe
+PROBE_EXIT=0
+```
+
+## Raw run (server foreground, stderr to /tmp/ui002-server.log)
+
+```
+$ cd /home/sulthonuladib/.herdr/worktrees/relayable/ui-ui-002-reference-workspace
+$ RELAYABLE_SERVER=/tmp/relayable-ui002-probe/relayable.sock SHELL=/bin/bash ./target/debug/relayable-server run 2>/tmp/ui002-server.log &
+server pid=4089964
+socket ready: /tmp/relayable-ui002-probe/relayable.sock
+$ RELAYABLE_SERVER=/tmp/relayable-ui002-probe/relayable.sock timeout 60 ./apps/linux/target/debug/live-probe
+live-probe: socket = /tmp/relayable-ui002-probe/relayable.sock
+live-probe: connected
+live-probe: created block block:01a14194-e9a9-73b5-be07-5847a1c64fad
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: received output bytes = 230
+live-probe: stream_id = 1
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: rendered screen (120x40), first 24 rows:
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+PROBE_EXIT=0
+--- server stderr (/tmp/ui002-server.log) ---
+relayable-server: listening on /tmp/relayable-ui002-probe/relayable.sock (protocol 1.0)
+--- stopping server ---
+server wait exit=0
+socket removed: yes
+```
+
+## Observed proof
+
+- command output `RELAYABLE-PROBE-OK` observed; initial `stty size` = `24 80`;
+- `terminal.resize` to cols=120 rows=40 accepted: `TerminalResizeAccepted = stream_id=1 cols=120 rows=40`;
+- child `stty size` after the resize = `40 120`, rendered on the live screen.

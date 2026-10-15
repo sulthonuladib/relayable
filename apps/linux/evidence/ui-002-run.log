@@ -1,0 +1,1048 @@
+++ date -u +%FT%TZ
++ echo date_utc=2026-10-15T23:20:55Z
+date_utc=2026-10-15T23:20:55Z
++ echo socket=/tmp/relayable-ui002-ui/relayable.sock
+socket=/tmp/relayable-ui002-ui/relayable.sock
+++ printf 'WAYLAND_DISPLAY=%s DISPLAY=%s' wayland-1 :0
++ echo 'display=WAYLAND_DISPLAY=wayland-1 DISPLAY=:0'
+display=WAYLAND_DISPLAY=wayland-1 DISPLAY=:0
++ cat
++ chmod +x /tmp/relayable-ui002-ui/osc.sh
++ cat
++ chmod +x /tmp/relayable-ui002-ui/size.sh
++ launch_app baseline live 1099 706
++ local tag=baseline mode=live w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' live = mock ']'
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=71086
++ echo 'app_pid=71086 tag=baseline mode=live'
+app_pid=71086 tag=baseline mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ echo '--- app log /tmp/relayable-ui002-ui/baseline.log ---'
+--- app log /tmp/relayable-ui002-ui/baseline.log ---
++ cat /tmp/relayable-ui002-ui/baseline.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141de-6531-7499-87f1-7416efe1c99d block=block:01a141de-6531-7499-87f1-7418df67b63e
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ capture workspace
++ local tag=workspace geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=workspace geometry=10,40 1099x706'
+capture tag=workspace geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-workspace.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-workspace.png
+evidence/ui-002-workspace.png PNG 1099x706 1099x706+0+0 8-bit sRGB 76789B 0.000u 0:00.000
++ grim evidence/ui-002-workspace-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-workspace-fullscreen.png
+evidence/ui-002-workspace-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 243060B 0.000u 0:00.000
++ stop_app
++ kill -0 71086
++ kill -TERM 71086
++ echo kill_exit=0
+kill_exit=0
++ wait 71086
++ echo wait_exit=143
+wait_exit=143
++ launch_app tabs live 1099 706
++ local tag=tabs mode=live w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' live = mock ']'
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=71612
++ echo 'app_pid=71612 tag=tabs mode=live'
+app_pid=71612 tag=tabs mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ echo '--- app log /tmp/relayable-ui002-ui/tabs.log ---'
+--- app log /tmp/relayable-ui002-ui/tabs.log ---
++ cat /tmp/relayable-ui002-ui/tabs.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141de-7ae1-7182-aa72-eb704d8a431c block=block:01a141de-7ae1-7182-aa72-eb727a07d8cd
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype /tmp/relayable-ui002-ui/osc.sh
++ echo wtype_osc_exit=0
+wtype_osc_exit=0
++ wtype -k Return
++ echo wtype_enter_exit=0
+wtype_enter_exit=0
++ sleep 1.5
++ capture tabs-one-osc
++ local tag=tabs-one-osc geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=tabs-one-osc geometry=10,40 1099x706'
+capture tag=tabs-one-osc geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-tabs-one-osc.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-tabs-one-osc.png
+evidence/ui-002-tabs-one-osc.png PNG 1099x706 1099x706+0+0 8-bit sRGB 84541B 0.000u 0:00.000
++ grim evidence/ui-002-tabs-one-osc-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-tabs-one-osc-fullscreen.png
+evidence/ui-002-tabs-one-osc-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 250583B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k n
++ echo wtype_newtab1_exit=0
+wtype_newtab1_exit=0
++ sleep 2
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k n
++ echo wtype_newtab2_exit=0
+wtype_newtab2_exit=0
++ sleep 2
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -k 2
++ echo wtype_tab2_exit=0
+wtype_tab2_exit=0
++ sleep 1.5
++ capture tabs
++ local tag=tabs geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=tabs geometry=10,40 1099x706'
+capture tag=tabs geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-tabs.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-tabs.png
+evidence/ui-002-tabs.png PNG 1099x706 1099x706+0+0 8-bit sRGB 79556B 0.000u 0:00.000
++ grim evidence/ui-002-tabs-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-tabs-fullscreen.png
+evidence/ui-002-tabs-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 245920B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -k 1
++ echo wtype_tab1_exit=0
+wtype_tab1_exit=0
++ sleep 1.5
++ capture switch-tab1
++ local tag=switch-tab1 geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=switch-tab1 geometry=10,40 1099x706'
+capture tag=switch-tab1 geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-switch-tab1.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-switch-tab1.png
+evidence/ui-002-switch-tab1.png PNG 1099x706 1099x706+0+0 8-bit sRGB 87306B 0.000u 0:00.000
++ grim evidence/ui-002-switch-tab1-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-switch-tab1-fullscreen.png
+evidence/ui-002-switch-tab1-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 253196B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -k 3
++ echo wtype_tab3_exit=0
+wtype_tab3_exit=0
++ sleep 1.5
++ capture switch-tab3
++ local tag=switch-tab3 geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=switch-tab3 geometry=10,40 1099x706'
+capture tag=switch-tab3 geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-switch-tab3.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-switch-tab3.png
+evidence/ui-002-switch-tab3.png PNG 1099x706 1099x706+0+0 8-bit sRGB 79749B 0.000u 0:00.000
++ grim evidence/ui-002-switch-tab3-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-switch-tab3-fullscreen.png
+evidence/ui-002-switch-tab3-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 246146B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k e
++ echo wtype_split_exit=0
+wtype_split_exit=0
++ sleep 3
++ capture split
++ local tag=split geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=split geometry=10,40 1099x706'
+capture tag=split geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-split.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-split.png
+evidence/ui-002-split.png PNG 1099x706 1099x706+0+0 8-bit sRGB 86805B 0.000u 0:00.000
++ grim evidence/ui-002-split-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-split-fullscreen.png
+evidence/ui-002-split-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 251330B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k s
++ echo wtype_picker_exit=0
+wtype_picker_exit=0
++ sleep 1.5
++ capture picker
++ local tag=picker geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=picker geometry=10,40 1099x706'
+capture tag=picker geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-picker.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-picker.png
+evidence/ui-002-picker.png PNG 1099x706 1099x706+0+0 8-bit sRGB 114707B 0.000u 0:00.000
++ grim evidence/ui-002-picker-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-picker-fullscreen.png
+evidence/ui-002-picker-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 278634B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -k Escape
++ echo wtype_picker_escape_exit=0
+wtype_picker_escape_exit=0
++ sleep 0.5
++ echo '--- app log after interaction ---'
+--- app log after interaction ---
++ cat /tmp/relayable-ui002-ui/tabs.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141de-7ae1-7182-aa72-eb704d8a431c block=block:01a141de-7ae1-7182-aa72-eb727a07d8cd
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
+relayable-ui: output stream_id=1 bytes=2 total=64
+relayable-ui: output stream_id=1 bytes=1 total=65
+relayable-ui: output stream_id=1 bytes=1 total=66
+relayable-ui: output stream_id=1 bytes=1 total=67
+relayable-ui: output stream_id=1 bytes=1 total=68
+relayable-ui: output stream_id=1 bytes=2 total=70
+relayable-ui: output stream_id=1 bytes=1 total=71
+relayable-ui: output stream_id=1 bytes=1 total=72
+relayable-ui: output stream_id=1 bytes=1 total=73
+relayable-ui: output stream_id=1 bytes=1 total=74
+relayable-ui: output stream_id=1 bytes=1 total=75
+relayable-ui: output stream_id=1 bytes=1 total=76
+relayable-ui: output stream_id=1 bytes=1 total=77
+relayable-ui: output stream_id=1 bytes=1 total=78
+relayable-ui: output stream_id=1 bytes=1 total=79
+relayable-ui: output stream_id=1 bytes=2 total=81
+relayable-ui: output stream_id=1 bytes=1 total=82
+relayable-ui: output stream_id=1 bytes=1 total=83
+relayable-ui: output stream_id=1 bytes=1 total=84
+relayable-ui: output stream_id=1 bytes=3 total=87
+relayable-ui: output stream_id=1 bytes=1 total=88
+relayable-ui: output stream_id=1 bytes=1 total=89
+relayable-ui: output stream_id=1 bytes=1 total=90
+relayable-ui: output stream_id=1 bytes=1 total=91
+relayable-ui: output stream_id=1 bytes=1 total=92
+relayable-ui: output stream_id=1 bytes=11 total=103
+relayable-ui: output stream_id=1 bytes=56 total=159
+relayable-ui: pane title/cwd program=Some("Relayable Demo") cwd=Some("/home/sulthonuladib")
+relayable-ui: output stream_id=1 bytes=8 total=167
+relayable-ui: output stream_id=1 bytes=20 total=187
+relayable-ui: output stream_id=1 bytes=27 total=214
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=Some("/home/sulthonuladib")
+relayable-ui: output stream_id=1 bytes=67 total=281
+relayable-ui: session.created session=session:01a141de-97ba-72fa-9a03-f1c10690b497 block=block:01a141de-97ba-72fa-9a03-f1c3ab1ac1a8
+relayable-ui: block.attached stream_id=2 cols=80 rows=24 snapshot_bytes=0
+relayable-ui: output stream_id=2 bytes=27 total=27
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=8 total=35
+relayable-ui: output stream_id=2 bytes=59 total=94
+relayable-ui: sending terminal.resize stream_id=2 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=2 cols=140 rows=36
+relayable-ui: output stream_id=2 bytes=62 total=156
+relayable-ui: session.created session=session:01a141de-a112-7626-a195-bc626ea97393 block=block:01a141de-a112-7626-a195-bc6477b5d0f5
+relayable-ui: block.attached stream_id=3 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=3 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=3 cols=140 rows=36
+relayable-ui: output stream_id=3 bytes=62 total=62
+relayable-ui: session.created session=session:01a141de-c2c9-7677-a046-b2a0b092a389 block=block:01a141de-c2c9-7677-a046-b2a2037ae85b
+relayable-ui: sending terminal.resize stream_id=3 cols=69 rows=35 pane_px=539x619
+relayable-ui: block.attached stream_id=4 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: terminal.resize accepted stream_id=3 cols=69 rows=35
+relayable-ui: output stream_id=3 bytes=62 total=124
+relayable-ui: sending terminal.resize stream_id=4 cols=69 rows=35 pane_px=539x619
+relayable-ui: terminal.resize accepted stream_id=4 cols=69 rows=35
+relayable-ui: output stream_id=4 bytes=62 total=62
++ echo '--- end ---'
+--- end ---
++ stop_app
++ kill -0 71612
++ kill -TERM 71612
++ echo kill_exit=0
+kill_exit=0
++ wait 71612
++ echo wait_exit=143
+wait_exit=143
++ launch_app npanes live 1099 706
++ local tag=npanes mode=live w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' live = mock ']'
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=73649
++ echo 'app_pid=73649 tag=npanes mode=live'
+app_pid=73649 tag=npanes mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ echo '--- app log /tmp/relayable-ui002-ui/npanes.log ---'
+--- app log /tmp/relayable-ui002-ui/npanes.log ---
++ cat /tmp/relayable-ui002-ui/npanes.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141de-dd31-74d9-bb40-974d4efe6934 block=block:01a141de-dd31-74d9-bb40-974f9b293995
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype 'echo PANE-ONE-MARKER'
++ echo wtype_pane1_exit=0
+wtype_pane1_exit=0
++ wtype -k Return
++ echo wtype_pane1_enter_exit=0
+wtype_pane1_enter_exit=0
++ sleep 1
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k e
++ echo wtype_npanes_split1_exit=0
+wtype_npanes_split1_exit=0
++ sleep 3
++ wtype 'echo PANE-TWO-MARKER'
++ echo wtype_pane2_exit=0
+wtype_pane2_exit=0
++ wtype -k Return
++ echo wtype_pane2_enter_exit=0
+wtype_pane2_enter_exit=0
++ sleep 1
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k e
++ echo wtype_npanes_split2_exit=0
+wtype_npanes_split2_exit=0
++ sleep 3
++ wtype 'echo PANE-THREE-MARKER'
++ echo wtype_pane3_exit=0
+wtype_pane3_exit=0
++ wtype -k Return
++ echo wtype_pane3_enter_exit=0
+wtype_pane3_enter_exit=0
++ sleep 1.5
++ capture npanes
++ local tag=npanes geom
+++ geometry_for
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
+++ hyprctl clients -j
++ geom='10,40 1099x706'
++ echo 'capture tag=npanes geometry=10,40 1099x706'
+capture tag=npanes geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-npanes.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-npanes.png
+evidence/ui-002-npanes.png PNG 1099x706 1099x706+0+0 8-bit sRGB 96028B 0.000u 0:00.000
++ grim evidence/ui-002-npanes-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-npanes-fullscreen.png
+evidence/ui-002-npanes-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 259058B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k Left
++ echo wtype_focus_prev1_exit=0
+wtype_focus_prev1_exit=0
++ wtype -M ctrl -M shift -k Left
++ echo wtype_focus_prev2_exit=0
+wtype_focus_prev2_exit=0
++ sleep 0.5
++ wtype 'echo PANE-ONE-SECOND'
++ echo wtype_pane1b_exit=0
+wtype_pane1b_exit=0
++ wtype -k Return
++ echo wtype_pane1b_enter_exit=0
+wtype_pane1b_enter_exit=0
++ sleep 1.5
++ capture npanes-live
++ local tag=npanes-live geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=npanes-live geometry=10,40 1099x706'
+capture tag=npanes-live geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-npanes-live.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-npanes-live.png
+evidence/ui-002-npanes-live.png PNG 1099x706 1099x706+0+0 8-bit sRGB 100870B 0.000u 0:00.000
++ grim evidence/ui-002-npanes-live-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-npanes-live-fullscreen.png
+evidence/ui-002-npanes-live-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 265015B 0.000u 0:00.000
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype -M ctrl -M shift -k w
++ echo wtype_close_exit=0
+wtype_close_exit=0
++ sleep 1.5
++ capture npanes-closed
++ local tag=npanes-closed geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=npanes-closed geometry=10,40 1099x706'
+capture tag=npanes-closed geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-npanes-closed.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-npanes-closed.png
+evidence/ui-002-npanes-closed.png PNG 1099x706 1099x706+0+0 8-bit sRGB 93692B 0.000u 0:00.000
++ grim evidence/ui-002-npanes-closed-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-npanes-closed-fullscreen.png
+evidence/ui-002-npanes-closed-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 257045B 0.000u 0:00.000
++ echo '--- app log after npanes ---'
+--- app log after npanes ---
++ cat /tmp/relayable-ui002-ui/npanes.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141de-dd31-74d9-bb40-974d4efe6934 block=block:01a141de-dd31-74d9-bb40-974f9b293995
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
+relayable-ui: output stream_id=1 bytes=2 total=64
+relayable-ui: output stream_id=1 bytes=1 total=65
+relayable-ui: output stream_id=1 bytes=1 total=66
+relayable-ui: output stream_id=1 bytes=1 total=67
+relayable-ui: output stream_id=1 bytes=2 total=69
+relayable-ui: output stream_id=1 bytes=2 total=71
+relayable-ui: output stream_id=1 bytes=1 total=72
+relayable-ui: output stream_id=1 bytes=3 total=75
+relayable-ui: output stream_id=1 bytes=2 total=77
+relayable-ui: output stream_id=1 bytes=1 total=78
+relayable-ui: output stream_id=1 bytes=15 total=93
+relayable-ui: output stream_id=1 bytes=17 total=110
+relayable-ui: output stream_id=1 bytes=27 total=137
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=67 total=204
+relayable-ui: session.created session=session:01a141de-f731-76d6-be5e-de1090c30368 block=block:01a141de-f731-76d6-be5e-de12824fe6d3
+relayable-ui: sending terminal.resize stream_id=1 cols=69 rows=35 pane_px=539x619
+relayable-ui: block.attached stream_id=2 cols=80 rows=24 snapshot_bytes=0
+relayable-ui: terminal.resize accepted stream_id=1 cols=69 rows=35
+relayable-ui: output stream_id=1 bytes=62 total=266
+relayable-ui: output stream_id=2 bytes=27 total=27
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=8 total=35
+relayable-ui: output stream_id=2 bytes=59 total=94
+relayable-ui: sending terminal.resize stream_id=2 cols=69 rows=35 pane_px=539x619
+relayable-ui: terminal.resize accepted stream_id=2 cols=69 rows=35
+relayable-ui: output stream_id=2 bytes=62 total=156
+relayable-ui: output stream_id=2 bytes=2 total=158
+relayable-ui: output stream_id=2 bytes=2 total=160
+relayable-ui: output stream_id=2 bytes=1 total=161
+relayable-ui: output stream_id=2 bytes=1 total=162
+relayable-ui: output stream_id=2 bytes=1 total=163
+relayable-ui: output stream_id=2 bytes=2 total=165
+relayable-ui: output stream_id=2 bytes=1 total=166
+relayable-ui: output stream_id=2 bytes=2 total=168
+relayable-ui: output stream_id=2 bytes=1 total=169
+relayable-ui: output stream_id=2 bytes=2 total=171
+relayable-ui: output stream_id=2 bytes=1 total=172
+relayable-ui: output stream_id=2 bytes=15 total=187
+relayable-ui: output stream_id=2 bytes=17 total=204
+relayable-ui: output stream_id=2 bytes=27 total=231
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=10 total=241
+relayable-ui: output stream_id=2 bytes=57 total=298
+relayable-ui: session.created session=session:01a141df-0911-7196-b332-a473dceda899 block=block:01a141df-0911-7196-b332-a475372dc305
+relayable-ui: sending terminal.resize stream_id=1 cols=45 rows=35 pane_px=355x619
+relayable-ui: sending terminal.resize stream_id=2 cols=45 rows=35 pane_px=355x619
+relayable-ui: block.attached stream_id=3 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: terminal.resize accepted stream_id=1 cols=45 rows=35
+relayable-ui: terminal.resize accepted stream_id=2 cols=45 rows=35
+relayable-ui: output stream_id=2 bytes=62 total=360
+relayable-ui: output stream_id=1 bytes=62 total=328
+relayable-ui: sending terminal.resize stream_id=3 cols=45 rows=35 pane_px=355x619
+relayable-ui: terminal.resize accepted stream_id=3 cols=45 rows=35
+relayable-ui: output stream_id=3 bytes=62 total=62
+relayable-ui: output stream_id=3 bytes=1 total=63
+relayable-ui: output stream_id=3 bytes=1 total=64
+relayable-ui: output stream_id=3 bytes=2 total=66
+relayable-ui: output stream_id=3 bytes=1 total=67
+relayable-ui: output stream_id=3 bytes=2 total=69
+relayable-ui: output stream_id=3 bytes=1 total=70
+relayable-ui: output stream_id=3 bytes=1 total=71
+relayable-ui: output stream_id=3 bytes=1 total=72
+relayable-ui: output stream_id=3 bytes=1 total=73
+relayable-ui: output stream_id=3 bytes=1 total=74
+relayable-ui: output stream_id=3 bytes=5 total=79
+relayable-ui: output stream_id=3 bytes=3 total=82
+relayable-ui: output stream_id=3 bytes=1 total=83
+relayable-ui: output stream_id=3 bytes=12 total=95
+relayable-ui: output stream_id=3 bytes=19 total=114
+relayable-ui: output stream_id=3 bytes=27 total=141
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=3 bytes=67 total=208
+relayable-ui: output stream_id=1 bytes=1 total=329
+relayable-ui: output stream_id=1 bytes=2 total=331
+relayable-ui: output stream_id=1 bytes=1 total=332
+relayable-ui: output stream_id=1 bytes=1 total=333
+relayable-ui: output stream_id=1 bytes=4 total=337
+relayable-ui: output stream_id=1 bytes=1 total=338
+relayable-ui: output stream_id=1 bytes=1 total=339
+relayable-ui: output stream_id=1 bytes=1 total=340
+relayable-ui: output stream_id=1 bytes=1 total=341
+relayable-ui: output stream_id=1 bytes=1 total=342
+relayable-ui: output stream_id=1 bytes=1 total=343
+relayable-ui: output stream_id=1 bytes=1 total=344
+relayable-ui: output stream_id=1 bytes=1 total=345
+relayable-ui: output stream_id=1 bytes=1 total=346
+relayable-ui: output stream_id=1 bytes=1 total=347
+relayable-ui: output stream_id=1 bytes=1 total=348
+relayable-ui: output stream_id=1 bytes=11 total=359
+relayable-ui: output stream_id=1 bytes=17 total=376
+relayable-ui: output stream_id=1 bytes=27 total=403
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=10 total=413
+relayable-ui: output stream_id=1 bytes=57 total=470
+relayable-ui: sending terminal.resize stream_id=2 cols=69 rows=35 pane_px=539x619
+relayable-ui: sending terminal.resize stream_id=3 cols=69 rows=35 pane_px=539x619
+relayable-ui: terminal.resize accepted stream_id=2 cols=69 rows=35
+relayable-ui: terminal.resize accepted stream_id=3 cols=69 rows=35
+relayable-ui: output stream_id=2 bytes=62 total=422
+relayable-ui: output stream_id=3 bytes=62 total=270
++ echo '--- end npanes log ---'
+--- end npanes log ---
++ stop_app
++ kill -0 73649
++ kill -TERM 73649
++ echo kill_exit=0
+kill_exit=0
++ wait 73649
++ echo wait_exit=143
+wait_exit=143
++ launch_app smaller live 900 600
++ local tag=smaller mode=live w=900 h=600
++ args=('--canvas' '900' '600')
++ local args
++ '[' live = mock ']'
++ apply_rule 900 600
++ local w=900 h=600
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 900, 600 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=75406
++ echo 'app_pid=75406 tag=smaller mode=live'
+app_pid=75406 tag=smaller mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 900 600
++ echo '--- app log /tmp/relayable-ui002-ui/smaller.log ---'
+--- app log /tmp/relayable-ui002-ui/smaller.log ---
++ cat /tmp/relayable-ui002-ui/smaller.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 900x600 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141df-30a9-7345-ab70-3526d2fbc0fa block=block:01a141df-30a9-7345-ab70-35287617d76a
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=115 rows=30 pane_px=900x518
+relayable-ui: terminal.resize accepted stream_id=1 cols=115 rows=30
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ capture smaller
++ local tag=smaller geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 900x600'
++ echo 'capture tag=smaller geometry=10,40 900x600'
+capture tag=smaller geometry=10,40 900x600
++ '[' -n '10,40 900x600' ']'
++ grim -g '10,40 900x600' evidence/ui-002-smaller.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-smaller.png
+evidence/ui-002-smaller.png PNG 900x600 900x600+0+0 8-bit sRGB 55213B 0.000u 0:00.000
++ grim evidence/ui-002-smaller-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-smaller-fullscreen.png
+evidence/ui-002-smaller-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 286203B 0.000u 0:00.000
++ stop_app
++ kill -0 75406
++ kill -TERM 75406
++ echo kill_exit=0
+kill_exit=0
++ wait 75406
++ echo wait_exit=143
+wait_exit=143
++ launch_app larger live 1400 900
++ local tag=larger mode=live w=1400 h=900
++ args=('--canvas' '1400' '900')
++ local args
++ '[' live = mock ']'
++ apply_rule 1400 900
++ local w=1400 h=900
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1400, 900 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=75937
++ echo 'app_pid=75937 tag=larger mode=live'
+app_pid=75937 tag=larger mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1400 900
++ echo '--- app log /tmp/relayable-ui002-ui/larger.log ---'
+--- app log /tmp/relayable-ui002-ui/larger.log ---
++ cat /tmp/relayable-ui002-ui/larger.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1400x900 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141df-4651-7537-909a-e6966c2a3f20 block=block:01a141df-4651-7537-909a-e698a0ff3cab
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=179 rows=47 pane_px=1400x818
+relayable-ui: terminal.resize accepted stream_id=1 cols=179 rows=47
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ capture larger
++ local tag=larger geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1400x900'
++ echo 'capture tag=larger geometry=10,40 1400x900'
+capture tag=larger geometry=10,40 1400x900
++ '[' -n '10,40 1400x900' ']'
++ grim -g '10,40 1400x900' evidence/ui-002-larger.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-larger.png
+evidence/ui-002-larger.png PNG 1400x900 1400x900+0+0 8-bit sRGB 102828B 0.000u 0:00.000
++ grim evidence/ui-002-larger-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-larger-fullscreen.png
+evidence/ui-002-larger-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 183417B 0.000u 0:00.000
++ stop_app
++ kill -0 75937
++ kill -TERM 75937
++ echo kill_exit=0
+kill_exit=0
++ wait 75937
++ echo wait_exit=143
+wait_exit=143
++ launch_app mock mock 1099 706
++ local tag=mock mode=mock w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' mock = mock ']'
++ args+=(--mock)
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=76459
++ echo 'app_pid=76459 tag=mock mode=mock'
+app_pid=76459 tag=mock mode=mock
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706 --mock
++ echo '--- app log /tmp/relayable-ui002-ui/mock.log ---'
+--- app log /tmp/relayable-ui002-ui/mock.log ---
++ cat /tmp/relayable-ui002-ui/mock.log
+relayable: MOCK mode — synthetic in-process data, no live server
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:mock block=block:mock
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=6
+relayable-ui: output stream_id=1 bytes=13 total=13
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=35 pane_px=1099x604
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=35
++ echo '--- end app log ---'
+--- end app log ---
++ capture mock
++ local tag=mock geom
+++ geometry_for
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
+++ hyprctl clients -j
++ geom='10,40 1099x706'
++ echo 'capture tag=mock geometry=10,40 1099x706'
+capture tag=mock geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-mock.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-mock.png
+evidence/ui-002-mock.png PNG 1099x706 1099x706+0+0 8-bit sRGB 79577B 0.000u 0:00.000
++ grim evidence/ui-002-mock-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-mock-fullscreen.png
+evidence/ui-002-mock-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 245488B 0.000u 0:00.000
++ stop_app
++ kill -0 76459
++ kill -TERM 76459
++ echo kill_exit=0
+kill_exit=0
++ wait 76459
++ echo wait_exit=143
+wait_exit=143
++ launch_app resize live 1099 706
++ local tag=resize mode=live w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' live = mock ']'
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end; RELAYABLE_UI002_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=76687
++ echo 'app_pid=76687 tag=resize mode=live'
+app_pid=76687 tag=resize mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui002-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ echo '--- app log /tmp/relayable-ui002-ui/resize.log ---'
+--- app log /tmp/relayable-ui002-ui/resize.log ---
++ cat /tmp/relayable-ui002-ui/resize.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141df-71c1-77cf-859e-c6a422f0693b block=block:01a141df-71c1-77cf-859e-c6a6796da4e9
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
++ echo '--- end app log ---'
+--- end app log ---
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ wtype /tmp/relayable-ui002-ui/size.sh
++ echo wtype_size_exit=0
+wtype_size_exit=0
++ wtype -k Return
++ echo wtype_size_enter_exit=0
+wtype_size_enter_exit=0
++ sleep 1
++ capture resize-before
++ local tag=resize-before geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=resize-before geometry=10,40 1099x706'
+capture tag=resize-before geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-002-resize-before.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-resize-before.png
+evidence/ui-002-resize-before.png PNG 1099x706 1099x706+0+0 8-bit sRGB 84261B 0.000u 0:00.000
++ grim evidence/ui-002-resize-before-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-resize-before-fullscreen.png
+evidence/ui-002-resize-before-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 250713B 0.000u 0:00.000
++ hyprctl eval 'hl.dispatch(hl.dsp.window.resize({ x = -199, y = -106, relative = true }))'
+ok
++ echo window_resize_exit=0
+window_resize_exit=0
++ sleep 2
++ capture resize-after
++ local tag=resize-after geom
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='110,93 900x600'
++ echo 'capture tag=resize-after geometry=110,93 900x600'
+capture tag=resize-after geometry=110,93 900x600
++ '[' -n '110,93 900x600' ']'
++ grim -g '110,93 900x600' evidence/ui-002-resize-after.png
++ echo grim_window_exit=0
+grim_window_exit=0
++ identify evidence/ui-002-resize-after.png
+evidence/ui-002-resize-after.png PNG 900x600 900x600+0+0 8-bit sRGB 69694B 0.000u 0:00.000
++ grim evidence/ui-002-resize-after-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-002-resize-after-fullscreen.png
+evidence/ui-002-resize-after-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 278241B 0.000u 0:00.000
++ echo '--- app log after resize ---'
+--- app log after resize ---
++ cat /tmp/relayable-ui002-ui/resize.log
+relayable: live mode — socket = /tmp/relayable-ui002-ui/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141df-71c1-77cf-859e-c6a422f0693b block=block:01a141df-71c1-77cf-859e-c6a6796da4e9
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
+relayable-ui: output stream_id=1 bytes=1 total=63
+relayable-ui: output stream_id=1 bytes=1 total=64
+relayable-ui: output stream_id=1 bytes=1 total=65
+relayable-ui: output stream_id=1 bytes=1 total=66
+relayable-ui: output stream_id=1 bytes=1 total=67
+relayable-ui: output stream_id=1 bytes=1 total=68
+relayable-ui: output stream_id=1 bytes=1 total=69
+relayable-ui: output stream_id=1 bytes=1 total=70
+relayable-ui: output stream_id=1 bytes=1 total=71
+relayable-ui: output stream_id=1 bytes=2 total=73
+relayable-ui: output stream_id=1 bytes=1 total=74
+relayable-ui: output stream_id=1 bytes=1 total=75
+relayable-ui: output stream_id=1 bytes=1 total=76
+relayable-ui: output stream_id=1 bytes=3 total=79
+relayable-ui: output stream_id=1 bytes=3 total=82
+relayable-ui: output stream_id=1 bytes=2 total=84
+relayable-ui: output stream_id=1 bytes=3 total=87
+relayable-ui: output stream_id=1 bytes=3 total=90
+relayable-ui: output stream_id=1 bytes=1 total=91
+relayable-ui: output stream_id=1 bytes=13 total=104
+relayable-ui: output stream_id=1 bytes=23 total=127
+relayable-ui: output stream_id=1 bytes=8 total=135
+relayable-ui: output stream_id=1 bytes=27 total=162
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=67 total=229
+relayable-ui: sending terminal.resize stream_id=1 cols=115 rows=30 pane_px=900x518
+relayable-ui: terminal.resize accepted stream_id=1 cols=115 rows=30
+relayable-ui: output stream_id=1 bytes=62 total=291
++ echo '--- end ---'
+--- end ---
++ stop_app
++ kill -0 76687
++ kill -TERM 76687
++ echo kill_exit=0
+kill_exit=0
++ wait 76687
++ echo wait_exit=143
+wait_exit=143
++ hyprctl eval 'if RELAYABLE_UI002_RULE then RELAYABLE_UI002_RULE:set_enabled(false) end'
+ok
++ echo rule_disable_exit=0
+rule_disable_exit=0
++ '[' -f /tmp/relayable-ui002-ui/server.pid ']'
+++ sed 's/[^0-9]//g' /tmp/relayable-ui002-ui/server.pid
++ server_pid=71063
++ '[' -n 71063 ']'
++ kill -0 71063
++ kill -TERM 71063
++ echo server_kill_exit=0
+server_kill_exit=0
++ wait 71063
++ echo server_wait_exit=127
+server_wait_exit=127
++ rm -f /tmp/relayable-ui002-ui/relayable.sock
+++ '[' -e /tmp/relayable-ui002-ui/relayable.sock ']'
+++ echo yes
++ echo socket_removed=yes
+socket_removed=yes
++ '[' -f /tmp/relayable-ui002-ui/server.log ']'
++ echo '--- server log ---'
+--- server log ---
++ cat /tmp/relayable-ui002-ui/server.log
+relayable-server: listening on /tmp/relayable-ui002-ui/relayable.sock (protocol 1.0)
++ echo '--- end server log ---'
+--- end server log ---
++ rm -rf /tmp/relayable-ui002-ui
+++ '[' -d /tmp/relayable-ui002-ui ']'
+++ echo yes
++ echo scratch_removed=yes
+scratch_removed=yes
+++ date -u +%FT%TZ
++ echo date_utc_end=2026-10-15T23:22:13Z
+date_utc_end=2026-10-15T23:22:13Z

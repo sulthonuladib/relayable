@@ -1,0 +1,184 @@
+++ pwd
++ ROOT=/home/sulthonuladib/.herdr/worktrees/relayable/ui-ui-002-reference-workspace
++ TMP=/tmp/relayable-ui002-reconnect
++ SOCK=/tmp/relayable-ui002-reconnect/relayable.sock
++ mkdir -p /tmp/relayable-ui002-reconnect
++ SRV=69169
++ RELAYABLE_SERVER=/tmp/relayable-ui002-reconnect/relayable.sock
++ SHELL=/bin/bash
++ RELAYABLE_IDLE_TIMEOUT_MILLIS=4000
++ RELAYABLE_HEARTBEAT_INTERVAL_MILLIS=1000
++ /home/sulthonuladib/.herdr/worktrees/relayable/ui-ui-002-reference-workspace/target/debug/relayable-server run
+++ seq 1 50
++ for i in $(seq 1 50)
++ '[' -S /tmp/relayable-ui002-reconnect/relayable.sock ']'
++ sleep 0.2
++ for i in $(seq 1 50)
++ '[' -S /tmp/relayable-ui002-reconnect/relayable.sock ']'
++ break
+++ '[' -S /tmp/relayable-ui002-reconnect/relayable.sock ']'
+++ echo yes
++ echo 'server_pid=69169 socket=yes'
+server_pid=69169 socket=yes
++ hyprctl eval 'if RELAYABLE_UI002_RC then RELAYABLE_UI002_RC:set_enabled(false) end; RELAYABLE_UI002_RC = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ cd /home/sulthonuladib/.herdr/worktrees/relayable/ui-ui-002-reference-workspace/apps/linux
++ APP=69180
++ sleep 6
++ RELAYABLE_SERVER=/tmp/relayable-ui002-reconnect/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ focus
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
++ sleep 0.4
++ wtype 'echo PRE-PANE1'
++ wtype -k Return
++ sleep 1
++ focus
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
++ sleep 0.4
++ wtype -M ctrl -M shift -k e
++ sleep 3
++ focus
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
++ sleep 0.4
++ wtype 'echo PRE-PANE2'
++ wtype -k Return
++ sleep 1
++ sleep 9
++ focus
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
++ sleep 0.4
++ wtype 'echo POST-PANE2'
++ wtype -k Return
++ sleep 1.5
++ focus
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
++ sleep 0.4
++ wtype -M ctrl -M shift -k Left
++ sleep 0.5
++ wtype 'echo POST-PANE1'
++ wtype -k Return
++ sleep 2
++ echo '=== app log ==='
+=== app log ===
++ cat /tmp/relayable-ui002-reconnect/app.log
+relayable: live mode — socket = /tmp/relayable-ui002-reconnect/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: session.created session=session:01a141dd-e299-76b1-b2a7-c54e2568e67e block=block:01a141dd-e299-76b1-b2a7-c55028ab8691
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=62 total=62
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: disconnected reason=data connection lost: server closed the connection
+relayable-ui: data plane reconnected; connection state restored to Connected
+relayable-ui: block.attached stream_id=1 cols=140 rows=36 snapshot_bytes=156
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=1 total=63
+relayable-ui: output stream_id=1 bytes=1 total=64
+relayable-ui: output stream_id=1 bytes=1 total=65
+relayable-ui: output stream_id=1 bytes=1 total=66
+relayable-ui: output stream_id=1 bytes=1 total=67
+relayable-ui: output stream_id=1 bytes=1 total=68
+relayable-ui: output stream_id=1 bytes=1 total=69
+relayable-ui: output stream_id=1 bytes=3 total=72
+relayable-ui: output stream_id=1 bytes=1 total=73
+relayable-ui: output stream_id=1 bytes=14 total=87
+relayable-ui: output stream_id=1 bytes=11 total=98
+relayable-ui: output stream_id=1 bytes=27 total=125
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=67 total=192
+relayable-ui: session.created session=session:01a141de-00a9-74ba-b64e-2499d2661a81 block=block:01a141de-00a9-74ba-b64e-249bb17fd1a4
+relayable-ui: sending terminal.resize stream_id=1 cols=69 rows=35 pane_px=539x619
+relayable-ui: block.attached stream_id=2 cols=80 rows=24 snapshot_bytes=94
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: terminal.resize accepted stream_id=1 cols=69 rows=35
+relayable-ui: output stream_id=1 bytes=62 total=254
+relayable-ui: sending terminal.resize stream_id=2 cols=69 rows=35 pane_px=539x619
+relayable-ui: terminal.resize accepted stream_id=2 cols=69 rows=35
+relayable-ui: output stream_id=2 bytes=62 total=62
+relayable-ui: output stream_id=2 bytes=3 total=65
+relayable-ui: output stream_id=2 bytes=1 total=66
+relayable-ui: output stream_id=2 bytes=1 total=67
+relayable-ui: output stream_id=2 bytes=1 total=68
+relayable-ui: output stream_id=2 bytes=1 total=69
+relayable-ui: output stream_id=2 bytes=2 total=71
+relayable-ui: output stream_id=2 bytes=1 total=72
+relayable-ui: output stream_id=2 bytes=2 total=74
+relayable-ui: output stream_id=2 bytes=1 total=75
+relayable-ui: output stream_id=2 bytes=1 total=76
+relayable-ui: output stream_id=2 bytes=11 total=87
+relayable-ui: output stream_id=2 bytes=11 total=98
+relayable-ui: output stream_id=2 bytes=27 total=125
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=67 total=192
+relayable-ui: disconnected reason=data connection lost: server closed the connection
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: data plane reconnected; connection state restored to Connected
+relayable-ui: block.attached stream_id=1 cols=69 rows=35 snapshot_bytes=348
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: block.attached stream_id=2 cols=69 rows=35 snapshot_bytes=286
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: disconnected reason=data connection lost: server closed the connection
+relayable-ui: data plane reconnected; connection state restored to Connected
+relayable-ui: block.attached stream_id=1 cols=69 rows=35 snapshot_bytes=348
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: block.attached stream_id=2 cols=69 rows=35 snapshot_bytes=286
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=1 total=193
+relayable-ui: output stream_id=2 bytes=1 total=194
+relayable-ui: output stream_id=2 bytes=1 total=195
+relayable-ui: output stream_id=2 bytes=1 total=196
+relayable-ui: output stream_id=2 bytes=1 total=197
+relayable-ui: output stream_id=2 bytes=1 total=198
+relayable-ui: output stream_id=2 bytes=1 total=199
+relayable-ui: output stream_id=2 bytes=1 total=200
+relayable-ui: output stream_id=2 bytes=2 total=202
+relayable-ui: output stream_id=2 bytes=1 total=203
+relayable-ui: output stream_id=2 bytes=1 total=204
+relayable-ui: output stream_id=2 bytes=2 total=206
+relayable-ui: output stream_id=2 bytes=1 total=207
+relayable-ui: output stream_id=2 bytes=11 total=218
+relayable-ui: output stream_id=2 bytes=12 total=230
+relayable-ui: output stream_id=2 bytes=27 total=257
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=2 bytes=67 total=324
+relayable-ui: output stream_id=1 bytes=1 total=255
+relayable-ui: output stream_id=1 bytes=1 total=256
+relayable-ui: output stream_id=1 bytes=1 total=257
+relayable-ui: output stream_id=1 bytes=1 total=258
+relayable-ui: output stream_id=1 bytes=2 total=260
+relayable-ui: output stream_id=1 bytes=1 total=261
+relayable-ui: output stream_id=1 bytes=1 total=262
+relayable-ui: output stream_id=1 bytes=3 total=265
+relayable-ui: output stream_id=1 bytes=1 total=266
+relayable-ui: output stream_id=1 bytes=14 total=280
+relayable-ui: output stream_id=1 bytes=12 total=292
+relayable-ui: output stream_id=1 bytes=27 total=319
+relayable-ui: pane title/cwd program=Some("sulthonuladib@falcon:~") cwd=None
+relayable-ui: output stream_id=1 bytes=10 total=329
+relayable-ui: output stream_id=1 bytes=57 total=386
++ echo '=== end app log ==='
+=== end app log ===
++ kill -TERM 69180
++ wait 69180
++ echo app_wait=143
+app_wait=143
++ kill -TERM 69169
++ wait 69169
++ echo srv_wait=0
+srv_wait=0
++ hyprctl eval 'if RELAYABLE_UI002_RC then RELAYABLE_UI002_RC:set_enabled(false) end'
+ok
++ rm -rf /tmp/relayable-ui002-reconnect
+++ '[' -d /tmp/relayable-ui002-reconnect ']'
+++ echo yes
++ echo tmp_removed=yes
+tmp_removed=yes
++ echo done
+done
