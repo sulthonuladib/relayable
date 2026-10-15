@@ -77,6 +77,33 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 22 — UI-002 in flight: reference-still durability + client API gaps recorded (2026-10-15)
+
+**Objective:** launch UI-002 and settle its evidence-policy question.
+
+**UI-002 finding:** the 13 reference stills cited by `docs/research/design-tokens.md` §2.4 do not exist
+in-repo — `docs/research/evidence/**` was gitignored and is lost (the Wave-1 worktree was removed and
+gitignored files are not in Git). UI-002 regenerated them locally from the surviving 1080p sources in
+`~/.cache/relayable-research/hires/` (V1 1170×1080, V4 1624×1080) into the gitignored
+`apps/linux/evidence-local/ref/`. **Manager decision:** commit only Relayable's own screenshots + a
+written discrepancy table; keep composites/reference frames local-only (`full.md` §0.2/§2.6). The
+durable evidence is `docs/research/ui-catalog.md` + `design-tokens.md`; stills must be regenerated for
+future comparisons.
+
+**UI-002 token re-verification:** against the regenerated stills (1:1, 1920×1080): top bar 40 px +
+1 px sep rgb(29,50,66); top-bar bg mean rgb(5,27,47) (claimed 4,27,46); active pill exactly 205×30
+fill rgb(19,41,62); terminal row pitch ≈17.1 px; window crop 1099×706. Only the known REF-004 palette
+attribution conflict surfaced. `v1-t0222` shows the command palette, not vertical tabs → vertical-tab
+geometry is unmeasurable and will not be implemented (honest gap).
+
+**Client API gap recorded (`CLIENT-API-001`):** `relayable-client`'s only raw-byte API
+(`wait_for_output`) returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live
+terminal; UI-002 uses a wire client on `relayable-protocol` as a workaround.
+
+**Active:** UI-002 (`w1D`). **Next:** integrate UI-002 → QA-001 → CTX-001 → ADR-004.
+
+---
+
 ## Checkpoint 21 — CORE-002 integrated: events, disconnect detection, resume cursor, reattach (2026-10-15)
 
 **Objective:** add the reconnection semantics CORE-001 deferred.

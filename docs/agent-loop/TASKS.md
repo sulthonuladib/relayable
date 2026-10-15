@@ -52,6 +52,7 @@ the evidence is integrated.
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot + event stream/resume | CORE-001 | `core/core-002-reconnect-events` | DONE — integrated `91662af` (INT-011); 148 tests; events/disconnect/resume-cursor/reattach/multi-client proven; no model/contract change |
 | QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |
 | QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | TBD | BACKLOG |
+| CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | TBD | BACKLOG |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
 (parallel, disjoint paths) → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →
