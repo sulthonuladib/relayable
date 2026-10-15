@@ -70,8 +70,8 @@ use relayable_protocol::transport::{default_socket_path, FrameConnection};
 use relayable_protocol::v1::{
     envelope::Body, request::Operation, response::Result as ResponseResult, BlockAttachRequest,
     BlockDetachRequest, Envelope, FlowControl, Handshake, Heartbeat, Request, Response,
-    SessionCreateRequest, SessionListResponse, SessionSnapshotRequest, TerminalInput,
-    TerminalResize,
+    SessionCreateRequest, SessionListResponse, SessionResumeRequest, SessionSnapshotRequest,
+    TerminalInput, TerminalResize,
 };
 use relayable_protocol::{CONTROL_STREAM_ID, PROTOCOL_VERSION};
 
@@ -80,13 +80,26 @@ use relayable_protocol::{CONTROL_STREAM_ID, PROTOCOL_VERSION};
 /// do not need a direct `relayable-protocol` dependency.
 pub use relayable_protocol::transport::TransportError;
 pub use relayable_protocol::v1::{
-    AttachMode, Error, ErrorCode, Limits, ServerHello, SessionRecord, SessionSnapshotResponse,
-    SessionSummary, TerminalSnapshot,
+    AttachMode, BlockAttachResponse, Error, ErrorCode, Event, Limits, ServerHello, SessionRecord,
+    SessionResumeResponse, SessionSnapshotResponse, SessionSummary, TerminalSnapshot,
 };
 
 /// Maximum time a control RPC (and the initial handshake) waits for its
 /// response before failing with [`ClientError::Timeout`].
 pub const CONTROL_RPC_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// Maximum number of received `Event` frames buffered inside a [`Client`] when
+/// the caller has not drained them yet.
+///
+/// CORE-002 events are control-class frames the client may receive at any time;
+/// [`Client::drain_events`], [`Client::wait_for_event`], and
+/// [`Client::collect_events`] surface them. The buffer is bounded so a client
+/// that never drains cannot grow without limit: when full, the **oldest**
+/// buffered event is evicted (FIFO) before the newest is stored. Evicted events
+/// are not lost from the server's retained event log, so a later
+/// [`Client::resume_session`] from the last applied cursor can re-fetch them.
+/// Terminal bytes never live in this buffer and are never evicted by this bound.
+pub const MAX_PENDING_EVENTS: usize = 4096;
 
 /// Static client identity sent in the handshake.
 #[derive(Debug, Clone)]
@@ -207,6 +220,14 @@ pub struct Client {
     config: ClientConfig,
     next_request_id: u64,
     pending: VecDeque<Envelope>,
+    pending_events: VecDeque<Event>,
+    /// When this client last actually sent a `Heartbeat`.
+    ///
+    /// Persisted across calls on purpose: repeated short waits must accumulate
+    /// toward the outbound cadence instead of each call resetting it. Only
+    /// [`Client::heartbeat_if_due`] advances it, and only after a heartbeat is
+    /// sent.
+    last_heartbeat_sent: Instant,
     control_rpc_timeout: Duration,
 }
 
@@ -350,6 +371,38 @@ impl Client {
         }
     }
 
+    /// Resume a session from a server-wide event-log cursor (`session.resume`).
+    ///
+    /// `None` sends `last_sequence_applied = 0`, the frozen "no cursor"
+    /// sentinel (`protocol/compatibility/core-002-method-set.md` §A); the server
+    /// then returns a fresh snapshot rather than a false replay. The response
+    /// body is returned unchanged: the client does not reinterpret
+    /// `snapshot_required` or reorder the returned events. Live events that
+    /// follow arrive as `Event` frames and are surfaced by
+    /// [`Client::wait_for_event`], [`Client::collect_events`], or
+    /// [`Client::drain_events`].
+    ///
+    /// # Errors
+    ///
+    /// See [`ClientError`].
+    pub fn resume_session(
+        &mut self,
+        session: &SessionId,
+        last_sequence_applied: Option<u64>,
+    ) -> Result<SessionResumeResponse, ClientError> {
+        let result = self.request_operation(
+            methods::SESSION_RESUME,
+            Operation::SessionResume(SessionResumeRequest {
+                session_id: ids::session_id_to_wire(session),
+                last_sequence_applied: last_sequence_applied.unwrap_or(0),
+            }),
+        )?;
+        match result {
+            ResponseResult::SessionResume(response) => Ok(response),
+            _ => Err(unexpected("session.resume", &result)),
+        }
+    }
+
     /// Attach to a terminal block (`block.attach`).
     ///
     /// # Errors
@@ -365,6 +418,7 @@ impl Client {
             Operation::BlockAttach(BlockAttachRequest {
                 block_id: ids::block_id_to_wire(block_id),
                 mode: mode as i32,
+                takeover: false,
             }),
         )?;
         match result {
@@ -376,6 +430,57 @@ impl Client {
                     .snapshot
                     .ok_or_else(|| missing("block.attach snapshot"))?,
             }),
+            _ => Err(unexpected("block.attach", &result)),
+        }
+    }
+
+    /// Attach to a terminal block (`block.attach`) without taking over an
+    /// existing writer lease (`takeover = false`).
+    ///
+    /// `session` is accepted for call-site parity with
+    /// [`Client::attach_with_takeover`]; `block.attach` itself is addressed by
+    /// `block` plus the acting client identity on the local socket
+    /// (`protocol/compatibility/core-002-method-set.md` §E).
+    ///
+    /// # Errors
+    ///
+    /// See [`ClientError`].
+    pub fn attach(
+        &mut self,
+        session: &SessionId,
+        block: &BlockId,
+        mode: AttachMode,
+    ) -> Result<BlockAttachResponse, ClientError> {
+        self.attach_with_takeover(session, block, mode, false)
+    }
+
+    /// Attach to a terminal block (`block.attach`), optionally taking over the
+    /// single writer lease from the current holder (CORE-002, contract §5).
+    ///
+    /// `takeover = false` is exactly [`Client::attach`] / [`Client::attach_block`]
+    /// (a second writer is rejected with `input_not_owned`). `takeover = true`
+    /// asks the server to transfer the lease and emit `writer_lease_changed`.
+    ///
+    /// # Errors
+    ///
+    /// See [`ClientError`].
+    pub fn attach_with_takeover(
+        &mut self,
+        _session: &SessionId,
+        block: &BlockId,
+        mode: AttachMode,
+        takeover: bool,
+    ) -> Result<BlockAttachResponse, ClientError> {
+        let result = self.request_operation(
+            methods::BLOCK_ATTACH,
+            Operation::BlockAttach(BlockAttachRequest {
+                block_id: ids::block_id_to_wire(block),
+                mode: mode as i32,
+                takeover,
+            }),
+        )?;
+        match result {
+            ResponseResult::BlockAttach(response) => Ok(response),
             _ => Err(unexpected("block.attach", &result)),
         }
     }
@@ -465,6 +570,100 @@ impl Client {
         result
     }
 
+    /// Return every `Event` frame already buffered inside the client, in
+    /// arrival order, without reading the socket.
+    ///
+    /// Events are buffered by [`Client::wait_for_event`],
+    /// [`Client::collect_events`], and whenever a control RPC drains a frame it
+    /// is not waiting for. The buffer is bounded by [`MAX_PENDING_EVENTS`]; see
+    /// that constant for the overflow policy.
+    #[must_use]
+    pub fn drain_events(&mut self) -> Vec<Event> {
+        self.pending_events.drain(..).collect()
+    }
+
+    /// Block until the next `Event` frame arrives, or `timeout` elapses.
+    ///
+    /// Returns `Ok(None)` if no event arrived before the deadline. While
+    /// waiting the method sends a `Heartbeat` whenever its own send cadence
+    /// ([`Limits::heartbeat_interval_millis`], measured from the last heartbeat
+    /// it *sent*) elapses. Inbound frames — including the server's own
+    /// `Heartbeat` frames — never reset that timer, and the blocking read is
+    /// capped so the loop wakes often enough to send on schedule. Non-event
+    /// frames are retained (moved to the internal pending queue), never
+    /// dropped.
+    ///
+    /// # Errors
+    ///
+    /// [`ClientError::Disconnected`] if the peer closes the connection, and any
+    /// other [`ClientError`] from the transport.
+    pub fn wait_for_event(&mut self, timeout: Duration) -> Result<Option<Event>, ClientError> {
+        if let Some(event) = self.pending_events.pop_front() {
+            return Ok(Some(event));
+        }
+        let heartbeat = self.heartbeat_interval();
+        let start = Instant::now();
+        let deadline = start.checked_add(timeout).unwrap_or(start);
+        loop {
+            if Instant::now() >= deadline {
+                return Ok(None);
+            }
+            self.heartbeat_if_due(heartbeat)?;
+            if Instant::now() >= deadline {
+                return Ok(None);
+            }
+            let read_timeout = self.next_read_timeout(deadline, heartbeat);
+            if read_timeout.is_zero() {
+                continue;
+            }
+            if let Some(envelope) = self.read_event_frame(read_timeout)? {
+                match envelope.body {
+                    Some(Body::Event(event)) => return Ok(Some(event)),
+                    _ => self.pending.push_back(envelope),
+                }
+            }
+        }
+    }
+
+    /// Read `Event` frames until `timeout` elapses, returning every event
+    /// received in that window in arrival order.
+    ///
+    /// Events already buffered inside the client are returned first. The method
+    /// heartbeats and retains non-event frames exactly like
+    /// [`Client::wait_for_event`]: the outbound cadence depends only on the last
+    /// heartbeat this client sent, never on inbound frames. An empty vector
+    /// means the deadline expired with no event, not an error.
+    ///
+    /// # Errors
+    ///
+    /// [`ClientError::Disconnected`] if the peer closes the connection, and any
+    /// other [`ClientError`] from the transport.
+    pub fn collect_events(&mut self, timeout: Duration) -> Result<Vec<Event>, ClientError> {
+        let mut events: Vec<Event> = self.pending_events.drain(..).collect();
+        let heartbeat = self.heartbeat_interval();
+        let start = Instant::now();
+        let deadline = start.checked_add(timeout).unwrap_or(start);
+        loop {
+            if Instant::now() >= deadline {
+                return Ok(events);
+            }
+            self.heartbeat_if_due(heartbeat)?;
+            if Instant::now() >= deadline {
+                return Ok(events);
+            }
+            let read_timeout = self.next_read_timeout(deadline, heartbeat);
+            if read_timeout.is_zero() {
+                continue;
+            }
+            if let Some(envelope) = self.read_event_frame(read_timeout)? {
+                match envelope.body {
+                    Some(Body::Event(event)) => events.push(event),
+                    _ => self.pending.push_back(envelope),
+                }
+            }
+        }
+    }
+
     // --- internals -------------------------------------------------------
 
     fn from_connection(
@@ -480,6 +679,8 @@ impl Client {
             config,
             next_request_id: 1,
             pending: VecDeque::new(),
+            pending_events: VecDeque::new(),
+            last_heartbeat_sent: Instant::now(),
             control_rpc_timeout: CONTROL_RPC_TIMEOUT,
         };
         let hello = client.perform_handshake()?;
@@ -577,12 +778,10 @@ impl Client {
                         response.request_id
                     )));
                 }
-                Some(
-                    Body::Event(_)
-                    | Body::TerminalData(_)
-                    | Body::FlowControl(_)
-                    | Body::Heartbeat(_),
-                ) => deferred.push_back(envelope),
+                Some(Body::Event(event)) => self.enqueue_event(event),
+                Some(Body::TerminalData(_) | Body::FlowControl(_) | Body::Heartbeat(_)) => {
+                    deferred.push_back(envelope);
+                }
                 _ => {
                     return Err(ClientError::Protocol(
                         "unexpected frame while awaiting a response".to_string(),
@@ -599,8 +798,7 @@ impl Client {
         timeout: Duration,
         deferred: &mut VecDeque<Envelope>,
     ) -> Result<Vec<u8>, ClientError> {
-        let heartbeat =
-            Duration::from_millis(u64::from(self.limits.heartbeat_interval_millis.max(1)));
+        let heartbeat = self.heartbeat_interval();
         let start = Instant::now();
         let deadline = start.checked_add(timeout).unwrap_or(start);
         let mut accumulated: Vec<u8> = Vec::new();
@@ -613,12 +811,14 @@ impl Client {
                 return Err(ClientError::Timeout);
             }
 
-            let remaining = deadline.saturating_duration_since(Instant::now());
-            let read_timeout = if remaining < heartbeat {
-                remaining
-            } else {
-                heartbeat
-            };
+            self.heartbeat_if_due(heartbeat)?;
+            if Instant::now() >= deadline {
+                return Err(ClientError::Timeout);
+            }
+            let read_timeout = self.next_read_timeout(deadline, heartbeat);
+            if read_timeout.is_zero() {
+                continue;
+            }
             self.conn
                 .set_read_timeout(Some(read_timeout))
                 .map_err(|err| ClientError::Transport(TransportError::Io(err)))?;
@@ -633,7 +833,10 @@ impl Client {
             };
 
             match frame {
-                None => self.send_heartbeat()?,
+                // A read-deadline expiry is not an error here: the loop top
+                // sends a heartbeat if the send cadence elapsed, or returns
+                // `Timeout` once the caller's deadline passes.
+                None => {}
                 Some(envelope) => match envelope.body {
                     Some(Body::TerminalData(output)) if output.stream_id == stream_id => {
                         let len = output.bytes.len() as u64;
@@ -642,6 +845,7 @@ impl Client {
                             self.send_flow_control(stream_id, len)?;
                         }
                     }
+                    Some(Body::Event(event)) => self.enqueue_event(event),
                     _ => deferred.push_back(envelope),
                 },
             }
@@ -665,6 +869,62 @@ impl Client {
 
     fn send(&mut self, envelope: &Envelope) -> Result<(), ClientError> {
         self.conn.send(envelope).map_err(ClientError::Transport)
+    }
+
+    /// Store a received event in the bounded pending list, evicting the oldest
+    /// buffered event when full (see [`MAX_PENDING_EVENTS`]).
+    fn enqueue_event(&mut self, event: Event) {
+        if self.pending_events.len() >= MAX_PENDING_EVENTS {
+            self.pending_events.pop_front();
+        }
+        self.pending_events.push_back(event);
+    }
+
+    fn heartbeat_interval(&self) -> Duration {
+        Duration::from_millis(u64::from(self.limits.heartbeat_interval_millis.max(1)))
+    }
+
+    /// Send a heartbeat if the outbound cadence has elapsed since this client
+    /// last sent one, advancing the shared baseline only when a heartbeat is
+    /// actually sent.
+    ///
+    /// The baseline lives on the `Client` so it survives across calls: repeated
+    /// short waits accumulate toward the cadence instead of resetting it, and a
+    /// heartbeat is never sent more often than once per cadence. Inbound frames
+    /// never feed this timer.
+    fn heartbeat_if_due(&mut self, cadence: Duration) -> Result<(), ClientError> {
+        if Instant::now().duration_since(self.last_heartbeat_sent) >= cadence {
+            self.send_heartbeat()?;
+            self.last_heartbeat_sent = Instant::now();
+        }
+        Ok(())
+    }
+
+    /// The blocking-read cap that wakes the caller when either its own deadline
+    /// or the next outbound heartbeat falls first.
+    fn next_read_timeout(&self, deadline: Instant, cadence: Duration) -> Duration {
+        let now = Instant::now();
+        let remaining = deadline.saturating_duration_since(now);
+        let until_heartbeat = cadence.saturating_sub(now.duration_since(self.last_heartbeat_sent));
+        remaining.min(until_heartbeat)
+    }
+
+    /// Read one frame for the event-reading methods. The caller owns the
+    /// outbound heartbeat cadence; an expired read deadline is reported as
+    /// `Ok(None)` so the caller can re-check its timers rather than mistaking it
+    /// for a transport error.
+    fn read_event_frame(
+        &mut self,
+        read_timeout: Duration,
+    ) -> Result<Option<Envelope>, ClientError> {
+        self.conn
+            .set_read_timeout(Some(read_timeout))
+            .map_err(|err| ClientError::Transport(TransportError::Io(err)))?;
+        match self.recv_network() {
+            Ok(envelope) => Ok(Some(envelope)),
+            Err(ClientError::Timeout) => Ok(None),
+            Err(err) => Err(err),
+        }
     }
 
     fn send_heartbeat(&mut self) -> Result<(), ClientError> {
@@ -730,6 +990,7 @@ fn variant_name(result: &ResponseResult) -> &'static str {
         ResponseResult::BlockDetach(_) => "block_detach",
         ResponseResult::TerminalInput(_) => "terminal_input",
         ResponseResult::TerminalResize(_) => "terminal_resize",
+        ResponseResult::SessionResume(_) => "session_resume",
     }
 }
 
@@ -751,8 +1012,9 @@ fn is_timeout(err: &io::Error) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use relayable_protocol::v1::SessionState;
+    use relayable_protocol::v1::{event, ClientConnectionStateChanged, SessionState};
     use std::os::unix::net::{UnixListener, UnixStream};
+    use std::sync::mpsc;
     use std::thread;
 
     fn response_for(request_id: u64, result: ResponseResult) -> Envelope {
@@ -768,9 +1030,25 @@ mod tests {
         }
     }
 
+    /// Receive one envelope for a stub server, treating a closed connection or a
+    /// torn-down socket as "the stub is finished" instead of panicking.
+    ///
+    /// The tests assert on the *client* side, so a stub that loses a teardown
+    /// race with a dropping client should just stop. `Ok(None)` is EOF; a
+    /// timeout/reset `Err` is the same teardown condition observed from the read
+    /// side. Returns `None` in either case.
+    fn recv_or_finished(conn: &mut FrameConnection) -> Option<Envelope> {
+        match conn.recv() {
+            Ok(Some(envelope)) => Some(envelope),
+            Ok(None) | Err(_) => None,
+        }
+    }
+
     fn fake_server(mut conn: FrameConnection) {
         conn.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
-        let handshake = conn.recv().unwrap().unwrap();
+        let Some(handshake) = recv_or_finished(&mut conn) else {
+            return;
+        };
         assert!(matches!(handshake.body, Some(Body::Handshake(_))));
         assert_eq!(handshake.request_id, Some(1));
         conn.send(&response_for(
@@ -786,7 +1064,12 @@ mod tests {
         ))
         .unwrap();
 
-        let list = conn.recv().unwrap().unwrap();
+        // A client that only exercises the handshake (e.g.
+        // `handshake_captures_hello_and_limits`) drops without ever sending a
+        // `session.list`; its EOF must end the stub cleanly, not panic.
+        let Some(list) = recv_or_finished(&mut conn) else {
+            return;
+        };
         let request_id = list.request_id.unwrap();
         assert!(matches!(list.body, Some(Body::Request(_))));
         conn.send(&response_for(
@@ -819,6 +1102,159 @@ mod tests {
         )
         .unwrap();
         (client, server)
+    }
+
+    /// Complete the client handshake on a server-side connection, advertising
+    /// `limits`. Returns `false` (without panicking) if the client has already
+    /// gone away, so the caller skips its script.
+    fn complete_handshake(conn: &mut FrameConnection, limits: Limits) -> bool {
+        conn.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+        let Some(handshake) = recv_or_finished(conn) else {
+            return false;
+        };
+        let request_id = handshake.request_id.unwrap();
+        assert!(matches!(handshake.body, Some(Body::Handshake(_))));
+        conn.send(&response_for(
+            request_id,
+            ResponseResult::Hello(ServerHello {
+                protocol_version: PROTOCOL_VERSION.to_string(),
+                capabilities: vec!["test".to_string()],
+                limits: Some(limits),
+            }),
+        ))
+        .unwrap();
+        true
+    }
+
+    /// Spawn a paired server thread that completes the handshake and then runs
+    /// `script` against the connection.
+    fn spawn_scripted_server<F>(script: F) -> (Client, thread::JoinHandle<()>)
+    where
+        F: FnOnce(&mut FrameConnection) + Send + 'static,
+    {
+        let limits = Limits {
+            max_frame_bytes: 4096,
+            ..DEFAULT_LIMITS
+        };
+        spawn_scripted_server_with_limits(limits, script)
+    }
+
+    /// Like [`spawn_scripted_server`], but advertises `limits` (so a test can
+    /// pick a short heartbeat cadence).
+    fn spawn_scripted_server_with_limits<F>(
+        limits: Limits,
+        script: F,
+    ) -> (Client, thread::JoinHandle<()>)
+    where
+        F: FnOnce(&mut FrameConnection) + Send + 'static,
+    {
+        let (client_stream, server_stream) = UnixStream::pair().unwrap();
+        let server = thread::spawn(move || {
+            let mut conn =
+                FrameConnection::from_stream(server_stream, DEFAULT_LIMITS.max_frame_bytes);
+            if complete_handshake(&mut conn, limits) {
+                script(&mut conn);
+            }
+        });
+        let client = Client::from_connection(
+            FrameConnection::from_stream(client_stream, DEFAULT_LIMITS.max_frame_bytes),
+            PathBuf::from("/tmp/relayable-test.sock"),
+            ClientConfig::new("test"),
+        )
+        .unwrap();
+        (client, server)
+    }
+
+    fn block_attach_response() -> BlockAttachResponse {
+        BlockAttachResponse {
+            stream_id: 7,
+            mode: AttachMode::Writer as i32,
+            writer_lease: true,
+            snapshot: Some(TerminalSnapshot::default()),
+        }
+    }
+
+    fn block_attach_of(envelope: Envelope) -> BlockAttachRequest {
+        match envelope.body {
+            Some(Body::Request(Request {
+                operation: Some(Operation::BlockAttach(request)),
+                ..
+            })) => request,
+            other => panic!("expected a block.attach request, got {other:?}"),
+        }
+    }
+
+    fn session_resume_of(envelope: Envelope) -> SessionResumeRequest {
+        match envelope.body {
+            Some(Body::Request(Request {
+                operation: Some(Operation::SessionResume(request)),
+                ..
+            })) => request,
+            other => panic!("expected a session.resume request, got {other:?}"),
+        }
+    }
+
+    fn event_envelope(sequence: u64) -> Envelope {
+        Envelope {
+            protocol_version: PROTOCOL_VERSION.to_string(),
+            request_id: None,
+            stream_id: CONTROL_STREAM_ID,
+            sequence: Some(sequence),
+            body: Some(Body::Event(Event {
+                sequence,
+                revision: 0,
+                session_id: String::new(),
+                event: Some(event::Event::ClientConnectionStateChanged(
+                    ClientConnectionStateChanged {
+                        client_id: "client:test".to_string(),
+                        connection_state: "ready".to_string(),
+                    },
+                )),
+            })),
+            ..Envelope::default()
+        }
+    }
+
+    /// Spawn a server that captures exactly one `block.attach` request and
+    /// answers it with [`block_attach_response`].
+    fn attach_server() -> (Client, thread::JoinHandle<()>, mpsc::Receiver<Envelope>) {
+        let (tx, rx) = mpsc::channel();
+        let (client, server) = spawn_scripted_server(move |conn| {
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
+            let request_id = request.request_id.unwrap();
+            tx.send(request).unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::BlockAttach(block_attach_response()),
+            ))
+            .unwrap();
+        });
+        (client, server, rx)
+    }
+
+    /// Spawn a server that captures exactly one `session.resume` request and
+    /// answers it with a snapshot-required response.
+    fn resume_server() -> (Client, thread::JoinHandle<()>, mpsc::Receiver<Envelope>) {
+        let (tx, rx) = mpsc::channel();
+        let (client, server) = spawn_scripted_server(move |conn| {
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
+            let request_id = request.request_id.unwrap();
+            tx.send(request).unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::SessionResume(SessionResumeResponse {
+                    snapshot_required: true,
+                    snapshot_required_reason: "no_cursor".to_string(),
+                    ..SessionResumeResponse::default()
+                }),
+            ))
+            .unwrap();
+        });
+        (client, server, rx)
     }
 
     #[test]
@@ -924,5 +1360,271 @@ mod tests {
         assert!(contains(b"hello world", b"lo wo"));
         assert!(!contains(b"hello", b"world"));
         assert!(!contains(b"", b"x"));
+    }
+
+    #[test]
+    fn attach_sets_takeover_false_and_attach_with_takeover_sets_true() {
+        let session = SessionId::new();
+        let block = BlockId::new();
+
+        let (mut client, server, rx) = attach_server();
+        let response = client.attach(&session, &block, AttachMode::Writer).unwrap();
+        assert_eq!(response.stream_id, 7);
+        assert_eq!(response.mode, AttachMode::Writer as i32);
+        assert!(response.writer_lease);
+        let request = block_attach_of(rx.recv().unwrap());
+        assert!(!request.takeover, "plain attach must not take over");
+        assert_eq!(request.block_id, ids::block_id_to_wire(&block));
+        drop(client);
+        let _ = server.join();
+
+        let (mut client, server, rx) = attach_server();
+        let response = client
+            .attach_with_takeover(&session, &block, AttachMode::Writer, true)
+            .unwrap();
+        assert_eq!(response.stream_id, 7);
+        let request = block_attach_of(rx.recv().unwrap());
+        assert!(request.takeover, "attach_with_takeover must set takeover");
+        assert_eq!(request.block_id, ids::block_id_to_wire(&block));
+        drop(client);
+        let _ = server.join();
+    }
+
+    #[test]
+    fn resume_session_encodes_the_last_applied_sequence() {
+        let session = SessionId::new();
+
+        let (mut client, server, rx) = resume_server();
+        client.resume_session(&session, None).unwrap();
+        let request = session_resume_of(rx.recv().unwrap());
+        assert_eq!(
+            request.last_sequence_applied, 0,
+            "None is the no-cursor sentinel"
+        );
+        assert_eq!(request.session_id, ids::session_id_to_wire(&session));
+        drop(client);
+        let _ = server.join();
+
+        let (mut client, server, rx) = resume_server();
+        client.resume_session(&session, Some(41)).unwrap();
+        let request = session_resume_of(rx.recv().unwrap());
+        assert_eq!(request.last_sequence_applied, 41);
+        drop(client);
+        let _ = server.join();
+    }
+
+    #[test]
+    fn wait_for_event_surfaces_a_live_event() {
+        let (mut client, server) = spawn_scripted_server(|conn| {
+            conn.send(&event_envelope(7)).unwrap();
+            // Keep the connection open until the client is done.
+            let _ = conn.recv();
+        });
+
+        let event = client
+            .wait_for_event(Duration::from_secs(2))
+            .unwrap()
+            .expect("an event should arrive");
+        assert_eq!(event.sequence, 7);
+        assert!(matches!(
+            event.event,
+            Some(event::Event::ClientConnectionStateChanged(_))
+        ));
+        assert!(client.drain_events().is_empty());
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    #[test]
+    fn events_are_retained_across_control_rpcs_and_reachable_by_drain() {
+        let (mut client, server) = spawn_scripted_server(|conn| {
+            let request = conn.recv().unwrap().unwrap();
+            let request_id = request.request_id.unwrap();
+            // The event arrives between the request and its response: it must be
+            // buffered without corrupting the pending control RPC.
+            conn.send(&event_envelope(9)).unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::SessionList(SessionListResponse {
+                    sessions: vec![SessionSummary {
+                        session_id: "session:01a10cf3-2655-7e48-9b9c-43dd6612bef5".to_string(),
+                        label: Some("demo".to_string()),
+                        state: SessionState::Active as i32,
+                        revision: 1,
+                    }],
+                    sequence: 9,
+                }),
+            ))
+            .unwrap();
+        });
+
+        let sessions = client.list_sessions().unwrap();
+        assert_eq!(sessions.len(), 1);
+        assert_eq!(sessions[0].label.as_deref(), Some("demo"));
+
+        let events = client.drain_events();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].sequence, 9);
+        assert!(client.drain_events().is_empty());
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    #[test]
+    fn events_buffered_during_a_rpc_can_be_waited_for_later() {
+        let (mut client, server) = spawn_scripted_server(|conn| {
+            conn.send(&event_envelope(11)).unwrap();
+            let request = conn.recv().unwrap().unwrap();
+            let request_id = request.request_id.unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::SessionList(SessionListResponse {
+                    sessions: Vec::new(),
+                    sequence: 11,
+                }),
+            ))
+            .unwrap();
+            // Keep the connection open until the client is done.
+            let _ = conn.recv();
+        });
+
+        // The list RPC drains the event frame into the bounded pending list.
+        assert!(client.list_sessions().unwrap().is_empty());
+        let event = client
+            .wait_for_event(Duration::from_millis(50))
+            .unwrap()
+            .expect("buffered event");
+        assert_eq!(event.sequence, 11);
+        assert!(client
+            .wait_for_event(Duration::from_millis(10))
+            .unwrap()
+            .is_none());
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    /// Receiving frames must never reset the outbound heartbeat deadline: a
+    /// client blocked in one long `collect_events` call while the server streams
+    /// events every few milliseconds (so the client's blocking read always
+    /// returns a frame and never reaches a read timeout) must still send its own
+    /// `Heartbeat` frames on its advertised cadence. With the previous
+    /// "send-on-read-timeout" logic this produced zero heartbeats.
+    #[test]
+    fn inbound_frames_do_not_starve_the_outbound_heartbeat() {
+        const CADENCE_MS: u64 = 40;
+        let limits = Limits {
+            max_frame_bytes: 4096,
+            heartbeat_interval_millis: CADENCE_MS as u32,
+            ..DEFAULT_LIMITS
+        };
+        let (hb_tx, hb_rx) = mpsc::channel();
+        let (mut client, server) = spawn_scripted_server_with_limits(limits, move |conn| {
+            // Stream events faster than the heartbeat cadence, for longer than
+            // the client's collect window, so inbound frames keep the client's
+            // blocking read busy the whole time.
+            let start = Instant::now();
+            let mut sequence = 0u64;
+            while start.elapsed() < Duration::from_millis(320) {
+                sequence += 1;
+                conn.send(&event_envelope(sequence)).unwrap();
+                thread::sleep(Duration::from_millis(5));
+            }
+            // The client has returned from `collect_events` by now; drain the
+            // heartbeats it sent while the window was open.
+            conn.set_read_timeout(Some(Duration::from_millis(100)))
+                .unwrap();
+            let mut heartbeats = 0usize;
+            let drain_deadline = Instant::now() + Duration::from_millis(300);
+            while Instant::now() < drain_deadline {
+                match conn.recv() {
+                    Ok(Some(envelope)) => {
+                        if matches!(envelope.body, Some(Body::Heartbeat(_))) {
+                            heartbeats += 1;
+                        }
+                    }
+                    Ok(None) | Err(_) => break,
+                }
+            }
+            hb_tx.send(heartbeats).unwrap();
+        });
+
+        let events = client.collect_events(Duration::from_millis(300)).unwrap();
+        assert!(!events.is_empty(), "the server streamed events");
+        let heartbeats = hb_rx.recv().unwrap();
+        assert!(
+            heartbeats >= 1,
+            "expected an outbound heartbeat while inbound frames kept arriving, got {heartbeats}"
+        );
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    /// The outbound baseline must survive **across calls**: a pump loop that
+    /// waits in short repeated slices spanning the cadence still emits
+    /// heartbeats — with a per-call baseline it emits none and is idle-dropped —
+    /// yet never emits faster than the cadence.
+    #[test]
+    fn short_repeated_waits_accumulate_toward_the_heartbeat_cadence() {
+        const CADENCE_MS: u64 = 40;
+        let limits = Limits {
+            max_frame_bytes: 4096,
+            heartbeat_interval_millis: CADENCE_MS as u32,
+            ..DEFAULT_LIMITS
+        };
+        let (hb_tx, hb_rx) = mpsc::channel();
+        let (mut client, server) = spawn_scripted_server_with_limits(limits, move |conn| {
+            let start = Instant::now();
+            let mut sequence = 0u64;
+            while start.elapsed() < Duration::from_millis(320) {
+                sequence += 1;
+                conn.send(&event_envelope(sequence)).unwrap();
+                thread::sleep(Duration::from_millis(5));
+            }
+            conn.set_read_timeout(Some(Duration::from_millis(100)))
+                .unwrap();
+            let mut heartbeats = 0usize;
+            let drain_deadline = Instant::now() + Duration::from_millis(300);
+            while Instant::now() < drain_deadline {
+                match conn.recv() {
+                    Ok(Some(envelope)) => {
+                        if matches!(envelope.body, Some(Body::Heartbeat(_))) {
+                            heartbeats += 1;
+                        }
+                    }
+                    Ok(None) | Err(_) => break,
+                }
+            }
+            hb_tx.send(heartbeats).unwrap();
+        });
+
+        // Pump in 10 ms slices for ~300 ms, the way a CLI/output pump would.
+        let pump_deadline = Instant::now() + Duration::from_millis(300);
+        let mut events_seen = 0usize;
+        while Instant::now() < pump_deadline {
+            events_seen += client
+                .collect_events(Duration::from_millis(10))
+                .unwrap()
+                .len();
+        }
+        assert!(events_seen > 0, "the server streamed events");
+
+        let heartbeats = hb_rx.recv().unwrap();
+        assert!(
+            heartbeats >= 1,
+            "short repeated waits must accumulate toward the cadence, got {heartbeats}"
+        );
+        // ~300 ms / 40 ms cadence is at most ~8 sends; allow slack for scheduling
+        // but reject per-call flooding (a 10 ms slice would send ~30 times).
+        assert!(
+            heartbeats <= 12,
+            "heartbeats must not be sent faster than the cadence, got {heartbeats}"
+        );
+
+        drop(client);
+        let _ = server.join();
     }
 }

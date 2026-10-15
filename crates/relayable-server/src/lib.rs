@@ -12,6 +12,7 @@ pub mod config;
 
 mod connection;
 mod dispatch;
+mod events;
 mod registry;
 mod session;
 mod signals;
@@ -30,6 +31,7 @@ use std::time::Duration;
 use anyhow::Context;
 use relayable_protocol::transport::bind_listener;
 
+use crate::events::DisconnectReason;
 use crate::registry::ServerShared;
 
 /// Lock a mutex, recovering from poisoning rather than panicking.
@@ -77,7 +79,7 @@ impl Server {
     pub fn shutdown(&self) {
         self.shared.request_shutdown();
         for connection in lock(&self.shared.connections).iter() {
-            connection.close_now();
+            connection.close_now(DisconnectReason::ServerShutdown);
         }
     }
 
@@ -120,7 +122,7 @@ impl Server {
 
         shared.request_shutdown();
         for connection in lock(&shared.connections).iter() {
-            connection.close_now();
+            connection.close_now(DisconnectReason::ServerShutdown);
         }
         for session in shared.live_sessions() {
             session.block.close(Duration::from_millis(500));

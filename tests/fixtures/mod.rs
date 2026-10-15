@@ -276,6 +276,69 @@ pub fn contains(haystack: &[u8], needle: &[u8]) -> bool {
             .any(|window| window == needle)
 }
 
+/// Collect [`relayable_client::Event`] frames until `quiet` elapses with no new
+/// event, or `cap` elapses. Events already buffered inside the client are
+/// returned first. [`relayable_client::Client::wait_for_event`] heartbeats
+/// while idle, so this never trips the server idle timeout.
+pub fn collect_until_quiet(
+    client: &mut relayable_client::Client,
+    quiet: Duration,
+    cap: Duration,
+) -> Result<Vec<relayable_client::Event>, relayable_client::ClientError> {
+    let mut events = Vec::new();
+    let deadline = Instant::now() + cap;
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            break;
+        }
+        match client.wait_for_event(remaining.min(quiet))? {
+            Some(event) => events.push(event),
+            None => break,
+        }
+    }
+    Ok(events)
+}
+
+/// Pump [`relayable_client::Client::collect_events`] in short `slice` windows
+/// until `total` elapses, accumulating events in arrival order.
+///
+/// The client sends a `Heartbeat` whenever a read deadline expires. A single
+/// long `collect_events` call can receive the server's own heartbeats on the
+/// same cadence and therefore never reach its own deadline; short slices force
+/// the documented keep-alive path so an observer stays alive across a server
+/// idle-timeout window.
+pub fn collect_events_over(
+    client: &mut relayable_client::Client,
+    slice: Duration,
+    total: Duration,
+) -> Result<Vec<relayable_client::Event>, relayable_client::ClientError> {
+    let mut events = Vec::new();
+    let deadline = Instant::now() + total;
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            break;
+        }
+        events.extend(client.collect_events(remaining.min(slice))?);
+    }
+    Ok(events)
+}
+
+/// Assert event sequences are strictly increasing by exactly one (no gap, no
+/// duplicate) across the slice.
+pub fn assert_event_sequences_contiguous(events: &[relayable_client::Event]) {
+    for pair in events.windows(2) {
+        assert_eq!(
+            pair[1].sequence,
+            pair[0].sequence + 1,
+            "event sequences must be contiguous with no gap or duplicate: {} -> {}",
+            pair[0].sequence,
+            pair[1].sequence
+        );
+    }
+}
+
 /// Assert a `<kind>:<lowercase uuidv7>` tagged id: 36-char hyphenated canonical
 /// lowercase UUID, version nibble `7`.
 pub fn assert_tagged_uuid_v7(text: &str, kind: &str) {
@@ -313,18 +376,35 @@ pub struct TestServer {
 impl TestServer {
     /// Spawn `relayable-server run` with a private socket under a temp dir.
     pub fn spawn() -> Self {
+        Self::spawn_with_env(&[])
+    }
+
+    /// Spawn `relayable-server run` with explicit extra environment values.
+    ///
+    /// `extra` is applied *after* the harness defaults (`PATH`,
+    /// `RELAYABLE_SERVER`, `SHELL`, `TERM`), so it is the supported way for a
+    /// test to set the CORE-002 server parameters
+    /// (`RELAYABLE_EVENT_RETENTION_EVENTS`, `RELAYABLE_IDLE_TIMEOUT_MILLIS`,
+    /// `RELAYABLE_HEARTBEAT_INTERVAL_MILLIS`) for one spawned process. Each call
+    /// still gets its own temp dir and socket path, so tests stay parallel-safe.
+    pub fn spawn_with_env(extra: &[(&str, &str)]) -> Self {
         let dir = tempfile::Builder::new()
             .prefix("relayable-it-")
             .tempdir()
             .expect("create temp dir");
         let socket = dir.path().join("relayable.sock");
-        let child = Command::new(bin("relayable-server"))
+        let mut command = Command::new(bin("relayable-server"));
+        command
             .arg("run")
             .env_clear()
             .env("PATH", child_path())
             .env("RELAYABLE_SERVER", &socket)
             .env("SHELL", "/bin/sh")
-            .env("TERM", "xterm-256color")
+            .env("TERM", "xterm-256color");
+        for (key, value) in extra {
+            command.env(key, value);
+        }
+        let child = command
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()

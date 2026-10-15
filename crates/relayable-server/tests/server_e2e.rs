@@ -21,7 +21,8 @@ use relayable_protocol::transport::{FrameConnection, TransportError};
 use relayable_protocol::v1::{
     envelope::Body, request, response, AttachMode, BlockAttachRequest, BlockDetachRequest,
     Envelope, Error, ErrorCode, Handshake, Request, SessionCloseRequest, SessionCreateRequest,
-    SessionSnapshotRequest, SessionSnapshotResponse, TerminalInput, TerminalResize,
+    SessionResumeRequest, SessionSnapshotRequest, SessionSnapshotResponse, TerminalInput,
+    TerminalResize,
 };
 use relayable_protocol::PROTOCOL_VERSION;
 
@@ -87,13 +88,23 @@ struct ServerGuard {
 
 impl ServerGuard {
     fn spawn() -> Self {
+        Self::spawn_with_env(&[])
+    }
+
+    /// Spawn the server with extra `RELAYABLE_*` environment overrides.
+    fn spawn_with_env(extra: &[(&str, &str)]) -> Self {
         let dir = unique_dir();
         std::fs::create_dir_all(&dir).expect("create temp dir");
         let socket = dir.join("relayable.sock");
-        let child = Command::new(env!("CARGO_BIN_EXE_relayable-server"))
+        let mut command = Command::new(env!("CARGO_BIN_EXE_relayable-server"));
+        command
             .arg("run")
             .env("RELAYABLE_SERVER", &socket)
-            .env("SHELL", "/bin/sh")
+            .env("SHELL", "/bin/sh");
+        for (key, value) in extra {
+            command.env(key, value);
+        }
+        let child = command
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
@@ -269,6 +280,10 @@ impl Client {
     }
 
     fn handshake(&mut self) -> relayable_protocol::v1::ServerHello {
+        self.handshake_as("e2e")
+    }
+
+    fn handshake_as(&mut self, client_kind: &str) -> relayable_protocol::v1::ServerHello {
         self.next_id = 1;
         let envelope = Envelope {
             protocol_version: PROTOCOL_VERSION.to_string(),
@@ -278,7 +293,7 @@ impl Client {
             trace_id: None,
             timestamp_unix_millis: None,
             body: Some(Body::Handshake(Handshake {
-                client_kind: "e2e".to_string(),
+                client_kind: client_kind.to_string(),
                 platform: "linux".to_string(),
                 client_version: "0".to_string(),
                 protocol_version: PROTOCOL_VERSION.to_string(),
@@ -399,6 +414,7 @@ fn attach(
         request::Operation::BlockAttach(BlockAttachRequest {
             block_id: block_id.to_string(),
             mode: mode as i32,
+            takeover: false,
         }),
     ) {
         response::Result::BlockAttach(response) => response,
@@ -416,6 +432,50 @@ fn input(client: &mut Client, stream_id: u64, text: &str) -> u64 {
     ) {
         response::Result::TerminalInput(accepted) => accepted.accepted_bytes,
         other => panic!("terminal.input failed: {other:?}"),
+    }
+}
+
+fn resume(
+    client: &mut Client,
+    session_id: &str,
+    last_sequence_applied: u64,
+) -> relayable_protocol::v1::SessionResumeResponse {
+    match client.request(
+        methods::SESSION_RESUME,
+        request::Operation::SessionResume(SessionResumeRequest {
+            session_id: session_id.to_string(),
+            last_sequence_applied,
+        }),
+    ) {
+        response::Result::SessionResume(response) => response,
+        other => panic!("session.resume failed: {other:?}"),
+    }
+}
+
+fn attach_takeover(
+    client: &mut Client,
+    block_id: &str,
+) -> relayable_protocol::v1::BlockAttachResponse {
+    match client.request(
+        methods::BLOCK_ATTACH,
+        request::Operation::BlockAttach(BlockAttachRequest {
+            block_id: block_id.to_string(),
+            mode: AttachMode::Writer as i32,
+            takeover: true,
+        }),
+    ) {
+        response::Result::BlockAttach(response) => response,
+        other => panic!("block.attach takeover failed: {other:?}"),
+    }
+}
+
+/// Read the next control event, ignoring terminal output and responses.
+fn next_event(client: &mut Client, deadline: Instant) -> Option<relayable_protocol::v1::Event> {
+    loop {
+        let envelope = client.recv_frame(deadline)?;
+        if let Some(Body::Event(event)) = envelope.body {
+            return Some(event);
+        }
     }
 }
 
@@ -610,6 +670,7 @@ fn server_end_to_end() {
             request::Operation::BlockAttach(BlockAttachRequest {
                 block_id: block_id.clone(),
                 mode: AttachMode::Writer as i32,
+                takeover: false,
             }),
         ) {
             response::Result::BlockAttach(attached) => break attached.stream_id,
@@ -771,6 +832,7 @@ fn server_end_to_end() {
             request::Operation::BlockAttach(BlockAttachRequest {
                 block_id: held_block.clone(),
                 mode: AttachMode::Writer as i32,
+                takeover: false,
             }),
         ),
         ErrorCode::InputNotOwned,
@@ -969,6 +1031,7 @@ fn blocking_program_does_not_wedge_the_connection() {
             request::Operation::BlockAttach(BlockAttachRequest {
                 block_id: block_id.clone(),
                 mode: AttachMode::Writer as i32,
+                takeover: false,
             }),
         ),
         ErrorCode::InputNotOwned,
@@ -1107,6 +1170,7 @@ fn closed_session_block_and_streams_are_unknown() {
             request::Operation::BlockAttach(BlockAttachRequest {
                 block_id: block_id.clone(),
                 mode: AttachMode::Writer as i32,
+                takeover: false,
             }),
         ),
         ErrorCode::UnknownEntity,
@@ -1128,5 +1192,274 @@ fn closed_session_block_and_streams_are_unknown() {
             request::Operation::BlockDetach(BlockDetachRequest { stream_id }),
         ),
         ErrorCode::UnknownEntity,
+    );
+}
+
+/// CORE-002: `session.resume` replay/snapshot shapes and writer-lease takeover.
+#[test]
+fn resume_shapes_and_writer_takeover() {
+    let mut server = ServerGuard::spawn();
+    let mut a = Client::new(server.connect());
+    a.handshake();
+    let created = create(&mut a, "resume");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session")
+        .session_id
+        .clone();
+    let block_id = created.block_id.clone();
+    server.track(created.program_pid);
+
+    // First view completes synchronization (Ready) and emits the `ready` event.
+    let _ = view(&mut a, &session_id);
+    // A second view observes the log head with no further state change.
+    let head = view(&mut a, &session_id).sequence;
+
+    // No cursor: snapshot fallback, reason `no_cursor`, events EMPTY.
+    let no_cursor = resume(&mut a, &session_id, 0);
+    assert!(no_cursor.snapshot_required);
+    assert_eq!(no_cursor.snapshot_required_reason, "no_cursor");
+    assert!(no_cursor.events.is_empty(), "never a false replay");
+    let snapshot = no_cursor.snapshot.as_ref().expect("snapshot payload");
+    assert_eq!(no_cursor.snapshot_sequence, no_cursor.current_sequence);
+    assert_eq!(snapshot.sequence, no_cursor.snapshot_sequence);
+
+    // Cursor at the head: replay with an empty event range and no snapshot.
+    let at_head = resume(&mut a, &session_id, head);
+    assert!(!at_head.snapshot_required);
+    assert!(at_head.snapshot.is_none());
+    assert!(at_head.events.is_empty());
+    assert_eq!(at_head.snapshot_sequence, head);
+    assert_eq!(at_head.current_sequence, head);
+
+    // Cursor ahead of the server: snapshot fallback, reason `cursor_ahead`.
+    let ahead = resume(&mut a, &session_id, head + 100);
+    assert!(ahead.snapshot_required);
+    assert_eq!(ahead.snapshot_required_reason, "cursor_ahead");
+    assert!(ahead.events.is_empty());
+
+    // Cursor at the floor: the contiguous retained suffix replays in order.
+    let from_floor = resume(&mut a, &session_id, 1);
+    assert!(!from_floor.snapshot_required);
+    assert!(
+        !from_floor.events.is_empty(),
+        "session create and lease events are retained"
+    );
+    assert_eq!(from_floor.events.first().map(|e| e.sequence), Some(2));
+    assert_eq!(from_floor.events.last().map(|e| e.sequence), Some(head));
+    for pair in from_floor.events.windows(2) {
+        assert_eq!(
+            pair[1].sequence,
+            pair[0].sequence + 1,
+            "replayed events must be contiguous with no duplicates"
+        );
+    }
+
+    // Takeover: a second writer takes the single lease, and the previously
+    // subscribed client A receives `writer_lease_changed`.
+    let stream_a = attach(&mut a, &block_id, AttachMode::Writer).stream_id;
+    let mut b = Client::new(server.connect());
+    b.handshake();
+    let taken = attach_takeover(&mut b, &block_id);
+    assert!(taken.writer_lease, "B now holds the lease");
+
+    let deadline = Instant::now() + WAIT;
+    let event = loop {
+        let event = next_event(&mut a, deadline).expect("a control event");
+        if matches!(
+            event.event,
+            Some(relayable_protocol::v1::event::Event::WriterLeaseChanged(_))
+        ) {
+            break event;
+        }
+    };
+    match event.event {
+        Some(relayable_protocol::v1::event::Event::WriterLeaseChanged(change)) => {
+            assert!(change.lease_held, "the lease is held by the new writer");
+            assert_eq!(change.block_id, block_id);
+            assert!(
+                !change.previous_client_id.is_empty(),
+                "a takeover names the previous holder"
+            );
+            assert!(!change.new_client_id.is_empty());
+        }
+        other => panic!("expected writer_lease_changed, got {other:?}"),
+    }
+
+    // The demoted holder's input is rejected, never silently dropped.
+    expect_error(
+        a.request(
+            methods::TERMINAL_INPUT,
+            request::Operation::TerminalInput(TerminalInput {
+                stream_id: stream_a,
+                bytes: b"should be rejected\n".to_vec(),
+            }),
+        ),
+        ErrorCode::InputNotOwned,
+    );
+    // B holds the lease and can write.
+    assert!(input(&mut b, taken.stream_id, "echo takeover\n") > 0);
+
+    match b.request(
+        methods::SESSION_CLOSE,
+        request::Operation::SessionClose(SessionCloseRequest {
+            session_id: session_id.clone(),
+        }),
+    ) {
+        response::Result::SessionClose(_) => {}
+        other => panic!("cleanup close failed: {other:?}"),
+    }
+}
+
+/// CORE-002: disconnect emits the transition event pair and then removes the
+/// client record, so a snapshot lists live clients only (CORE-001 semantics),
+/// while the session and child survive.
+#[test]
+fn disconnected_client_record_is_removed() {
+    let mut server = ServerGuard::spawn();
+    let mut x = Client::new(server.connect());
+    x.handshake();
+    let created = create(&mut x, "removed");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session")
+        .session_id
+        .clone();
+    let program_pid = created.program_pid;
+    server.track(program_pid);
+
+    let before = view(&mut x, &session_id);
+    let x_id = before
+        .clients
+        .iter()
+        .find(|client| client.kind == "e2e")
+        .map(|client| client.client_id.clone())
+        .expect("the connected client is listed in the snapshot");
+    drop(x);
+
+    let mut y = Client::new(server.connect());
+    y.handshake();
+    let deadline = Instant::now() + RETRY;
+    let mut removed = false;
+    loop {
+        let snapshot = view(&mut y, &session_id);
+        if snapshot
+            .clients
+            .iter()
+            .all(|client| client.client_id != x_id)
+        {
+            removed = true;
+            break;
+        }
+        if Instant::now() >= deadline {
+            break;
+        }
+        thread::sleep(Duration::from_millis(30));
+    }
+    assert!(
+        removed,
+        "the disconnected client record must be removed from the snapshot"
+    );
+    assert!(
+        proc_exists(program_pid),
+        "the session and child must survive the client disconnect"
+    );
+}
+
+/// A client-to-server heartbeat envelope; it carries no application data but
+/// resets the server reader's idle deadline.
+fn heartbeat_envelope() -> Envelope {
+    Envelope {
+        protocol_version: PROTOCOL_VERSION.to_string(),
+        request_id: None,
+        stream_id: 0,
+        sequence: None,
+        trace_id: None,
+        timestamp_unix_millis: None,
+        body: Some(Body::Heartbeat(relayable_protocol::v1::Heartbeat {
+            sequence: None,
+        })),
+    }
+}
+
+/// The real reader path: a silent client must be classified `idle_timeout`
+/// (never `transport_error`), while a heartbeating observer stays connected and
+/// receives the disconnect event pair. This exercises the codec-wrapped timeout
+/// shape over a live socket.
+#[test]
+fn idle_timeout_reason_is_reported_to_a_subscriber() {
+    let mut server = ServerGuard::spawn_with_env(&[
+        ("RELAYABLE_IDLE_TIMEOUT_MILLIS", "700"),
+        ("RELAYABLE_HEARTBEAT_INTERVAL_MILLIS", "200"),
+    ]);
+
+    let mut observer = Client::new(server.connect());
+    observer.handshake_as("e2e-observer");
+    let created = create(&mut observer, "idle");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session")
+        .session_id
+        .clone();
+    let program_pid = created.program_pid;
+    server.track(program_pid);
+    // Subscribe the observer to live control events.
+    let _ = resume(&mut observer, &session_id, 0);
+
+    // A second client handshakes and is then deliberately silent.
+    let mut victim = Client::new(server.connect());
+    victim.handshake_as("e2e-victim");
+    let victim_id = view(&mut observer, &session_id)
+        .clients
+        .iter()
+        .find(|client| client.kind == "e2e-victim")
+        .map(|client| client.client_id.clone())
+        .expect("the victim is listed live");
+
+    // Keep the observer alive with heartbeats well inside the idle window,
+    // while the silent victim idles out.
+    let deadline = Instant::now() + Duration::from_secs(4);
+    let mut reason = None;
+    'outer: while Instant::now() < deadline {
+        observer.send(&heartbeat_envelope());
+        let read_until = Instant::now() + Duration::from_millis(150);
+        while let Some(envelope) = observer.recv_frame(read_until) {
+            if let Some(Body::Event(event)) = envelope.body {
+                if let Some(relayable_protocol::v1::event::Event::ClientDisconnected(
+                    disconnected,
+                )) = event.event
+                {
+                    if disconnected.client_id == victim_id {
+                        reason = Some(disconnected.reason);
+                        break 'outer;
+                    }
+                }
+            }
+        }
+    }
+
+    assert_eq!(reason.as_deref(), Some("idle_timeout"));
+    assert!(
+        proc_exists(program_pid),
+        "the session and child must survive the idle disconnect"
+    );
+    // The victim is gone from the snapshot; the observer is still listed.
+    let snapshot = view(&mut observer, &session_id);
+    assert!(
+        snapshot
+            .clients
+            .iter()
+            .all(|client| client.client_id != victim_id),
+        "the victim record must be removed"
+    );
+    assert!(
+        snapshot
+            .clients
+            .iter()
+            .any(|client| client.kind == "e2e-observer"),
+        "the heartbeating observer stays connected"
     );
 }
