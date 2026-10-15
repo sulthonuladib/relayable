@@ -77,6 +77,56 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 8 — Wave 2 handoff: INT-002 merged; DOC-002 blocked; wind-down (2026-10-15)
+
+**Objective:** the user directed a wind-down — no new delegation, finish in-flight work, checkpoint,
+hand off, commit + push, then clean up agents and merged worktrees so a new provider/agent can
+resume from files.
+
+**Actions:**
+
+1. Propagated the wind-down instruction to all three Wave 2 Leads, requiring them to cascade it to
+their subagents (finish only the current bounded task, launch nothing new), commit safe work on
+their branch, and return a concise handoff.
+2. Two Leads committed before settling, one did not:
+   - `research/term-001-adr-003`: `085375c` (PTY/SIGWINCH/byte-stream/RSS spike harness) + `2e41da4`
+     (ADR-003, `Proposed`). 58 files, +8300. Phase 2 (engine-level adapters) cancelled by wind-down.
+   - `research/adr-001-002`: `69e5600` (ADR-001, ADR-002, `docs/architecture/interface-contract.md`,
+     3 files, +1244).
+   - `research/doc-002`: **not executed.** Its Lead session had agent-management tools only (no
+     `bash`/`edit`/`write`), so with new delegation forbidden it could not land the matrix edit and
+     stopped honestly. It did complete and verify the evidence: **zero URL drift** (21 URLs re-fetched
+     2026-10-15T16:57:25–34Z; every sha256 identical to DOC-001 and `cmp`-identical to the originals)
+     and a full citation audit: 433 links = 386 line-number citations + 47 non-line refs; **193 MATCH /
+     115 SHIFT / 78 NOT_FOUND** across 7 files (the defect is far broader than `events.md`).
+3. Reviewed both committed branches: scope limited to owned paths, secret scan clean, and the
+   spike's recorded checks all exit 0 (`cargo build`, `cargo clippy --all-targets`,
+   `cargo fmt --check`); the real-PTY probe reports `SIGWINCH_OBSERVED=true`, `VERDICT=PASS`.
+4. Integrated both into `master` (INT-002): `78b83f2` (term-001), `31bed30` (adr-001-002).
+5. Preserved the volatile `/tmp/doc002/` evidence durably on the `research/doc-002` branch
+   (`docs/compatibility/doc-002-audit/`, commit `2ff3447`, 316 KB) and merged `master` into that
+   branch (`669cb84`) so a resumed session has current state.
+6. Updated `docs/agent-loop/**` (this checkpoint, `STATUS.md`, `TASKS.md`, `BACKLOG.md`,
+   `DECISIONS.md`, `TESTS.md`, `NEXT.md`) and committed + pushed `master`.
+
+**Result on `master`:** `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
+`spikes/terminal-engine/**`, plus all Wave 1 research. ADR-001/002/003 are `Proposed`.
+
+**Commands:** see `TESTS.md` rows 48–56 (review, merges, evidence preservation).
+
+**Risks / caveats:**
+
+- ADR-003's engine pin (`alacritty_terminal 0.26.0`, `vte 0.15.0`, `portable-pty 0.9.0`,
+  `gpui ="=0.2.2"`) is provisional; TERM-002 must validate the engine-level claim.
+- DOC-002's ~142 remaining wrong citations beyond `events.md` stay unfixed until the writer pass.
+- `/tmp/doc002/` and `/tmp/term001-evidence/` may be cleared on reboot; the doc-002 audit is now
+  committed, and the spike's raw results are committed, so the durable evidence survives.
+
+**Next tasks:** see `NEXT.md` — DOC-002 writer pass; TERM-002; CORE-001 (first engineering slice)
+using the ADR-001/002 interface contract; then CORE-002 → UI-001/UI-002 → QA-001.
+
+---
+
 ## Checkpoint 7 — Wave 2 kickoff: DEC-009 resolved, DOC-002 + TERM-001/ADR-003 + ADR-001/002 launched (2026-10-15)
 
 **Objective:** resume from `NEXT.md`; clear the DEC-009 agent-provisioning gate; launch the Wave 2

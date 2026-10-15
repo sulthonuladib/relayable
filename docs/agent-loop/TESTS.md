@@ -102,3 +102,23 @@ Environment: Linux `falcon` x86_64 (omarchy), `pi 1.2.0`, pi-herdsman 0.27.0, re
 **Interpretation:** option A resolves the `agent_pane_busy` fault (rows 42–45); three disjoint-path
 Wave 2 projects are running. No repo code changed by the host fix; the repo work is on the three
 branches pending INT-002 review.
+
+## 2026-10-15 — INT-002: Wave 2 review + integration; DOC-002 evidence preserved
+
+Host/repo: Linux `falcon` x86_64 (omarchy), rustc/cargo 1.98.1, `master` @ `f096f23` before merges.
+
+| # | Command / action | Observed result | Exit |
+|---|---|---|---|
+| 48 | `git log master..<branch>` + `git diff --stat master...<branch>` for `term-001-adr-003` and `adr-001-002` | `2e41da4`+`085375c` (spike+ADR-003, 58 files +8300); `69e5600` (ADR-001/002+interface contract, 3 files +1244); only owned paths changed | 0 |
+| 49 | secret-pattern scan over both branch diffs (`grep -iE 'ghp_|github_pat_|AKIA…|PRIVATE KEY|password|secret|api[_-]?key'`) | no matches | 1 (no match) |
+| 50 | `cat spikes/terminal-engine/results/raw/checks/cargo_build.txt` | `cargo build` `exit_code: 0`; provenance stamped (git_head `b96da27…`, rustc 1.98.1) | 0 |
+| 51 | `cat …/checks/cargo_clippy.txt` / `cargo_fmt_check.txt` | `cargo clippy --all-targets` exit 0; `cargo fmt --check` exit 0 | 0 |
+| 52 | `cat …/raw/pty_size.txt` | real PTY probe: `CHILD_STTY_SIZE 24 80 → 40 120`, `SIGWINCH_OBSERVED=true`, `VERDICT=PASS` | 0 |
+| 53 | `git merge --no-ff research/term-001-adr-003` | merge `78b83f2`; clean (disjoint from `master`) | 0 |
+| 54 | `git merge --no-ff research/adr-001-002` | merge `31bed30`; clean (disjoint) | 0 |
+| 55 | copy `/tmp/doc002/{citation-audit.md,citation-raw.tsv,fetch-report.md,audit.py,adjudicate.py,urls.txt,fetch.sh,fetch.log}` → `research/doc-002:docs/compatibility/doc-002-audit/`; commit | `2ff3447` (316 KB evidence, durable; matrix repair still NOT applied) | 0 |
+| 56 | `git merge master` into `research/doc-002` | merge `669cb84`; branch now current | 0 |
+
+**Not run / not claimed:** the spike's engine-level phase 2 did not run (cancelled by wind-down); the
+DOC-002 matrix repair was not applied (the Lead session had no edit tools and wind-down forbade a new
+writer); no workspace-wide `cargo test` exists because no Cargo workspace exists yet.

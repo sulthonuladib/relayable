@@ -1,63 +1,73 @@
 # NEXT — handoff for the next session
 
 Read `full.md` completely, then `AGENTS.md`, `STATUS.md`, `BACKLOG.md`, `TASKS.md`, `DECISIONS.md`,
-`TESTS.md`, `WORKLOG.md` (tail), and this file. Trust repo state over chat.
+`TESTS.md`, `WORKLOG.md` (tail), `docs/architecture/interface-contract.md`, `docs/adr/ADR-001..003`,
+and this file. Trust repo state over chat.
 
 ## First commands
 
 ```bash
 cd /home/sulthonuladib/work/relayable && git status --short --branch && git log --oneline -8
 git worktree list && git branch -a
+ls docs/adr docs/architecture spikes/terminal-engine
 ```
 
-## Current state (Wave 2 kickoff)
+## Current state (end of Wave 2)
 
-`master` @ `b96da27` (pushed) contains all Wave 1 research. Wave 2 is in flight on three branches,
-all based on `master` @ `b96da27`:
+`master` is clean and pushed. Wave 2 architecture is integrated:
 
-| Workspace | Branch | Session | Tasks | Owned paths |
-|---|---|---|---|---|
-| `w12` | `research/doc-002` | `3534d553-bec1-455c-83df-807ee3ca724a` | DOC-002 | `docs/compatibility/reference-behavior-matrix.md` |
-| `w13` | `research/term-001-adr-003` | `8f442f6e-6f8c-4a03-9016-dcf3f5827aa1` | TERM-001, ADR-003 | `docs/adr/ADR-003-*.md`, `spikes/terminal-engine/**` |
-| `w14` | `research/adr-001-002` | `6a4c1607-f4d3-42fb-b1fc-d6e2dce6e7ba` | ADR-001, ADR-002 | `docs/adr/ADR-001-*.md`, `docs/adr/ADR-002-*.md`, `docs/architecture/**` |
+- `31bed30` — **ADR-001** (domain model + dependency boundaries), **ADR-002** (proto3 + `prost`;
+  4-byte length-prefix framing; pathname Unix socket local; TLS 1.3 remote, off by default), and
+  `docs/architecture/interface-contract.md` (the `full.md` §14.4 interface note).
+- `78b83f2` — **TERM-001 phase 1** spike (`spikes/terminal-engine/**`, standalone crate; `cargo
+  build`/`clippy`/`fmt --check` exit 0; real-PTY `SIGWINCH` probe `VERDICT=PASS`) + **ADR-003**
+  (`Proposed`; pins `alacritty_terminal 0.26.0`, `vte 0.15.0`, `portable-pty 0.9.0`, `gpui = "=0.2.2"`).
+- ADR-001/002/003 are **`Proposed`**, not Accepted — reconfirm before CORE-001.
 
-Manager (this session) owns `docs/agent-loop/**` and integration (INT-002).
-
-## DEC-009 gate — RESOLVED (option A applied 2026-10-15)
-
-The automatic-rename fish hook block in `~/.config/fish/config.fish` (original lines 40–43) is
-commented out; backup `/tmp/relayable-config.fish.bak` (md5
-`60a6536db6ac375f7c0e4d4f2872d609`). `delegate_project` now succeeds. Restore = uncomment the
-block. The wake daemon `/tmp/relayable-wake-daemon.py` remains a fallback but is **stopped**;
-restart only if delegation regresses:
-`setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <workspace-ids...>`.
+**Blocked — DOC-002 (matrix citation repair), not applied.** Evidence is durable on branch
+`research/doc-002` at `docs/compatibility/doc-002-audit/` (commit `2ff3447`; branch merged up to
+`669cb84`). Findings: **zero URL drift** (21 URLs re-fetched, all sha256 identical to DOC-001);
+**386 line-number citations, 193 MATCH / 115 SHIFT / 78 NOT_FOUND across 7 files** (the defect is far
+broader than `events.md`). One writer pass applies `citation-audit.md` to
+`docs/compatibility/reference-behavior-matrix.md`, converts un-locatable rows to
+`[file.md §<heading>](url)` + the existing verbatim quote (never invent a number), updates the §4
+retrieval log + "as-of" timestamps, and commits.
 
 ## Next actions (in order)
 
-1. Monitor the three Leads; when each reports, independently review its diff (`git diff --stat`,
-   scope check, secret scan), run any claimed validation where feasible, then integrate into
-   `master` (INT-002). Update `docs/agent-loop/**` after each merge.
-2. Integrate DOC-002 (matrix citation fix + URL drift), then ADR-001/002, then TERM-001/ADR-003.
-3. After ADR-001/002 are on `master`: launch CORE-001 (server-owned PTY + CLI-created session +
-   terminal I/O + reconnection) with an automated integration test; then CORE-002; then UI-001/UI-002
-   against `docs/research/` + `design-tokens.md`; then QA-001 smoke/CI.
-4. Keep one writer per branch/path; update `STATUS.md`, `BACKLOG.md`, `TASKS.md`, `TESTS.md`,
-   `WORKLOG.md`, `NEXT.md` after every meaningful iteration.
+1. **DOC-002 writer pass** (READY; needs a writer with `edit`/`bash`): resume `research/doc-002`, apply
+   `docs/compatibility/doc-002-audit/citation-audit.md`, verify, commit; then merge to `master`.
+2. **CORE-001** — first engineering slice. Create the Cargo workspace + `relayable-model`,
+   `relayable-protocol`, `relayable-pty`, `relayable-server`, `relayable-client`, `relayable-cli` per
+   the ADR-001 `Proposed` layout and the interface contract. Automated integration test must prove:
+   foreground server owns a PTY; CLI creates a session and returns a stable ID; terminal I/O
+   round-trips; client disconnect leaves the child process alive; reconnect retrieves current state.
+   Use `portable-pty 0.9.0`. Do **not** absorb `spikes/terminal-engine` into the workspace.
+3. **TERM-002** (READY) — engine-level spike phase 2 that validates ADR-003's provisional engine pin.
+4. Then **CORE-002**, **UI-001/UI-002** (against `docs/research/` + `design-tokens.md`), **QA-001**;
+   **ADR-004** (DEC-005 ownership/persistence) and **ADR-005** (DEC-006 env namespace; ADR-002 D14
+   recommends `RELAYABLE_*`-only — Manager decision pending).
+5. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## Review gates (do not skip)
 
-- UI fidelity: frames were actually inspected; no generic redesign; unverified states stay labelled.
-- No REX wire/binary compatibility claims (§3).
-- No GoRex source/asset reuse; no repo-level license found (§2.6).
-- Android Studio is not a dependency; commit a Gradle wrapper (§10).
+- No REX wire/binary compatibility claims (`full.md` §3); no GoRex source/asset reuse (§2.6).
+- UI fidelity: catalogue + design tokens are the acceptance gate; unverified states stay labelled.
+- Android Studio is not a dependency; commit a Gradle wrapper when Android work starts (§10).
 - Never claim server-crash or host-reboot session survival (§6.3).
+- Only the standalone `spikes/terminal-engine` crate exists in-repo; no Cargo workspace yet.
 
-## Open approval gates
+## Approval gates
 
 - **Android SDK/emulator install + project JDK pin** — only needed for Android work; unresolved.
-- **DEC-006 env namespace** (`RELAYABLE_*` vs REX aliases) — ADR-001/002 Lead will recommend; Manager
-  decides on integration.
-- **Packaging target** (`.deb`/`.rpm`) — later.
+
+## Cleanup performed at this handoff
+
+- All three Wave 2 Leads stopped; merged worktrees removed (`research/adr-001-002`,
+  `research/term-001-adr-003`). Branches and Pi sessions preserved.
+- **`research/doc-002` worktree retained** — its branch is not merged and holds the DOC-002 evidence;
+  resume it for the writer pass.
+- DEC-009 remains resolved (option A: automatic-rename fish hook sourcing disabled); wake daemon stopped.
 
 ## If context pressure hits
 

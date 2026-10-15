@@ -6,11 +6,11 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 |---|---|---|---|
 | DEC-000 | Work state is tracked in-repository (`docs/agent-loop/`), not in chat | **Accepted** | — |
 | DEC-001 | Repo is Phase 0 spec-only; establish minimal workspace rather than migrating existing code | **Accepted** | — |
-| DEC-002 | Domain model and dependency direction | Pending | `docs/adr/ADR-001` |
-| DEC-003 | Protocol serialization + transport | Pending — depends on DOC-001 | `docs/adr/ADR-002` |
-| DEC-004 | Terminal engine selection | Pending — spike required | `docs/adr/ADR-003` |
+| DEC-002 | Domain model and dependency direction | **Proposed** — ADR-001 integrated `31bed30` | `docs/adr/ADR-001-domain-model-and-dependency-boundaries.md` |
+| DEC-003 | Protocol serialization + transport | **Proposed** — ADR-002 integrated `31bed30` | `docs/adr/ADR-002-protocol-schema-and-transport.md` |
+| DEC-004 | Terminal engine selection | **Proposed** — ADR-003 integrated `78b83f2`; engine-level spike phase 2 (TERM-002) pending | `docs/adr/ADR-003-terminal-engine-and-gpui-artifact-pin.md` |
 | DEC-005 | Local/remote process ownership and persistence guarantees | Pending | `docs/adr/ADR-004` |
-| DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Pending — ADR + tests required (§8.1) | `docs/adr/ADR-005` |
+| DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Recommended by ADR-002 D14 as `RELAYABLE_*`-only; Manager approval pending | — |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
 | DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — option A applied 2026-10-15** | — |

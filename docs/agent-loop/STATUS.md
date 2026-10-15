@@ -1,17 +1,18 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 0 — **Wave 1 research integrated; Wave 2 (ADRs, terminal spike, first vertical slice) in flight.**
-**Updated:** Wave 2 kickoff — see `WORKLOG.md` Checkpoint 7 and `NEXT.md`.
+**Milestone:** Phase 0 — **Wave 2 architecture integrated (ADR-001/002/003, TERM-001 phase 1); DOC-002 repair pending; CORE-001 is next.**
+**Updated:** Wave 2 handoff — see `WORKLOG.md` Checkpoint 8 and `NEXT.md`.
 
 ## Objective (current)
 
 1. ~~Honest, timestamped evidence for all five reference videos + GoRex + official REX docs.~~ DONE
 2. ~~Verified toolchain inventory; no installs.~~ DONE
-3. Domain/dependency and protocol ADRs — IN_PROGRESS (`research/adr-001-002`).
-4. Terminal engine + GPUI pin ADR and spike — IN_PROGRESS (`research/term-001-adr-003`).
+3. Domain/dependency and protocol ADRs — DONE (ADR-001/002 integrated `31bed30`, `Proposed`; confirm before CORE-001).
+4. Terminal engine + GPUI pin ADR and spike — DONE phase 1 (spike + ADR-003 integrated `78b83f2`, `Proposed`); engine-level spike phase 2 pending (TERM-002).
 5. Smallest useful vertical slice (server-owned PTY, CLI-created session, terminal I/O, disconnect
-   survives, reconnect recovers) — after ADR-001/002.
+   survives, reconnect recovers) — next (CORE-001).
+6. DOC-002 matrix citation repair — BLOCKED on a single writer pass; evidence complete and committed.
 
 ## Wave 1 research state (all integrated on `master`)
 
@@ -24,15 +25,18 @@
 INT-001 complete. Wave 1 branches were removed with their worktrees during the user's wrap-up
 (branches and Pi sessions preserved); nothing pushed; no tracked media in any branch.
 
-## Wave 2 state (in flight, base `master` @ `b96da27`)
+## Wave 2 state (2026-10-15 handoff)
 
-| Workspace | Branch | Session | Tasks | State |
-|---|---|---|---|---|
-| `w12` | `research/doc-002` | `3534d553-bec1-455c-83df-807ee3ca724a` | DOC-002 | IN_PROGRESS (Lead `working`) |
-| `w13` | `research/term-001-adr-003` | `8f442f6e-6f8c-4a03-9016-dcf3f5827aa1` | TERM-001, ADR-003 | IN_PROGRESS |
-| `w14` | `research/adr-001-002` | `6a4c1607-f4d3-42fb-b1fc-d6e2dce6e7ba` | ADR-001, ADR-002 | IN_PROGRESS |
+| Branch | Tasks | Result |
+|---|---|---|
+| `research/adr-001-002` | ADR-001, ADR-002 | COMPLETE — integrated `31bed30` (ADR-001/002 + `docs/architecture/interface-contract.md`, +1244) |
+| `research/term-001-adr-003` | TERM-001, ADR-003 | COMPLETE phase 1 — integrated `78b83f2` (PTY spike + ADR-003, +8300); ADR-003 `Proposed`, engine-level phase 2 pending |
+| `research/doc-002` | DOC-002 | BLOCKED — evidence complete and committed `2ff3447`; the matrix repair is **not** applied (needs a writer pass) |
 
-Manager (this session) owns `docs/agent-loop/**` and integration on `master` (INT-002).
+`master` now contains `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`, and
+`spikes/terminal-engine/**` (58 files). INT-002 is complete for the two committed branches;
+`research/doc-002` is not merged (no repair yet) and its worktree is retained for resumption. All
+three Wave 2 Leads were stopped after integration.
 
 ## Context-window policy (DEC-008)
 
@@ -53,13 +57,15 @@ Manager (this session) owns `docs/agent-loop/**` and integration on `master` (IN
 
 ## Known risks
 
-- ADR-003 must decide the GPUI artifact/license pin: crates.io `gpui` 0.2.2 (Apache-2.0) vs
-  `Glass-HQ/gpui` (no root LICENSE; manifests declare Apache-2.0); not cached locally.
+- ADR-003 pins `gpui = "=0.2.2"` (crates.io, Apache-2.0 at version level) and `alacritty_terminal 0.26.0` /
+  `vte 0.15.0` / `portable-pty 0.9.0`, but ADR-003 is `Proposed` and the engine-level spike has not
+  run — the engine choice is provisional. Phase 2 spike (TERM-002) still needs to validate it.
 - The original REX wire protocol is not documented — no binary/wire compatibility claims (§3).
 - GoRex has no repository-level license → behavior observation only, no reuse (§2.6).
 - Research docs are evidence, not truth: spot-check cited URLs/timestamps before relying on a claim.
+  DOC-002 found ~142 further wrong line citations beyond `events.md` (audit committed on `doc-002`).
 - No build/test suite or workspace exists yet; Phase 0 exit gate still requires the first vertical
-  slice.
+  slice. The only in-repo Rust code is the standalone `spikes/terminal-engine` crate (not a workspace).
 
 ## Guarantees that must NOT be claimed
 
