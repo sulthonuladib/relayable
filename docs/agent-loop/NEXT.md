@@ -4,6 +4,13 @@ Read `full.md` completely, then `AGENTS.md`, `STATUS.md`, `BACKLOG.md`, `TASKS.m
 `TESTS.md`, `WORKLOG.md` (tail), `docs/architecture/interface-contract.md`, `docs/adr/ADR-001..003`,
 and this file. Trust repo state over chat.
 
+> **Restart trigger (DEC-008 — compaction is disabled):** if this session approaches its context
+> limit, STOP launching new work, finish a safe checkpoint (commit + push + update
+> `docs/agent-loop/**`), and tell the user to start a fresh session with the next-session prompt.
+> Repository files are authoritative; never rely on conversation memory. Project work is durable by
+> Git branch, so a restart loses nothing. Manager auto-start is enabled, so a fresh session opened in
+> the primary workspace re-takes the Manager role; otherwise the user pastes the prompt.
+
 ## First commands
 
 ```bash
