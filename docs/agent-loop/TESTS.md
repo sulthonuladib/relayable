@@ -249,3 +249,18 @@ requires `cargo build --workspace` beforehand (which `validate.sh` runs). This i
 **Decisions recorded:** CORE-002's schema extensions are additive (D3) and recorded in
 `protocol/compatibility/core-002-method-set.md`; `relayable-model` and ADR-001/002/003 are unchanged;
 the interface contract now points at both CORE-001 and CORE-002 method-set notes.
+
+## 2026-10-15 — UI-002 reference workspace: independent Manager validation (`d46c66c`)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Run in `apps/linux`.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 90 | `cargo check --locked` | exit 0 (only the transitive `proc-macro-error2` future-incompat warning) | 0 |
+| 91 | `cargo test --locked` | `58 passed; 0 failed` | 0 |
+| 92 | inspect `apps/linux/evidence/ui-002-tabs.png` (`file` + read) + `grep` lockfile | real PNG; Manager confirmed 3 tabs + pane header + live terminal; lockfile exactly `libc 0.2.189` + `xattr 0.2.3` | 0 |
+| 93 | root `cargo check --workspace --locked`; `bash scripts/validate.sh` (post-merge) | 0; `All CORE-001 validation checks passed.` — core workspace unaffected by `apps/linux` | 0 |
+
+**Fidelity:** measured 1:1 against the regenerated V1 crop at 1099×706 — top bar 40 px, pill 205×30,
+ramp ±1–5/channel, row pitch 17.25 vs ≈17.1; pixel-perfect not claimed. One actionable item: active-pill
+1 px top/bottom edge highlight not rendered. Reference frames/composites stayed local-only per decision.

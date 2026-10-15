@@ -77,6 +77,33 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 23 — UI-002 integrated: reference workspace (2026-10-15)
+
+**Objective:** land the main reference workspace UI and verify it.
+
+**Deliverable:** UI-002 (`20a0446`, 54 files, +9122/−193) merged as INT-012 `d46c66c` — all inside
+`apps/linux/**`. Six catalogue screens implemented (`workspace-default`, `tab-strip`, `pane-header`,
+`terminal-body`, `split-layout`, `session-picker`); vertical tabs / command palette / remote host remain
+honest gaps. Live by default: a wire data plane on `relayable-protocol` + a `relayable-client`
+control plane; `--mock` is opt-in with a visible `MOCK` strip. `libc 0.2.189` hold survives the three
+core path deps (no `[patch.crates-io]`).
+
+**Independent validation:** `apps/linux` `cargo check --locked` 0, `cargo test --locked` **58 passed**,
+lockfile `libc 0.2.189` + `xattr 0.2.3`; Manager visually confirmed `ui-002-tabs.png` (real tabs +
+pane header + live terminal); root `cargo check --workspace --locked` 0 and `scripts/validate.sh`
+passes on `master` (core unchanged).
+
+**Fidelity (measured 1:1 vs the regenerated V1 crop, both 1099×706):** top bar 40 px + 1 px separator,
+pill 205×30 (fill ΔG −1), ramp within ±1–5/channel, row pitch 17.25 vs ≈17.1. Pixel-perfect explicitly
+not claimed. Highest-impact remaining item: the active pill's 1 px top/bottom edge highlight is not
+rendered. Reference frames/composites remain local-only.
+
+**Recorded:** the client API gap is `CLIENT-API-001`; reference stills are not repo-durable.
+
+**Next:** QA-001 (+ `QA-FLOW-001`) → CTX-001 → ADR-004. TERM-003 still awaiting user decision.
+
+---
+
 ## Checkpoint 22 — UI-002 in flight: reference-still durability + client API gaps recorded (2026-10-15)
 
 **Objective:** launch UI-002 and settle its evidence-policy question.

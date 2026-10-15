@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 1/2 — **CORE-001 + CORE-002 complete (events, disconnect survival, reconnect/resume); ADR-001/002/003/005 Accepted; UI-001 window runs. Next: UI-002.**
+**Milestone:** Phase 2 — **reference workspace integrated (UI-002); CORE-001/002, TERM-002, UI-001/002, all four ADRs done. Next: QA-001, CTX-001, ADR-004.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)
