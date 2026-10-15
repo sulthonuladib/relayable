@@ -45,6 +45,7 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 | Tool | State |
 |---|---|
 | rustc / cargo | 1.98.1, `stable-x86_64-unknown-linux-gnu` (default) |
+| protoc | `/usr/bin/protoc` → `libprotoc 36.1` (required by `prost-build`; verified 2026-10-15 by REVIEW-001) |
 | mise | `/usr/bin/mise` |
 | android CLI | `/home/sulthonuladib/.local/bin/android` |
 | adb | `/usr/bin/adb` |
@@ -58,6 +59,6 @@ Android Studio is **not** required and must not be a build dependency (§10).
 
 ## Path ownership
 
-The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration.
+The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration. A lead-owned path may be delegated to a bounded worker only by naming it explicitly in that worker's assignment (the lead still integrates).
 
 Workers own only the paths named in their assignment.

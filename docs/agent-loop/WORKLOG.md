@@ -77,6 +77,28 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 14 — REVIEW-001 integrated; DOC-002 sent back; ADR-FIX-001 + CORE-001 launched (2026-10-15)
+
+**Objective:** integrate the review, correct the DOC-002 repair, and start the fix pass.
+
+**Commands/actions and results**
+
+| # | Action | Result |
+|---|---|---|
+| 1 | reviewed `115a5bb` scope + secret scan; `git merge --no-ff review/review-001-adr-pass` | INT-004 `774d394` — only `docs/reviews/**` (5 files, +2348); pushed |
+| 2 | re-ran `audit.py` against the DOC-002 branch matrix (`1634f42`) | 433 links: MATCH 298 / NO_LINE_REF 125 / **SHIFT 8 / AMBIGUOUS 1 / NOT_FOUND 1** → repair incomplete; 10 defective rows returned to the DOC-002 Lead with a re-run recipe (see `TESTS.md` 71–72) |
+| 3 | `delegate_project` ADR-FIX-001 | session `e605e0cc-e299-46c8-acfa-9164955d7aed`, workspace `w19`, branch `adr/review-001-fixes` (documentation correctness only; no decision change) |
+| 4 | `delegate_project` CORE-001 | session `3096aa58-8c0c-4198-b636-2e4197d00ecc`, workspace `w18`, branch `core/core-001-vertical-slice` |
+| 5 | `AGENTS.md` protoc row + delegation note; `TASKS.md` statuses | Manager-owned edits (this commit) |
+
+**Live projects:** TERM-002 (`w17`, 2 agents), CORE-001 (`w18`, 2 agents), ADR-FIX-001 (`w19`),
+DOC-002 revision (`w16`). REVIEW-001 integrated and its Lead idle.
+
+**Next tasks:** await TERM-002 + CORE-001 reports; review/merge ADR-FIX-001 then flip DEC-002/DEC-003 to
+Accepted if the blocking items are cleared; re-check DOC-002 and merge; then CORE-002/UI-001.
+
+---
+
 ## Checkpoint 13 — REVIEW-001 findings recorded; CORE-001 blocker cleared (2026-10-15)
 
 **Objective:** satisfy the "independent review before CORE-001" gate. REVIEW-001 (branch
