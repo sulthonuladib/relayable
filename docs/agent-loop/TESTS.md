@@ -22,7 +22,8 @@ Node 26.8.2, repo `/home/sulthonuladib/work/relayable`.
 | 10 | `cat ~/.pi/agent/pi-herdsman/config.json` | `{"spawnPlacement":"subtree"}` — no `contextRetirement` override | 0 |
 | 11 | inspect pi-herdsman 0.27.0 `dist/index.js` | `contextRetirement` default is `true`; `session_before_compact` handler cancels threshold compaction for assigned managed agents | 0 |
 | 12 | inspect pi extensions | only `herdr-agent-state.ts` globally; no compaction hooks. `pi-herdsman` registers the context-retirement `session_before_compact` hook | 0 |
-| 13 | settings verification via `SettingsManager.create(cwd).getSettings()` | *(filled in below after branch fast-forward)* | — |
+| 13 | `git -C <worktree> merge --ff-only master` ×3 (ui-reference, protocol-compat, env-audit) | `Updating 1c84bca..ccfdb7a; Fast-forward` for each; each worktree now contains `.pi/settings.json` | 0 |
+| 14 | `node /tmp/verify-settings.mjs <primary + 3 worktree cwds>` (`SettingsManager.create(cwd).getSettings()`) | every path: `trusted: true`, `effectiveCompaction.enabled=false`, `projectCompaction.enabled=false`, `errors: []` | 0 |
 
 ### Notes
 

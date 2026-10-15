@@ -74,3 +74,64 @@ None. No build system exists yet. No test claimed.
 2. REF-001/002/003, DOC-001, ENV-001 — delegate bounded research with disjoint path ownership.
 3. ADR-001 — domain model and dependency boundaries once DOC-001 evidence lands.
 4. CORE-001 — server-owned PTY + CLI session + terminal I/O + reconnect vertical slice.
+
+---
+
+## Checkpoint 2 — Context-window policy implementation + Wave 1 delegation recovery (2026-10-15)
+
+**Objective:** implement and verify the user's strict context-window policy (no automatic/manual
+compaction; repository-authoritative state; fresh bounded agents; checkpoint-and-handoff), then
+resume the failed Wave 1 research delegations.
+
+**Files changed:** `.pi/settings.json` (new); `AGENTS.md` (context policy); `docs/agent-loop/`:
+`BACKLOG.md` (new), `TESTS.md` (new), `DECISIONS.md` (DEC-008), `STATUS.md`, `NEXT.md`,
+`WORKLOG.md` (this entry). Policy commit `ccfdb7a`; evidence commit follows this entry.
+
+### What was inspected
+
+- Pi `1.2.0` (`pi --version`); docs `settings.md` / `compaction.md`: `compaction.enabled` is a
+  supported setting (default `true`); project `.pi/settings.json` overrides agent-directory settings;
+  changes take effect on `/reload` or a new Pi process.
+- Global `~/.pi/agent/settings.json`: `compaction.enabled` already `false` — left unmodified.
+- Extensions: global `herdr-agent-state.ts` registers no compaction hooks; pi-herdsman 0.27.0
+  registers `session_before_compact` context-retirement handling; `contextRetirement` defaults to
+  `true` (`config.json` overrides only `spawnPlacement`).
+- Project `.pi/` did not exist before this checkpoint.
+- Failed delegation state: Herdr worktrees wX/wY/wZ and branches created at `1c84bca`; panes are
+  idle fish shells in the worktree cwds; Herdsman persisted assignment records for the three
+  branches (repoKey `/home/sulthonuladib/work/relayable/.git`), so recovery is `resume_project`, not
+  a new `delegate_project`.
+
+### Commands and results (full table in `TESTS.md`)
+
+- `pi --version` → `1.2.0` (exit 0).
+- `node /tmp/verify-settings.mjs <primary checkout + 3 worktree cwds>` → every path:
+  `trusted: true`, `effectiveCompaction.enabled=false`, `projectCompaction.enabled=false`,
+  `errors: []` (exit 0).
+- `git -C <worktree> merge --ff-only master` ×3 → fast-forward `1c84bca..ccfdb7a` (exit 0); each
+  worktree now carries `.pi/settings.json` and the updated loop docs.
+- `herdr pane list` / `herdr pane process-info --pane wX:p1` / `herdr pane read wX:p1` → panes alive,
+  `agent_status: unknown`, fish at the worktree prompt, readiness marker echoed.
+
+### Interpretation
+
+- Compaction is disabled for every Pi process whose cwd is the primary checkout or any of the three
+  research worktrees, which covers Manager, project Leads, and agents launched inside those cwds.
+- Settings resolve at process start; a running process keeps its startup configuration. This Manager
+  session started 22:30 local and the global settings file mtime is 22:33, so no claim is made about
+  this process's in-memory value; no process was restarted to apply the preference (per the user's
+  instruction). Newly started processes use the verified effective value.
+
+### Risks / caveats
+
+- The persisted Wave 1 assignments were snapshotted with `full.md` embedded in the task text. New
+  briefs will not attach `full.md` (DEC-008); recipients read it from the checkout instead.
+- No build/test suite exists yet, so this checkpoint validates configuration and infrastructure only.
+- The failed pane launch is not yet root-caused; recovery is sequential `resume_project` with
+  verification after each.
+
+### Next tasks
+
+1. Resume the three research projects sequentially; verify each Lead is live before the next.
+2. Review Wave 1 diffs, integrate (INT-001), then Wave 2 (`ADR-003`/`TERM-001`, `ADR-001`/`ADR-002`,
+   `CORE-001`/`CORE-002`, UI work against the integrated catalogue).
