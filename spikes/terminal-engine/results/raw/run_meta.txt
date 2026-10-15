@@ -1,0 +1,53 @@
+# ---- provenance ----
+# command: ./scripts/run.sh (aggregate summary)
+# exit_code: 0
+# utc_timestamp: 2026-10-15T17:05:39Z
+# git_head: b96da2766e8750a77feee3beec0d84c2ce28f2fc
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# host: Linux 7.2.5-3-omarchy x86_64
+# os: Omarchy
+# ---- output ----
+aggregate_failures=0
+raw_dir=/home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine/results/raw
+files:
+results/raw/checks/cargo_build.txt
+results/raw/checks/cargo_clippy.txt
+results/raw/checks/cargo_fmt_check.txt
+results/raw/esc_selftest.txt
+results/raw/less.bin
+results/raw/less.bin.meta
+results/raw/less.esc
+results/raw/less.seq
+results/raw/less.summary.txt
+results/raw/nvim.bin
+results/raw/nvim.bin.meta
+results/raw/nvim.esc
+results/raw/nvim_mouse.bin
+results/raw/nvim_mouse.bin.meta
+results/raw/nvim_mouse.esc
+results/raw/nvim_mouse.seq
+results/raw/nvim_mouse.summary.txt
+results/raw/nvim.seq
+results/raw/nvim.summary.txt
+results/raw/nvim_title.bin
+results/raw/nvim_title.bin.meta
+results/raw/nvim_title.esc
+results/raw/nvim_title.seq
+results/raw/nvim_title.summary.txt
+results/raw/osc8_ls.bin
+results/raw/osc8_ls.bin.meta
+results/raw/osc8_ls.esc
+results/raw/osc8_ls.seq
+results/raw/osc8_ls.summary.txt
+results/raw/pty_size.txt
+results/raw/run_meta.txt
+results/raw/scrollback_bounded.txt
+results/raw/scrollback_discard.txt
+results/raw/scrollback_unbounded.txt
+results/raw/tools_available.txt
+results/raw/top.bin
+results/raw/top.bin.meta
+results/raw/top.esc
+results/raw/top.seq
+results/raw/top.summary.txt

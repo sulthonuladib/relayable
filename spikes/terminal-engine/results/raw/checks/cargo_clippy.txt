@@ -1,0 +1,12 @@
+# ---- provenance ----
+# command: cargo clippy --all-targets
+# exit_code: 0
+# utc_timestamp: 2026-10-15T17:05:22Z
+# git_head: b96da2766e8750a77feee3beec0d84c2ce28f2fc
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# host: Linux 7.2.5-3-omarchy x86_64
+# os: Omarchy
+# ---- output ----
+    Checking relayable-terminal-engine-spike v0.0.0 (/home/sulthonuladib/.herdr/worktrees/relayable/research-term-001-adr-003/spikes/terminal-engine)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s

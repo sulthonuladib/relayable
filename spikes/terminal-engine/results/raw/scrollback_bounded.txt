@@ -1,0 +1,37 @@
+# ---- provenance ----
+# command: ./target/debug/scrollback_mem --mib 64 --retain bounded --cap-lines 1000 --interval-ms 25
+# exit_code: 0
+# utc_timestamp: 2026-10-15T17:05:38Z
+# git_head: b96da2766e8750a77feee3beec0d84c2ce28f2fc
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# host: Linux 7.2.5-3-omarchy x86_64
+# os: Omarchy
+# ---- output ----
+== scrollback_mem: PTY output volume vs process RSS observation ==
+RETENTION_MODE=bounded cap_lines=1000
+TARGET_MIB=64
+LINES=1220161
+LINE_BYTES=55
+EXPECTED_PAYLOAD_BYTES=67108855
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+RSS_SAMPLING=/proc/<pid>/status VmRSS every 25 ms; VmHWM at end
+RSS_LIMITATION=RSS includes the allocator, reader buffers, and binary; it is not an engine baseline and no memory target is asserted.
+RSS_BASELINE_AFTER_SPAWN_KB=2536
+BYTES_READ_FROM_PTY=68329016
+BYTES_DELTA_VS_PAYLOAD=1220161
+BYTES_DELTA_NOTE=the slave applies OPOST|ONLCR, so each \n arrives as \r\n (+1 byte/line)
+RETAINED_LINES=1000
+RETAINED_BYTES=56000
+RSS_SAMPLE_COUNT=41
+RSS_START_KB=2728
+RSS_PEAK_SAMPLED_KB=3004
+RSS_END_KB=3004
+RSS_VMHWM_KB=3004
+CHILD_RSS_PEAK_KB=3492
+WALL_MS=981
+CHILD_EXIT_CODE=Some(0)
+CHILD_EXIT_SUCCESS=true
+OBSERVATION_RETAINED_MINUS_START_KB=276
+VERDICT=PASS
