@@ -100,6 +100,15 @@ wrap-up instruction.
 **State:** all Leads idle with open assignments; worktrees clean; nothing pushed; no tracked media;
 no leaked panes. Handoff written to `NEXT.md`.
 
+**DOC-001 wrap-up (Lead, tip `9b0fe37`):** 648 lines, clean tree, one file; labels 342
+`verified-official-docs` / 50 `unknown` / 2 `inferred` / 1 `intentionally-different`; explicit
+no-wire-compatibility statement; 22-row retrieval log (URL/HTTP/exit/timestamp/sha256). Known gaps
+recorded as **DOC-002**: (a) `events.md` line-number citations do not match the canonical `.md`
+line numbers (quoted text is verbatim); (b) the live drift re-check of the 7 doc URLs was cancelled
+by the wrap-up — all facts are as-of 2026-10-15 16:03–16:08Z; (c) the independent reviewer's
+live-drift pass and consolidated review were stopped (its non-live cache check matched every
+sampled high-risk fact).
+
 **Next:** ADR-003/TERM-001 and ADR-001/002 from the integrated evidence, then CORE-001/002 and UI
 work; Android install and Herdr remediation are approval gates.
 

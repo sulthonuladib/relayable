@@ -53,7 +53,10 @@ nothing was pushed; no tracked media exists in any branch.
    Apache-2.0 vs `Glass-HQ/gpui` with no root LICENSE), then the terminal spike.
 3. **ADR-001 + ADR-002:** domain/dependency boundaries and protocol serialization/transport, using
    `docs/compatibility/reference-behavior-matrix.md`. No REX wire/binary compatibility claims;
-   DEC-006 (`RELAYABLE_*` vs REX aliases) still open.
+   DEC-006 (`RELAYABLE_*` vs REX aliases) still open. **First run DOC-002:** re-derive or drop the
+   `events.md` line-number citations (quoted text was verified verbatim) and re-check the 7 source
+   URLs for drift — the matrix's facts are as-of 2026-10-15 16:03–16:08Z and its reviewer's
+   live-drift pass was stopped by the session wrap-up.
 4. **CORE-001** (server-owned PTY + CLI-created session + terminal I/O + reconnection) with an
    automated integration test, then **CORE-002**; **UI-001/UI-002** against `docs/research/`
    catalogue + `design-tokens.md`; **QA-001** smoke/CI.

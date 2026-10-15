@@ -29,6 +29,7 @@ the evidence is integrated.
 | REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
+| DOC-002 | Fix DOC-001 citation defects (`events.md` line refs) and re-check the 7 source URLs for live drift | DOC-001 | branch TBD | BACKLOG |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
 | INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | Lead | BACKLOG |

@@ -67,6 +67,7 @@ resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
 | 35 | Wrap-up review of `research/ui-reference` (tip `269018c`) and `research/protocol-compat` (tip `9b0fe37`): `git log`, `git diff --name-only`, worktree status, secret scan | only `docs/research/**` (5 files) and `docs/compatibility/**` (1 file) changed; both worktrees clean; scan found nothing | 0 |
 | 36 | `git merge --no-ff research/ui-reference` → `c0578ca`; `git merge --no-ff research/protocol-compat` → `49795a0` | clean merges (disjoint paths): 5 research docs (+1902) and 1 compatibility matrix (+648) on `master` | 0 |
 | 37 | `touch /tmp/relayable-wake-daemon.stop` | Option D daemon exited; `ps -p <pid>` shows no process | 0 |
+| 38 | `protocol-compat` Lead wrap-up report | tip `9b0fe37` clean, 1 file, 648 lines; labels 342/50/2/1; explicit no-wire statement; 22-row retrieval log. Known gaps: `events.md` line-number citations defective; 7-URL live drift re-check cancelled (facts as-of 16:03–16:08Z); reviewer live pass stopped → tracked as DOC-002 | observation |
 
 **Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
 fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`
