@@ -1,10 +1,11 @@
 # Relayable UI research — open questions and fidelity risks (Phase 0, Wave 2)
 
-Companion to `docs/research/ui-catalog.md`. Sources: `docs/research/video-review.md` (commit
-`f067f92`, primary), `docs/research/gorex-review.md` (commit `a7e14a3`, supplemental,
-always `[clone-derived]`) and `docs/research/design-tokens.md` (commit `e0e61c8`, measured values
-with per-value confidence). Nothing here is evidence by itself; each question names the artefact
-that would close it and the catalogue entry it blocks.
+Companion to `docs/research/ui-catalog.md`. Sources: `docs/research/video-review.md` (primary),
+`docs/research/gorex-review.md` (supplemental, always `[clone-derived]`) and
+`docs/research/design-tokens.md` (measured values with per-value confidence). Revisions: see the
+git history of each file (`git log --oneline -- docs/research/`); measurement corrections are
+recorded in commit history and in-file revision notes where present. Nothing here is evidence by
+itself; each question names the artefact that would close it and the catalogue entry it blocks.
 
 ## Unresolved visual/interaction questions
 

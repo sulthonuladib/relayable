@@ -5,16 +5,18 @@ was actually observed in the five reference videos.
 
 ## Evidence basis and conventions
 
-- Primary source: `docs/research/video-review.md` (commit `f067f92`), which records the frame-cited
+- Primary source: `docs/research/video-review.md`, which records the frame-cited
   visual review of all five videos. Every video-derived claim below cites a video timestamp and/or an
   evidence frame path from that file.
-- Supplemental source: `docs/research/gorex-review.md` (commit `a7e14a3`), a behaviour-only review of
+- Supplemental source: `docs/research/gorex-review.md`, a behaviour-only review of
   the third-party GoRex clone. There is **no GoRex licence**; anything from it is tagged
   `[clone-derived]` and is never treated as original-product evidence.
-- Measured source (Wave 3): `docs/research/design-tokens.md` (commit `e0e61c8`), pixel measurements
+- Measured source (Wave 3): `docs/research/design-tokens.md`, pixel measurements
   from re-captured 1080p VP9 frames with per-value method and confidence. Measured values are cited
   inline as `(measured: design-tokens.md §…)`. V1 and V4 exports have different scales, so absolute
   pixel values are **not comparable across videos**; colours are video-compression approximations.
+- Revisions: see the git history of each file (`git log --oneline -- docs/research/`); measurement
+  corrections are recorded in commit history and in-file revision notes where present.
 - Frames live under `docs/research/evidence/video1..video5/**` (332 JPEGs, gitignored by
   `.gitignore:11`; read-only for this task, never staged). Paths below are relative to the repo root.
 - Video 2 (architecture) and Video 3 (memory benchmarks) contain **no product UI** and are not UI
@@ -215,7 +217,8 @@ observed**; see Coverage and limitations at the end.
   possible translucency), local prompt p95 rgb(125,128,207) and remote prompt p95 rgb(128,203,167)
   (`design-tokens.md` §3.2, low-medium/medium; compression approximations). Unresolved: font family
   and exact type sizes, cursor style, scrollback loading visual, selection colour, and scrollbar
-  colours — `not measurable` from the current frames (`design-tokens.md` §4).
+  colours, animation/hover timings, sub-pixel radii, and all Video 5 CLI tokens — `not measurable`
+  from the current frames; `design-tokens.md` §4 lists the complete set.
 - **Relayable mapping:** planned `apps/linux/src/ui/terminal.rs` (proposed); tests
   `screenshot_terminal_default`, `screenshot_terminal_scrollback`.
 - **GoRex cross-reference:** GoRex terminal font JetBrains Mono 11.6 px, dark bg `#1e1e22`
@@ -315,7 +318,7 @@ observed**; see Coverage and limitations at the end.
 - **Confidence/unresolved:** high for structure, placeholder, and command names; panel size, row
   pitch, and selected fill now measured at high confidence, remaining geometry at medium; low-medium
   for specific shortcut readings. Unresolved: fuzzy-match behaviour, empty-results state, whether
-  `Pane` is the only group; panel background rgb(10,29,41) and border rgb(85–102,109–116,113–125) are
+  `Pane` is the only group; panel background rgb(10,29,41) and border rgb(71–102,102–116,113–125) are
   measured at medium confidence (`design-tokens.md` §3.2) but remain compression approximations.
 - **Relayable mapping:** planned `apps/linux/src/ui/command_palette.rs` (proposed); tests
   `screenshot_command_palette_open`, `screenshot_command_palette_selected`.
