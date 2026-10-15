@@ -13,7 +13,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Recommended by ADR-002 D14 as `RELAYABLE_*`-only; Manager approval pending | — |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
-| DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — option A applied 2026-10-15** | — |
+| DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — option A applied + plugin disabled 2026-10-15** | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -103,9 +103,16 @@ a pointer to the restore lines. Backup: `/tmp/relayable-config.fish.bak` (md5
 `fish -n` (exit 0) and a fresh `fish -c 'functions'` check showing no hook functions loaded; a real
 `delegate_project` then succeeded (`w12`/`research/doc-002`).
 
-**Consequences:** live per-command tab auto-renaming stops (cosmetic; event-based naming unaffected).
-No repo file depends on the hook. This is a host-configuration change outside the repo, made under
-the user's explicit instruction naming that file and action.
+**Additional step (user request, 2026-10-15):** the plugin itself was then fully disabled —
+`herdr plugin disable herdr-automatic-rename` → `plugin_disabled`, `enabled: false` (verified with
+`herdr plugin list`). Disabling the plugin alone would **not** have fixed the fault, because the shell
+hook is sourced independently of plugin enable state and its `bash` children are what made Herdr
+report `agent_pane_busy`; that is why the `config.fish` hook block stays commented. Re-enable with
+`herdr plugin enable herdr-automatic-rename`.
+
+**Consequences:** all automatic tab/workspace naming stops (both per-command and event-driven).
+No repo file depends on it. These are host-configuration changes outside the repo, made under the
+user's explicit instruction. The Wave 1 Option D wake daemon remains a documented fallback.
 
 **Reconsider if:** Herdr changes its pane-readiness check, or the plugin fixes the hook.
 
@@ -120,5 +127,6 @@ the user's explicit instruction naming that file and action.
 - **GPUI artifact/license pin:** crates.io `gpui` 0.2.2 (Apache-2.0) vs `Glass-HQ/gpui` (no root
   LICENSE, manifests declare Apache-2.0) — decide in ADR-003 before pinning.
 - Whether any REX wire protocol is documented enough to attempt interoperability (currently assumed **not**).
-- **DEC-009 — RESOLVED 2026-10-15:** option A applied (hook sourcing disabled); delegation verified
-  working. Details above and in `WORKLOG.md` Checkpoint 7.
+- **DEC-009 — RESOLVED 2026-10-15:** option A applied (hook sourcing disabled) **and** the
+  `herdr-automatic-rename` plugin fully disabled; delegation verified working. Details above and in
+  `WORKLOG.md` Checkpoints 7 and 10.

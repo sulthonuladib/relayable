@@ -77,6 +77,30 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 10 — Herdr auto-rename plugin fully disabled (2026-10-15)
+
+**Objective:** the user asked where the `herdr-automatic-rename` plugin is documented and directed
+that it be fully disabled.
+
+**Repo references found:** `DECISIONS.md` DEC-009 (row + section), `STATUS.md`, `NEXT.md`,
+`WORKLOG.md` Checkpoints 3 and 7, `TESTS.md` rows 15–23 and 40–43. No other repo file mentions it.
+
+**Mechanism distinction (important):** the plugin's `[[startup]]`/`[[events]]` handlers are separate
+from the fish **shell hook**. The hook (`~/.config/fish/config.fish` lines 40–43) is what spawned a
+background `bash` on every prompt and caused `agent_pane_busy`; disabling the plugin alone would not
+stop it. The hook stays commented (DEC-009 option A).
+
+**Action:** `herdr plugin disable herdr-automatic-rename` → result `plugin_disabled`, `enabled:false`;
+`herdr plugin list` now shows `disabled`. Reversible with `herdr plugin enable herdr-automatic-rename`.
+No uninstall was performed.
+
+**Files changed:** `docs/agent-loop/{DECISIONS,STATUS,NEXT,TESTS,WORKLOG}.md`.
+
+**Next tasks:** unchanged — see `NEXT.md` (REVIEW-001 → DOC-002 writer pass → TERM-002 → CORE-001 →
+CORE-002 → UI-001/UI-002 → QA-001).
+
+---
+
 ## Checkpoint 9 — Clean-start handoff: `doc-002` evidence merged; worktrees retired (2026-10-15)
 
 **Objective:** the user asked why `research/doc-002` was not on `master` and directed that it be
