@@ -77,6 +77,34 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 6 — Wave 1 complete, all research integrated; handoff (2026-10-15)
+
+**Objective:** finalize the research wave at a state acceptable for the next phase, per the user's
+wrap-up instruction.
+
+**Actions:**
+
+- Messaged all three Leads a wrap-up instruction (commit cleanly, leave the worktree clean, no new
+  waves, immediate concise handoff); `env-audit` was confirmed complete.
+- Reviewed branch scopes (`git log`/`git diff --name-only`/worktree status/secret scan): only the
+  owned paths changed and all worktrees are clean.
+- Integrated into `master` with `--no-ff` merges:
+  - `research/env-audit` → `b24133c` (2 docs, +1591; tip `a31a839`) — already recorded in Checkpoint 5
+  - `research/ui-reference` → `c0578ca` (5 docs, +1902; tip `269018c`)
+  - `research/protocol-compat` → `49795a0` (1 doc, +648; tip `9b0fe37`)
+- INT-001 is complete. `docs/operations/`, `docs/research/`, and `docs/compatibility/` now exist on
+  `master`.
+- Stopped the Option D stopgap daemon (`touch /tmp/relayable-wake-daemon.stop`) and verified it is
+  gone. The underlying Herdr fault remains unresolved (DEC-009 A/B/C pending).
+
+**State:** all Leads idle with open assignments; worktrees clean; nothing pushed; no tracked media;
+no leaked panes. Handoff written to `NEXT.md`.
+
+**Next:** ADR-003/TERM-001 and ADR-001/002 from the integrated evidence, then CORE-001/002 and UI
+work; Android install and Herdr remediation are approval gates.
+
+---
+
 ## Checkpoint 5 — ENV-001 complete and integrated (INT-001, 1/3) (2026-10-15)
 
 **Objective:** review and integrate the completed `research/env-audit` branch.

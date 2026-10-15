@@ -25,12 +25,12 @@ the evidence is integrated.
 |---|---|---|---|---|
 | BOOT-001 | Inspect repo, toolchain, instructions, working tree; preserve user changes | — | Lead | DONE |
 | BOOT-002 | Create `AGENTS.md` + `docs/agent-loop/` scaffold | BOOT-001 | Lead | DONE |
-| REF-001 | Review video 1 (pre-alpha demo); catalogue main UI | BOOT-001 | research/ui-reference | IN_PROGRESS |
-| REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | IN_PROGRESS |
-| REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | IN_PROGRESS |
-| DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | IN_PROGRESS |
+| REF-001 | Review video 1 (pre-alpha demo); catalogue main UI | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
+| REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
+| REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
+| DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
-| INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | IN_PROGRESS (1/3: env-audit b24133c) |
+| INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | Lead | BACKLOG |
 | ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | Lead | BACKLOG |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | Lead | BACKLOG |
