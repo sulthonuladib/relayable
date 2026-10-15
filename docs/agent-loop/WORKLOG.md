@@ -77,6 +77,31 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 4 — Stopgap mitigation (Option D) activated (2026-10-15)
+
+**Objective:** unblock the three holding Wave 1 Leads without a global config change while the
+DEC-009 remediation decision is pending.
+
+**Actions:**
+
+- Started `/tmp/relayable-wake-daemon.py` for a bounded 1800 s (pid in
+  `/tmp/relayable-wake-daemon.pid`): every ~0.25 s it sends one empty `Enter` to each agent-less
+  pane in workspaces `wX`, `wY`, `wZ`, clearing Herdr's `agent_pane_busy` state inside Herdsman's
+  `agent_start` retry window. Stop file `/tmp/relayable-wake-daemon.stop`; log
+  `/tmp/relayable-wake-daemon.log`.
+- Sent each Lead a bounded retry instruction (`message_staff`): retry delegation now, ≤2 concurrent
+  workers, stop after 3 consecutive `agent_start` failures, stay in owned paths, commit, report.
+
+**State:** all three Leads were idle before the messages; daemon verified running; no config or
+system change; no leaked panes. This is a time-boxed stopgap only — the permanent fix is still the
+pending DEC-009 decision.
+
+**Next:** collect the Leads' retry results; if agents start, review/integrate Wave 1 (INT-001). If
+`agent_start` still fails, stop the daemon (`touch /tmp/relayable-wake-daemon.stop`) and report the
+fresh evidence.
+
+---
+
 ## Checkpoint 3 — Wave 1 execution blocked by Herdr agent-provisioning fault (2026-10-15)
 
 **Objective:** let the three resumed Wave 1 research projects execute and produce their evidence.

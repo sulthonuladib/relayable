@@ -57,9 +57,11 @@ and the Manager integrates (INT-001) before Wave 2.
 - **Agent provisioning (fleet-wide, remediation pending approval):** Herdr's `agent start` reports
   `agent_pane_busy` for programmatically provisioned panes because the automatic-rename fish hook
   spawns background bash on every prompt. All three Wave 1 Leads are blocked in `delegate_agent`;
-  no research files were written. Evidence: `TESTS.md` rows 15–23; options and recommendation in
+  no research files were written. Evidence: `TESTS.md` rows 15–25; options and recommendation in
   `WORKLOG.md` Checkpoint 3. Option A (recommended) needs approval to edit
   `~/.config/fish/config.fish`; Option B is repo-only.
+- **Stopgap in progress:** the bounded Option D wake daemon is running and the three Leads were
+  instructed to retry delegation (time-boxed window). See `WORKLOG.md` Checkpoint 4.
 
 ## Known risks
 

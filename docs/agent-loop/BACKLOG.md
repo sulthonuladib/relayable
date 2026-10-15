@@ -20,6 +20,9 @@ checkpoint; keep it short.
   `managed-lead` overlay granting Leads bash/edit/write so they execute directly; Option C —
   update/reinstall the plugin.
 - **Uncommitted changes:** none after the blocker checkpoint.
+- **Stopgap active (Option D, no config change):** bounded wake daemon running (~30 min) and the
+  three Leads instructed to retry delegation; see `WORKLOG.md` Checkpoint 4. The permanent fix is
+  still the pending DEC-009 decision.
 - **Failing tests:** none — no build/test suite exists yet (Phase 0).
 - **Next integration step:** apply the approved fix, tell the Leads to retry delegation, then INT-001
   review/merge into `master`; Wave 2 follows.

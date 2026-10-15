@@ -53,6 +53,8 @@ resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
 | 21 | `herdr tab create ... --env HERDR_PANE_ID=`, marker + probe | Hooks still ran (`[fish, bash, bash]`), busy — Herdr overrides the env var; env simulation inconclusive | 1 |
 | 22 | `herdr tab close wZ:tD` / `wZ:tE`; `herdr pane list --workspace wZ` | test tabs removed; workspace shows only `wZ:p1` | 0 |
 | 23 | `resume_project` ui-reference / protocol-compat / env-audit with a background pane wake loop (empty `Enter` every 0.25–0.4 s during launch) | all three Leads started; ui-reference and protocol-compat bound as Herdr agents (`working`), env-audit needed a second resume | 0 |
+| 24 | `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 1800 wX wY wZ` | daemon running (pid 2765519); `ps` confirms the exact command line; stop file `/tmp/relayable-wake-daemon.stop` | 0 |
+| 25 | `message_staff` to the three Lead sessions | all returned `ok: true` (delivery ids `2b82f497…`, `fe14f159…`, `68ede95e…`) | 0 |
 
 **Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
 fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`

@@ -45,6 +45,10 @@ Until a fix is applied, any Herdsman agent start needs a pane wake: run a bounde
 that sends `herdr pane send-keys <pane> Enter` every ~0.3 s during the launch, or expect
 `agent_pane_busy`. Do not remove worktrees or restart Herdr without explicit user confirmation.
 
+**Stopgap active:** `/tmp/relayable-wake-daemon.py` is running for 1800 s against workspaces wX/wY/wZ
+(stop file `/tmp/relayable-wake-daemon.stop`) and all three Leads were messaged to retry delegation
+(`WORKLOG.md` Checkpoint 4). Collect their results; the permanent fix is still DEC-009.
+
 | Branch | Worktree | Produces | Exclusive paths |
 |---|---|---|---|
 | `research/ui-reference` | `~/.herdr/worktrees/relayable/research-ui-reference` (wX) | `docs/research/{video-review,ui-catalog,open-questions,gorex-review}.md` | `docs/research/**` |
