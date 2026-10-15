@@ -33,24 +33,24 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 - **REVIEW-001** (`774d394`, report + evidence in `docs/reviews/**`) and **DOC-002** citation repair
   (`16c8bc9`) integrated.
 - `docs/architecture/interface-contract.md` is frozen and uses `PtyProcessId`.
-- **In flight:** **TERM-002** (`spike/term-002-engine-validation`) is the only active project; CORE-001 is integrated.
-- Host: `protoc` = `libprotoc 36.1`; both spike crates self-root with an empty `[workspace]` table.
+- **In flight:** **CORE-002** (`core/core-002-reconnect-events`) is the only active project; TERM-002 is integrated.
+- Host: `protoc` = `libprotoc 36.1`; both spike crates self-root with an empty `[workspace]` table; root workspace `exclude = ["spikes"]`.
 
 ## Open tasks, in order
 
-1. **TERM-002** (in progress) — engine-level spike validating ADR-003's provisional pin; verdict
-   accept as-is / accept with caveats / change the pin.
-2. **CORE-002** — harden disconnect survival + reattach snapshot (CORE-001 already demonstrates the
-   basic flow; CORE-002 adds the documented hard cases).
-3. **UI-001/UI-002** — GPUI workspace against `docs/research/` + `design-tokens.md`; UI-001 also proves
-   the `gpui` pin builds/runs on this host.
-4. **QA-001** — smoke/CI scripts and build matrix (extend `scripts/validate.sh`).
-5. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
+1. **CORE-002** (in progress) — event stream + heartbeat disconnect + resume cursor/`snapshot_required`
+   + reattach consistency + multi-client; owns `crates/**` except `relayable-model`, plus `tests/**`.
+2. **UI-001/UI-002** — GPUI workspace against `docs/research/` + `design-tokens.md`. UI-001 must first
+   apply and prove a contained `gpui = "=0.2.2"` remedy (hold `libc` ≤0.2.189 via
+   `cargo update -p libc --precise 0.2.189`, or patch `xattr`) and prove a minimal window builds/runs;
+   only then can ADR-003 move to Accepted.
+3. **QA-001** — smoke/CI scripts and build matrix (extend `scripts/validate.sh`).
+4. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
    add the ADR-005 §8.1 context-resolution test (currently not implemented).
-6. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
-7. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
+5. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
+6. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build evidence spike (ADR-003 reconsideration trigger #10).
-8. Update `docs/agent-loop/**` after every meaningful iteration.
+7. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## Review gates (do not skip)
 

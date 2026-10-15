@@ -213,9 +213,7 @@ crates.io artifact (Option H) and these remain fallbacks.
 
 ## Decision
 
-**Status: Proposed — PTY-level spike evidence available; engine-level spike pending.** The
-engine-independent phase-1 spike validates PTY plumbing and the wire-level sequences programs emit,
-but no engine-level spike has validated the engine choice itself.
+**Status: Proposed — terminal-engine pins VALIDATED by TERM-002; the GPUI pin is NOT build-verified and awaits UI-001.** The engine-independent phase-1 spike validated PTY plumbing; the phase-2 engine-level spike (`spikes/terminal-engine-phase2/`, TERM-002) now drives the candidate engines behind a common adapter on real PTYs: `alacritty_terminal` 0.26.0 + `vte` 0.15.0 + `portable-pty` 0.9.0 pass **32 PASS / 1 documented UNSUPPORTED / 0 FAIL / 0 NOT_TESTED**, and no engine change is warranted (`vt100` lacks OSC 8 + resize reflow; `avt` lacks title/mouse/bracketed-paste/OSC 8). The `gpui = "=0.2.2"` pin **resolves but does not compile** on this host (transitive `xattr 0.2.3` → `libc 0.2.190` removed `ENOATTR`), so the GPUI half of this ADR needs a UI-001 remedy before it is relied on.
 
 1. **Terminal engine:** pin `alacritty_terminal` **0.26.0** (`Apache-2.0`, version-level field) as the
    parser + screen/grid state engine.
@@ -225,7 +223,12 @@ but no engine-level spike has validated the engine choice itself.
    not by any GUI view (`full.md` §5.4: "a GUI view does not own the shell").
 4. **GPUI artifact:** pin `gpui` **exactly** as `gpui = "=0.2.2"` (`Apache-2.0`, version-level field;
    crate-level field absent), sourced from crates.io, with GPUI code isolated in `apps/linux` and no
-   GPUI types in shared crates (`full.md` §5.3).
+   GPUI types in shared crates (`full.md` §5.3). **TERM-002 caveat (blocking for the pin):** on this
+   host `cargo check` for `gpui 0.2.2` exits 101 at `xattr 0.2.3` (`libc::ENOATTR` was removed in
+   `libc 0.2.190`); 0.2.2 is the latest crates.io `gpui` and a 7-variant feature matrix does not help.
+   UI-001 must apply and prove a contained remedy — hold `libc` below 0.2.190
+   (`cargo update -p libc --precise 0.2.189`) or patch `xattr` — before the pin is relied on
+   (`spikes/terminal-engine-phase2/results/raw/gpui-followup/DIAGNOSIS.md`).
 5. **License obligation mitigation:** vendor the applicable `LICENSE-APACHE`/`LICENSE-MIT`/`LICENSE.md`
    texts into any Relayable distribution, and ship no `NOTICE` (none of the inspected artifacts ships
    one). For `alacritty_terminal` that means `LICENSE-APACHE` (Apache-2.0); for `vte` both
@@ -235,6 +238,10 @@ but no engine-level spike has validated the engine choice itself.
    do not exist.
 
 ### §5.4 requirement mapping
+
+**Phase-2 update (TERM-002).** The `alacritty_terminal` 0.26.0 engine-level results are committed in
+`spikes/terminal-engine-phase2/results/REPORT.md` §3–§4 (32 PASS / 1 documented UNSUPPORTED / 0 FAIL
+on real PTYs); the phase-1 column below is retained as the engine-independent record.
 
 | §5.4 bullet | Chosen-engine mechanism (published source) | Spike evidence — TERM-001 phase 1, engine-independent (`spikes/terminal-engine`) | Status |
 |---|---|---|---|
@@ -253,14 +260,17 @@ but no engine-level spike has validated the engine choice itself.
 | Android rendering later | no renderer in the engine; `tty` unix backend `#[cfg(not(windows))]` (`src/tty/mod.rs:10–13`) | none | **UNVERIFIED / spike-pending** |
 | Platform support / licensing / cadence / tests | crates.io: BSD/Linux/macOS/Windows; Apache-2.0; 0.26.0 published 2026-04-06, active cadence (`PER-VERSION.tsv`); `tests/ref.rs` | none | evidenced (metadata; tests not executed) |
 
-**Honest statement.** The committed phase-1 spike proves that a real PTY can be owned, resized and
-signalled, that candidate programs emit alt-screen / mouse / bracketed-paste / OSC / cursor / SGR
-sequences on the wire, and it records an RSS observation. It is **engine-independent**: it validates
-neither `alacritty_terminal` nor any engine, and phase 2 (engine adapters) was cancelled with no
-results. Source inspection shows the chosen engine *has* the mechanisms, but not that its rendered
-output matches the reference behavior, that `vim`/`nvim`/multiplexers are compatible, that selection
-or Unicode/wide glyphs behave correctly, or that memory bounds are met. Those remain `spike-pending`
-(`full.md` §5.4, §13.5). Nothing here claims otherwise.
+**Honest statement.** The phase-1 spike (engine-independent) proved a real PTY can be owned, resized
+and signalled and that candidate programs emit alt-screen / mouse / bracketed-paste / OSC / cursor /
+SGR sequences on the wire. **TERM-002 (phase 2) now supplies the engine-level evidence for
+`alacritty_terminal` 0.26.0** (`spikes/terminal-engine-phase2/results/REPORT.md` §3–§4, §7): 32 PASS /
+1 UNSUPPORTED / 0 FAIL / 0 NOT_TESTED, with real-program captures (nvim, less, top, tmux) and
+chunk-boundary invariance. Surviving limits (REPORT.md §8): `vte` is exercised only through
+`alacritty_terminal`'s re-export, not as an independent parser boundary; palette→RGB is unverified
+(no frontend); the mouse model approximates (`Press` vs `PressRelease`); bracketed-paste payload is an
+input-path property and UNSUPPORTED here; selection is golden-value tested only; there is no Android
+rendering, no GPU/renderer path, and no `TerminalOutput`/`TerminalSnapshot` protocol mapping yet; and
+`gpui` remains unbuilt and unrun. Nothing here claims otherwise.
 
 ---
 
@@ -332,8 +342,10 @@ Each trigger below is concrete and falsifiable.
    reconstructed; OSC 8 link targets are not retrievable through the public API), reconsider.
 3. **Measured memory growth violating §6.4.** If measurement (§12) shows unbounded or unacceptably
    large retained scrollback bytes with the chosen bound, reconsider the bound or the engine.
-4. **`gpui` 0.2.2 does not build or run on this toolchain.** A UI-001 build/run failure forces a
-   revision move (to a newer `gpui`, or to a fork/republish that first satisfies the license check).
+4. **`gpui` 0.2.2 does not build or run on this toolchain.** TERM-002 confirms it does not compile
+   (`xattr`/`libc::ENOATTR`). Keep the pin if UI-001's contained remedy (hold `libc` ≤0.2.189 or patch
+   `xattr`) makes it build and run; otherwise a revision move (a newer `gpui`, or a fork/republish that
+   first satisfies the license check) is required.
 5. **GPUI API churn.** Breaking API changes that force a revision move away from 0.2.2 constitute
    evidence to revisit the pin and possibly move to a different published artifact.
 6. **`Glass-HQ/gpui` (or any fork) gains a license file + (if applicable) `NOTICE`,** making a

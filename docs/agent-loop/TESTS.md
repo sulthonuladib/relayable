@@ -196,3 +196,20 @@ each flagged row directly against `/tmp/doc002/raw/**`:
 `audit.py` re-derives spans automatically and false-positives on paraphrased evidence and on repeated
 quotes. The repaired matrix agrees with the adjudicated audit (0 invented refs; 78 NOT_FOUND converted
 to heading anchors). **DOC-002 is accepted; the revision request (`ea419e3b`/`88505e2b`) was withdrawn.**
+
+## 2026-10-15 — TERM-002 engine-level spike: independent Manager validation (`60d4395`)
+
+Environment: Linux `falcon` x86_64, rustc/cargo 1.98.1, repo `/home/sulthonuladib/work/relayable`.
+Run in the spike's own workspace root (`spikes/terminal-engine-phase2`).
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 79 | `cargo build --offline`; `cargo clippy --all-targets --offline -- -D warnings`; `cargo fmt --check` | all exit 0 | 0 |
+| 80 | `cargo test --offline` | `42 passed; 0 failed` (+0 in bins/doc-tests) | 0 |
+| 81 | read `spikes/terminal-engine-phase2/results/REPORT.md` §3–§9 | `alacritty_terminal 0.26.0` + `vte 0.15.0` + `portable-pty 0.9.0` = 32 PASS / 1 documented UNSUPPORTED / 0 FAIL / 0 NOT_TESTED on real PTYs; `gpui = "=0.2.2"` resolves but `cargo check` exits 101 at `xattr 0.2.3` (`libc::ENOATTR` removed in libc 0.2.190); remedies (hold libc ≤0.2.189 or patch xattr) NOT applied | 0 |
+
+**Decisions recorded:** engine pins accepted; no engine change (`vt100` lacks OSC 8 + reflow; `avt` lacks
+title/mouse/bracketed-paste/OSC 8). `gpui` pin accepted only with the documented caveat; ADR-003 stays
+`Proposed` until UI-001 proves a contained remedy and a window build/run. Full report caveats: vte is
+exercised only transitively through `alacritty_terminal`; palette→RGB, Android rendering, and the
+`TerminalSnapshot` mapping are untested in this spike.

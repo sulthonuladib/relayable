@@ -77,6 +77,27 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 19 — TERM-002 integrated; ADR-003 engine pins validated, GPUI pin blocked (2026-10-15)
+
+**Objective:** complete the engine-level spike and resolve ADR-003's engine gate.
+
+**Deliverable:** TERM-002 (`af37bc5`+`7ff32cf3`, 327 files, +77884) merged as INT-009 `60d4395`
+(`spikes/terminal-engine-phase2/**` only; root workspace still `exclude = ["spikes"]`). Independently
+re-validated: build/clippy/fmt exit 0, `cargo test` 42 passed.
+
+**Verdict:** `alacritty_terminal 0.26.0` + `vte 0.15.0` + `portable-pty 0.9.0` = 32 PASS / 1 documented
+UNSUPPORTED / 0 FAIL on real PTYs; **engine pins accepted, no engine change**. `gpui = "=0.2.2"`
+resolves but `cargo check` exits 101 (`xattr 0.2.3` → `libc 0.2.190` removed `ENOATTR`); remedies are
+hold `libc` ≤0.2.189 or patch `xattr`, **not applied**.
+
+**Actions:** ADR-003 updated with the phase-2 result, the `gpui` blocker, and the required UI-001
+remedy — **kept `Proposed`**. DEC-004 updated.
+
+**Next:** UI-001 must (a) apply and prove a contained `gpui` remedy and (b) prove a minimal window
+builds/runs, then ADR-003 can move to Accepted. CORE-002 (`w1B`) is still in flight.
+
+---
+
 ## Checkpoint 18 — CORE-001 integrated: first engineering vertical slice (2026-10-15)
 
 **Objective:** land the first real Linux vertical slice and verify it independently.

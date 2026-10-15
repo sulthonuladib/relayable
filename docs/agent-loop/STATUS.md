@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 1 — **first engineering vertical slice integrated and verified (`d3e0286`); TERM-002 pending; UI-001 next.**
+**Milestone:** Phase 1 — **CORE-001 slice verified; TERM-002 engine pins validated; `gpui` pin blocker + UI-001 remedy pending; CORE-002 in flight.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)
