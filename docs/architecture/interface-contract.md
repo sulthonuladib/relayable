@@ -48,8 +48,8 @@ identities."; DOC-001 §5 "Domain hierarchy and stable IDs" records labels as ch
 and whether a session close retains audit history are undecided (DOC-001 §5 "Deletion permanence and whether a session close
 leaves audit history" is unknown) and the contract only requires the decision stay expressible; `host:` IDs are client-local
 and never accepted as a server identity, with server targeting resolving to a `server:` ID (DOC-001 §6 "Target resolution").
-Rust uses one distinct newtype per kind in `relayable-model` (`SessionId`, `WindowId`, `BlockId`, `ClientId`, `PtyId`,
-`ServerId`, `HostProfileId`, `ScriptId`), and no bare `String` ID crosses a crate boundary. This does both halves of `full.md`
+Rust uses one distinct newtype per kind in `relayable-model` (`SessionId`, `WindowId`, `BlockId`, `ClientId`, `PtyProcessId`,
+`ServerId`, `HostProfileId`, `ScriptId`), and no bare `String` ID crosses a crate boundary. (REVIEW-001 A-1: reconciled from `PtyId` to `PtyProcessId` to match the `PtyProcess` entity and ADR-001 §Interface details.) This does both halves of `full.md`
 §4:343 "Use tagged IDs or explicit entity type fields to prevent cross-entity ambiguity."
 
 **Target resolution** belongs to `relayable-cli` and the docs layer, never to `relayable-model`. It follows the DOC-001 §6

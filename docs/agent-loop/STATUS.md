@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 0 — **Wave 2 architecture integrated (ADR-001/002/003, TERM-001 phase 1); DOC-002 repair pending; CORE-001 is next.**
+**Milestone:** Phase 0 — **Wave 2 architecture reviewed (REVIEW-001 recorded); ADR-FIX-001 and TERM-002 in flight; CORE-001 next.**
 **Updated:** Clean-start handoff — see `WORKLOG.md` Checkpoint 9 and `NEXT.md`.
 
 ## Objective (current)
@@ -66,9 +66,13 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
   DOC-002 found ~142 further wrong line citations beyond `events.md` (audit committed on `doc-002`).
 - No build/test suite or workspace exists yet; Phase 0 exit gate still requires the first vertical
   slice. The only in-repo Rust code is the standalone `spikes/terminal-engine` crate (not a workspace).
-- **Independent review gap (REVIEW-001):** ADR-001/002/003 and the spike were merged without an
-  independent reviewer pass (wind-down forbade new agents); ADR-002 also carries in-file UNVERIFIED
-  external claims. Review before CORE-001 builds on them.
+- **Independent review (REVIEW-001) — recorded 2026-10-15:** report at
+  `docs/reviews/REVIEW-001-adr-review.md` (+4 evidence files) on branch `review/review-001-adr-pass`.
+  Verdicts: ADR-001 and ADR-002 **accept-with-nits**; ADR-003 + spike **keep `Proposed`**. Blocking
+  items: A-1 (PTY ID newtype reconciled in `interface-contract.md`), B-1/B-2/B-3 (ADR-002 Unverified
+  table refresh, authn/authz coverage-row fix, D11 no-reserialize test) tracked as `ADR-FIX-001`.
+  TERM-002 is a hard gate for adopting the engine, **not** for CORE-001 provided CORE-001 does not
+  adopt `alacritty_terminal`/`vte`.
 
 ## Guarantees that must NOT be claimed
 

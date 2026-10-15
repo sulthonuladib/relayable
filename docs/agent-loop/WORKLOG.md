@@ -77,6 +77,34 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 13 — REVIEW-001 findings recorded; CORE-001 blocker cleared (2026-10-15)
+
+**Objective:** satisfy the "independent review before CORE-001" gate. REVIEW-001 (branch
+`review/review-001-adr-pass`) produced `docs/reviews/REVIEW-001-adr-review.md` (327 lines) plus four
+evidence files in `docs/reviews/evidence/`. The Lead is applying final internal-consistency fixes; the
+branch is not yet committed/merged, so this checkpoint records the findings from the review worktree.
+
+**Verdicts (from the review report):**
+
+| Artifact | Verdict | Blocking items |
+|---|---|---|
+| ADR-001 | accept-with-nits | A-1: same entity had two Rust newtype names (`PtyProcessId` vs `PtyId`) |
+| ADR-002 | accept-with-nits | B-1 stale Unverified table (9/10 settled, only #10 Android QUIC open); B-2 overstated authn/authz coverage row; B-3 missing D11 no-decode→re-encode test |
+| ADR-003 + spike | keep `Proposed` | C-1: no committed evidence exercises any engine → TERM-002 is a hard gate for engine adoption; UI-001 gates the `gpui = "=0.2.2"` pin |
+
+**Manager action taken now:** A-1 reconciled — `docs/architecture/interface-contract.md` now names the
+type `PtyProcessId` (was `PtyId`), matching ADR-001 and the `PtyProcess` entity. This was the only item
+the review marked as blocking for CORE-001 model code. ADR-002's B-1/B-2/B-3 and the ADR-001 nits are
+tracked as `ADR-FIX-001`; they gate marking DEC-003 Accepted, not CORE-001.
+
+**Interpretation:** the review confirms `TERM-002` is **not** a precondition for CORE-001 provided
+CORE-001 does not adopt `alacritty_terminal`/`vte` (PTY-level `portable-pty` evidence already exists).
+
+**Not yet done:** review branch commit/merge; DOC-002 branch merge; TERM-002 completion; ADR-FIX-001;
+DEC-002/003 status change to Accepted.
+
+---
+
 ## Checkpoint 12 — Post-Android-deferral: REVIEW-001 + DOC-002 repair + TERM-002 launched (2026-10-15)
 
 **Objective:** resume the ordered Linux work after the DEC-010 Android deferral, with REVIEW-001
