@@ -144,6 +144,17 @@ pub struct Ramp<T> {
     pub bottom: T,
 }
 
+/// A measured range between two samples, with **no direction implied**
+/// (contrast [`Ramp<T>`], which is directional/vertical). Used for values the
+/// document reports as a spread of samples, e.g. glyph bright-sample ranges.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Span<T> {
+    /// Lower/first sample.
+    pub low: T,
+    /// Upper/second sample.
+    pub high: T,
+}
+
 /// A pane surface: a flat header colour plus a body ramp.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PaneSurface {
@@ -740,7 +751,7 @@ pub mod terminal {
 /// Tokens the document **measures** but that must **not** be adopted as app
 /// tokens. Reasons are the document's own wording.
 pub mod not_app_tokens {
-    use super::{Confidence, Measured, Ramp, Rgb8};
+    use super::{Confidence, Measured, Rgb8, Span};
 
     /// macOS traffic-light colours: rgb(254,79,84) / (248,190,0) / (42,190,75).
     ///
@@ -762,10 +773,10 @@ pub mod not_app_tokens {
     ///
     /// Reason (document, verbatim): "small glyphs, heavy antialias; not a safe
     /// token".
-    pub const ACCENT_TERMINAL_GLYPH_RANGE: Measured<Ramp<Rgb8>> = Measured::new(
-        Ramp {
-            top: Rgb8::new(33, 94, 39),
-            bottom: Rgb8::new(208, 255, 214),
+    pub const ACCENT_TERMINAL_GLYPH_RANGE: Measured<Span<Rgb8>> = Measured::new(
+        Span {
+            low: Rgb8::new(33, 94, 39),
+            high: Rgb8::new(208, 255, 214),
         },
         "V1 0:47 `v1-t0047.png`; V1 1:40 `v1-t0140.png`",
         Confidence::Low,
@@ -1294,12 +1305,14 @@ mod tests {
             colors::SELECTION_SESSION_PICKER_ROW.value,
             Rgb8::new(68, 156, 255)
         );
-        // §3.2 line 127: "Pane card border / focused | 2–3 px, rgb ≈ (31,82,115)".
+        // design-tokens.md §3.1 (Geometry) line 127: "Pane card border / focused
+        // | 2–3 px, rgb ≈ (31,82,115)"; restated in §5 (Reconciliation) line 201.
         assert_eq!(
             colors::PANE_CARD_BORDER_FOCUSED.value,
             Rgb8::new(31, 82, 115)
         );
-        // §3.2 line 128: "Pane card border / unfocused | 2–3 px, rgb ≈ (17,54,71)".
+        // design-tokens.md §3.1 (Geometry) line 128: "Pane card border / unfocused
+        // | 2–3 px, rgb ≈ (17,54,71)"; restated in §5 (Reconciliation) line 201.
         assert_eq!(
             colors::PANE_CARD_BORDER_UNFOCUSED.value,
             Rgb8::new(17, 54, 71)
