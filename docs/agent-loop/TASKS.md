@@ -50,6 +50,7 @@ the evidence is integrated.
 | CTX-001 | Context-resolution test + set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005 Decision 2 + the §8.1 test) | ADR-005, CORE-001 | TBD | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot + event stream/resume | CORE-001 | `core/core-002-reconnect-events` | IN_PROGRESS (2026-10-15) — owns `crates/**` (except `relayable-model`) + `tests/**` + `protocol/**`; no model/contract edits |
 | QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |
+| QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | TBD | BACKLOG |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
 (parallel, disjoint paths) → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →
