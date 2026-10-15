@@ -1030,9 +1030,25 @@ mod tests {
         }
     }
 
+    /// Receive one envelope for a stub server, treating a closed connection or a
+    /// torn-down socket as "the stub is finished" instead of panicking.
+    ///
+    /// The tests assert on the *client* side, so a stub that loses a teardown
+    /// race with a dropping client should just stop. `Ok(None)` is EOF; a
+    /// timeout/reset `Err` is the same teardown condition observed from the read
+    /// side. Returns `None` in either case.
+    fn recv_or_finished(conn: &mut FrameConnection) -> Option<Envelope> {
+        match conn.recv() {
+            Ok(Some(envelope)) => Some(envelope),
+            Ok(None) | Err(_) => None,
+        }
+    }
+
     fn fake_server(mut conn: FrameConnection) {
         conn.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
-        let handshake = conn.recv().unwrap().unwrap();
+        let Some(handshake) = recv_or_finished(&mut conn) else {
+            return;
+        };
         assert!(matches!(handshake.body, Some(Body::Handshake(_))));
         assert_eq!(handshake.request_id, Some(1));
         conn.send(&response_for(
@@ -1048,7 +1064,12 @@ mod tests {
         ))
         .unwrap();
 
-        let list = conn.recv().unwrap().unwrap();
+        // A client that only exercises the handshake (e.g.
+        // `handshake_captures_hello_and_limits`) drops without ever sending a
+        // `session.list`; its EOF must end the stub cleanly, not panic.
+        let Some(list) = recv_or_finished(&mut conn) else {
+            return;
+        };
         let request_id = list.request_id.unwrap();
         assert!(matches!(list.body, Some(Body::Request(_))));
         conn.send(&response_for(
@@ -1084,10 +1105,13 @@ mod tests {
     }
 
     /// Complete the client handshake on a server-side connection, advertising
-    /// `limits`.
-    fn complete_handshake(conn: &mut FrameConnection, limits: Limits) {
+    /// `limits`. Returns `false` (without panicking) if the client has already
+    /// gone away, so the caller skips its script.
+    fn complete_handshake(conn: &mut FrameConnection, limits: Limits) -> bool {
         conn.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
-        let handshake = conn.recv().unwrap().unwrap();
+        let Some(handshake) = recv_or_finished(conn) else {
+            return false;
+        };
         let request_id = handshake.request_id.unwrap();
         assert!(matches!(handshake.body, Some(Body::Handshake(_))));
         conn.send(&response_for(
@@ -1099,6 +1123,7 @@ mod tests {
             }),
         ))
         .unwrap();
+        true
     }
 
     /// Spawn a paired server thread that completes the handshake and then runs
@@ -1127,8 +1152,9 @@ mod tests {
         let server = thread::spawn(move || {
             let mut conn =
                 FrameConnection::from_stream(server_stream, DEFAULT_LIMITS.max_frame_bytes);
-            complete_handshake(&mut conn, limits);
-            script(&mut conn);
+            if complete_handshake(&mut conn, limits) {
+                script(&mut conn);
+            }
         });
         let client = Client::from_connection(
             FrameConnection::from_stream(client_stream, DEFAULT_LIMITS.max_frame_bytes),
@@ -1194,7 +1220,9 @@ mod tests {
     fn attach_server() -> (Client, thread::JoinHandle<()>, mpsc::Receiver<Envelope>) {
         let (tx, rx) = mpsc::channel();
         let (client, server) = spawn_scripted_server(move |conn| {
-            let request = conn.recv().unwrap().unwrap();
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
             let request_id = request.request_id.unwrap();
             tx.send(request).unwrap();
             conn.send(&response_for(
@@ -1211,7 +1239,9 @@ mod tests {
     fn resume_server() -> (Client, thread::JoinHandle<()>, mpsc::Receiver<Envelope>) {
         let (tx, rx) = mpsc::channel();
         let (client, server) = spawn_scripted_server(move |conn| {
-            let request = conn.recv().unwrap().unwrap();
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
             let request_id = request.request_id.unwrap();
             tx.send(request).unwrap();
             conn.send(&response_for(
