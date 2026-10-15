@@ -29,8 +29,8 @@ the evidence is integrated.
 | REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | IN_PROGRESS |
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | IN_PROGRESS |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | IN_PROGRESS |
-| ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | IN_PROGRESS |
-| INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | BACKLOG |
+| ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
+| INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | IN_PROGRESS (1/3: env-audit b24133c) |
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | Lead | BACKLOG |
 | ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | Lead | BACKLOG |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | Lead | BACKLOG |
@@ -84,6 +84,8 @@ date/host context per row; explicit "gaps blocking implementation" section with 
 Covers Rust/cargo/mise, GPUI availability & license, systemd user mode, Android CLI/`adb`/SDK/
 emulator/system images, JDK/Gradle, display backend, disk/KVM. No installs, upgrades, `sudo`, or
 system changes.
+Evidence: both files delivered (+1591 lines across 6 commits) with an independent verification /
+remediation loop; integrated into `master` in `b24133c`.
 **Forbidden:** production code, other docs trees, any mutating host command.
 
 **INT-001** — the three research branches' commits reviewed by the Manager, merged into `master`

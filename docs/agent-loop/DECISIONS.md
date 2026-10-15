@@ -90,6 +90,11 @@ insufficient for a bounded session.
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).
 - Env namespace: `RELAYABLE_*` vs REX-compatible aliases vs both (§8.1).
+- **Android SDK/emulator install (approval gate):** ENV-001 found no SDK/emulator/images/licenses
+  and no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified); install + license acceptance need
+  explicit user approval. Evidence: `docs/operations/android-toolchain.md`.
+- **GPUI artifact/license pin:** crates.io `gpui` 0.2.2 (Apache-2.0) vs `Glass-HQ/gpui` (no root
+  LICENSE, manifests declare Apache-2.0) — decide in ADR-003 before pinning.
 - Whether any REX wire protocol is documented enough to attempt interoperability (currently assumed **not**).
 - **DEC-009 (approval gate):** which remediation for the Herdr agent-provisioning fault — A) stop
   sourcing the automatic-rename fish hook in `~/.config/fish/config.fish` (recommended; cosmetic

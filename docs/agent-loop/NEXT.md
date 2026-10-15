@@ -25,11 +25,10 @@ cd /home/sulthonuladib/work/relayable && git status --short --branch && git log 
 
 ## Current phase and state
 
-Phase 0 — Wave 1 research is **blocked by an environment fault at an approval gate**. All three
-Leads are alive and holding; their `delegate_agent` calls fail at `stage: agent_start` because
-Herdr reports `agent_pane_busy` for programmatically provisioned panes. Root cause (A/B-confirmed):
-the `herdr-automatic-rename` fish hook spawns background bash on every prompt, while Herdr requires
-the shell alone in the foreground. Evidence: `TESTS.md` rows 15–23; `WORKLOG.md` Checkpoint 3.
+Phase 0 — Wave 1 research is executing under the Option D stopgap. `research/env-audit` (ENV-001) is
+complete and integrated into `master` (`b24133c`); `research/ui-reference` (REF) has committed wave 1
+and is writing wave 2/3; `research/protocol-compat` (DOC) has its writers in flight. The permanent
+Herdr fix is still the pending DEC-009 decision.
 
 Recovery options (do not apply without the user's decision — DEC-009):
 
@@ -45,9 +44,10 @@ Until a fix is applied, any Herdsman agent start needs a pane wake: run a bounde
 that sends `herdr pane send-keys <pane> Enter` every ~0.3 s during the launch, or expect
 `agent_pane_busy`. Do not remove worktrees or restart Herdr without explicit user confirmation.
 
-**Stopgap active:** `/tmp/relayable-wake-daemon.py` is running for 1800 s against workspaces wX/wY/wZ
-(stop file `/tmp/relayable-wake-daemon.stop`) and all three Leads were messaged to retry delegation
-(`WORKLOG.md` Checkpoint 4). Collect their results; the permanent fix is still DEC-009.
+**Stopgap active:** `/tmp/relayable-wake-daemon.py` is running (pid file
+`/tmp/relayable-wake-daemon.pid`, stop file `/tmp/relayable-wake-daemon.stop`, expires ~00:05) with
+0 `agent_start` failures so far. Restart it if a later wave still needs agent starts; stop it once
+the permanent fix is applied or the wave settles (`WORKLOG.md` Checkpoints 4–5).
 
 | Branch | Worktree | Produces | Exclusive paths |
 |---|---|---|---|
@@ -97,4 +97,9 @@ and `**/evidence-local/`.
 None at this checkpoint. Decisions that will eventually need user input:
 
 - distribution/packaging target confirmation (`.deb` vs `.rpm` vs both, §7.3);
-- the `RELAYABLE_*` vs REX-compat environment-variable namespace decision (§8.1, DEC-006).
+- the `RELAYABLE_*` vs REX-compat environment-variable namespace decision (§8.1, DEC-006);
+- **Android SDK/emulator install (approval gate for AND-001):** ENV-001 found no Android SDK,
+  sdkmanager/avdmanager/emulator, AVDs, system images, or licenses, and no project JDK pin
+  (JDK 25 only; AGP-on-JDK-25 unverified). Downloading/installing the SDK and accepting licenses
+  requires explicit user approval; disk is 68% used. Evidence:
+  `docs/operations/android-toolchain.md`.

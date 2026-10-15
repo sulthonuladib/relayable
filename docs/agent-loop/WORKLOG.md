@@ -77,6 +77,46 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 5 — ENV-001 complete and integrated (INT-001, 1/3) (2026-10-15)
+
+**Objective:** review and integrate the completed `research/env-audit` branch.
+
+**Review (Manager):**
+
+- `git log --oneline 3db73c2..research/env-audit` → 6 commits; `git diff --name-only` → only
+  `docs/operations/{toolchain-audit,android-toolchain}.md` (+1591 lines); worktree clean; a
+  secret-pattern scan found nothing.
+- The Lead's workflow included an independent verification pass (3 defects), remediation, focused
+  re-verification (2 residual inaccuracies), and a final accuracy fix. Verification/remediation
+  artifacts are in the pi-herdsman results store.
+
+**Integration:** `git merge --no-ff research/env-audit` → merge commit `b24133c` on `master`;
+INT-001 is 1/3 complete (ENV done; REF and DOC in flight).
+
+**Key findings to feed ADRs (full detail in the merged docs):**
+
+- Rust 1.98.1 stable (rustfmt 1.9.0, clippy 0.1.98, single GNU target); mise 2026.10.5 manages
+  java/node but not Rust; crates.io requires a descriptive User-Agent; registry cache 914 MB.
+- crates.io `gpui` 0.2.2, Apache-2.0, repo `zed-industries/zed`; not cached → first build needs
+  network. `Glass-HQ/gpui` is reachable but has no root LICENSE (404; manifests declare
+  Apache-2.0) → artifact/license decision required in ADR-003 before pinning (gap G3).
+- systemd 261 user manager running; `Linger=yes`; `/run/user/1000` mode 700; `journalctl --user`
+  usable; no relayable units.
+- Wayland + XWayland, 798 fonts (JetBrainsMono Nerd Font present), 20 CPUs, 31 GiB RAM, 51 GB free,
+  `/dev/dri` present; wayland/xkbcommon/fontconfig/Vulkan/EGL libs present.
+- Android: CLI 1.0.16500706 + adb 1.0.41 + KVM + Temurin 25.0.4.1 ready; **no SDK, sdkmanager,
+  avdmanager, emulator, AVDs, images, licenses, or Gradle wrapper**; AGP 9.4 needs Gradle ≥ 9.6 and
+  JDK ≥ 17 (Java 25 needs Gradle ≥ 9.1); AGP-on-JDK-25 unverified. Android Studio absent and not a
+  dependency.
+
+**Approval gate surfaced to the user:** Android SDK/emulator installation, license acceptance, and
+project JDK pin (JDK-25-only risk) for AND-001; disk is 68% used.
+
+**Next:** continue REF/DOC; integrate as they complete; then ADR-003 from the ENV evidence and
+ADR-001/002 from DOC-001; then CORE-001.
+
+---
+
 ## Checkpoint 4 — Stopgap mitigation (Option D) activated (2026-10-15)
 
 **Objective:** unblock the three holding Wave 1 Leads without a global config change while the

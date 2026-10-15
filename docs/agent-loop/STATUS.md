@@ -2,7 +2,7 @@
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
 **Milestone:** Phase 0 exit gate (§16): evidence status clear, ADRs recorded, buildable minimal shell exists.
-**Updated:** Wave 1 Leads resumed but blocked by a fleet-wide Herdr agent-provisioning fault; remediation awaits user approval (see `BACKLOG.md`, `WORKLOG.md` Checkpoint 3).
+**Updated:** ENV-001 complete and integrated into `master` (`b24133c`); REF/DOC research in flight under the Option D stopgap; DEC-009 permanent fix still open.
 
 ## Objective (current)
 
@@ -29,7 +29,7 @@ Stand up the evidence base and the first working vertical slice:
 |---|---|---|---|
 | `research/ui-reference` | wX | five videos + GoRex catalogue (`docs/research/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
 | `research/protocol-compat` | wY | official REX behavior matrix (`docs/compatibility/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
-| `research/env-audit` | wZ | toolchain audit (`docs/operations/**`) | Lead alive, holding; blocked in `delegate_agent`; branch at `3db73c2`, no writes |
+| `research/env-audit` | wZ | toolchain audit (`docs/operations/**`) | **COMPLETE** — integrated into `master` (`b24133c`): 2 docs, +1591 lines, independently verified |
 
 All three Leads were resumed and bound; their Agent delegations fail at `stage: agent_start` with
 Herdr `agent_pane_busy` because the `herdr-automatic-rename` fish hook spawns background bash on
@@ -60,8 +60,13 @@ and the Manager integrates (INT-001) before Wave 2.
   no research files were written. Evidence: `TESTS.md` rows 15–25; options and recommendation in
   `WORKLOG.md` Checkpoint 3. Option A (recommended) needs approval to edit
   `~/.config/fish/config.fish`; Option B is repo-only.
-- **Stopgap in progress:** the bounded Option D wake daemon is running and the three Leads were
-  instructed to retry delegation (time-boxed window). See `WORKLOG.md` Checkpoint 4.
+- **Stopgap effective:** the bounded Option D wake daemon has kept all three Leads' Agent launches
+  working (0 `agent_start` failures in the retry window). It is time-boxed to ~00:05; the permanent
+  fix is the pending DEC-009 decision. See `WORKLOG.md` Checkpoints 4–5.
+- **Android tooling approval gate (for AND-001, not blocking Wave 1):** the audit found no Android
+  SDK, sdkmanager/avdmanager/emulator, AVDs, system images, or licenses, and no project JDK pin
+  (JDK 25 only). Installing the SDK/emulator and accepting licenses requires user approval; disk is
+  68% used. See `docs/operations/android-toolchain.md` and `NEXT.md`.
 
 ## Known risks
 
