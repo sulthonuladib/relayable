@@ -95,7 +95,9 @@ stop it. The hook stays commented (DEC-009 option A).
 instruction: `herdr plugin uninstall herdr-automatic-rename` → `No plugins installed.` Herdr left the
 checkout (~1.4 MB, git `b90c4086…`) and an empty config dir behind, so both were moved to
 `/tmp/herdr-automatic-rename-removed/` and the stale lock removed; `ls ~/.config/herdr/plugins/github`
-is now empty and the `config.fish` glob matches 0 files. Reinstall from
+is now empty and the `config.fish` glob matches 0 files. Finally, at the user's request the now-dead
+commented hook block was **deleted from `config.fish`** (`fish -n` exit 0; `grep` shows no
+`automatic-rename` reference). Reinstall from
 `github:qu8n/herdr-automatic-rename@b90c4086…` if ever wanted.
 
 **Files changed:** `docs/agent-loop/{DECISIONS,STATUS,NEXT,TESTS,WORKLOG}.md`.

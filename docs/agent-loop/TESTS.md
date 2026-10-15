@@ -130,6 +130,7 @@ Host/repo: Linux `falcon` x86_64 (omarchy), rustc/cargo 1.98.1, `master` @ `f096
 | 66 | `herdr plugin disable herdr-automatic-rename` then `herdr plugin list` | result `plugin_disabled`, `enabled:false`; list shows `disabled` | 0 |
 | 67 | `herdr plugin uninstall herdr-automatic-rename` | `Uninstalled herdr-automatic-rename.`; `herdr plugin list` → `No plugins installed.` | 0 |
 | 68 | move residual checkout + empty config dir to `/tmp/herdr-automatic-rename-removed/`; `rm` stale lock; re-check | `github/` empty, config dir gone; fish glob `matches=0`; plugin still unregistered | 0 |
+| 69 | delete the now-dead commented hook block from `~/.config/fish/config.fish`; `fish -n`; `grep -niE 'automatic-rename'` | syntax OK; no `automatic-rename` reference remains; backup `/tmp/relayable-config.fish.bak` intact | 0 |
 
 **Not run / not claimed:** the spike's engine-level phase 2 did not run (cancelled by wind-down); the
 DOC-002 matrix repair was not applied (the Lead session had no edit tools and wind-down forbade a new

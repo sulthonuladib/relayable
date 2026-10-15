@@ -46,11 +46,11 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
 
 ## Blockers / approval gates
 
-- **Herdr agent provisioning (DEC-009) — RESOLVED 2026-10-15:** option A applied (automatic-rename
-  fish hook sourcing disabled in `~/.config/fish/config.fish`) and the `herdr-automatic-rename`
-  plugin **uninstalled** (residual dirs cleared; `herdr plugin list` → `No plugins installed.`);
-  verified with `fish -n` and a successful `delegate_project`. The Option D wake daemon remains a
-  documented fallback. Details: `DECISIONS.md` DEC-009, `WORKLOG.md` Checkpoints 7 and 10.
+- **Herdr agent provisioning (DEC-009) — RESOLVED 2026-10-15:** the automatic-rename fish hook block
+  was removed from `~/.config/fish/config.fish` and the `herdr-automatic-rename` plugin
+  **uninstalled** (residual dirs cleared; `herdr plugin list` → `No plugins installed.`); verified
+  with `fish -n` and a successful `delegate_project`. The Option D wake daemon remains a documented
+  fallback. Details: `DECISIONS.md` DEC-009, `WORKLOG.md` Checkpoints 7 and 10.
 - **Android SDK/emulator install (AND-001 gate):** no SDK, sdkmanager/avdmanager/emulator, AVDs,
   images, or licenses; no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified). Install and
   license acceptance need explicit user approval; disk is 68% used. Evidence:

@@ -63,12 +63,12 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 ## Environment / cleanup
 
 - Steering can use fresh bounded agents again; one writer per branch/path.
-- DEC-009 is resolved (option A: automatic-rename fish hook sourcing disabled in
+- DEC-009 is resolved (the automatic-rename fish hook block was removed from
   `~/.config/fish/config.fish`; backup `/tmp/relayable-config.fish.bak`) **and the
   `herdr-automatic-rename` plugin is uninstalled** (`herdr plugin list` → `No plugins installed.`;
-  residual dirs at `/tmp/herdr-automatic-rename-removed/`). The `config.fish` glob now matches 0, so
-  the commented hook block is inert. If delegation fails with `agent_pane_busy`, restart the fallback
-  daemon: `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <ids…>`.
+  residual dirs at `/tmp/herdr-automatic-rename-removed/`). If delegation fails with `agent_pane_busy`,
+  restart the fallback daemon:
+  `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <ids…>`.
 - All Wave 2 Leads stopped; all Wave 2 branches merged; worktrees retired. Branches preserved.
 
 ## If context pressure hits

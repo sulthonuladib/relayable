@@ -97,22 +97,23 @@ rows 15–23.
 hook's background `bash` children, so Herdr accepts `agent_start`. The Wave 1 Option D wake daemon
 stays stopped; it remains a documented fallback if a future environment regresses.
 
-**Change made:** the `for _f in …herdr-automatic-rename-*/shell/hook.fish` block is commented out with
-a pointer to the restore lines. Backup: `/tmp/relayable-config.fish.bak` (md5
-`60a6536db6ac375f7c0e4d4f2872d609`). Restore = uncomment the commented block. Verified with
-`fish -n` (exit 0) and a fresh `fish -c 'functions'` check showing no hook functions loaded; a real
-`delegate_project` then succeeded (`w12`/`research/doc-002`).
+**Change made:** the `for _f in …herdr-automatic-rename-*/shell/hook.fish` block was first commented
+out (with a restore pointer). Backup: `/tmp/relayable-config.fish.bak` (md5
+`60a6536db6ac375f7c0e4d4f2872d609`). Later, after the plugin was uninstalled, the block was **removed
+from `config.fish` entirely**. Verified with `fish -n` (exit 0), a `grep` showing no
+`automatic-rename` reference in `config.fish`, and a fresh `fish -c 'functions'` check showing no hook
+functions loaded; a real `delegate_project` then succeeded (`w12`/`research/doc-002`).
 
 **Additional step (user request, 2026-10-15):** the plugin itself was then fully disabled —
 `herdr plugin disable herdr-automatic-rename` → `plugin_disabled`, `enabled: false` (verified with
 `herdr plugin list`). Disabling the plugin alone would **not** have fixed the fault, because the shell
 hook is sourced independently of plugin enable state and its `bash` children are what made Herdr
-report `agent_pane_busy`; that is why the `config.fish` hook block stays commented. The plugin was
-then **uninstalled** (`herdr plugin uninstall herdr-automatic-rename` → `No plugins installed.`), and
-the residual checkout/config directories that herdr leaves behind were moved to
-`/tmp/herdr-automatic-rename-removed/`. The `config.fish` glob now matches **0** files, so the
-commented hook block is inert. Reinstall from `github:qu8n/herdr-automatic-rename@b90c4086…` if
-ever wanted.
+report `agent_pane_busy`; that is why the `config.fish` hook block was disabled. The plugin was
+then **uninstalled** (`herdr plugin uninstall herdr-automatic-rename` → `No plugins installed.`), the
+residual checkout/config directories that herdr leaves behind were moved to
+`/tmp/herdr-automatic-rename-removed/`, and the now-dead commented hook block was deleted from
+`config.fish`. No `automatic-rename` reference remains in `config.fish`. Reinstall from
+`github:qu8n/herdr-automatic-rename@b90c4086…` if ever wanted.
 
 **Consequences:** all automatic tab/workspace naming stops, and the plugin is no longer present.
 No repo file depends on it. These are host-configuration changes outside the repo, made under the
