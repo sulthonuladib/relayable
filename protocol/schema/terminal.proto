@@ -1,0 +1,57 @@
+// Relayable protocol v1 — terminal stream messages.
+//
+// Sources:
+// - `docs/architecture/interface-contract.md` §5 (terminal stream interface):
+//   `TerminalOutput`, `TerminalInput`, `TerminalResize`, `TerminalSnapshot`,
+//   `AttachMode`, and the per-stream credit window.
+// - Every name here is Relayable-defined (no REX evidence); the reference docs
+//   do not document a wire format (matrix §8.3 records the transport as
+//   unknown). OSC 7501 is a terminal-level integration, never the native wire
+//   protocol (full.md §8.5). No terminal-engine/screen emulation is implemented
+//   by CORE-001: `TerminalSnapshot.screen_bytes` is a bounded byte tail, not an
+//   emulated screen, and `scrollback_bytes` is left empty.
+
+syntax = "proto3";
+
+package relayable.protocol.v1;
+
+enum AttachMode {
+  ATTACH_MODE_UNSPECIFIED = 0;
+  ATTACH_MODE_WRITER = 1;
+  ATTACH_MODE_OBSERVER = 2;
+}
+
+message TerminalInput {
+  uint64 stream_id = 1;
+  bytes bytes = 2;
+}
+
+message TerminalResize {
+  uint64 stream_id = 1;
+  uint32 cols = 2;
+  uint32 rows = 3;
+  optional uint32 pixel_width = 4;
+  optional uint32 pixel_height = 5;
+}
+
+// This is the contract §3 `terminal_data` envelope body and the contract §5
+// `TerminalOutput` row; the field name and message name satisfy both.
+message TerminalOutput {
+  uint64 stream_id = 1;
+  uint64 stream_seq = 2;
+  bytes bytes = 3;
+}
+
+message TerminalSnapshot {
+  uint64 stream_id = 1;
+  uint64 snapshot_seq = 2;
+  uint32 cols = 3;
+  uint32 rows = 4;
+  bytes screen_bytes = 5;
+  bytes scrollback_bytes = 6;
+}
+
+message FlowControl {
+  uint64 stream_id = 1;
+  uint64 ack_bytes = 2;
+}

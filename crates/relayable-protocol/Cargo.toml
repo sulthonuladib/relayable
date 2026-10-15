@@ -1,0 +1,25 @@
+[package]
+name = "relayable-protocol"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Relayable versioned protocol: schema, wire messages, codec, framing"
+
+[dependencies]
+relayable-model = { workspace = true }
+prost = { workspace = true }
+prost-types = { workspace = true }
+bytes = { workspace = true }
+thiserror = { workspace = true }
+
+[build-dependencies]
+prost-build = { workspace = true }
+
+[features]
+default = []
+# Local Unix-domain socket transport (ADR-002 D6). Deliberately non-default so a
+# default-feature build of this crate stays free of `std::os::unix`/socket
+# types and remains usable from the Android client (DEC-010).
+transport-unix = []

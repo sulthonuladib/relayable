@@ -1,0 +1,171 @@
+// Relayable protocol v1 — control operations (sessions, blocks, snapshot).
+//
+// Sources:
+// - `docs/architecture/interface-contract.md` §2 (session snapshot schema),
+//   §3 (envelope), §5 (terminal stream interface), §7 (snapshot/sequence).
+// - `SessionCreateRequest/Response`, `SessionList*`, `SessionSnapshot*`,
+//   `SessionClose*`, `BlockAttach*`, `BlockDetach*`, `TerminalInputAccepted`,
+//   `TerminalResizeAccepted`, and the record/state messages below are
+//   Relayable-defined (no REX evidence) except where a field name is documented
+//   in the matrix (§8.2 Schemas and examples; §10 Events; §12 Multi-client
+//   behavior; §13 Connection lifecycle): `session_id`, `block_id`, `window_id`,
+//   `revision`, `client_id`, `principal`, `connection_state`,
+//   `connected_at`, `exit_code`, `pwd`, `title`, `state`, `progress`.
+// See `protocol/compatibility/core-001-method-set.md`.
+
+syntax = "proto3";
+
+package relayable.protocol.v1;
+
+import "terminal.proto";
+
+message SessionCreateRequest {
+  optional string label = 1;
+}
+
+message SessionCreateResponse {
+  SessionRecord session = 1;
+  string window_id = 2;
+  string block_id = 3;
+  string pty_process_id = 4;
+  uint32 program_pid = 5;
+}
+
+message SessionListRequest {}
+
+message SessionSummary {
+  string session_id = 1;
+  optional string label = 2;
+  SessionState state = 3;
+  uint64 revision = 4;
+}
+
+message SessionListResponse {
+  repeated SessionSummary sessions = 1;
+  uint64 sequence = 2;
+}
+
+message SessionSnapshotRequest {
+  string session_id = 1;
+}
+
+message SessionSnapshotResponse {
+  uint64 sequence = 1;
+  ServerRecord server = 2;
+  SessionRecord session = 3;
+  repeated WindowRecord windows = 4;
+  repeated BlockRecord blocks = 5;
+  repeated ClientRecord clients = 6;
+}
+
+message ServerRecord {
+  string server_id = 1;
+  string protocol_version = 2;
+  uint64 sequence = 3;
+  uint64 started_at_unix_millis = 4;
+}
+
+message SessionRecord {
+  string session_id = 1;
+  optional string label = 2;
+  uint64 revision = 3;
+  SessionState state = 4;
+  uint64 created_at_unix_millis = 5;
+}
+
+message WindowRecord {
+  string window_id = 1;
+  string session_id = 2;
+  optional string label = 3;
+  uint64 revision = 4;
+  bool active = 5;
+}
+
+message BlockRecord {
+  string block_id = 1;
+  string window_id = 2;
+  string session_id = 3;
+  BlockKind kind = 4;
+  optional string label = 5;
+  uint64 revision = 6;
+  uint32 cols = 7;
+  uint32 rows = 8;
+  ProgramStatus program_status = 9;
+  string pty_process_id = 10;
+  uint32 program_pid = 11;
+  bool writer_attached = 12;
+}
+
+message ProgramStatus {
+  ProgramState state = 1;
+  optional uint32 exit_code = 2;
+  optional string signal = 3;
+  optional string pwd = 4;
+  optional string title = 5;
+}
+
+message ClientRecord {
+  string client_id = 1;
+  string kind = 2;
+  string platform = 3;
+  string version = 4;
+  string connection_state = 5;
+  optional string principal = 6;
+  uint64 connected_at_unix_millis = 7;
+}
+
+message SessionCloseRequest {
+  string session_id = 1;
+}
+
+message SessionCloseResponse {
+  SessionRecord session = 1;
+}
+
+message BlockAttachRequest {
+  string block_id = 1;
+  AttachMode mode = 2;
+}
+
+message BlockAttachResponse {
+  uint64 stream_id = 1;
+  AttachMode mode = 2;
+  bool writer_lease = 3;
+  TerminalSnapshot snapshot = 4;
+}
+
+message BlockDetachRequest {
+  uint64 stream_id = 1;
+}
+
+message BlockDetachResponse {
+  uint64 stream_id = 1;
+}
+
+message TerminalInputAccepted {
+  uint64 stream_id = 1;
+  uint64 accepted_bytes = 2;
+}
+
+message TerminalResizeAccepted {
+  uint64 stream_id = 1;
+  uint32 cols = 2;
+  uint32 rows = 3;
+}
+
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_ACTIVE = 1;
+  SESSION_STATE_CLOSED = 2;
+}
+
+enum BlockKind {
+  BLOCK_KIND_UNSPECIFIED = 0;
+  BLOCK_KIND_TERMINAL = 1;
+}
+
+enum ProgramState {
+  PROGRAM_STATE_UNSPECIFIED = 0;
+  PROGRAM_STATE_RUNNING = 1;
+  PROGRAM_STATE_EXITED = 2;
+}

@@ -1,0 +1,21 @@
+[package]
+name = "relayable-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Relayable command-line client (binary `relayable`)"
+
+[[bin]]
+name = "relayable"
+path = "src/main.rs"
+
+[dependencies]
+# ADR-001 §7: `cli -> {model, protocol, client}` only. The CLI must not depend
+# on `relayable-server` or `relayable-pty`, so the foreground server is the
+# separate `relayable-server` binary and is deliberately not a subcommand.
+relayable-model = { workspace = true }
+relayable-protocol = { workspace = true, features = ["transport-unix"] }
+relayable-client = { workspace = true }
+serde_json = { workspace = true }

@@ -1,0 +1,23 @@
+[package]
+name = "relayable-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Relayable server: session registry, server-owned PTY, protocol front end"
+
+[[bin]]
+name = "relayable-server"
+path = "src/main.rs"
+
+[dependencies]
+relayable-model = { workspace = true }
+relayable-protocol = { workspace = true, features = ["transport-unix"] }
+relayable-pty = { workspace = true }
+anyhow = { workspace = true }
+# Signal handling only. The single documented `unsafe` block lives in
+# `src/signals.rs` and calls `libc::signal` with an async-signal-safe handler
+# that only sets an `AtomicBool`. Declared here (not in the root manifest);
+# `=0.2.190` matches the version already resolved in `Cargo.lock`.
+libc = "=0.2.190"
