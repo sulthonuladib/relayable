@@ -16,53 +16,54 @@ and this file. Trust repo state over chat.
 ```bash
 cd /home/sulthonuladib/work/relayable && git status --short --branch && git log --oneline -8
 git worktree list && git branch -a
-ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-audit
+ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-audit docs/reviews
 ```
 
-## Current state (clean start)
+## Current state (Manager integration session, 2026-10-15)
 
-`master` is clean and pushed; **all Wave 2 work is merged and all Wave 2 worktrees are retired**
-(the branches and Pi sessions are preserved). Fresh worktrees can be created per task.
+`master` is clean and pushed at `dca5263`. The Wave 1/2 research and the review/fix cycle are integrated.
 
-- `31bed30` — **ADR-001** (domain model + dependency boundaries), **ADR-002** (proto3 + `prost`;
-  4-byte length-prefix framing; pathname Unix socket local; TLS 1.3 remote, off by default), and
-  `docs/architecture/interface-contract.md` (`full.md` §14.4 interface note).
-- `78b83f2` — **TERM-001 phase 1** PTY spike (`spikes/terminal-engine/**`; `cargo build`/`clippy`/
-  `fmt --check` exit 0; real-PTY `SIGWINCH` probe `VERDICT=PASS`) + **ADR-003** (`Proposed`; pins
-  `alacritty_terminal 0.26.0`, `vte 0.15.0`, `portable-pty 0.9.0`, `gpui = "=0.2.2"`).
-- `a1f1719` — **DOC-002 audit evidence** (`docs/compatibility/doc-002-audit/**`).
-- ADR-001/002/003 are **`Proposed`**, not Accepted — reconfirm before CORE-001.
+- **ADR-001** (domain model + dependency boundaries) and **ADR-002** (proto3 + `prost`; 4-byte
+  length-prefix framing; pathname Unix socket local; TLS 1.3 remote, off by default) — **Accepted**
+  (`31bed30`, corrections via INT-007 `f474c83`).
+- **ADR-005** (env namespace `RELAYABLE_*`-only, no `REX_*` aliases) — **Accepted** (`74e7e20`,
+  `99c4c0c`); DEC-006 resolved.
+- **ADR-003** (terminal engine + GPUI pin) — **`Proposed`**; engine-level spike **TERM-002** is the hard
+  gate for the engine choice, **UI-001** gates the `gpui = "=0.2.2"` pin.
+- **REVIEW-001** (`774d394`, report + evidence in `docs/reviews/**`) and **DOC-002** citation repair
+  (`16c8bc9`) integrated.
+- `docs/architecture/interface-contract.md` is frozen and uses `PtyProcessId`.
+- **In flight:** **CORE-001** (`core/core-001-vertical-slice`) and **TERM-002** (`spike/term-002-engine-validation`).
+- Host: `protoc` = `libprotoc 36.1`; both spike crates self-root with an empty `[workspace]` table.
 
 ## Open tasks, in order
 
-1. **REVIEW-001** — independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike
-   (`2e41da4`) before CORE-001 builds on them; record findings. No independent review happened during
-   the wind-down (wind-down forbade new agents), and ADR-002 carries in-file UNVERIFIED external claims.
-2. **DOC-002 writer pass** — apply `docs/compatibility/doc-002-audit/citation-audit.md` to
-   `docs/compatibility/reference-behavior-matrix.md`: fix **all 7 source files'** line numbers;
-   convert unlocatable rows to `[file.md §<heading>](url)` + the existing verbatim quote (never invent
-   a number); update the §4 retrieval log and "as-of" timestamps to the re-check window. Findings:
-   **zero URL drift**; **386 line citations = 193 MATCH / 115 SHIFT / 78 NOT_FOUND**. Commit + merge.
-3. **TERM-002** — engine-level spike phase 2 validating ADR-003's provisional engine pin.
-4. **CORE-001** — first engineering slice: create the Cargo workspace + `relayable-{model,protocol,
-   pty,server,client,cli}` per ADR-001/002 + the interface contract. Automated integration test must
-   prove: foreground server owns a PTY; CLI creates a session and returns a stable ID; terminal I/O
-   round-trips; client disconnect leaves the child process alive; reconnect retrieves current state.
-   Use `portable-pty 0.9.0`. Do **not** absorb `spikes/terminal-engine` into the workspace.
-5. Then **CORE-002**, **UI-001/UI-002** (against `docs/research/` + `design-tokens.md`), **QA-001**;
-   **ADR-004** (DEC-005 ownership/persistence) and **ADR-005** (DEC-006 env namespace; ADR-002 D14
-   recommends `RELAYABLE_*`-only — Manager decision pending).
-6. Update `docs/agent-loop/**` after every meaningful iteration.
+1. **CORE-001** (in progress) — Cargo workspace + `relayable-{model,protocol,pty,server,client,cli}`
+   per ADR-001/002 + the interface contract. The automated integration test must prove: foreground
+   server owns a PTY; CLI creates a session and returns a stable ID; terminal I/O round-trips; client
+   disconnect leaves the child alive; reconnect retrieves current state. Use `portable-pty 0.9.0`; do
+   **not** adopt `alacritty_terminal`/`vte` (TERM-002 gate); do not absorb `spikes/**`.
+2. **TERM-002** (in progress) — engine-level spike validating ADR-003's provisional pin; verdict
+   accept as-is / accept with caveats / change the pin.
+3. **CORE-002** — disconnect survival + reattach snapshot.
+4. **UI-001/UI-002** — GPUI workspace against `docs/research/` + `design-tokens.md`; UI-001 also proves
+   the `gpui` pin builds/runs on this host.
+5. **QA-001** — smoke/CI scripts and build matrix.
+6. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
+7. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
+   build evidence spike (ADR-003 reconsideration trigger #10).
+8. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## Review gates (do not skip)
 
-- **Independent-review gap (REVIEW-001):** do the reviewer pass before building CORE-001 on the ADRs.
+- ADR-001/002/005 are **Accepted**; ADR-003 stays `Proposed` until TERM-002 (engine) and UI-001
+  (GPUI pin) report.
 - No REX wire/binary compatibility claims (`full.md` §3); no GoRex source/asset reuse (§2.6).
 - UI fidelity: catalogue + design tokens are the acceptance gate; unverified states stay labelled.
 - Android is deferred (DEC-010): no Android app/SDK/emulator/Gradle work now, but keep
   `relayable-model`/`relayable-protocol` Android-ready (no Linux-only assumptions; §1.3.6, §5.2).
 - Never claim server-crash or host-reboot session survival (§6.3).
-- Only the standalone `spikes/terminal-engine` crate exists in-repo; no Cargo workspace yet.
+- The root workspace must not absorb `spikes/**` (verify `cargo build` still works in each spike dir).
 
 ## Approval gates
 
