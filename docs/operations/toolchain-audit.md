@@ -766,20 +766,42 @@ $ git status --short            # before writing this file (after all read-only 
 EXIT: 0
 
 $ git status --short            # after writing this file
-?? docs/operations/toolchain-audit.md
+?? docs/operations/
 EXIT: 0
 
 $ git add docs/operations/toolchain-audit.md
-# (only this file staged — never `git add -A`)
+A  docs/operations/toolchain-audit.md
+# only this file staged (never `git add -A`)
 EXIT: 0
 
 $ git commit -m "docs(env-audit): add Rust/GPUI/systemd toolchain audit (ENV-001)"
-[research/env-audit <hash>] docs(env-audit): add Rust/GPUI/systemd toolchain audit (ENV-001)
- 1 file changed, ... insertions(+)
-# (exact hash and stat are reported in the worker handoff / `git show --stat HEAD`)
+[research/env-audit 5a6bc9a] docs(env-audit): add Rust/GPUI/systemd toolchain audit (ENV-001)
+ 1 file changed, 785 insertions(+)
+ create mode 100644 docs/operations/toolchain-audit.md
+EXIT: 0
 
 $ git status --short            # after commit
-# (empty except possibly untracked files owned by the parallel worker B)
+# (empty)
+EXIT: 0
+
+$ git show --stat HEAD
+commit 5a6bc9ad4dca4956044436950cf16f039dbb5689
+Author: Sulthonul Adib <adibcyber4rt@gmail.com>
+Date:   Thu Oct 15 23:08:57 2026 +0700
+
+    docs(env-audit): add Rust/GPUI/systemd toolchain audit (ENV-001)
+
+ docs/operations/toolchain-audit.md | 785 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 785 insertions(+)
+EXIT: 0
+
+$ git diff-tree --no-commit-id --name-only -r HEAD
+docs/operations/toolchain-audit.md
+EXIT: 0
 ```
+
+This validation block was then updated by a follow-up, append-only commit (an amend was avoided
+because a parallel worker owns another file on this branch); each commit on this branch touches
+only `docs/operations/**`.
 
 No push performed.
