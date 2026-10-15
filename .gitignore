@@ -1,0 +1,17 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Node
+node_modules/
+
+# Local-only reference captures (full.md §2.3: keep raw reference stills local
+# unless there is a clear right to redistribute them)
+/docs/research/evidence/
+/docs/research/**/evidence/
+**/evidence-local/
+
+# Android / Gradle build output (never commit build artifacts; wrapper IS committed)
+.gradle/
+**/build/
+local.properties
