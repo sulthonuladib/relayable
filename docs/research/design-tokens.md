@@ -210,7 +210,7 @@ No existing file was edited; this table is for the lead.
 **GoRex values not used.** No clone-derived number (33 px pane header, 14 px tab radius, 29 px
 palette rows, 8 px gaps, 26×26 buttons, `#1e1e22` terminal bg) was adopted. Where video measurement
 now disagrees with a clone-derived value (pane header 40–42 px vs GoRex 33 px; palette rows 37.5 px
-vs GoRex ≈28 px), the video values above stand on their own evidence and GoRex is not cited as
+vs GoRex 34 px), the video values above stand on their own evidence and GoRex is not cited as
 corroboration.
 
 ## 6. Validation record
