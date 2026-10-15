@@ -1,0 +1,17 @@
+== capture: bell ==
+PROGRAM=/bin/sh
+PROGRAM_ARGS=["-c", "printf \"\\a\""]
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+COLORTERM=truecolor
+DURATION_MS=1500
+BYTES_RECEIVED=1
+SHA256=ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879
+CHILD_EXIT=exited:0
+CHILD_EXIT_CODE=Some(0)
+KILLED=false
+TIMED_OUT=false
+READER_STALLED=false
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/bell.bin
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/bell.meta
+VERDICT=PASS

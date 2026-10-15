@@ -1,0 +1,63 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: mouse_modes
+# title: Mouse reporting modes 1000/1002/1003/1006
+# kind: fixture
+# utc_timestamp: 2026-10-15T20:12:31Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/mouse_1000.bin kind=fixture sha256=b600fe89f5237793cc03353cc5f0abb93b143280d05902f34f4567b15c33a034
+# source: results/raw/fixtures/mouse_1002.bin kind=fixture sha256=b730dc3176832cb1704afd3011e2481d903e62718696edae73fd1b6f4a54a094
+# source: results/raw/fixtures/mouse_1003.bin kind=fixture sha256=307d8e099000c61f2c8d66f26ff96f7938aea8893a70f25f852724179d6d30b9
+# source: results/raw/fixtures/mouse_1006.bin kind=fixture sha256=fc3966766c991c15b89b3b57e2b0bf53166472cdd932b261ed7deb385b786700
+# ---- expected vs actual ----
+ASSERT mouse_mode_after_1000_click
+  EXPECTED Click
+  ACTUAL   Click
+  STATUS   PASS
+ASSERT mouse_mode_after_1002_drag
+  EXPECTED Drag
+  ACTUAL   Drag
+  STATUS   PASS
+ASSERT mouse_mode_after_1003_any
+  EXPECTED Any
+  ACTUAL   Any
+  STATUS   PASS
+ASSERT mouse_sgr_after_1006
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- Mouse protocols are mutually exclusive in alacritty; 1003 replaces the prior mode. SGR encoding is independent of the mode and stays enabled.
+STATUS=PASS

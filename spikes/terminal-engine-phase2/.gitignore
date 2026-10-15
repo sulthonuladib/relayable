@@ -1,0 +1,6 @@
+# Build output for this standalone crate.  The repository-root .gitignore only
+# anchors `/target/` at the repo root, so this nested ignore is required.
+/target/
+
+# Build output for the nested gpui-pin-probe package (also its own workspace).
+gpui-pin-probe/target/

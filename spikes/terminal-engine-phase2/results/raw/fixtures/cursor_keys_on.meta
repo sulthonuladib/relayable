@@ -1,0 +1,5 @@
+kind=fixture
+name=cursor_keys_on
+description=DECSET 1 application cursor keys on
+bytes=5
+sha256=a45567c3f79d91d50db4a5be7cb15bc4dfb2a08c50ac7350ad70bb15c20b649d

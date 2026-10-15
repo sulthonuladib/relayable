@@ -1,0 +1,95 @@
+# ---- provenance ----
+# engine: vt100 0.16.2
+# check: unicode_emoji
+# title: Emoji base / VS16 / ZWJ per-cell decomposition
+# kind: fixture
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/unicode_emoji_base.bin kind=fixture sha256=f0443a342c5ef54783a111b51ba56c938e474c32324d90c3a60c9c8e3a37e2d9
+# source: results/raw/fixtures/unicode_vs16.bin kind=fixture sha256=16e81418a36c58995e00aeb9c261c9ef7fb739b37c72351f511dc3b3a89e5962
+# source: results/raw/fixtures/unicode_zwj.bin kind=fixture sha256=cc3baf32248d766570483335ce273f90c99f020f4bc530d05ffe869cd3ac2ae8
+# ---- expected vs actual ----
+ASSERT emoji_base_cell(0,0)
+  EXPECTED "😀"
+  ACTUAL   "😀"
+  STATUS   PASS
+ASSERT emoji_base_cell(0,1)_continuation
+  EXPECTED ""
+  ACTUAL   ""
+  STATUS   PASS
+ASSERT emoji_base_cursor_col
+  EXPECTED 2
+  ACTUAL   2
+  STATUS   PASS
+ASSERT vs16_cell(0,0)
+  EXPECTED "❤\u{fe0f}"
+  ACTUAL   "❤\u{fe0f}"
+  STATUS   PASS
+ASSERT vs16_cursor_col
+  EXPECTED 1
+  ACTUAL   1
+  STATUS   PASS
+ASSERT zwj_cell(0,0)
+  EXPECTED "👨\u{200d}"
+  ACTUAL   "👨\u{200d}"
+  STATUS   PASS
+ASSERT zwj_cell(0,1)_continuation
+  EXPECTED ""
+  ACTUAL   ""
+  STATUS   PASS
+ASSERT zwj_cell(0,2)
+  EXPECTED "👩\u{200d}"
+  ACTUAL   "👩\u{200d}"
+  STATUS   PASS
+ASSERT zwj_cell(0,3)_continuation
+  EXPECTED ""
+  ACTUAL   ""
+  STATUS   PASS
+ASSERT zwj_cell(0,4)
+  EXPECTED "👧"
+  ACTUAL   "👧"
+  STATUS   PASS
+ASSERT zwj_cell(0,5)_continuation
+  EXPECTED ""
+  ACTUAL   ""
+  STATUS   PASS
+ASSERT zwj_cursor_col
+  EXPECTED 6
+  ACTUAL   6
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 👨‍👩‍👧
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- alacritty uses unicode-width per-char width: U+2764 is width 1 and U+FE0F (VS16) is width 0, attached to the base cell. VS16 does not widen the cell to 2 columns in this engine.
+- alacritty does no grapheme clustering: each emoji is a 2-column wide char and each ZWJ (U+200D) is a width-0 mark attached to the preceding base cell.
+STATUS=PASS

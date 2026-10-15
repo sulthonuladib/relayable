@@ -1,0 +1,1203 @@
+{
+  "provenance": {
+    "utc_timestamp": "2026-10-15T20:12:35Z",
+    "hostname": "falcon",
+    "uname": "Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "git_head": "a1091e58f32d363ceb2614ab4915329b5de6a869",
+    "source_tree_sha256": "cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d"
+  },
+  "git_status_short": "?? ./",
+  "tally": {"PASS": 77, "UNSUPPORTED": 55},
+  "checks": [
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "vt_basics",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/vt_basics.bin", "kind": "fixture", "sha256": "0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "alt_screen",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/alt_enter.bin", "kind": "fixture", "sha256": "22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce"}, {"path": "results/raw/fixtures/alt_leave.bin", "kind": "fixture", "sha256": "9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "osc_title",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/title_0.bin", "kind": "fixture", "sha256": "c3c053809ba7e85f93458dc64fffad42c4f317256c5687e7c990883f454cb864"}, {"path": "results/raw/fixtures/title_2.bin", "kind": "fixture", "sha256": "8813d5ecfeaadc159817e058f438c0cb6e4fba6e9a0428121d13f2f3b605fcc7"}, {"path": "results/raw/fixtures/title_reset.bin", "kind": "fixture", "sha256": "f5a3c94a5050a7070a5cee1811c824afb207042763299c59e7f1301ef47b1b1e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "osc8_hyperlink",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/osc8.bin", "kind": "fixture", "sha256": "150806394eab4ca4d6e8c1805f76913f42e0aba5f4b768b62bfc260df2d34930"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "bell",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/bell.bin", "kind": "fixture", "sha256": "9f069067bda2832e7ce0b0957917882e35680e3f36dd6b850a3c2c40a6441046"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "unicode_wide",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_wide.bin", "kind": "fixture", "sha256": "10d6fe7a99e9aef6a0cfba3a5e15a0db9ffbdc36337e90163711031987ef35f8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "unicode_combining",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_combining.bin", "kind": "fixture", "sha256": "39f31f5c4f17ba7a53d54228a448a052236b39f75e942aa46038c61b7efe2d51"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "unicode_emoji",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_emoji_base.bin", "kind": "fixture", "sha256": "f0443a342c5ef54783a111b51ba56c938e474c32324d90c3a60c9c8e3a37e2d9"}, {"path": "results/raw/fixtures/unicode_vs16.bin", "kind": "fixture", "sha256": "16e81418a36c58995e00aeb9c261c9ef7fb739b37c72351f511dc3b3a89e5962"}, {"path": "results/raw/fixtures/unicode_zwj.bin", "kind": "fixture", "sha256": "cc3baf32248d766570483335ce273f90c99f020f4bc530d05ffe869cd3ac2ae8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "colors",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/colors.bin", "kind": "fixture", "sha256": "a8b1de85653c32512104ffacb38eaaa77f45554f4a59d4257f45eae1cdcb2d11"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "cursor_keys",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/cursor_keys_on.bin", "kind": "fixture", "sha256": "a45567c3f79d91d50db4a5be7cb15bc4dfb2a08c50ac7350ad70bb15c20b649d"}, {"path": "results/raw/fixtures/cursor_keys_off.bin", "kind": "fixture", "sha256": "38b33297c9170dfcfc3adf22cacfbf99b799c6ecaaa60f91c4eb3b431e30edcd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "bracketed_paste_mode",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/bracketed_paste_on.bin", "kind": "fixture", "sha256": "dfe5456fed7d6508bcf91708c48eb9d48213ca34668e6238e94cace519f39755"}, {"path": "results/raw/fixtures/bracketed_paste_off.bin", "kind": "fixture", "sha256": "30bd97c63fea7c0b9944d97a1dfd74ebb982be38458e6e374b3b36ad4cf3886f"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "bracketed_paste_payload",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "results/raw/fixtures/bracketed_paste_payload.bin", "kind": "fixture", "sha256": "139bb87a1083e79fee4762d5a2f202bc00ed5c7cf1893262c0cfe40732bd2780"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "mouse_modes",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/mouse_1000.bin", "kind": "fixture", "sha256": "b600fe89f5237793cc03353cc5f0abb93b143280d05902f34f4567b15c33a034"}, {"path": "results/raw/fixtures/mouse_1002.bin", "kind": "fixture", "sha256": "b730dc3176832cb1704afd3011e2481d903e62718696edae73fd1b6f4a54a094"}, {"path": "results/raw/fixtures/mouse_1003.bin", "kind": "fixture", "sha256": "307d8e099000c61f2c8d66f26ff96f7938aea8893a70f25f852724179d6d30b9"}, {"path": "results/raw/fixtures/mouse_1006.bin", "kind": "fixture", "sha256": "fc3966766c991c15b89b3b57e2b0bf53166472cdd932b261ed7deb385b786700"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "resize_reflow",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/engine_resize_input.bin", "kind": "engine-input", "sha256": "d82c6aa133a0fc25b087f46ad7ed2a3042772e612e015571e61753ff55ba6da8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "scrollback_bound",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/engine_scrollback_input.bin", "kind": "engine-input", "sha256": "a200b916c02d0d7b32b2ce535a31b2278272a03bb31e4faef1b54d571a1f67fa"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "selection",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/selection_input.bin", "kind": "engine-input", "sha256": "af49764a1fc2685f8d762ad250b355dcf35b1c152fe6dbac252c6b728acb8a27"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "chunk_boundary_invariance",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "alt_screen_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_alt.bin", "kind": "real-program", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "osc_title_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_title.bin", "kind": "real-program", "sha256": "a7acb071888575736d4f54bc405b1887b915ea36a1c20ab3c9abb6ef85a2fa27"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "osc8_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/osc8_ls.bin", "kind": "real-program", "sha256": "f7f96a1750fa71c920101805767be7be7a5ffc04202ca2c0a8dff82fe3981815"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "bell_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/bell.bin", "kind": "real-program", "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "unicode_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/unicode.bin", "kind": "real-program", "sha256": "a3250847264a2acb6b5af847a53f09d0570d02af6184aedd3e51271769cba2e5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "cursor_keys_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/cursor_keys.bin", "kind": "real-program", "sha256": "844db1632f1b7a170fabb1293538d7ec39143816b4b048565647f89246fd44b6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "mouse_modes_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_mouse.bin", "kind": "real-program", "sha256": "63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "resize_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/resize_winch.bin", "kind": "real-program", "sha256": "1b678a35c5f3ce05bf42ead8bd41dc09851706c6bd976c86fc96a072a3dd5ddb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "scrollback_bound_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/seq_20000.bin", "kind": "real-program", "sha256": "2a3211286c9175af88866db6522eb223e92f5546fc5946ad9a18c130a2c66aa6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "tmux_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.bin", "kind": "real-program", "sha256": "45e3f721839f1000d96f135b5a9f5f5a094b626c21eaaa3763bd386dfc2344a5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_less",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/less.bin", "kind": "replayed-real-capture", "sha256": "a5477a7e63c69ea19ada2989596afabf7e7c31675dc69cf0598b57a3372695cf"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_nvim",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim.bin", "kind": "replayed-real-capture", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_nvim_mouse",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_mouse.bin", "kind": "replayed-real-capture", "sha256": "63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_nvim_title",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_title.bin", "kind": "replayed-real-capture", "sha256": "fc7f295a4301d3d21c60dc1b4c2f7132010ae34f03f44a7d954b60e820e473a4"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_osc8_ls",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/osc8_ls.bin", "kind": "replayed-real-capture", "sha256": "da793e14da940177c91a2661de2d74040192c7974c62c100cf6636c798eb046e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "alacritty_terminal",
+      "engine_version": "0.26.0",
+      "check": "replay_top",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/top.bin", "kind": "replayed-real-capture", "sha256": "d1da1e148aa6cd4626f764902bcc44b1993d25bbff145b663c89fcbf51b0ba5e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "vt_basics",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/vt_basics.bin", "kind": "fixture", "sha256": "0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "alt_screen",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/alt_enter.bin", "kind": "fixture", "sha256": "22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce"}, {"path": "results/raw/fixtures/alt_leave.bin", "kind": "fixture", "sha256": "9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "osc_title",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/title_0.bin", "kind": "fixture", "sha256": "c3c053809ba7e85f93458dc64fffad42c4f317256c5687e7c990883f454cb864"}, {"path": "results/raw/fixtures/title_2.bin", "kind": "fixture", "sha256": "8813d5ecfeaadc159817e058f438c0cb6e4fba6e9a0428121d13f2f3b605fcc7"}, {"path": "results/raw/fixtures/title_reset.bin", "kind": "fixture", "sha256": "f5a3c94a5050a7070a5cee1811c824afb207042763299c59e7f1301ef47b1b1e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "osc8_hyperlink",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "bell",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/bell.bin", "kind": "fixture", "sha256": "9f069067bda2832e7ce0b0957917882e35680e3f36dd6b850a3c2c40a6441046"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "unicode_wide",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_wide.bin", "kind": "fixture", "sha256": "10d6fe7a99e9aef6a0cfba3a5e15a0db9ffbdc36337e90163711031987ef35f8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "unicode_combining",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_combining.bin", "kind": "fixture", "sha256": "39f31f5c4f17ba7a53d54228a448a052236b39f75e942aa46038c61b7efe2d51"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "unicode_emoji",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_emoji_base.bin", "kind": "fixture", "sha256": "f0443a342c5ef54783a111b51ba56c938e474c32324d90c3a60c9c8e3a37e2d9"}, {"path": "results/raw/fixtures/unicode_vs16.bin", "kind": "fixture", "sha256": "16e81418a36c58995e00aeb9c261c9ef7fb739b37c72351f511dc3b3a89e5962"}, {"path": "results/raw/fixtures/unicode_zwj.bin", "kind": "fixture", "sha256": "cc3baf32248d766570483335ce273f90c99f020f4bc530d05ffe869cd3ac2ae8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "colors",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/colors.bin", "kind": "fixture", "sha256": "a8b1de85653c32512104ffacb38eaaa77f45554f4a59d4257f45eae1cdcb2d11"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "cursor_keys",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/cursor_keys_on.bin", "kind": "fixture", "sha256": "a45567c3f79d91d50db4a5be7cb15bc4dfb2a08c50ac7350ad70bb15c20b649d"}, {"path": "results/raw/fixtures/cursor_keys_off.bin", "kind": "fixture", "sha256": "38b33297c9170dfcfc3adf22cacfbf99b799c6ecaaa60f91c4eb3b431e30edcd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "bracketed_paste_mode",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/bracketed_paste_on.bin", "kind": "fixture", "sha256": "dfe5456fed7d6508bcf91708c48eb9d48213ca34668e6238e94cace519f39755"}, {"path": "results/raw/fixtures/bracketed_paste_off.bin", "kind": "fixture", "sha256": "30bd97c63fea7c0b9944d97a1dfd74ebb982be38458e6e374b3b36ad4cf3886f"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "bracketed_paste_payload",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "results/raw/fixtures/bracketed_paste_payload.bin", "kind": "fixture", "sha256": "139bb87a1083e79fee4762d5a2f202bc00ed5c7cf1893262c0cfe40732bd2780"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "mouse_modes",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/mouse_1000.bin", "kind": "fixture", "sha256": "b600fe89f5237793cc03353cc5f0abb93b143280d05902f34f4567b15c33a034"}, {"path": "results/raw/fixtures/mouse_1002.bin", "kind": "fixture", "sha256": "b730dc3176832cb1704afd3011e2481d903e62718696edae73fd1b6f4a54a094"}, {"path": "results/raw/fixtures/mouse_1003.bin", "kind": "fixture", "sha256": "307d8e099000c61f2c8d66f26ff96f7938aea8893a70f25f852724179d6d30b9"}, {"path": "results/raw/fixtures/mouse_1006.bin", "kind": "fixture", "sha256": "fc3966766c991c15b89b3b57e2b0bf53166472cdd932b261ed7deb385b786700"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "resize_reflow",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "scrollback_bound",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/engine_scrollback_input.bin", "kind": "engine-input", "sha256": "a200b916c02d0d7b32b2ce535a31b2278272a03bb31e4faef1b54d571a1f67fa"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "selection",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/selection_input.bin", "kind": "engine-input", "sha256": "af49764a1fc2685f8d762ad250b355dcf35b1c152fe6dbac252c6b728acb8a27"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "chunk_boundary_invariance",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "alt_screen_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_alt.bin", "kind": "real-program", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "osc_title_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_title.bin", "kind": "real-program", "sha256": "a7acb071888575736d4f54bc405b1887b915ea36a1c20ab3c9abb6ef85a2fa27"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "osc8_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "bell_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/bell.bin", "kind": "real-program", "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "unicode_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/unicode.bin", "kind": "real-program", "sha256": "a3250847264a2acb6b5af847a53f09d0570d02af6184aedd3e51271769cba2e5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "cursor_keys_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/cursor_keys.bin", "kind": "real-program", "sha256": "844db1632f1b7a170fabb1293538d7ec39143816b4b048565647f89246fd44b6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "mouse_modes_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_mouse.bin", "kind": "real-program", "sha256": "63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "resize_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/resize_winch.bin", "kind": "real-program", "sha256": "1b678a35c5f3ce05bf42ead8bd41dc09851706c6bd976c86fc96a072a3dd5ddb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "scrollback_bound_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/seq_20000.bin", "kind": "real-program", "sha256": "2a3211286c9175af88866db6522eb223e92f5546fc5946ad9a18c130a2c66aa6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "tmux_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.bin", "kind": "real-program", "sha256": "45e3f721839f1000d96f135b5a9f5f5a094b626c21eaaa3763bd386dfc2344a5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_less",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/less.bin", "kind": "replayed-real-capture", "sha256": "a5477a7e63c69ea19ada2989596afabf7e7c31675dc69cf0598b57a3372695cf"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_nvim",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim.bin", "kind": "replayed-real-capture", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_nvim_mouse",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_mouse.bin", "kind": "replayed-real-capture", "sha256": "63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_nvim_title",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_title.bin", "kind": "replayed-real-capture", "sha256": "fc7f295a4301d3d21c60dc1b4c2f7132010ae34f03f44a7d954b60e820e473a4"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_osc8_ls",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/osc8_ls.bin", "kind": "replayed-real-capture", "sha256": "da793e14da940177c91a2661de2d74040192c7974c62c100cf6636c798eb046e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "vt100",
+      "engine_version": "0.16.2",
+      "check": "replay_top",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/top.bin", "kind": "replayed-real-capture", "sha256": "d1da1e148aa6cd4626f764902bcc44b1993d25bbff145b663c89fcbf51b0ba5e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "vt_basics",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/vt_basics.bin", "kind": "fixture", "sha256": "0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "alt_screen",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/alt_enter.bin", "kind": "fixture", "sha256": "22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce"}, {"path": "results/raw/fixtures/alt_leave.bin", "kind": "fixture", "sha256": "9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "osc_title",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "osc8_hyperlink",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "bell",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "unicode_wide",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/unicode_wide.bin", "kind": "fixture", "sha256": "10d6fe7a99e9aef6a0cfba3a5e15a0db9ffbdc36337e90163711031987ef35f8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "unicode_combining",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "unicode_emoji",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "colors",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/colors.bin", "kind": "fixture", "sha256": "a8b1de85653c32512104ffacb38eaaa77f45554f4a59d4257f45eae1cdcb2d11"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "cursor_keys",
+      "kind": "fixture",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/cursor_keys_on.bin", "kind": "fixture", "sha256": "a45567c3f79d91d50db4a5be7cb15bc4dfb2a08c50ac7350ad70bb15c20b649d"}, {"path": "results/raw/fixtures/cursor_keys_off.bin", "kind": "fixture", "sha256": "38b33297c9170dfcfc3adf22cacfbf99b799c6ecaaa60f91c4eb3b431e30edcd"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "bracketed_paste_mode",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "bracketed_paste_payload",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "results/raw/fixtures/bracketed_paste_payload.bin", "kind": "fixture", "sha256": "139bb87a1083e79fee4762d5a2f202bc00ed5c7cf1893262c0cfe40732bd2780"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "mouse_modes",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "resize_reflow",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/engine_resize_input.bin", "kind": "engine-input", "sha256": "d82c6aa133a0fc25b087f46ad7ed2a3042772e612e015571e61753ff55ba6da8"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "scrollback_bound",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [{"path": "results/raw/fixtures/engine_scrollback_input.bin", "kind": "engine-input", "sha256": "a200b916c02d0d7b32b2ce535a31b2278272a03bb31e4faef1b54d571a1f67fa"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "selection",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "chunk_boundary_invariance",
+      "kind": "engine",
+      "status": "PASS",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "alt_screen_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_alt.bin", "kind": "real-program", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "osc_title_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "osc8_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "bell_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "unicode_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/unicode.bin", "kind": "real-program", "sha256": "a3250847264a2acb6b5af847a53f09d0570d02af6184aedd3e51271769cba2e5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "cursor_keys_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/cursor_keys.bin", "kind": "real-program", "sha256": "844db1632f1b7a170fabb1293538d7ec39143816b4b048565647f89246fd44b6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "mouse_modes_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "resize_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/resize_winch.bin", "kind": "real-program", "sha256": "1b678a35c5f3ce05bf42ead8bd41dc09851706c6bd976c86fc96a072a3dd5ddb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "scrollback_bound_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/seq_20000.bin", "kind": "real-program", "sha256": "2a3211286c9175af88866db6522eb223e92f5546fc5946ad9a18c130a2c66aa6"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "tmux_real",
+      "kind": "real-program",
+      "status": "PASS",
+      "sources": [{"path": "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.bin", "kind": "real-program", "sha256": "45e3f721839f1000d96f135b5a9f5f5a094b626c21eaaa3763bd386dfc2344a5"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_less",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/less.bin", "kind": "replayed-real-capture", "sha256": "a5477a7e63c69ea19ada2989596afabf7e7c31675dc69cf0598b57a3372695cf"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_nvim",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim.bin", "kind": "replayed-real-capture", "sha256": "466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_nvim_mouse",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_mouse.bin", "kind": "replayed-real-capture", "sha256": "63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_nvim_title",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/nvim_title.bin", "kind": "replayed-real-capture", "sha256": "fc7f295a4301d3d21c60dc1b4c2f7132010ae34f03f44a7d954b60e820e473a4"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_osc8_ls",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/osc8_ls.bin", "kind": "replayed-real-capture", "sha256": "da793e14da940177c91a2661de2d74040192c7974c62c100cf6636c798eb046e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "avt",
+      "engine_version": "0.18.0",
+      "check": "replay_top",
+      "kind": "replayed-real-capture",
+      "status": "PASS",
+      "sources": [{"path": "spikes/terminal-engine/results/raw/top.bin", "kind": "replayed-real-capture", "sha256": "d1da1e148aa6cd4626f764902bcc44b1993d25bbff145b663c89fcbf51b0ba5e"}],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "vt_basics",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "alt_screen",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "osc_title",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "osc8_hyperlink",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "bell",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "unicode_wide",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "unicode_combining",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "unicode_emoji",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "colors",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "cursor_keys",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "bracketed_paste_mode",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "bracketed_paste_payload",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "mouse_modes",
+      "kind": "fixture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "resize_reflow",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "scrollback_bound",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "selection",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "chunk_boundary_invariance",
+      "kind": "engine",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "alt_screen_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "osc_title_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "osc8_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "bell_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "unicode_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "cursor_keys_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "mouse_modes_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "resize_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "scrollback_bound_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "tmux_real",
+      "kind": "real-program",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_less",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_nvim",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_nvim_mouse",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_nvim_title",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_osc8_ls",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    },
+    {
+      "engine": "termwiz",
+      "engine_version": "0.23.3",
+      "check": "replay_top",
+      "kind": "replayed-real-capture",
+      "status": "UNSUPPORTED",
+      "sources": [],
+      "failed_assertions": []
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+# ---- provenance ----
+# command: bash -c cd "$0" && echo "--- xattr lock entry ---" && grep -n -A7 "^name = \"xattr\"" Cargo.lock && echo "--- libc lock entry ---" && grep -n -A4 "^name = \"libc\"" Cargo.lock && echo "--- count of libc entries ---" && grep -c "^name = \"libc\"" Cargo.lock /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/gpui-pin-probe
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:42Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.007
+# ---- output ----
+--- xattr lock entry ---
+6728:name = "xattr"
+6729-version = "0.2.3"
+6730-source = "registry+https://github.com/rust-lang/crates.io-index"
+6731-checksum = "6d1526bbe5aaeb5eb06885f4d987bcdfa5e23187055de9b83fe00156a821fabc"
+6732-dependencies = [
+6733- "libc",
+6734-]
+6735-
+--- libc lock entry ---
+2906:name = "libc"
+2907-version = "0.2.190"
+2908-source = "registry+https://github.com/rust-lang/crates.io-index"
+2909-checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
+2910-
+--- count of libc entries ---
+1

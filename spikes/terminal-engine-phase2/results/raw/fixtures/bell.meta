@@ -1,0 +1,5 @@
+kind=fixture
+name=bell
+description=BEL between two printable chars
+bytes=3
+sha256=9f069067bda2832e7ce0b0957917882e35680e3f36dd6b850a3c2c40a6441046

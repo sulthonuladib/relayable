@@ -1,0 +1,64 @@
+# ---- provenance ----
+# engine: avt 0.18.0
+# check: scrollback_bound
+# title: Scrollback bound at scrolling_history=1000
+# kind: engine
+# utc_timestamp: 2026-10-15T20:12:33Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/engine_scrollback_input.bin kind=engine-input sha256=a200b916c02d0d7b32b2ce535a31b2278272a03bb31e4faef1b54d571a1f67fa
+# ---- expected vs actual ----
+ASSERT retained_lines_bounded
+  EXPECTED retained_lines <= 1000
+  ACTUAL   1000
+  STATUS   PASS
+ASSERT retained_lines_positive
+  EXPECTED retained_lines > 0
+  ACTUAL   1000
+  STATUS   PASS
+ASSERT retained_lines_le_configured_bound
+  EXPECTED retained_lines <= configured_bound
+  ACTUAL   retained_lines=1000 configured_bound=1000
+  STATUS   PASS
+ASSERT newest_line_present_in_visible
+  EXPECTED visible screen contains "line 1499"
+  ACTUAL   last_non_blank_visible_row=Some((22, "line 1499")); present=["line 1499"]
+  STATUS   PASS
+ASSERT oldest_line_gone_from_visible
+  EXPECTED visible screen does not contain "line 0000"
+  ACTUAL   present=[]; absent=["line 0000"]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| line 1477
+| line 1478
+| line 1479
+| line 1480
+| line 1481
+| line 1482
+| line 1483
+| line 1484
+| line 1485
+| line 1486
+| line 1487
+| line 1488
+| line 1489
+| line 1490
+| line 1491
+| line 1492
+| line 1493
+| line 1494
+| line 1495
+| line 1496
+| line 1497
+| line 1498
+| line 1499
+# ---- notes ----
+- neutral scrollback leg for avt 0.18.0: retained_lines=1000 (configured_bound=1000, informational only). The exact oldest-retained-line text is an engine-specific window-arithmetic detail and is asserted only by the alacritty-specific leg.
+STATUS=PASS

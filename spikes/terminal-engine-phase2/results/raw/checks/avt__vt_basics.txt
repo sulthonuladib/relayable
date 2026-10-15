@@ -1,0 +1,112 @@
+# ---- provenance ----
+# engine: avt 0.18.0
+# check: vt_basics
+# title: VT/ANSI basics (CUP/SGR/EL/ED/DECSC)
+# kind: fixture
+# utc_timestamp: 2026-10-15T20:12:33Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/vt_basics.bin kind=fixture sha256=0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0
+# ---- expected vs actual ----
+ASSERT row0_text
+  EXPECTED "AB"
+  ACTUAL   "AB"
+  STATUS   PASS
+ASSERT cell(1,4)_text
+  EXPECTED "C"
+  ACTUAL   "C"
+  STATUS   PASS
+ASSERT cell(1,5)_text
+  EXPECTED "D"
+  ACTUAL   "D"
+  STATUS   PASS
+ASSERT cell(1,5)_bold
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT cell(1,6)_text
+  EXPECTED "E"
+  ACTUAL   "E"
+  STATUS   PASS
+ASSERT cell(1,6)_italic
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT cell(1,7)_text
+  EXPECTED "F"
+  ACTUAL   "F"
+  STATUS   PASS
+ASSERT cell(1,7)_underline
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT cell(1,8)_text
+  EXPECTED "G"
+  ACTUAL   "G"
+  STATUS   PASS
+ASSERT cell(1,8)_reverse
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT row3_EL_from_col2_text
+  EXPECTED "KL"
+  ACTUAL   "KL"
+  STATUS   PASS
+ASSERT row4_ED2_cleared_text
+  EXPECTED ""
+  ACTUAL   ""
+  STATUS   PASS
+ASSERT cell(7,9)_text
+  EXPECTED "Z"
+  ACTUAL   "Z"
+  STATUS   PASS
+ASSERT cell(5,2)_after_DECRC_text
+  EXPECTED "z"
+  ACTUAL   "z"
+  STATUS   PASS
+ASSERT cursor_row
+  EXPECTED 5
+  ACTUAL   5
+  STATUS   PASS
+ASSERT cursor_col
+  EXPECTED 3
+  ACTUAL   3
+  STATUS   PASS
+ASSERT cursor_visible
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| AB
+|     CDEFG
+| 
+| KL
+| 
+|   z
+| 
+|          Z
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- (none)
+STATUS=PASS

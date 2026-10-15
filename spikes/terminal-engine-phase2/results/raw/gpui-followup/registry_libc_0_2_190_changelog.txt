@@ -1,0 +1,68 @@
+# ---- provenance ----
+# command: bash -c echo "=== CHANGELOG head ==="; sed -n "1,4p" "$0/CHANGELOG.md"; echo; echo "=== removal entries ==="; grep -n -iE "enoattr|deprecated|breaking|remov" "$0/CHANGELOG.md" | head -40 /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:42Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.005
+# ---- output ----
+=== CHANGELOG head ===
+# Changelog
+
+## [0.2.190](https://github.com/rust-lang/libc/compare/0.2.189...0.2.190) - 2026-10-02
+
+
+=== removal entries ===
+89:### Deprecated
+97:- OpenBSD: Deprecate `syscall`, `mincore`, and `KERN_NSELCOLL`, all of which have been removed upstream ([87992e9895c2](https://github.com/rust-lang/libc/commit/87992e9895c2bfc6daab97d2e8f20ae895fd9f7b))
+102:- **breaking** AIX: Change the type of `BPF_ALIGNMENT` to `size_t`  to match upstream and harmonize with other platforms. ([#5373](https://github.com/rust-lang/libc/pull/5373))
+103:- **breaking** Apple: change the type of `BPF_ALIGNMENT` to `size_t` to match upstream and harmonize with other platforms. ([#5348](https://github.com/rust-lang/libc/pull/5348))
+128:  `libc_unstable_musl_v1_2`. The old version will continue to work for now, but will be removed in
+138:### Removed
+140:`libc` exposed quite a bit of API on all Apple platforms that is not actually available anywhere other than MacOS. This release removes a number of these cases.
+142:- **breaking** Apple: Disable `mach.h` API on Apple mobile OSs ([e6bfb187513c](https://github.com/rust-lang/libc/commit/e6bfb187513c665c94683b9738a855e982173c2f))
+143:- **breaking** Apple: Remove a large number of items from iOS, tvOS, watchOS, and visionOS that are only available on MacOS. ([#5158](https://github.com/rust-lang/libc/pull/5158))
+144:- **breaking** Apple: Remove the unsupported `exec*` and `fork` calls from tvOS and watchOS ([#5158](https://github.com/rust-lang/libc/pull/5158))
+146:Additionally, this release cleans up a lot of API that has been deprecated since at least libc 0.2.100, released 2021-08-20.
+148:- **breaking** Android, Linux: remove unsound `af_alg_iv` trait implementations. The have been deprecated for a long time because they allowed out-of-bounds reads via safe functions. ([444db4456f38](https://github.com/rust-lang/libc/commit/444db4456f3866519b7eacd35a8bb59484bb7bbf))
+149:- **breaking** Remove most items that have been deprecated since before 0.2.100 ([#5401](https://github.com/rust-lang/libc/pull/5401))
+151:Other removed items:
+153:- Dragonfly: Remove `INHERIT_ZERO` that does not exist upstream ([#5587](https://github.com/rust-lang/libc/pull/5587))
+154:- Musl riscv64: Remove GNU-gated `REG_*` definitions ([#5527](https://github.com/rust-lang/libc/pull/5527))
+155:- Musl riscv64: Remove non-esxistant `REG_NARGS` ([#5527](https://github.com/rust-lang/libc/pull/5527))
+169:### Deprecated
+186:These were removed in 0.2.187 because `libc` does not actually make `Send` and `Sync`
+188:The traits are added back for now to allow time to migrate, but will be removed again
+224:- Better document breaking change policy and recommended usage ([#5179](https://github.com/rust-lang/libc/pull/5179))
+281:### Deprecated
+287:- **breaking** NetBSD: Correct `ts` from `*const timespec` to `*mut timespec` in _lwp_park` ([#5169](https://github.com/rust-lang/libc/pull/5169))
+288:- **breaking** Linux GNU: Change overflowing `PTRACE_*ET_SYSCALL_USER_DISPATCH_CONFIG` constants from `u8` to `c_uint` ([#4936](https://github.com/rust-lang/libc/pull/4936))
+301:- uClibc: Fix constants accidentally removed ([#5141](https://github.com/rust-lang/libc/pull/5141))
+315:### Removed
+317:- Dragonfly: Remove FreeBSD-only `Elf32_Lword`, `ip_mreq_source`, and `IP_` constants ([#5116](https://github.com/rust-lang/libc/pull/5116))
+318:- Dragonfly: Remove private VM type bindings ([#5116](https://github.com/rust-lang/libc/pull/5116))
+319:- Linux: Remove `KERN_REALROOTDEV` and `VM_LAPTOP_MODE` ([#5177](https://github.com/rust-lang/libc/pull/5177))
+320:- VxWorks: Remove non-user-facing (kernel) API ([#5129](https://github.com/rust-lang/libc/pull/5129))
+334:- (internal) Glibc: Remove public configuration for file offset bits ([#5268](https://github.com/rust-lang/libc/pull/5268))
+388:### Deprecated
+391:have been deprecated. Use `i128` and `u128` instead. ([#4343](https://github.com/rust-lang/libc/pull/4343))
+395:- **breaking** Redox: Fix signal action constant types ([#5009](https://github.com/rust-lang/libc/pull/5009))
+402:- **potentially breaking** Linux: Add new fields to `struct ptrace_syscall_info` ([#4966](https://github.com/rust-lang/libc/pull/4966))
+452:- **breaking**: Redox: Fix the type of dev_t ([#4928](https://github.com/rust-lang/libc/pull/4928))
+536:### Removed
+538:- Build: Remove `RUST_LIBC_UNSTABLE_LINUX_TIME_BITS64` ([#4865](https://github.com/rust-lang/libc/pull/4865))
+539:- WASI: Remove nonexistent clocks ([#4880](https://github.com/rust-lang/libc/pull/4880))
+564:### Deprecated

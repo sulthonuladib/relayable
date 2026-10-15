@@ -1,0 +1,5 @@
+kind=fixture
+name=alt_enter
+description=DECSET 1049 enter alternate screen, then write 'alt'
+bytes=14
+sha256=22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce

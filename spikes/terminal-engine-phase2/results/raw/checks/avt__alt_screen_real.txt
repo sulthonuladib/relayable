@@ -1,0 +1,65 @@
+# ---- provenance ----
+# engine: avt 0.18.0
+# check: alt_screen_real
+# title: Alternate screen (real nvim)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:33Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_alt.bin kind=real-program sha256=466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb
+# ---- expected vs actual ----
+ASSERT raw_bytes_1049h_present
+  EXPECTED capture bytes contain at least one ESC[?1049h
+  ACTUAL   [0]
+  STATUS   PASS
+ASSERT raw_bytes_1049l_present
+  EXPECTED capture bytes contain at least one ESC[?1049l
+  ACTUAL   [12702]
+  STATUS   PASS
+ASSERT engine_alt_true_after_every_1049h
+  EXPECTED engine alt_screen == true after every 1049h
+  ACTUAL   [true]
+  STATUS   PASS
+ASSERT engine_alt_false_after_every_1049l
+  EXPECTED engine alt_screen == false after every 1049l
+  ACTUAL   [false]
+  STATUS   PASS
+ASSERT alt_screen_had_content
+  EXPECTED a snapshot taken while the engine was in the alt screen is non-blank
+  ACTUAL   alt_screen_nonblank=true
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| ~
+| ~
+| ~                                    │ ╲ ││
+| ~                                    ││╲╲││
+| ~                                    ││ ╲ │
+| ~
+| ~                                 NVIM v0.12.5
+| ~                 ────────────────────────────────────────────
+| ~                 Nvim is open source and freely distributable
+| ~                           https://neovim.io/#chat
+| ~                 ────────────────────────────────────────────
+| ~                 type  :help nvim<Enter>     if you are new!
+| ~                 type  :checkhealth<Enter>   to optimize Nvim
+| ~                 type  :q<Enter>             to exit
+| ~                 type  :help<Enter>          for help
+| ~                 ────────────────────────────────────────────
+| ~                 type  :help news<Enter>     for v0.12 notes
+| ~                 ────────────────────────────────────────────
+| ~                        Help poor children in Uganda!
+| ~                 type  :help Kuwasha<Enter>  for information
+| ~
+| [No Name]                                                     0,0-1          All
+| :qa!
+# ---- notes ----
+- Alt-screen transitions are detected two ways: (1) chunk-independent raw-byte scan for ESC[?1049h/l (the phase-1 method) and (2) the engine's own alt_screen flag snapshotted at each transition by replay_with_alt_watch. The old chunk-sampled `watch` field is no longer used as alt-screen evidence.
+STATUS=PASS

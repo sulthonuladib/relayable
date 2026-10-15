@@ -1,0 +1,66 @@
+# ---- provenance ----
+# engine: avt 0.18.0
+# check: replay_osc8_ls
+# title: Secondary cross-check of phase-1 committed capture
+# kind: replayed-real-capture
+# utc_timestamp: 2026-10-15T20:12:34Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: spikes/terminal-engine/results/raw/osc8_ls.bin kind=replayed-real-capture sha256=da793e14da940177c91a2661de2d74040192c7974c62c100cf6636c798eb046e
+# ---- expected vs actual ----
+ASSERT capture_processed
+  EXPECTED non-empty capture processed
+  ACTUAL   342 bytes
+  STATUS   PASS
+ASSERT raw_bytes_1049h_count
+  EXPECTED 0
+  ACTUAL   0
+  STATUS   PASS
+ASSERT raw_bytes_1049l_count
+  EXPECTED 0
+  ACTUAL   0
+  STATUS   PASS
+ASSERT final_screen_signature
+  EXPECTED final engine screen contains "alpha.txt"
+  ACTUAL   present=["alpha.txt"] final_first_rows=["alpha.txt", "beta.txt"]
+  STATUS   PASS
+ASSERT hyperlink_cells_present
+  EXPECTED > 0 cells carry a file:// OSC 8 hyperlink
+  ACTUAL   avt declares osc8_hyperlinks absent
+  STATUS   UNSUPPORTED
+# ---- screen dump (final visible screen) ----
+| alpha.txt
+| beta.txt
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- phase-1 source commit (last change to spikes/terminal-engine/results/raw): 085375c5fe02e79fbecb6d057a5aea306c7a3565
+- Expectations were established by feeding the committed phase-1 capture into alacritty_terminal 0.26.0 and reading the engine's own screen/title/mode state; the 1049 counts match phase-1's CATEGORY_CHECKLIST (spikes/terminal-engine/results/raw/<name>.summary.txt).
+- Alt-screen transitions are chunk-independent (raw-byte scan + engine flag per transition). Mouse state is asserted only for the mouse-specific capture (replay_nvim_mouse) and is accumulated from per-chunk snapshots, which is labelled as chunk-sampled.
+STATUS=UNSUPPORTED

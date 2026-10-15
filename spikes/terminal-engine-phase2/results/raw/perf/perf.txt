@@ -1,0 +1,67 @@
+Relayable TERM-002 — throughput / memory OBSERVATION
+===================================================
+This is an observation only. No threshold is asserted and no memory
+target is invented (full.md §0.5 / §12: measure before setting targets).
+Each engine was measured in its own process (`analyze --perf-only <engine>`),
+so RSS baseline/after/peak are per-engine and not cross-contaminated. Each
+engine ran at least 3 passes; min/median/max throughput and every raw pass
+are reported.
+
+engine: alacritty_terminal 0.26.0
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=571.144 bytes_per_sec=14687419 rss_before_kb=12484 rss_after_kb=14472 rss_delta_kb=1988 vmhwm_kb=14476
+  pass 2: elapsed_ms=590.578 bytes_per_sec=14204098 rss_before_kb=14476 rss_after_kb=14476 rss_delta_kb=0 vmhwm_kb=14476
+  pass 3: elapsed_ms=587.971 bytes_per_sec=14267096 rss_before_kb=14476 rss_after_kb=14476 rss_delta_kb=0 vmhwm_kb=14476
+bytes_per_sec_min: 14204097.699
+bytes_per_sec_median: 14267095.787
+bytes_per_sec_max: 14687419.127
+rss_baseline_kb: 12480
+rss_after_kb: 14476
+rss_delta_kb: 1996
+vmhwm_kb: 14476
+
+engine: avt 0.18.0
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=479.411 bytes_per_sec=17497791 rss_before_kb=12172 rss_after_kb=15176 rss_delta_kb=3004 vmhwm_kb=15176
+  pass 2: elapsed_ms=496.503 bytes_per_sec=16895429 rss_before_kb=15176 rss_after_kb=15176 rss_delta_kb=0 vmhwm_kb=15176
+  pass 3: elapsed_ms=495.111 bytes_per_sec=16942944 rss_before_kb=15176 rss_after_kb=15176 rss_delta_kb=0 vmhwm_kb=15176
+bytes_per_sec_min: 16895429.145
+bytes_per_sec_median: 16942944.171
+bytes_per_sec_max: 17497790.867
+rss_baseline_kb: 11976
+rss_after_kb: 15176
+rss_delta_kb: 3200
+vmhwm_kb: 15176
+
+# perf skipped for termwiz (NOT_IMPLEMENTED stub): termwiz 0.23.3 is deliberately NOT implemented for the comparison leg: escape::parser::Parser::parse (src/escape/parser/mod.rs:86) only decodes into escape::Action (src/escape/mod.rs:28) and nothing maps Action->surface::Surface (src/surface/mod.rs:105 has no Action reference), while terminal::UnixTerminal::new opens /dev/tty (src/terminal/unix.rs:266) and captures tty termios via Termios::from_fd (src/terminal/unix.rs:171), so it cannot be driven headlessly from captured bytes.
+
+engine: vt100 0.16.2
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=1208.482 bytes_per_sec=6941464 rss_before_kb=12268 rss_after_kb=14896 rss_delta_kb=2628 vmhwm_kb=14896
+  pass 2: elapsed_ms=1213.081 bytes_per_sec=6915146 rss_before_kb=14896 rss_after_kb=14896 rss_delta_kb=0 vmhwm_kb=14896
+  pass 3: elapsed_ms=1214.005 bytes_per_sec=6909885 rss_before_kb=14896 rss_after_kb=14896 rss_delta_kb=0 vmhwm_kb=14896
+bytes_per_sec_min: 6909884.787
+bytes_per_sec_median: 6915145.655
+bytes_per_sec_max: 6941463.988
+rss_baseline_kb: 12204
+rss_after_kb: 14896
+rss_delta_kb: 2692
+vmhwm_kb: 14896

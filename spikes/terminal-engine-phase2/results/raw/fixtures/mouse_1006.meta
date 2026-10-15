@@ -1,0 +1,5 @@
+kind=fixture
+name=mouse_1006
+description=DECSET 1006 (SGR) mouse encoding
+bytes=8
+sha256=fc3966766c991c15b89b3b57e2b0bf53166472cdd932b261ed7deb385b786700

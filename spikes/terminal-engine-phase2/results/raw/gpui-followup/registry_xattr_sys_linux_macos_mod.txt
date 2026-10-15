@@ -1,0 +1,189 @@
+# ---- provenance ----
+# command: cat -n /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-0.2.3/src/sys/linux_macos/mod.rs
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:42Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.002
+# ---- output ----
+     1	#[cfg(any(target_os = "linux", target_os = "android"))]
+     2	mod linux;
+     3	
+     4	#[cfg(any(target_os = "linux", target_os = "android"))]
+     5	use self::linux::*;
+     6	
+     7	#[cfg(target_os = "macos")]
+     8	mod macos;
+     9	
+    10	#[cfg(target_os = "macos")]
+    11	use self::macos::*;
+    12	
+    13	use std::ffi::{OsStr, OsString};
+    14	use std::io;
+    15	use std::mem;
+    16	use std::os::unix::ffi::OsStrExt;
+    17	use std::os::unix::io::RawFd;
+    18	use std::path::Path;
+    19	
+    20	use libc::{c_char, c_void, size_t};
+    21	
+    22	use util::{allocate_loop, name_to_c, path_to_c};
+    23	
+    24	/// An iterator over a set of extended attributes names.
+    25	pub struct XAttrs {
+    26	    data: Box<[u8]>,
+    27	    offset: usize,
+    28	}
+    29	
+    30	impl Clone for XAttrs {
+    31	    fn clone(&self) -> Self {
+    32	        XAttrs {
+    33	            data: Vec::from(&*self.data).into_boxed_slice(),
+    34	            offset: self.offset,
+    35	        }
+    36	    }
+    37	    fn clone_from(&mut self, other: &XAttrs) {
+    38	        self.offset = other.offset;
+    39	
+    40	        let mut data = mem::replace(&mut self.data, Box::new([])).into_vec();
+    41	        data.extend(other.data.iter().cloned());
+    42	        self.data = data.into_boxed_slice();
+    43	    }
+    44	}
+    45	
+    46	// Yes, I could avoid these allocations on linux/macos. However, if we ever want to be freebsd
+    47	// compatible, we need to be able to prepend the namespace to the extended attribute names.
+    48	// Furthermore, borrowing makes the API messy.
+    49	impl Iterator for XAttrs {
+    50	    type Item = OsString;
+    51	    fn next(&mut self) -> Option<OsString> {
+    52	        let data = &self.data[self.offset..];
+    53	        if data.is_empty() {
+    54	            None
+    55	        } else {
+    56	            // always null terminated (unless empty).
+    57	            let end = data.iter().position(|&b| b == 0u8).unwrap();
+    58	            self.offset += end + 1;
+    59	            Some(OsStr::from_bytes(&data[..end]).to_owned())
+    60	        }
+    61	    }
+    62	
+    63	    fn size_hint(&self) -> (usize, Option<usize>) {
+    64	        if self.data.len() == self.offset {
+    65	            (0, Some(0))
+    66	        } else {
+    67	            (1, None)
+    68	        }
+    69	    }
+    70	}
+    71	
+    72	pub fn get_fd(fd: RawFd, name: &OsStr) -> io::Result<Vec<u8>> {
+    73	    let name = name_to_c(name)?;
+    74	    unsafe {
+    75	        allocate_loop(|buf, len| fgetxattr(fd, name.as_ptr(), buf as *mut c_void, len as size_t))
+    76	    }
+    77	}
+    78	
+    79	pub fn set_fd(fd: RawFd, name: &OsStr, value: &[u8]) -> io::Result<()> {
+    80	    let name = name_to_c(name)?;
+    81	    let ret = unsafe {
+    82	        fsetxattr(
+    83	            fd,
+    84	            name.as_ptr(),
+    85	            value.as_ptr() as *const c_void,
+    86	            value.len() as size_t,
+    87	        )
+    88	    };
+    89	    if ret != 0 {
+    90	        Err(io::Error::last_os_error())
+    91	    } else {
+    92	        Ok(())
+    93	    }
+    94	}
+    95	
+    96	pub fn remove_fd(fd: RawFd, name: &OsStr) -> io::Result<()> {
+    97	    let name = name_to_c(name)?;
+    98	    let ret = unsafe { fremovexattr(fd, name.as_ptr()) };
+    99	    if ret != 0 {
+   100	        Err(io::Error::last_os_error())
+   101	    } else {
+   102	        Ok(())
+   103	    }
+   104	}
+   105	
+   106	pub fn list_fd(fd: RawFd) -> io::Result<XAttrs> {
+   107	    let vec =
+   108	        unsafe { allocate_loop(|buf, len| flistxattr(fd, buf as *mut c_char, len as size_t))? };
+   109	    Ok(XAttrs {
+   110	        data: vec.into_boxed_slice(),
+   111	        offset: 0,
+   112	    })
+   113	}
+   114	
+   115	pub fn get_path(path: &Path, name: &OsStr) -> io::Result<Vec<u8>> {
+   116	    let name = name_to_c(name)?;
+   117	    let path = path_to_c(path)?;
+   118	    unsafe {
+   119	        allocate_loop(|buf, len| {
+   120	            lgetxattr(
+   121	                path.as_ptr(),
+   122	                name.as_ptr(),
+   123	                buf as *mut c_void,
+   124	                len as size_t,
+   125	            )
+   126	        })
+   127	    }
+   128	}
+   129	
+   130	pub fn set_path(path: &Path, name: &OsStr, value: &[u8]) -> io::Result<()> {
+   131	    let name = name_to_c(name)?;
+   132	    let path = path_to_c(path)?;
+   133	    let ret = unsafe {
+   134	        lsetxattr(
+   135	            path.as_ptr(),
+   136	            name.as_ptr(),
+   137	            value.as_ptr() as *const c_void,
+   138	            value.len() as size_t,
+   139	        )
+   140	    };
+   141	    if ret != 0 {
+   142	        Err(io::Error::last_os_error())
+   143	    } else {
+   144	        Ok(())
+   145	    }
+   146	}
+   147	
+   148	pub fn remove_path(path: &Path, name: &OsStr) -> io::Result<()> {
+   149	    let name = name_to_c(name)?;
+   150	    let path = path_to_c(path)?;
+   151	    let ret = unsafe { lremovexattr(path.as_ptr(), name.as_ptr()) };
+   152	    if ret != 0 {
+   153	        Err(io::Error::last_os_error())
+   154	    } else {
+   155	        Ok(())
+   156	    }
+   157	}
+   158	
+   159	pub fn list_path(path: &Path) -> io::Result<XAttrs> {
+   160	    let path = path_to_c(path)?;
+   161	    let vec = unsafe {
+   162	        allocate_loop(|buf, len| llistxattr(path.as_ptr(), buf as *mut c_char, len as size_t))?
+   163	    };
+   164	    Ok(XAttrs {
+   165	        data: vec.into_boxed_slice(),
+   166	        offset: 0,
+   167	    })
+   168	}

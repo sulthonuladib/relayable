@@ -1,0 +1,9 @@
+# tmux private-socket cleanup
+socket=relayable-term002-spike
+user_default_socket_untouched=1 (only -L relayable-term002-spike was ever used)
+command=tmux -L relayable-term002-spike kill-server
+kill_server_exit=0 (non-zero is expected when the server already exited)
+command=tmux -L relayable-term002-spike list-sessions
+verify_no_server_exit=1 (0 = a server is still running; non-zero = none)
+leftover_server=none
+utc_timestamp=2026-10-15T20:12:19Z

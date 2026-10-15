@@ -1,0 +1,5 @@
+kind=fixture
+name=unicode_emoji_base
+description=single emoji U+1F600 (wide)
+bytes=4
+sha256=f0443a342c5ef54783a111b51ba56c938e474c32324d90c3a60c9c8e3a37e2d9

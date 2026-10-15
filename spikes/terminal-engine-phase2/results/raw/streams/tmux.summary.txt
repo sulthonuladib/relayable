@@ -1,0 +1,17 @@
+== capture: tmux ==
+PROGRAM=tmux
+PROGRAM_ARGS=["-L", "relayable-term002-spike", "-f", "/dev/null", "new-session", "printf \"RELAYABLE_TMUX_MARKER\\n\"; sleep 4"]
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+COLORTERM=truecolor
+DURATION_MS=3000
+BYTES_RECEIVED=832
+SHA256=45e3f721839f1000d96f135b5a9f5f5a094b626c21eaaa3763bd386dfc2344a5
+CHILD_EXIT=signaled:Killed
+CHILD_EXIT_CODE=Some(1)
+KILLED=true
+TIMED_OUT=true
+READER_STALLED=false
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.bin
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.meta
+VERDICT=PASS

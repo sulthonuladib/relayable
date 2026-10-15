@@ -1,0 +1,93 @@
+# ---- provenance ----
+# command: cargo test
+# exit_code: 0
+# utc_timestamp: 2026-10-15T20:12:36Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc --version -v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- output ----
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/relayable_terminal_engine_phase2_spike-dae90e18c9ef4886)
+
+running 42 tests
+test checks::regression_tests::placeholder_actual_rule_is_conservative ... ok
+test checks::catalog_tests::termwiz_stub_check_is_unsupported_never_pass_or_fail ... ok
+test checks::regression_tests::scan_alt_1049_is_chunk_independent_and_ordered ... ok
+test checks::regression_tests::snapshot_invariance_detects_style_and_hyperlink_differences ... ok
+test engine::alacritty::tests::bell_and_alt_screen ... ok
+test engine::alacritty::tests::wide_char_uses_two_columns ... ok
+test engine::avt::tests::plain_text_and_alt_screen ... ok
+test engine::tests::registry_lists_four_engines_in_order ... ok
+test engine::vt100::tests::capabilities_declare_reflow_and_osc8_absent ... ok
+test engine::vt100::tests::plain_text_and_styles ... ok
+test checks::regression_tests::replay_expectations_cover_every_replay_name_in_run_all ... ok
+test engine::tests::alacritty_and_comparison_engines_are_implemented ... ok
+test engine::vt100::tests::scrollback_bound_is_reported ... ok
+test engine::alacritty::tests::colors_parse ... ok
+test engine::vt100::tests::title_and_bell_via_callbacks ... ok
+test engine::alacritty::tests::plain_text_lands_on_the_grid ... ok
+test fixtures::tests::names_are_unique_and_nonempty ... ok
+test engine::vt100::tests::wide_and_combining_cells ... ok
+test model::tests::cell_is_row_major ... ok
+test model::tests::row_text_trims_trailing_spaces_only ... ok
+test engine::avt::tests::capabilities_declare_combining_and_mouse_absent ... ok
+test report::tests::epoch_formats ... ok
+test engine::alacritty::tests::osc_title_is_reported_and_reset ... ok
+test engine::tests::stub_marker_constant_is_stable ... ok
+test engine::avt::tests::scrollback_bound_is_reported ... ok
+test model::tests::hyperlink_cells_are_counted ... ok
+test palette::tests::base_and_cube_and_gray ... ok
+test engine::avt::tests::utf8_is_chunk_boundary_invariant ... ok
+test report::tests::json_escaping ... ok
+test checks::regression_tests::replay_with_alt_watch_is_independent_of_chunk_size ... ok
+test sha256::tests::fips_empty_vector ... ok
+test sha256::tests::fips_abc_vector ... ok
+test sha256::tests::long_input_vector ... ok
+test tests::banner_mentions_crate_and_version ... ok
+test engine::tests::termwiz_stub_snapshots_are_blank ... ok
+test checks::regression_tests::engine_inputs_are_persisted_with_recomputable_sha256 ... ok
+test fixtures::tests::write_all_produces_bin_and_meta ... ok
+test checks::regression_tests::input_ignoring_engine_fails_chunk_boundary_invariance ... ok
+test checks::catalog_tests::catalog_matches_implemented_run_all ... ok
+test checks::catalog_tests::capability_gaps_are_unsupported_never_fail ... ok
+test checks::catalog_tests::comparison_engines_are_implemented_not_stub_short_circuited ... ok
+test checks::regression_tests::generated_assertions_never_use_placeholder_actuals ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running unittests src/bin/analyze.rs (target/debug/deps/analyze-8ec987117d82fd90)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/capture.rs (target/debug/deps/capture-92d9421da9ef83eb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/relayable_terminal_engine_phase2_spike-3ea2bf212ee7048c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_terminal_engine_phase2_spike
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

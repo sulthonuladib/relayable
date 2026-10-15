@@ -1,0 +1,53 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: bracketed_paste_mode
+# title: Bracketed paste mode (DECSET/DECRST 2004) flag
+# kind: fixture
+# utc_timestamp: 2026-10-15T20:12:31Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/bracketed_paste_on.bin kind=fixture sha256=dfe5456fed7d6508bcf91708c48eb9d48213ca34668e6238e94cace519f39755
+# source: results/raw/fixtures/bracketed_paste_off.bin kind=fixture sha256=30bd97c63fea7c0b9944d97a1dfd74ebb982be38458e6e374b3b36ad4cf3886f
+# ---- expected vs actual ----
+ASSERT bracketed_paste_after_?2004h
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT bracketed_paste_after_?2004l
+  EXPECTED false
+  ACTUAL   false
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- This split-off check asserts only the DECSET/DECRST 2004 mode flag, which every engine that tracks it exposes through the neutral model. Payload literal-text insertion is a separate input-path property (bracketed_paste_payload).
+STATUS=PASS

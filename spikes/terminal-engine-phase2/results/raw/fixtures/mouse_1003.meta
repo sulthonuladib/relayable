@@ -1,0 +1,5 @@
+kind=fixture
+name=mouse_1003
+description=DECSET 1003 (any motion) mouse reporting
+bytes=8
+sha256=307d8e099000c61f2c8d66f26ff96f7938aea8893a70f25f852724179d6d30b9

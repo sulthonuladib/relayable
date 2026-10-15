@@ -1,0 +1,1415 @@
+# ---- provenance ----
+# command: cargo tree -e normal,build --prefix depth -p gpui
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:34Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.170
+# ---- output ----
+0gpui v0.2.2
+1anyhow v1.0.104
+1as-raw-xcb-connection v1.0.1
+1ashpd v0.11.1
+2async-fs v2.2.0
+3async-lock v3.4.2
+4event-listener v5.4.2
+5parking v2.2.1
+5pin-project-lite v0.2.17
+4event-listener-strategy v0.5.4
+5event-listener v5.4.2 (*)
+5pin-project-lite v0.2.17
+4pin-project-lite v0.2.17
+3blocking v1.7.0
+4async-channel v2.5.0
+5concurrent-queue v2.5.0
+6crossbeam-utils v0.8.23
+5event-listener-strategy v0.5.4 (*)
+5futures-core v0.3.34
+5pin-project-lite v0.2.17
+4async-task v4.7.1
+4futures-io v0.3.34
+4futures-lite v2.6.1
+5fastrand v2.5.0
+5futures-core v0.3.34
+5futures-io v0.3.34
+5parking v2.2.1
+5pin-project-lite v0.2.17
+4piper v0.2.5
+5atomic-waker v1.1.2
+5fastrand v2.5.0
+5futures-io v0.3.34
+3futures-lite v2.6.1 (*)
+2async-net v2.0.0
+3async-io v2.6.0
+4cfg-if v1.0.5
+4concurrent-queue v2.5.0 (*)
+4futures-io v0.3.34
+4futures-lite v2.6.1 (*)
+4parking v2.2.1
+4polling v3.11.0
+5cfg-if v1.0.5
+5rustix v1.1.5
+6bitflags v2.13.2
+6linux-raw-sys v0.12.1
+4rustix v1.1.5 (*)
+4slab v0.4.12
+4autocfg v1.5.1
+3blocking v1.7.0 (*)
+3futures-lite v2.6.1 (*)
+2enumflags2 v0.7.12
+3enumflags2_derive v0.7.12 (proc-macro)
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v2.0.119
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+3serde v1.0.229
+4serde_core v1.0.229
+4serde_derive v1.0.229 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v3.0.9
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6unicode-ident v1.0.27
+2futures-channel v0.3.34
+3futures-core v0.3.34
+3futures-sink v0.3.34
+2futures-util v0.3.34
+3futures-channel v0.3.34 (*)
+3futures-core v0.3.34
+3futures-io v0.3.34
+3futures-macro v0.3.34 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3futures-sink v0.3.34
+3futures-task v0.3.34
+3memchr v2.8.3
+3pin-project-lite v0.2.17
+3slab v0.4.12
+2rand v0.9.5
+3rand_chacha v0.9.0
+4ppv-lite86 v0.2.21
+5zerocopy v0.8.63
+6zerocopy-derive v0.8.63 (proc-macro)
+7proc-macro2 v1.0.107 (*)
+7quote v1.0.47 (*)
+7syn v2.0.119 (*)
+4rand_core v0.9.5
+5getrandom v0.3.4
+6cfg-if v1.0.5
+6libc v0.2.190
+3rand_core v0.9.5 (*)
+2serde v1.0.229 (*)
+2serde_repr v0.1.21 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v3.0.9 (*)
+2url v2.5.8
+3form_urlencoded v1.2.2
+4percent-encoding v2.3.2
+3idna v1.1.0
+4idna_adapter v1.2.2
+5icu_normalizer v2.3.0
+6icu_collections v2.3.0
+7displaydoc v0.2.7 (proc-macro)
+8proc-macro2 v1.0.107 (*)
+8quote v1.0.47 (*)
+8syn v3.0.9 (*)
+7potential_utf v0.1.6
+8zerovec v0.11.8
+9yoke v0.8.3
+10stable_deref_trait v1.2.1
+10yoke-derive v0.8.4 (proc-macro)
+11proc-macro2 v1.0.107 (*)
+11quote v1.0.47 (*)
+11syn v3.0.9 (*)
+11synstructure v0.14.0
+12proc-macro2 v1.0.107 (*)
+12quote v1.0.47 (*)
+12syn v3.0.9 (*)
+10zerofrom v0.1.8
+11zerofrom-derive v0.1.8 (proc-macro)
+12proc-macro2 v1.0.107 (*)
+12quote v1.0.47 (*)
+12syn v3.0.9 (*)
+12synstructure v0.14.0 (*)
+9zerofrom v0.1.8 (*)
+9zerovec-derive v0.11.6 (proc-macro)
+10proc-macro2 v1.0.107 (*)
+10quote v1.0.47 (*)
+10syn v3.0.9 (*)
+7utf8_iter v1.0.4
+7yoke v0.8.3 (*)
+7zerofrom v0.1.8 (*)
+7zerovec v0.11.8 (*)
+6icu_normalizer_data v2.3.0
+6icu_provider v2.3.1
+7displaydoc v0.2.7 (proc-macro) (*)
+7icu_locale_core v2.3.0
+8displaydoc v0.2.7 (proc-macro) (*)
+8litemap v0.8.3
+8tinystr v0.8.4
+9displaydoc v0.2.7 (proc-macro) (*)
+9zerovec v0.11.8 (*)
+8writeable v0.6.4
+8zerovec v0.11.8 (*)
+7writeable v0.6.4
+7yoke v0.8.3 (*)
+7zerofrom v0.1.8 (*)
+7zerotrie v0.2.5
+8displaydoc v0.2.7 (proc-macro) (*)
+8yoke v0.8.3 (*)
+8zerofrom v0.1.8 (*)
+7zerovec v0.11.8 (*)
+6smallvec v1.16.3
+6zerovec v0.11.8 (*)
+5icu_properties v2.3.0
+6displaydoc v0.2.7 (proc-macro) (*)
+6icu_collections v2.3.0 (*)
+6icu_locale_core v2.3.0 (*)
+6icu_properties_data v2.3.0
+6icu_provider v2.3.1 (*)
+6zerotrie v0.2.5 (*)
+6zerovec v0.11.8 (*)
+4smallvec v1.16.3
+4utf8_iter v1.0.4
+3percent-encoding v2.3.2
+3serde v1.0.229 (*)
+3serde_derive v1.0.229 (proc-macro) (*)
+2wayland-backend v0.3.17
+3downcast-rs v1.2.1
+3rustix v1.1.5 (*)
+3scoped-tls v1.0.1
+3smallvec v1.16.3
+3wayland-sys v0.31.11
+4dlib v0.5.3
+5libloading v0.8.9
+6cfg-if v1.0.5
+4log v0.4.34
+5serde_core v1.0.229
+5value-bag v1.14.1
+6value-bag-serde1 v1.14.1
+7erased-serde v0.4.10
+8serde_core v1.0.229
+8typeid v1.0.3
+7serde_core v1.0.229
+7serde_fmt v1.1.0
+8serde_core v1.0.229
+4once_cell v1.21.4
+4pkg-config v0.3.34
+3cc v1.8.0
+4find-msvc-tools v0.1.14
+4shlex v2.0.1
+2wayland-client v0.31.15
+3bitflags v2.13.2
+3rustix v1.1.5 (*)
+3wayland-backend v0.3.17 (*)
+3wayland-scanner v0.31.11 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quick-xml v0.41.0
+5memchr v2.8.3
+4quote v1.0.47 (*)
+2wayland-protocols v0.32.13
+3bitflags v2.13.2
+3wayland-backend v0.3.17 (*)
+3wayland-client v0.31.15 (*)
+3wayland-scanner v0.31.11 (proc-macro) (*)
+2zbus v5.19.0
+3async-broadcast v0.7.2
+4event-listener v5.4.2 (*)
+4event-listener-strategy v0.5.4 (*)
+4futures-core v0.3.34
+4pin-project-lite v0.2.17
+3async-executor v1.14.0
+4async-task v4.7.1
+4concurrent-queue v2.5.0 (*)
+4fastrand v2.5.0
+4futures-lite v2.6.1 (*)
+4pin-project-lite v0.2.17
+4slab v0.4.12
+3async-io v2.6.0 (*)
+3async-lock v3.4.2 (*)
+3async-process v2.5.0
+4async-channel v2.5.0 (*)
+4async-io v2.6.0 (*)
+4async-lock v3.4.2 (*)
+4async-signal v0.2.14
+5async-io v2.6.0 (*)
+5cfg-if v1.0.5
+5futures-core v0.3.34
+5futures-io v0.3.34
+5rustix v1.1.5 (*)
+5signal-hook-registry v1.4.8
+6errno v0.3.14
+7libc v0.2.190
+6libc v0.2.190
+4async-task v4.7.1
+4cfg-if v1.0.5
+4event-listener v5.4.2 (*)
+4futures-lite v2.6.1 (*)
+4rustix v1.1.5 (*)
+3async-recursion v1.2.0 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3async-task v4.7.1
+3async-trait v0.1.92 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3blocking v1.7.0 (*)
+3enumflags2 v0.7.12 (*)
+3event-listener v5.4.2 (*)
+3futures-core v0.3.34
+3futures-lite v2.6.1 (*)
+3hex v0.4.3
+3libc v0.2.190
+3ordered-stream v0.2.0
+4futures-core v0.3.34
+4pin-project-lite v0.2.17
+3rustix v1.1.5 (*)
+3serde v1.0.229 (*)
+3serde_repr v0.1.21 (proc-macro) (*)
+3tracing v0.1.44
+4pin-project-lite v0.2.17
+4tracing-attributes v0.1.31 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4tracing-core v0.1.36
+5once_cell v1.21.4
+3uuid v1.28.0
+4getrandom v0.4.3
+5cfg-if v1.0.5
+5libc v0.2.190
+4serde_core v1.0.229
+4sha1_smol v1.0.1
+3winnow v1.0.4
+3zbus_macros v5.19.0 (proc-macro)
+4proc-macro-crate v3.5.0
+5toml_edit v0.25.17+spec-1.1.0
+6indexmap v2.14.2
+7equivalent v1.0.3
+7hashbrown v0.17.1
+7serde_core v1.0.229
+6toml_datetime v1.1.2+spec-1.1.0
+6toml_parser v1.1.5+spec-1.1.0
+7winnow v1.0.4
+6winnow v1.0.4
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+4zbus_names v4.3.4
+5serde v1.0.229
+6serde_core v1.0.229
+6serde_derive v1.0.229 (proc-macro) (*)
+5winnow v1.0.4
+5zvariant v5.15.0
+6endi v1.1.1
+6enumflags2 v0.7.12 (*)
+6serde v1.0.229 (*)
+6winnow v1.0.4
+6zcheapstr v1.1.0
+7serde v1.0.229 (*)
+6zvariant_derive v5.15.0 (proc-macro)
+7proc-macro-crate v3.5.0 (*)
+7proc-macro2 v1.0.107 (*)
+7quote v1.0.47 (*)
+7syn v3.0.9 (*)
+7zvariant_utils v4.2.0
+8proc-macro2 v1.0.107 (*)
+8quote v1.0.47 (*)
+8serde v1.0.229 (*)
+8syn v3.0.9 (*)
+8winnow v1.0.4
+6zvariant_utils v4.2.0 (*)
+4zvariant v5.15.0 (*)
+4zvariant_utils v4.2.0 (*)
+3zbus_names v4.3.4 (*)
+3zvariant v5.15.0
+4endi v1.1.1
+4enumflags2 v0.7.12 (*)
+4serde v1.0.229 (*)
+4url v2.5.8 (*)
+4winnow v1.0.4
+4zcheapstr v1.1.0 (*)
+4zvariant_derive v5.15.0 (proc-macro) (*)
+4zvariant_utils v4.2.0 (*)
+1async-task v4.7.1
+1blade-graphics v0.7.1
+2ash v0.38.0+1.3.281
+3libloading v0.8.9 (*)
+2ash-window v0.13.0
+3ash v0.38.0+1.3.281 (*)
+3raw-window-handle v0.6.2
+2bitflags v2.13.2
+2bytemuck v1.25.2
+3bytemuck_derive v1.12.1 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+2codespan-reporting v0.12.0
+3termcolor v1.4.1
+3unicode-width v0.2.2
+2gpu-alloc v0.6.2
+3bitflags v2.13.2
+3gpu-alloc-types v0.3.1
+4bitflags v2.13.2
+2gpu-alloc-ash v0.7.1
+3ash v0.38.0+1.3.281 (*)
+3gpu-alloc-types v0.3.1 (*)
+3tinyvec v1.13.3
+2hidden-trait v0.1.2 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v1.0.109
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4unicode-ident v1.0.27
+2log v0.4.34 (*)
+2mint v0.5.9
+2naga v25.0.1
+3arrayvec v0.7.8
+3bit-set v0.8.0
+4bit-vec v0.8.0
+3bitflags v2.13.2
+3codespan-reporting v0.12.0 (*)
+3half v2.7.1
+4cfg-if v1.0.5
+4num-traits v0.2.19
+5libm v0.2.16
+5autocfg v1.5.1
+4zerocopy v0.8.63 (*)
+3hashbrown v0.15.5
+4foldhash v0.1.5
+3hexf-parse v0.2.1
+3indexmap v2.14.2 (*)
+3log v0.4.34 (*)
+3num-traits v0.2.19 (*)
+3once_cell v1.21.4
+3rustc-hash v1.1.0
+3spirv v0.3.0+sdk-1.3.268.0
+4bitflags v2.13.2
+3strum v0.26.3
+4strum_macros v0.26.4 (proc-macro)
+5heck v0.5.0
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5rustversion v1.0.23 (proc-macro)
+5syn v2.0.119 (*)
+3thiserror v2.0.21
+4thiserror-impl v2.0.21 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v3.0.9 (*)
+3unicode-ident v1.0.27
+3cfg_aliases v0.2.2
+2once_cell v1.21.4
+2raw-window-handle v0.6.2
+2slab v0.4.12
+1blade-macros v0.3.0 (proc-macro)
+2proc-macro2 v1.0.107 (*)
+2quote v1.0.47 (*)
+2syn v2.0.119 (*)
+1blade-util v0.3.0
+2blade-graphics v0.7.1 (*)
+2bytemuck v1.25.2 (*)
+2log v0.4.34 (*)
+2profiling v1.0.18
+3profiling-procmacros v1.0.18 (proc-macro)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+1bytemuck v1.25.2 (*)
+1calloop v0.13.0
+2bitflags v2.13.2
+2log v0.4.34 (*)
+2polling v3.11.0 (*)
+2rustix v0.38.44
+3bitflags v2.13.2
+3linux-raw-sys v0.4.15
+2slab v0.4.12
+2thiserror v1.0.69
+3thiserror-impl v1.0.69 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+1calloop-wayland-source v0.3.0
+2calloop v0.13.0 (*)
+2rustix v0.38.44 (*)
+2wayland-backend v0.3.17 (*)
+2wayland-client v0.31.15 (*)
+1cosmic-text v0.14.2
+2bitflags v2.13.2
+2fontdb v0.16.2
+3fontconfig-parser v0.5.8
+4roxmltree v0.20.0
+3log v0.4.34 (*)
+3memmap2 v0.9.11
+4libc v0.2.190
+3slotmap v1.1.1
+4version_check v0.9.5
+3tinyvec v1.13.3
+3ttf-parser v0.20.0
+2log v0.4.34 (*)
+2rangemap v1.8.0
+2rustc-hash v1.1.0
+2rustybuzz v0.14.1
+3bitflags v2.13.2
+3bytemuck v1.25.2 (*)
+3libm v0.2.16
+3smallvec v1.16.3
+3ttf-parser v0.21.1
+3unicode-bidi-mirroring v0.2.0
+3unicode-ccc v0.2.0
+3unicode-properties v0.1.4
+3unicode-script v0.5.8
+2self_cell v1.3.0
+2smol_str v0.2.2
+2swash v0.2.10
+3skrifa v0.44.0
+4bytemuck v1.25.2 (*)
+4read-fonts v0.41.0
+5bytemuck v1.25.2 (*)
+5font-types v0.12.7
+6bytemuck v1.25.2 (*)
+5once_cell v1.21.4
+3yazi v0.2.1
+3zeno v0.3.3
+2sys-locale v0.3.2
+2ttf-parser v0.21.1
+2unicode-bidi v0.3.18
+2unicode-linebreak v0.1.5
+2unicode-script v0.5.8
+2unicode-segmentation v1.13.3
+1ctor v0.4.3
+2ctor-proc-macro v0.0.6 (proc-macro)
+2dtor v0.0.6
+3dtor-proc-macro v0.0.5 (proc-macro)
+1derive_more v0.99.20 (proc-macro)
+2convert_case v0.4.0
+2proc-macro2 v1.0.107 (*)
+2quote v1.0.47 (*)
+2syn v2.0.119 (*)
+2rustc_version v0.4.1
+3semver v1.0.28
+1etagere v0.2.15
+2euclid v0.22.14
+3num-traits v0.2.19 (*)
+2svg_fmt v0.4.5
+1filedescriptor v0.8.3
+2libc v0.2.190
+2thiserror v1.0.69 (*)
+1flume v0.11.1
+2futures-core v0.3.34
+2futures-sink v0.3.34
+2nanorand v0.7.0
+3getrandom v0.2.17
+4cfg-if v1.0.5
+4libc v0.2.190
+2spin v0.9.9
+3lock_api v0.4.14
+4scopeguard v1.2.0
+1futures v0.3.34
+2futures-channel v0.3.34 (*)
+2futures-core v0.3.34
+2futures-executor v0.3.34
+3futures-core v0.3.34
+3futures-task v0.3.34
+3futures-util v0.3.34 (*)
+2futures-io v0.3.34
+2futures-sink v0.3.34
+2futures-task v0.3.34
+2futures-util v0.3.34 (*)
+1gpui-macros v0.2.2 (proc-macro)
+2heck v0.5.0
+2proc-macro2 v1.0.107 (*)
+2quote v1.0.47 (*)
+2syn v2.0.119 (*)
+1gpui_collections v0.2.2
+2indexmap v2.14.2 (*)
+2rustc-hash v2.1.3
+1gpui_http_client v0.2.2
+2anyhow v1.0.104
+2async-compression v0.4.50
+3compression-codecs v0.4.45
+4compression-core v0.4.33
+4deflate64 v0.1.12
+4flate2 v1.1.10
+5crc32fast v1.5.2
+6cfg-if v1.0.5
+5miniz_oxide v0.9.1
+6adler2 v2.0.1
+6simd-adler32 v0.3.10
+4memchr v2.8.3
+3compression-core v0.4.33
+3futures-io v0.3.34
+3pin-project-lite v0.2.17
+2async-fs v2.2.0 (*)
+2bytes v1.12.1
+2derive_more v0.99.20 (proc-macro) (*)
+2futures v0.3.34 (*)
+2gpui_util v0.2.2
+3anyhow v1.0.104
+3async-fs v2.2.0 (*)
+3async_zip v0.0.17
+4async-compression v0.4.50 (*)
+4crc32fast v1.5.2 (*)
+4futures-lite v2.6.1 (*)
+4pin-project v1.1.13
+5pin-project-internal v1.1.13 (proc-macro)
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v2.0.119 (*)
+4thiserror v1.0.69 (*)
+3command-fds v0.3.3
+4nix v0.31.3
+5bitflags v2.13.2
+5cfg-if v1.0.5
+5libc v0.2.190
+5cfg_aliases v0.2.2
+4thiserror v2.0.21 (*)
+3dirs v4.0.0
+4dirs-sys v0.3.7
+5libc v0.2.190
+3dunce v1.0.5
+3futures v0.3.34 (*)
+3futures-lite v1.13.0
+4fastrand v1.9.0
+4futures-core v0.3.34
+4futures-io v0.3.34
+4memchr v2.8.3
+4parking v2.2.1
+4pin-project-lite v0.2.17
+4waker-fn v1.2.0
+3globset v0.4.20
+4aho-corasick v1.1.5
+5memchr v2.8.3
+4bstr v1.13.1
+5memchr v2.8.3
+4log v0.4.34 (*)
+4regex-automata v0.4.18
+5aho-corasick v1.1.5 (*)
+5memchr v2.8.3
+5regex-syntax v0.8.11
+4regex-syntax v0.8.11
+3gpui_collections v0.2.2 (*)
+3itertools v0.14.0
+4either v1.19.0
+3libc v0.2.190
+3log v0.4.34 (*)
+3nix v0.29.0
+4bitflags v2.13.2
+4cfg-if v1.0.5
+4libc v0.2.190
+4cfg_aliases v0.2.2
+3regex v1.13.1
+4aho-corasick v1.1.5 (*)
+4memchr v2.8.3
+4regex-automata v0.4.18 (*)
+4regex-syntax v0.8.11
+3rust-embed v8.13.0
+4rust-embed-impl v8.13.0 (proc-macro)
+5mime_guess v2.0.5
+6mime v0.3.17
+6unicase v2.10.0
+6unicase v2.10.0
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5rust-embed-utils v8.13.0
+6globset v0.4.20 (*)
+6sha2 v0.11.1
+7cfg-if v1.0.5
+7cpufeatures v0.3.1
+7digest v0.11.3
+8block-buffer v0.12.1
+9hybrid-array v0.4.15
+10typenum v1.20.1
+8const-oid v0.10.2
+8crypto-common v0.2.2
+9hybrid-array v0.4.15 (*)
+6walkdir v2.5.0
+7same-file v1.0.6
+5syn v2.0.119 (*)
+5walkdir v2.5.0 (*)
+4rust-embed-utils v8.13.0 (*)
+4walkdir v2.5.0 (*)
+3schemars v1.2.3
+4dyn-clone v1.0.20
+4indexmap v2.14.2 (*)
+4ref-cast v1.0.27
+5ref-cast-impl v1.0.27 (proc-macro)
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v3.0.9 (*)
+4schemars_derive v1.2.3 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5serde_derive_internals v0.30.0
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v3.0.9 (*)
+5syn v3.0.9 (*)
+4serde v1.0.229 (*)
+4serde_json v1.0.154
+5foldhash v0.2.0
+5indexmap v2.14.2 (*)
+5itoa v1.0.18
+5memchr v2.8.3
+5serde_core v1.0.229
+5zmij v1.0.23
+3serde v1.0.229 (*)
+3serde_json v1.0.154 (*)
+3serde_json_lenient v0.2.4
+4indexmap v2.14.2 (*)
+4itoa v1.0.18
+4memchr v2.8.3
+4ryu v1.0.23
+4serde v1.0.229 (*)
+3shlex v1.3.0
+3smol v2.0.2
+4async-channel v2.5.0 (*)
+4async-executor v1.14.0 (*)
+4async-fs v2.2.0 (*)
+4async-io v2.6.0 (*)
+4async-lock v3.4.2 (*)
+4async-net v2.0.0 (*)
+4async-process v2.5.0 (*)
+4blocking v1.7.0 (*)
+4futures-lite v2.6.1 (*)
+3take-until v0.2.0
+3tempfile v3.27.0
+4fastrand v2.5.0
+4getrandom v0.4.3 (*)
+4once_cell v1.21.4
+4rustix v1.1.5 (*)
+3unicase v2.10.0
+3walkdir v2.5.0 (*)
+3which v6.0.3
+4either v1.19.0
+4home v0.5.12
+4rustix v0.38.44 (*)
+2http v1.5.0
+3bytes v1.12.1
+3itoa v1.0.18
+2http-body v1.1.0
+3bytes v1.12.1
+3http v1.5.0 (*)
+2log v0.4.34 (*)
+2parking_lot v0.12.5
+3lock_api v0.4.14 (*)
+3parking_lot_core v0.9.12
+4cfg-if v1.0.5
+4libc v0.2.190
+4smallvec v1.16.3
+2serde v1.0.229 (*)
+2serde_json v1.0.154 (*)
+2sha2 v0.10.9
+3cfg-if v1.0.5
+3cpufeatures v0.2.17
+3digest v0.10.7
+4block-buffer v0.10.4
+5generic-array v0.14.7
+6typenum v1.20.1
+6version_check v0.9.5
+4crypto-common v0.1.7
+5generic-array v0.14.7 (*)
+5rand_core v0.6.4
+6getrandom v0.2.17 (*)
+5typenum v1.20.1
+4subtle v2.6.1
+2tempfile v3.27.0 (*)
+2url v2.5.8 (*)
+2zed-async-tar v0.5.0-zed
+3async-std v1.13.2
+4async-channel v1.9.0
+5concurrent-queue v2.5.0 (*)
+5event-listener v2.5.3
+5futures-core v0.3.34
+4async-global-executor v2.4.1
+5async-channel v2.5.0 (*)
+5async-executor v1.14.0 (*)
+5async-io v2.6.0 (*)
+5async-lock v3.4.2 (*)
+5blocking v1.7.0 (*)
+5futures-lite v2.6.1 (*)
+5once_cell v1.21.4
+4async-io v2.6.0 (*)
+4async-lock v3.4.2 (*)
+4async-process v2.5.0 (*)
+4crossbeam-utils v0.8.23
+4futures-core v0.3.34
+4futures-io v0.3.34
+4futures-lite v2.6.1 (*)
+4kv-log-macro v1.0.7
+5log v0.4.34 (*)
+4log v0.4.34 (*)
+4memchr v2.8.3
+4once_cell v1.21.4
+4pin-project-lite v0.2.17
+4pin-utils v0.1.1
+4slab v0.4.12
+3filetime v0.2.29
+4cfg-if v1.0.5
+4libc v0.2.190
+3libc v0.2.190
+3pin-project v1.1.13 (*)
+3xattr v0.2.3
+4libc v0.2.190
+2zed-reqwest v0.12.15-zed
+3base64 v0.22.1
+3bytes v1.12.1
+3encoding_rs v0.8.42
+4cfg-if v1.0.5
+4core_detect v1.0.0
+4multiversion_no_op v1.0.0 (proc-macro)
+4scopeguard v1.2.0
+4simdutf8 v0.1.5
+4rustversion v1.0.23 (proc-macro)
+3futures-core v0.3.34
+3futures-util v0.3.34 (*)
+3h2 v0.4.20
+4atomic-waker v1.1.2
+4bytes v1.12.1
+4fnv v1.0.7
+4futures-core v0.3.34
+4futures-sink v0.3.34
+4http v1.5.0 (*)
+4indexmap v2.14.2 (*)
+4slab v0.4.12
+4tokio v1.53.3
+5bytes v1.12.1
+5libc v0.2.190
+5mio v1.2.4
+6libc v0.2.190
+5pin-project-lite v0.2.17
+5socket2 v0.6.5
+6libc v0.2.190
+4tokio-util v0.7.20
+5bytes v1.12.1
+5futures-core v0.3.34
+5futures-sink v0.3.34
+5libc v0.2.190
+5pin-project-lite v0.2.17
+5tokio v1.53.3 (*)
+4tracing v0.1.44 (*)
+3http v1.5.0 (*)
+3http-body v1.1.0 (*)
+3http-body-util v0.1.5
+4bytes v1.12.1
+4futures-core v0.3.34
+4http v1.5.0 (*)
+4http-body v1.1.0 (*)
+4pin-project-lite v0.2.17
+3hyper v1.12.0
+4atomic-waker v1.1.2
+4bytes v1.12.1
+4futures-channel v0.3.34 (*)
+4futures-core v0.3.34
+4h2 v0.4.20 (*)
+4http v1.5.0 (*)
+4http-body v1.1.0 (*)
+4httparse v1.10.1
+4itoa v1.0.18
+4pin-project-lite v0.2.17
+4smallvec v1.16.3
+4tokio v1.53.3 (*)
+4want v0.3.2
+5try-lock v0.2.5
+3hyper-rustls v0.27.10
+4http v1.5.0 (*)
+4hyper v1.12.0 (*)
+4hyper-util v0.1.21
+5bytes v1.12.1
+5futures-channel v0.3.34 (*)
+5futures-util v0.3.34 (*)
+5http v1.5.0 (*)
+5http-body v1.1.0 (*)
+5httparse v1.10.1
+5hyper v1.12.0 (*)
+5libc v0.2.190
+5pin-project-lite v0.2.17
+5socket2 v0.6.5 (*)
+5tokio v1.53.3 (*)
+5tower-service v0.3.3
+5tracing v0.1.44 (*)
+4rustls v0.23.46
+5once_cell v1.21.4
+5ring v0.17.14
+6cfg-if v1.0.5
+6getrandom v0.2.17 (*)
+6untrusted v0.9.0
+6cc v1.8.0 (*)
+5rustls-pki-types v1.15.1
+6zeroize v1.9.1
+7zeroize_derive v1.5.0 (proc-macro)
+8proc-macro2 v1.0.107 (*)
+8quote v1.0.47 (*)
+8syn v2.0.119 (*)
+5rustls-webpki v0.103.15
+6ring v0.17.14 (*)
+6rustls-pki-types v1.15.1 (*)
+6untrusted v0.9.0
+5subtle v2.6.1
+5zeroize v1.9.1 (*)
+4rustls-native-certs v0.8.5
+5openssl-probe v0.2.1
+5rustls-pki-types v1.15.1 (*)
+4tokio v1.53.3 (*)
+4tokio-rustls v0.26.6
+5rustls v0.23.46 (*)
+5tokio v1.53.3 (*)
+4tower-service v0.3.3
+3hyper-util v0.1.21 (*)
+3ipnet v2.12.2
+3log v0.4.34 (*)
+3mime v0.3.17
+3mime_guess v2.0.5
+4mime v0.3.17
+4unicase v2.10.0
+4unicase v2.10.0
+3once_cell v1.21.4
+3percent-encoding v2.3.2
+3pin-project-lite v0.2.17
+3rustls v0.23.46 (*)
+3rustls-native-certs v0.8.5 (*)
+3rustls-pemfile v2.2.0
+4rustls-pki-types v1.15.1 (*)
+3rustls-pki-types v1.15.1 (*)
+3serde v1.0.229 (*)
+3serde_urlencoded v0.7.1
+4form_urlencoded v1.2.2 (*)
+4itoa v1.0.18
+4ryu v1.0.23
+4serde v1.0.229 (*)
+3sync_wrapper v1.0.2
+4futures-core v0.3.34
+3tokio v1.53.3 (*)
+3tokio-rustls v0.26.6 (*)
+3tokio-socks v0.5.3
+4either v1.19.0
+4futures-util v0.3.34 (*)
+4thiserror v1.0.69 (*)
+4tokio v1.53.3 (*)
+3tokio-util v0.7.20 (*)
+3tower v0.5.3
+4futures-core v0.3.34
+4futures-util v0.3.34 (*)
+4pin-project-lite v0.2.17
+4sync_wrapper v1.0.2 (*)
+4tokio v1.53.3 (*)
+4tower-layer v0.3.3
+4tower-service v0.3.3
+3tower-service v0.3.3
+3url v2.5.8 (*)
+1gpui_refineable v0.2.2
+2gpui_derive_refineable v0.2.2 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119 (*)
+1gpui_semantic_version v0.2.2
+2anyhow v1.0.104
+2serde v1.0.229 (*)
+1gpui_sum_tree v0.2.2
+2arrayvec v0.7.8
+2log v0.4.34 (*)
+2rayon v1.12.0
+3either v1.19.0
+3rayon-core v1.13.0
+4crossbeam-deque v0.8.8
+5crossbeam-epoch v0.9.21
+6crossbeam-utils v0.8.23
+5crossbeam-utils v0.8.23
+4crossbeam-utils v0.8.23
+1gpui_util v0.2.2 (*)
+1gpui_util_macros v0.2.2 (proc-macro)
+2gpui_perf v0.2.2
+3gpui_collections v0.2.2 (*)
+3serde v1.0.229 (*)
+3serde_json v1.0.154 (*)
+2quote v1.0.47 (*)
+2syn v2.0.119 (*)
+1image v0.25.10
+2bytemuck v1.25.2 (*)
+2byteorder-lite v0.1.0
+2color_quant v1.1.0
+2exr v1.74.2
+3bit_field v0.10.3
+3half v2.7.1 (*)
+3lebe v0.5.3
+3miniz_oxide v0.8.9
+4adler2 v2.0.1
+4simd-adler32 v0.3.10
+3num-complex v0.4.6
+4bytemuck v1.25.2 (*)
+4num-traits v0.2.19 (*)
+3pulp v0.22.3
+4bytemuck v1.25.2 (*)
+4cfg-if v1.0.5
+4libm v0.2.16
+4num-complex v0.4.6 (*)
+4paste v1.0.15 (proc-macro)
+4pulp-wasm-simd-flag v0.1.1
+4raw-cpuid v11.6.0
+5bitflags v2.13.2
+4reborrow v0.5.5
+4version_check v0.9.5
+3rayon-core v1.13.0 (*)
+3smallvec v1.16.3
+3zune-inflate v0.2.54
+4simd-adler32 v0.3.10
+2gif v0.14.2
+3color_quant v1.1.0
+3weezl v0.1.12
+2image-webp v0.2.4
+3byteorder-lite v0.1.0
+3quick-error v2.0.1
+2moxcms v0.8.1
+3num-traits v0.2.19 (*)
+3pxfm v0.1.30
+2num-traits v0.2.19 (*)
+2png v0.18.1
+3bitflags v2.13.2
+3crc32fast v1.5.2 (*)
+3fdeflate v0.3.7
+4simd-adler32 v0.3.10
+3flate2 v1.1.10 (*)
+3miniz_oxide v0.8.9 (*)
+2qoi v0.4.1
+3bytemuck v1.25.2 (*)
+2ravif v0.13.0
+3avif-serialize v0.8.9
+4arrayvec v0.7.8
+3imgref v1.12.3
+3loop9 v0.1.5
+4imgref v1.12.3
+3quick-error v2.0.1
+3rav1e v0.8.1
+4aligned-vec v0.6.4
+5equator v0.4.2
+6equator-macro v0.4.2 (proc-macro)
+7proc-macro2 v1.0.107 (*)
+7quote v1.0.47 (*)
+7syn v2.0.119 (*)
+4arg_enum_proc_macro v0.3.4 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4arrayvec v0.7.8
+4av-scenechange v0.14.1
+5aligned v0.4.3
+6as-slice v0.2.1
+7stable_deref_trait v1.2.1
+5anyhow v1.0.104
+5arg_enum_proc_macro v0.3.4 (proc-macro) (*)
+5arrayvec v0.7.8
+5log v0.4.34 (*)
+5num-rational v0.4.2
+6num-bigint v0.4.8
+7num-integer v0.1.47
+8num-traits v0.2.19 (*)
+7num-traits v0.2.19 (*)
+6num-integer v0.1.47 (*)
+6num-traits v0.2.19 (*)
+5num-traits v0.2.19 (*)
+5pastey v0.1.1 (proc-macro)
+5rayon v1.12.0 (*)
+5thiserror v2.0.21 (*)
+5v_frame v0.3.9
+6aligned-vec v0.6.4 (*)
+6num-traits v0.2.19 (*)
+5y4m v0.8.0
+4av1-grain v0.2.5
+5anyhow v1.0.104
+5arrayvec v0.7.8
+5log v0.4.34 (*)
+5nom v8.0.0
+6memchr v2.8.3
+5num-rational v0.4.2 (*)
+5v_frame v0.3.9 (*)
+4bitstream-io v4.10.0
+5no_std_io2 v0.9.4
+6memchr v2.8.3
+4cfg-if v1.0.5
+4itertools v0.14.0 (*)
+4libc v0.2.190
+4log v0.4.34 (*)
+4maybe-rayon v0.1.1
+5cfg-if v1.0.5
+5rayon v1.12.0 (*)
+4new_debug_unreachable v1.0.6
+4noop_proc_macro v0.3.0 (proc-macro)
+4num-derive v0.4.2 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4num-traits v0.2.19 (*)
+4paste v1.0.15 (proc-macro)
+4profiling v1.0.18 (*)
+4simd_helpers v0.1.0 (proc-macro)
+5quote v1.0.47 (*)
+4thiserror v2.0.21 (*)
+4v_frame v0.3.9 (*)
+4built v0.8.1
+3rayon v1.12.0 (*)
+3rgb v0.8.53
+4bytemuck v1.25.2 (*)
+2rayon v1.12.0 (*)
+2rgb v0.8.53 (*)
+2tiff v0.11.3
+3fax v0.2.7
+3flate2 v1.1.10 (*)
+3half v2.7.1 (*)
+3quick-error v2.0.1
+3weezl v0.1.12
+3zune-jpeg v0.5.15
+4zune-core v0.5.3
+2zune-core v0.5.3
+2zune-jpeg v0.5.15 (*)
+1inventory v0.3.25
+1itertools v0.14.0 (*)
+1libc v0.2.190
+1log v0.4.34 (*)
+1lyon v1.0.19
+2lyon_algorithms v1.0.21
+3lyon_path v1.0.19
+4lyon_geom v1.0.19
+5arrayvec v0.7.8
+5euclid v0.22.14 (*)
+5num-traits v0.2.19 (*)
+4num-traits v0.2.19 (*)
+3num-traits v0.2.19 (*)
+2lyon_tessellation v1.0.22
+3float_next_after v1.0.0
+3lyon_path v1.0.19 (*)
+3num-traits v0.2.19 (*)
+1num_cpus v1.17.0
+2libc v0.2.190
+1oo7 v0.5.0
+2aes v0.8.4
+3cfg-if v1.0.5
+3cipher v0.4.4
+4crypto-common v0.1.7 (*)
+4inout v0.1.4
+5block-padding v0.3.3
+6generic-array v0.14.7 (*)
+5generic-array v0.14.7 (*)
+4zeroize v1.9.1 (*)
+3cpufeatures v0.2.17
+3zeroize v1.9.1 (*)
+2ashpd v0.12.3
+3async-fs v2.2.0 (*)
+3async-net v2.0.0 (*)
+3enumflags2 v0.7.12 (*)
+3futures-channel v0.3.34 (*)
+3futures-util v0.3.34 (*)
+3rand v0.9.5 (*)
+3serde v1.0.229 (*)
+3serde_repr v0.1.21 (proc-macro) (*)
+3url v2.5.8 (*)
+3zbus v5.19.0 (*)
+2async-fs v2.2.0 (*)
+2async-io v2.6.0 (*)
+2async-lock v3.4.2 (*)
+2blocking v1.7.0 (*)
+2cbc v0.1.2
+3cipher v0.4.4 (*)
+2cipher v0.4.4 (*)
+2digest v0.10.7 (*)
+2endi v1.1.1
+2futures-lite v2.6.1 (*)
+2futures-util v0.3.34 (*)
+2getrandom v0.3.4 (*)
+2hkdf v0.12.4
+3hmac v0.12.1
+4digest v0.10.7 (*)
+2hmac v0.12.1 (*)
+2md-5 v0.10.6
+3cfg-if v1.0.5
+3digest v0.10.7 (*)
+2num v0.4.3
+3num-bigint v0.4.8 (*)
+3num-complex v0.4.6 (*)
+3num-integer v0.1.47 (*)
+3num-iter v0.1.46
+4num-integer v0.1.47 (*)
+4num-traits v0.2.19 (*)
+3num-rational v0.4.2 (*)
+3num-traits v0.2.19 (*)
+2num-bigint-dig v0.8.6
+3lazy_static v1.5.1
+4spin v0.9.9 (*)
+3libm v0.2.16
+3num-integer v0.1.47 (*)
+3num-iter v0.1.46 (*)
+3num-traits v0.2.19 (*)
+3rand v0.8.8
+4libc v0.2.190
+4rand_chacha v0.3.1
+5ppv-lite86 v0.2.21 (*)
+5rand_core v0.6.4 (*)
+4rand_core v0.6.4 (*)
+3serde v1.0.229 (*)
+3smallvec v1.16.3
+3zeroize v1.9.1 (*)
+2pbkdf2 v0.12.2
+3digest v0.10.7 (*)
+3hmac v0.12.1 (*)
+2rand v0.9.5 (*)
+2serde v1.0.229 (*)
+2sha2 v0.10.9 (*)
+2subtle v2.6.1
+2zbus v5.19.0 (*)
+2zbus_macros v5.19.0 (proc-macro) (*)
+2zeroize v1.9.1 (*)
+2zvariant v5.15.0 (*)
+1open v5.4.4
+2is-wsl v0.4.0
+3is-docker v0.2.0
+4once_cell v1.21.4
+3once_cell v1.21.4
+2libc v0.2.190
+1parking v2.2.1
+1parking_lot v0.12.5 (*)
+1pathfinder_geometry v0.5.1
+2log v0.4.34 (*)
+2pathfinder_simd v0.5.6
+3rustc_version v0.4.1 (*)
+1pin-project v1.1.13 (*)
+1postage v0.5.0
+2atomic v0.5.3
+2crossbeam-queue v0.3.14
+3crossbeam-utils v0.8.23
+2futures v0.3.34 (*)
+2log v0.4.34 (*)
+2parking_lot v0.12.5 (*)
+2pin-project v1.1.13 (*)
+2pollster v0.2.5
+2static_assertions v1.1.0
+2thiserror v1.0.69 (*)
+1profiling v1.0.18 (*)
+1raw-window-handle v0.6.2
+1resvg v0.45.1
+2log v0.4.34 (*)
+2pico-args v0.5.0
+2rgb v0.8.53 (*)
+2svgtypes v0.15.3
+3kurbo v0.11.3
+4arrayvec v0.7.8
+4smallvec v1.16.3
+3siphasher v1.0.4
+2tiny-skia v0.11.4
+3arrayref v0.3.9
+3arrayvec v0.7.8
+3bytemuck v1.25.2 (*)
+3cfg-if v1.0.5
+3log v0.4.34 (*)
+3png v0.17.16
+4bitflags v1.3.2
+4crc32fast v1.5.2 (*)
+4fdeflate v0.3.7 (*)
+4flate2 v1.1.10 (*)
+4miniz_oxide v0.8.9 (*)
+3tiny-skia-path v0.11.4
+4arrayref v0.3.9
+4bytemuck v1.25.2 (*)
+4strict-num v0.1.1
+5float-cmp v0.9.0
+2usvg v0.45.1
+3base64 v0.22.1
+3data-url v0.3.2
+3flate2 v1.1.10 (*)
+3fontdb v0.23.0
+4fontconfig-parser v0.5.8 (*)
+4log v0.4.34 (*)
+4memmap2 v0.9.11 (*)
+4slotmap v1.1.1 (*)
+4tinyvec v1.13.3
+4ttf-parser v0.25.1
+5core_maths v0.1.1
+6libm v0.2.16
+3imagesize v0.13.0
+3kurbo v0.11.3 (*)
+3log v0.4.34 (*)
+3pico-args v0.5.0
+3roxmltree v0.20.0
+3rustybuzz v0.20.1
+4bitflags v2.13.2
+4bytemuck v1.25.2 (*)
+4core_maths v0.1.1 (*)
+4log v0.4.34 (*)
+4smallvec v1.16.3
+4ttf-parser v0.25.1 (*)
+4unicode-bidi-mirroring v0.4.0
+4unicode-ccc v0.4.0
+4unicode-properties v0.1.4
+4unicode-script v0.5.8
+3simplecss v0.2.2
+4log v0.4.34 (*)
+3siphasher v1.0.4
+3strict-num v0.1.1 (*)
+3svgtypes v0.15.3 (*)
+3tiny-skia-path v0.11.4 (*)
+3unicode-bidi v0.3.18
+3unicode-script v0.5.8
+3unicode-vo v0.1.0
+3xmlwriter v0.1.0
+1schemars v1.2.3 (*)
+1seahash v4.1.0
+1serde v1.0.229 (*)
+1serde_json v1.0.154 (*)
+1slotmap v1.1.1 (*)
+1smallvec v1.16.3
+1smol v2.0.2 (*)
+1stacksafe v0.1.4
+2stacker v0.1.25
+3cfg-if v1.0.5
+3libc v0.2.190
+3psm v0.1.32
+4ar_archive_writer v0.5.3
+5object v0.39.1
+6memchr v2.8.3
+4cc v1.8.0 (*)
+3cc v1.8.0 (*)
+2stacksafe-macro v0.1.4 (proc-macro)
+3proc-macro-error2 v2.0.1
+4proc-macro-error-attr2 v2.0.0 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119 (*)
+1strum v0.27.2
+2strum_macros v0.27.2 (proc-macro)
+3heck v0.5.0
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119 (*)
+1taffy v0.9.0
+2arrayvec v0.7.8
+2grid v0.18.0
+2slotmap v1.1.1 (*)
+1thiserror v2.0.21 (*)
+1usvg v0.45.1 (*)
+1uuid v1.28.0 (*)
+1waker-fn v1.2.0
+1wayland-backend v0.3.17 (*)
+1wayland-client v0.31.15 (*)
+1wayland-cursor v0.31.14
+2rustix v1.1.5 (*)
+2wayland-client v0.31.15 (*)
+2xcursor v0.3.11
+1wayland-protocols v0.31.2
+2bitflags v2.13.2
+2wayland-backend v0.3.17 (*)
+2wayland-client v0.31.15 (*)
+2wayland-scanner v0.31.11 (proc-macro) (*)
+1wayland-protocols-plasma v0.2.0
+2bitflags v2.13.2
+2wayland-backend v0.3.17 (*)
+2wayland-client v0.31.15 (*)
+2wayland-protocols v0.31.2 (*)
+2wayland-scanner v0.31.11 (proc-macro) (*)
+1x11-clipboard v0.9.3
+2libc v0.2.190
+2x11rb v0.13.2
+3as-raw-xcb-connection v1.0.1
+3gethostname v1.1.0
+4rustix v1.1.5 (*)
+3libc v0.2.190
+3rustix v1.1.5 (*)
+3x11rb-protocol v0.13.2
+3xcursor v0.3.11
+1x11rb v0.13.2 (*)
+1xkbcommon v0.8.0
+2as-raw-xcb-connection v1.0.1
+2libc v0.2.190
+2memmap2 v0.9.11 (*)
+2xkeysym v0.2.1
+1zed-font-kit v0.14.1-zed
+2bitflags v2.13.2
+2byteorder v1.5.0
+2dirs v5.0.1
+3dirs-sys v0.4.1
+4libc v0.2.190
+4option-ext v0.2.0
+2float-ord v0.3.2
+2freetype-sys v0.20.1
+3libc v0.2.190
+3cc v1.8.0 (*)
+3pkg-config v0.3.34
+2lazy_static v1.5.1 (*)
+2libc v0.2.190
+2log v0.4.34 (*)
+2pathfinder_geometry v0.5.1 (*)
+2pathfinder_simd v0.5.6 (*)
+2walkdir v2.5.0 (*)
+2yeslogic-fontconfig-sys v6.0.1
+3dlib v0.5.3 (*)
+3once_cell v1.21.4
+3pkg-config v0.3.34
+1zed-xim v0.4.0-zed
+2ahash v0.8.12
+3cfg-if v1.0.5
+3const-random v0.1.18
+4const-random-macro v0.1.16 (proc-macro)
+5getrandom v0.2.17
+6cfg-if v1.0.5
+6libc v0.2.190
+5once_cell v1.21.4
+5tiny-keccak v2.0.2
+6crunchy v0.2.4
+3once_cell v1.21.4
+3zerocopy v0.8.63 (*)
+3version_check v0.9.5
+2hashbrown v0.14.5
+2log v0.4.34 (*)
+2x11rb v0.13.2 (*)
+2xim-ctext v0.3.0
+3encoding_rs v0.8.42 (*)
+2xim-parser v0.2.2
+3bitflags v2.13.2
+1naga v25.0.1
+2arrayvec v0.7.8
+2bit-set v0.8.0 (*)
+2bitflags v2.13.2
+2codespan-reporting v0.12.0
+3termcolor v1.4.1
+3unicode-width v0.2.2
+2half v2.7.1
+3cfg-if v1.0.5
+3num-traits v0.2.19
+4libm v0.2.16
+4autocfg v1.5.1
+3zerocopy v0.8.63 (*)
+2hashbrown v0.15.5 (*)
+2hexf-parse v0.2.1
+2indexmap v2.14.2 (*)
+2log v0.4.34
+2num-traits v0.2.19 (*)
+2once_cell v1.21.4
+2rustc-hash v1.1.0
+2strum v0.26.3 (*)
+2thiserror v2.0.21
+3thiserror-impl v2.0.21 (proc-macro) (*)
+2unicode-ident v1.0.27
+2cfg_aliases v0.2.2

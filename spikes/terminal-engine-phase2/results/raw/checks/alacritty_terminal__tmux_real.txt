@@ -1,0 +1,74 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: tmux_real
+# title: Alternate screen + content (real tmux session)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/tmux.bin kind=real-program sha256=45e3f721839f1000d96f135b5a9f5f5a094b626c21eaaa3763bd386dfc2344a5
+# ---- expected vs actual ----
+ASSERT raw_bytes_1049h_present
+  EXPECTED capture bytes contain at least one ESC[?1049h
+  ACTUAL   1049h_count=1
+  STATUS   PASS
+ASSERT raw_bytes_1049l_present
+  EXPECTED capture bytes contain at least one ESC[?1049l
+  ACTUAL   1049l_count=1
+  STATUS   PASS
+ASSERT engine_alt_true_after_every_1049h
+  EXPECTED engine alt_screen == true after every 1049h
+  ACTUAL   engine_alt_after_each_1049h=[true]
+  STATUS   PASS
+ASSERT engine_alt_false_after_every_1049l
+  EXPECTED engine alt_screen == false after every 1049l
+  ACTUAL   engine_alt_after_each_1049l=[false]
+  STATUS   PASS
+ASSERT raw_bytes_marker_present
+  EXPECTED capture bytes contain the deterministic tmux pane marker "RELAYABLE_TMUX_MARKER"
+  ACTUAL   marker_count=1 marker_offset=Some(681)
+  STATUS   PASS
+ASSERT engine_alt_screen_active_at_marker
+  EXPECTED engine alt_screen == true at the byte offset where the pane marker is written
+  ACTUAL   alt_screen=true marker_offset=Some(681)
+  STATUS   PASS
+ASSERT engine_alt_screen_contains_marker
+  EXPECTED engine alt-screen snapshot at the marker offset contains "RELAYABLE_TMUX_MARKER" (while alt_screen == true)
+  ACTUAL   alt_nonblank=true present=["RELAYABLE_TMUX_MARKER"] first_nonblank_rows=["RELAYABLE_TMUX_MARKER", "[0] 0:tmux*                                             \"falcon\" 03:12 16-Oct-26"]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| RELAYABLE_TMUX_MARKER
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| [0] 0:tmux*                                             "falcon" 03:12 16-Oct-26
+# ---- notes ----
+- The marker is asserted on an engine snapshot taken at the marker byte offset (mid-replay, while the engine is on the alternate screen), because tmux clears the screen before detaching: the snapshot immediately before 1049l is blank even though the pane content was non-blank.
+- Real tmux session captured through the PTY on the private socket `relayable-term002-spike` (capture command: `tmux -L relayable-term002-spike -f /dev/null new-session 'printf "RELAYABLE_TMUX_MARKER\n"; sleep 4'`). The user's default tmux server is never referenced. scripts/run_all.sh kills the private server after the capture and records the cleanup command, its exit code, and the verification that no server remains in results/raw/streams/tmux.cleanup.txt.
+STATUS=PASS

@@ -1,0 +1,5 @@
+kind=fixture
+name=mouse_1000
+description=DECSET 1000 (click) mouse reporting
+bytes=8
+sha256=b600fe89f5237793cc03353cc5f0abb93b143280d05902f34f4567b15c33a034

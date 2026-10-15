@@ -1,0 +1,19 @@
+
+engine: vt100 0.16.2
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=1208.482 bytes_per_sec=6941464 rss_before_kb=12268 rss_after_kb=14896 rss_delta_kb=2628 vmhwm_kb=14896
+  pass 2: elapsed_ms=1213.081 bytes_per_sec=6915146 rss_before_kb=14896 rss_after_kb=14896 rss_delta_kb=0 vmhwm_kb=14896
+  pass 3: elapsed_ms=1214.005 bytes_per_sec=6909885 rss_before_kb=14896 rss_after_kb=14896 rss_delta_kb=0 vmhwm_kb=14896
+bytes_per_sec_min: 6909884.787
+bytes_per_sec_median: 6915145.655
+bytes_per_sec_max: 6941463.988
+rss_baseline_kb: 12204
+rss_after_kb: 14896
+rss_delta_kb: 2692
+vmhwm_kb: 14896

@@ -1,0 +1,52 @@
+# ---- provenance ----
+# engine: vt100 0.16.2
+# check: mouse_modes_real
+# title: Mouse modes (real nvim '+set mouse=a')
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:33Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_mouse.bin kind=real-program sha256=63c296541cbb2c2378af24d40f455ef3730c14fe86a84e17c6ea856756d40067
+# ---- expected vs actual ----
+ASSERT mouse_mode_enabled
+  EXPECTED mouse mode != Off
+  ACTUAL   Drag
+  STATUS   PASS
+ASSERT mouse_sgr_enabled
+  EXPECTED SGR mouse encoding enabled
+  ACTUAL   true
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- max mouse mode observed: Drag
+STATUS=PASS

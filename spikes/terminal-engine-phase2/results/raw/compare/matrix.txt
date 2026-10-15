@@ -1,0 +1,44 @@
+Relayable TERM-002 phase C - comparison matrix (per-check x per-engine)
+generated from results/raw/summary.json by scripts/run_all.sh
+
+engine versions:
+  alacritty_terminal   0.26.0
+  vt100                0.16.2
+  avt                  0.18.0
+  termwiz              0.23.3
+
+check                      kind                   alacritty_terminal  vt100   avt     termwiz
+---------------------------------------------------------------------------------------------
+vt_basics                  fixture                PASS                PASS    PASS    UNSUPPORTED
+alt_screen                 fixture                PASS                PASS    PASS    UNSUPPORTED
+osc_title                  fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+osc8_hyperlink             fixture                PASS                UNSUPPORTED  UNSUPPORTED  UNSUPPORTED
+bell                       fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+unicode_wide               fixture                PASS                PASS    PASS    UNSUPPORTED
+unicode_combining          fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+unicode_emoji              fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+colors                     fixture                PASS                PASS    PASS    UNSUPPORTED
+cursor_keys                fixture                PASS                PASS    PASS    UNSUPPORTED
+bracketed_paste_mode       fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+bracketed_paste_payload    fixture                UNSUPPORTED         UNSUPPORTED  UNSUPPORTED  UNSUPPORTED
+mouse_modes                fixture                PASS                PASS    UNSUPPORTED  UNSUPPORTED
+resize_reflow              engine                 PASS                UNSUPPORTED  PASS    UNSUPPORTED
+scrollback_bound           engine                 PASS                PASS    PASS    UNSUPPORTED
+selection                  engine                 PASS                PASS    UNSUPPORTED  UNSUPPORTED
+chunk_boundary_invariance  engine                 PASS                PASS    PASS    UNSUPPORTED
+alt_screen_real            real-program           PASS                PASS    PASS    UNSUPPORTED
+osc_title_real             real-program           PASS                PASS    UNSUPPORTED  UNSUPPORTED
+osc8_real                  real-program           PASS                UNSUPPORTED  UNSUPPORTED  UNSUPPORTED
+bell_real                  real-program           PASS                PASS    UNSUPPORTED  UNSUPPORTED
+unicode_real               real-program           PASS                PASS    PASS    UNSUPPORTED
+cursor_keys_real           real-program           PASS                PASS    PASS    UNSUPPORTED
+mouse_modes_real           real-program           PASS                PASS    UNSUPPORTED  UNSUPPORTED
+resize_real                real-program           PASS                PASS    PASS    UNSUPPORTED
+scrollback_bound_real      real-program           PASS                PASS    PASS    UNSUPPORTED
+tmux_real                  real-program           PASS                PASS    PASS    UNSUPPORTED
+replay_less                replayed-real-capture  PASS                PASS    PASS    UNSUPPORTED
+replay_nvim                replayed-real-capture  PASS                PASS    PASS    UNSUPPORTED
+replay_nvim_mouse          replayed-real-capture  PASS                PASS    UNSUPPORTED  UNSUPPORTED
+replay_nvim_title          replayed-real-capture  PASS                PASS    UNSUPPORTED  UNSUPPORTED
+replay_osc8_ls             replayed-real-capture  PASS                UNSUPPORTED  UNSUPPORTED  UNSUPPORTED
+replay_top                 replayed-real-capture  PASS                PASS    PASS    UNSUPPORTED

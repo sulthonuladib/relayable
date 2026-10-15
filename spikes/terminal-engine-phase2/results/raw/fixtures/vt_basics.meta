@@ -1,0 +1,5 @@
+kind=fixture
+name=vt_basics
+description=CUP, SGR bold/italic/underline/reverse, EL/ED erase, DECSC/DECRC save+restore
+bytes=105
+sha256=0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0

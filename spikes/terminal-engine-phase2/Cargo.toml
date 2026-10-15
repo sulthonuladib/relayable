@@ -1,0 +1,46 @@
+# Relayable terminal-engine spike (TERM-002 / ADR-003, phase 2).
+#
+# Goal: prove one terminal-emulation engine can be driven behind a small common
+# interface with PTY ownership, and record the real APIs from the fetched
+# sources (notes/engine-api.md) so the phase-B adapter work can be written
+# against evidence instead of memory.
+#
+# Standalone on purpose: the empty `[workspace]` table below makes this crate
+# its own workspace root.  It must never absorb `spikes/terminal-engine/`
+# (phase 1, read-only), `crates/**`, or anything else in the repository, and a
+# future root workspace must not silently absorb it either.  This mirrors the
+# phase-1 crate at spikes/terminal-engine/Cargo.toml.
+
+[package]
+name = "relayable-terminal-engine-phase2-spike"
+version = "0.0.0"
+edition = "2021"
+# Mapped to the toolchain verified on this host (rustc/cargo 1.98.1).
+rust-version = "1.98.1"
+publish = false
+license = "Apache-2.0"
+description = "Phase-2 terminal-engine selection spike: engine adapters + PTY ownership (ADR-003)"
+
+[dependencies]
+# --- ADR-003 pins (required) -------------------------------------------------
+# PTY ownership.  Was present in the local cargo cache before this task; still
+# fetched to make `cargo fetch` a real network probe.
+portable-pty = "=0.9.0"
+# Candidate engine: parser + grid/screen state.
+alacritty_terminal = "=0.26.0"
+# Parser boundary.  alacritty_terminal 0.26.0 itself requires `vte ^0.15.0`, so
+# exactly one vte 0.15.0 is shared across the graph.
+vte = "=0.15.0"
+
+# --- comparison engines (optional; removed if they fail to fetch/resolve) ----
+# These three are only present to compare parser/grid APIs.  A failed optional
+# comparison must NOT break `cargo build`; see results/raw/deps/ for the verbatim
+# fetch/resolve evidence that justifies their presence here.
+vt100 = "=0.16.2"
+termwiz = "=0.23.3"
+avt = "=0.18.0"
+
+# Deliberately no `[profile]` overrides: this spike records debug-profile build
+# and API-shape evidence only, so a release profile would be unjustified.
+
+[workspace]

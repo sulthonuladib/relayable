@@ -1,0 +1,7 @@
+# canonical Cargo.toml sha256 before matrix: d7f1c1b10a38a07d7afc18c407f85fd93a2302befd9d7d08db7fb257d6694d6a
+# canonical Cargo.lock sha256 before matrix: e2ca138842fd390a267859ffcff40b707573de217cf3066f221301458ccb7ea8
+# canonical Cargo.toml sha256 after matrix:  d7f1c1b10a38a07d7afc18c407f85fd93a2302befd9d7d08db7fb257d6694d6a
+# canonical Cargo.lock sha256 after matrix:  e2ca138842fd390a267859ffcff40b707573de217cf3066f221301458ccb7ea8
+# RESULT: canonical manifest and lock UNCHANGED by the matrix.
+# cold check canonical Cargo.toml before/after: d7f1c1b10a38a07d7afc18c407f85fd93a2302befd9d7d08db7fb257d6694d6a / d7f1c1b10a38a07d7afc18c407f85fd93a2302befd9d7d08db7fb257d6694d6a
+# cold check canonical Cargo.lock before/after: e2ca138842fd390a267859ffcff40b707573de217cf3066f221301458ccb7ea8 / e2ca138842fd390a267859ffcff40b707573de217cf3066f221301458ccb7ea8

@@ -1,0 +1,5 @@
+kind=fixture
+name=osc8
+description=OSC 8 hyperlink without id to example.com, then with id=x to example.org
+bytes=75
+sha256=150806394eab4ca4d6e8c1805f76913f42e0aba5f4b768b62bfc260df2d34930
