@@ -207,11 +207,13 @@ No existing file was edited; this table is for the lead.
 | `desktop/vertical-tabs` | no new measurement this pass (frame captured at V1 2:22 but not scanned) | none |
 | `desktop/reconnect-after-quit` | 4:11/4:49 frames re-captured; no new visual token beyond split/remote chrome | none |
 
-**GoRex values not used.** No clone-derived number (33 px pane header, 14 px tab radius, 29 px
+**GoRex values not used.** No clone-derived number (33 px pane header, 14 px tab radius, 34 px
 palette rows, 8 px gaps, 26×26 buttons, `#1e1e22` terminal bg) was adopted. Where video measurement
 now disagrees with a clone-derived value (pane header 40–42 px vs GoRex 33 px; palette rows 37.5 px
 vs GoRex 34 px), the video values above stand on their own evidence and GoRex is not cited as
-corroboration.
+corroboration. (Correction: an earlier pass listed "29 px palette rows" here; 29 px was this
+project's own video estimate later corrected to 37.5 px in the `desktop/command-palette` row above,
+not a clone-derived value — the clone value is GoRex's 34 px.)
 
 ## 6. Validation record
 
