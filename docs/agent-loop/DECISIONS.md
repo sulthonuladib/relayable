@@ -11,6 +11,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-004 | Terminal engine selection | Pending — spike required | `docs/adr/ADR-003` |
 | DEC-005 | Local/remote process ownership and persistence guarantees | Pending | `docs/adr/ADR-004` |
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Pending — ADR + tests required (§8.1) | `docs/adr/ADR-005` |
+| DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -24,6 +25,21 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 **Decision:** Establish the minimal workspace (`AGENTS.md`, loop docs, Cargo workspace, smoke tests) rather than adapting existing architecture.
 **Consequences:** No migration risk; §0.4 "if the repository is empty, establish a minimal workspace" applies.
 **Reconsider if:** uncommitted or on-disk work is discovered that the initial inventory missed.
+
+## DEC-007 — Wave 1 research orchestration model
+
+**Context:** `full.md` §14 requires bounded delegation with explicit path ownership and one
+integrator; §19.5–19.7 requires parallel research before implementation. Three research streams
+(video/GoRex UI evidence, official REX behavior docs, toolchain audit) are independent and do not
+share files.
+**Decision:** run each stream as its own Pi Herdsman project on an isolated Git branch
+(`research/ui-reference`, `research/protocol-compat`, `research/env-audit`) with exclusive owned
+paths; each branch is documentation-only and must not touch `docs/agent-loop/**` or application
+code. The Manager reviews each diff and integrates into `master` (INT-001) before Wave 2 starts.
+**Consequences:** no overlapping writers; parallel evidence gathering; integration is a discrete,
+reviewable step; Wave 2 (ADRs, terminal spike, CORE-001) waits on integrated evidence.
+**Reconsider if:** the streams turn out to share files, or branch isolation costs more than one
+integrated research worktree would save.
 
 ## Open questions requiring evidence (not yet decidable)
 

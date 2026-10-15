@@ -2,46 +2,117 @@
 
 Statuses: `BACKLOG` · `READY` · `IN_PROGRESS` · `BLOCKED` · `REVIEW` · `DONE`.
 Every task needs: ID, dependencies, owner, acceptance criteria, test/validation command, evidence path.
-Seed set derives from `full.md` §17; re-sequence when evidence justifies it.
+
+**Writer rule:** one owner per branch and per path. The Manager owns `docs/agent-loop/**` and
+integration on `master`; parallel project branches must not edit it. Wave 1 branches are
+documentation-only: no application code, manifests, or toolchain changes.
+
+## Wave 1 — research (running in parallel, disjoint file ownership)
+
+| Branch (owner) | Tasks | Exclusive owned paths | Not permitted |
+|---|---|---|---|
+| `research/ui-reference` | REF-001, REF-002, REF-003 | `docs/research/**` | app/protocol code, `docs/compatibility/**`, `docs/operations/**`, `docs/agent-loop/**`, `AGENTS.md`, `full.md` |
+| `research/protocol-compat` | DOC-001 | `docs/compatibility/**` | app/protocol code, `docs/research/**`, `docs/operations/**`, `docs/agent-loop/**`, `AGENTS.md`, `full.md` |
+| `research/env-audit` | ENV-001 (plus the Android inventory portion of AND-001) | `docs/operations/**` | app/protocol code, other docs trees, `docs/agent-loop/**`, any install/upgrade/system change |
+
+Wave 1 produces evidence only. When a Wave 1 branch completes, the Manager reviews its diff and
+integrates it into `master` (INT-001). Wave 2 (ADRs, terminal spike, CORE-001) starts only after
+the evidence is integrated.
+
+## Ledger
 
 | ID | Task | Depends on | Owner | Status |
 |---|---|---|---|---|
-| BOOT-001 | Inspect repo, toolchain, instructions, working tree; preserve user changes | — | Lead | IN_PROGRESS |
+| BOOT-001 | Inspect repo, toolchain, instructions, working tree; preserve user changes | — | Lead | DONE |
 | BOOT-002 | Create `AGENTS.md` + `docs/agent-loop/` scaffold | BOOT-001 | Lead | DONE |
-| REF-001 | Review video 1 (pre-alpha demo) and catalogue main UI | BOOT-001 | Research/UI | READY |
-| REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | Research/UI | READY |
-| REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | Research/UI | READY |
-| DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | Architecture/Research | READY |
-| ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | Build/Test | READY |
+| REF-001 | Review video 1 (pre-alpha demo); catalogue main UI | BOOT-001 | research/ui-reference | IN_PROGRESS |
+| REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | IN_PROGRESS |
+| REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | IN_PROGRESS |
+| DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | IN_PROGRESS |
+| ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | IN_PROGRESS |
+| INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | BACKLOG |
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | Lead | BACKLOG |
-| ADR-002 | Protocol schema + transport alternatives | DOC-001 | Lead | BACKLOG |
-| ADR-003 | Terminal engine selection (spike-backed) | ENV-001 | Lead | BACKLOG |
+| ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | Lead | BACKLOG |
+| ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | Lead | BACKLOG |
 | ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | Lead | BACKLOG |
-| UI-001 | GPUI minimal Linux window build/run proof | ENV-001 | Lead/UI | BACKLOG |
+| UI-001 | GPUI minimal Linux window build/run proof | ENV-001, ADR-003 | Lead/UI | BACKLOG |
 | TERM-001 | Terminal engine candidate prototype (TUI/input/resize spike) | ENV-001 | Lead | BACKLOG |
-| AND-001 | Android CLI/JDK/SDK inventory; no global changes | ENV-001 | Build/Test | BACKLOG |
+| AND-001 | Android project scaffold checks + `scripts/android-check.sh` (toolchain inventory delivered by ENV-001) | ENV-001 | Build/Test | BACKLOG |
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | Lead | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |
-| QA-001 | Smoke/CI scripts and build matrix | BOOT-001 | Lead | BACKLOG |
+| QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |
+
+Wave 2 ordering (read after INT-001): `ENV-001` evidence → `TERM-001` spike + `ADR-003` →
+`ADR-001`/`ADR-002` → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →
+`QA-001`. The first engineering slice is deliberately CORE-001 (server-owned PTY, CLI-created
+session, terminal I/O, reconnection), with the verified reference UI as the UI acceptance gate.
 
 ## Acceptance criteria and validation (per task)
 
-**BOOT-001** — inventory recorded in `WORKLOG.md`; `git status` clean before and after; user changes preserved.
+**BOOT-001** — inventory recorded in `WORKLOG.md` Checkpoint 1; user changes preserved.
 Evidence: `docs/agent-loop/WORKLOG.md`.
 
 **BOOT-002** — `AGENTS.md` + five `docs/agent-loop/*.md` files exist and are committed.
 Evidence: `git log`, file listing.
 
-**REF-001/002** — for each of the five videos: URL, access route (viewed / captions only / metadata only / inaccessible), whether audio and actual frames were inspected, timestamped workflow timeline, layouts/geometry/typography/colors, observed transitions, verbatim shortcuts/commands when clearly shown, memory/CPU figures verbatim **with stated workload and environment**, and a confidence level per claim.
-Owned paths: `docs/research/video-review.md`, `docs/research/ui-catalog.md`, `docs/research/open-questions.md`.
-Explicitly permitted: `yt-dlp`, `ffmpeg`, `chromium` are installed. Time-box each access strategy; record failures and continue.
-**Forbidden:** production code, branding, protocol, inventing benchmark values or flags.
+**REF-001/002/003** — for each of the five videos: URL, access route (viewed / captions only /
+metadata only / inaccessible), whether audio and actual frames were inspected, timestamped workflow
+timeline, layouts/geometry/typography/colors, observed transitions, verbatim shortcuts/commands when
+clearly shown, memory/CPU figures verbatim **with stated workload and environment**, and a
+confidence level per claim. GoRex review additionally requires the exact commit hash, license
+re-check, confirmed-by-running vs inferred separation, and a feature comparison table.
+Owned paths on branch `research/ui-reference`: `docs/research/video-review.md`,
+`docs/research/ui-catalog.md`, `docs/research/open-questions.md`, `docs/research/gorex-review.md`
+(raw captures under `docs/research/evidence/**`, already gitignored, or outside the repo).
+Explicitly permitted tools: `yt-dlp`, `ffmpeg`, `chromium`, `curl`, Node/npm for a scratch GoRex
+checkout. Time-box each access strategy; record failures and continue.
+**Forbidden:** production code, branding, protocol, inventing benchmark values or flags, copying
+GoRex source/assets.
 
-**REF-003** — `docs/research/gorex-review.md`: repo URL + **commit hash** reviewed, per-state UI observations, component hierarchy/measurements/typography/colors, shortcuts, focus, resize, empty/error states; explicit "confirmed by running" vs "README/code-inferred" separation; feature comparison table (videos/docs vs GoRex vs Relayable); **license re-verification**; and the limitation that GoRex does not replicate remote server connections and uses a local socket.
-**Forbidden:** copying, vendoring, translating, or porting GoRex source or non-system assets unless a verified license expressly permits it.
+**DOC-001** — `docs/compatibility/reference-behavior-matrix.md` on branch `research/protocol-compat`.
+Every row labelled `observed-video` | `verified-official-docs` | `verified-by-test` | `implemented` |
+`intentionally-different` | `inferred` | `unknown`. Must cover domain hierarchy, target resolution,
+stable IDs, CLI flags, JSON output, exit codes, environment variables, server API method
+names/schemas, Lua functions, event names/payloads, block methods, OSC 7501 status protocol
+semantics, multi-client behavior, and connection lifecycle. Cite retrieval URL + date and quote
+exact names/schemas. Must **not** claim binary/wire compatibility with REX.
+**Forbidden:** production code, other docs trees.
 
-**DOC-001** — `docs/compatibility/reference-behavior-matrix.md`. Every row labelled `observed-video` | `verified-official-docs` | `verified-by-test` | `implemented` | `intentionally-different` | `inferred` | `unknown`. Must cover domain hierarchy, target resolution, stable IDs, CLI flags, JSON output, exit codes, env vars, server API methods/schemas, Lua functions, event names/payloads, block methods, status protocol semantics, multi-client behavior, connection lifecycle.
-Must **not** claim binary/wire compatibility with REX.
+**ENV-001** — `docs/operations/toolchain-audit.md` on branch `research/env-audit` (and optionally
+`docs/operations/android-toolchain.md`): toolchain matrix with raw command output, exit codes, and
+date/host context per row; explicit "gaps blocking implementation" section with safe next steps.
+Covers Rust/cargo/mise, GPUI availability & license, systemd user mode, Android CLI/`adb`/SDK/
+emulator/system images, JDK/Gradle, display backend, disk/KVM. No installs, upgrades, `sudo`, or
+system changes.
+**Forbidden:** production code, other docs trees, any mutating host command.
 
-**ENV-001** — toolchain matrix with raw command output per row; explicit "gaps blocking implementation" section. No installs, upgrades, or system changes.
-Owned paths: `docs/operations/**`.
+**INT-001** — the three research branches' commits reviewed by the Manager, merged into `master`
+with conflicts resolved and no owned content dropped; `git log` on `master` shows the integrated
+commits; no application code introduced by the research wave.
+Evidence: `docs/agent-loop/WORKLOG.md` Checkpoint 3.
+
+**ADR-001..004** — each ADR records context, options, decision, consequences, and what evidence
+would cause reconsideration; stored under `docs/adr/`. No ADR may invent an option that violates
+full.md §5.2 dependency direction or §6 transport security requirements.
+
+**CORE-001/CORE-002** — an automated integration test proves: foreground server owns a PTY; CLI
+creates a session and returns a stable ID; terminal input/output round-trips; killing/disconnecting
+the client leaves the child process alive; reconnecting retrieves current state (snapshot or
+documented equivalent). Evidence: test output in `WORKLOG.md` with exact commands.
+
+## Previously recorded acceptance criteria (kept for reference)
+
+**REF task rule (full.md §2.2/§2.3/§2.6):** `docs/research/ui-catalog.md` lists only actually
+observed screens/states, each with source video + timestamp, component hierarchy and geometry,
+interaction notes, exact readable labels, empty/loading/error/disconnected/focused/selected states,
+confidence, unresolved details, and the planned Relayable screenshot-test name. The catalogue must
+not be a wish list of desired screens.
+
+**DOC task rule (full.md §3):** official live docs are the source of truth for documented behavior.
+Verify current content before implementing; keep `observed-video`, `verified-official-docs`,
+`verified-by-test`, `implemented`, `intentionally-different`, `inferred`, and `unknown` strictly
+distinct.
+
+**ENV task rule (full.md §0.4, §10.1):** discovery checks are not authorization to change the
+system. If a required tool is missing, report exactly what is missing and propose a compatible
+`mise` pin only as an option; do not install or modify global configuration.
