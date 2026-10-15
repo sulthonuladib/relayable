@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 1/2 — **ADR-003 Accepted (engine pins + `gpui` pin proven); UI-001 window runs; CORE-002 in flight.**
+**Milestone:** Phase 1/2 — **CORE-001 + CORE-002 complete (events, disconnect survival, reconnect/resume); ADR-001/002/003/005 Accepted; UI-001 window runs. Next: UI-002.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)

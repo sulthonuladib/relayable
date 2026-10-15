@@ -285,7 +285,8 @@ Update schemas and contract tests before changing all consumers.").
 - The first-release method list: §3 fixes the `Request` shape and the diagnostic `method` string,
 but not method names (server-API task; DOC-001 §8.1 "Discovery and version coupling" bounds the inventory).
 The CORE-001 server-API task's first-release method set and CLI/JSON surface are recorded in
-`protocol/compatibility/core-001-method-set.md` and `core-001-cli-json.md` (accepted INT-008 `d3e0286`);
+`protocol/compatibility/core-001-method-set.md` and `core-001-cli-json.md` (accepted INT-008 `d3e0286`),
+extended by CORE-002's `protocol/compatibility/core-002-method-set.md` (accepted INT-011 `91662af`);
 this contract was not changed by them.
 - Concrete protocol encoding language and the remote transport selection (ADR-002).
 - Terminal engine and the `relayable-terminal` boundary (ADR-003).

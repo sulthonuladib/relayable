@@ -231,3 +231,21 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Ru
 separate `apps/linux` workspace (no `[patch.crates-io]` needed); **ADR-003 → Accepted** (DEC-004)
 with reconsideration trigger 4 discharged. Forward constraint recorded in ADR-003 consequences: a
 future `apps/linux` dependency on a crate pinning `libc = "=0.2.190"` would re-break `gpui`.
+
+## 2026-10-15 — CORE-002 events/reconnect: independent Manager validation (`91662af`)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, repo root.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 87 | `bash scripts/validate.sh` (post-merge) | fmt/clippy/build 0; `cargo test --workspace` all suites green (Σ **148 passed / 0 failed**; CORE-001's 104 unchanged); lifecycle 4/4; dependency-direction; spike build; **All CORE-001 validation checks passed** | 0 |
+| 88 | `cargo test -p relayable-integration-tests --offline -- --nocapture` | events 13, lifecycle 4, multi-client 4, protocol 8, reconnect 3, lib 2 = 34; evidence: `events-1` 6 contiguous live events; `events-2` replay S+1 no gap/dup; `events-3/4/5` `snapshot_required` on below-floor/ahead/no cursor; `events-6a/6b` ordered `Disconnected`→`client_disconnected{idle_timeout|peer_closed}`; `events-8` child-exit once; `events-10` resume response precedes later events; `multi-10/12` observer fan-out + lease release; `reconnect-8` snapshot+events no gap/dup, pid survives | 0 |
+| 89 | `cargo test --workspace` WITHOUT a prior `cargo build --workspace` | 4 `lifecycle` tests abort at the harness guard “refusing to run a stale `relayable` binary … run `cargo build --workspace` first” | 101 |
+
+**Interpretation of row 89:** the `lifecycle` harness intentionally refuses a stale CLI binary and
+requires `cargo build --workspace` beforehand (which `validate.sh` runs). This is a harness precondition,
+**not** a code regression — row 87 (the canonical entry point) is green.
+
+**Decisions recorded:** CORE-002's schema extensions are additive (D3) and recorded in
+`protocol/compatibility/core-002-method-set.md`; `relayable-model` and ADR-001/002/003 are unchanged;
+the interface contract now points at both CORE-001 and CORE-002 method-set notes.

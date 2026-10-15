@@ -77,6 +77,29 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 21 — CORE-002 integrated: events, disconnect detection, resume cursor, reattach (2026-10-15)
+
+**Objective:** add the reconnection semantics CORE-001 deferred.
+
+**Deliverable:** CORE-002 (`e8f206e`, 21 files, +4385/−152) merged as INT-011 `91662af`. Event bus +
+`client_connection_state_changed`/`client_disconnected`/`session_state_changed`/`writer_lease_changed`/
+`terminal_child_exited`; idle/transport-drop disconnect detection (session survives); `session.resume`
+with `snapshot_required` fallbacks (`no_cursor`/`cursor_below_floor`/`cursor_ahead`); snapshot-at-`S` +
+events no-gap/no-duplicate; writer-lease takeover. No `relayable-model`/contract change; extensions in
+`protocol/compatibility/core-002-method-set.md`.
+
+**Independent validation:** `bash scripts/validate.sh` on `master` → `All CORE-001 validation checks
+passed.` (fmt/clippy/build 0; **148 tests**, CORE-001's 104 unchanged). Property evidence in `TESTS.md`.
+Note discovered: the `lifecycle` tests abort if `target/debug/relayable` is older than source; the
+harness requires a prior `cargo build --workspace` (which `validate.sh` does) — not a regression.
+
+**Non-claims carried:** no crash/host-reboot survival; no automatic client reconnect/backoff; no CLI
+`events`/`wait`/`attach` surface; `flow_control_overflow` still untested (`QA-FLOW-001`).
+
+**Next:** UI-002 (reference workspace) → QA-001 → CTX-001 → ADR-004.
+
+---
+
 ## Checkpoint 20 — UI-001 integrated; ADR-003 Accepted (2026-10-15)
 
 **Objective:** resolve the `gpui` pin blocker and prove a Linux window.

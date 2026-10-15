@@ -38,9 +38,8 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 
 ## Open tasks, in order
 
-1. **CORE-002** (in progress) — event stream + heartbeat disconnect + resume cursor/`snapshot_required`
-   + reattach consistency + multi-client; owns `crates/**` except `relayable-model`, plus `tests/**`.
-2. **UI-002** — the reference workspace against `docs/research/ui-catalog.md` + `design-tokens.md`, consuming the live server API (and CORE-002's events once integrated). UI-001 is DONE (`09928db`): `gpui = "=0.2.2"` builds and runs via a `libc 0.2.189` lockfile hold in the separate `apps/linux` workspace. **Forward constraint:** if `apps/linux` ever path-depends on a core crate that pins `libc = "=0.2.190"` (e.g. `relayable-server`), the `ENOATTR` failure returns — use the `[patch.crates-io]` `xattr` fix then (ADR-003 consequences).
+1. **CORE-002** — DONE, integrated `91662af` (INT-011).
+2. **UI-002** — the reference workspace against `docs/research/ui-catalog.md` + `design-tokens.md`, consuming the live server API and CORE-002's events (now available). UI-001 is DONE (`09928db`): `gpui = "=0.2.2"` builds and runs via a `libc 0.2.189` lockfile hold in the separate `apps/linux` workspace. **Forward constraint:** if `apps/linux` ever path-depends on a core crate that pins `libc = "=0.2.190"` (e.g. `relayable-server`), the `ENOATTR` failure returns — use the `[patch.crates-io]` `xattr` fix then (ADR-003 consequences).
 3. **QA-001** — smoke/CI scripts and build matrix (extend `scripts/validate.sh`).
 4. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
    add the ADR-005 §8.1 context-resolution test (currently not implemented).
