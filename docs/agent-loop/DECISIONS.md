@@ -6,8 +6,8 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 |---|---|---|---|
 | DEC-000 | Work state is tracked in-repository (`docs/agent-loop/`), not in chat | **Accepted** | — |
 | DEC-001 | Repo is Phase 0 spec-only; establish minimal workspace rather than migrating existing code | **Accepted** | — |
-| DEC-002 | Domain model and dependency direction | **Proposed** — ADR-001 integrated `31bed30`; REVIEW-001 verdict accept-with-nits (blocking A-1 reconciled in `interface-contract.md`; A-2–A-10 tracked as ADR-FIX-001) | `docs/adr/ADR-001-domain-model-and-dependency-boundaries.md` |
-| DEC-003 | Protocol serialization + transport | **Proposed** — ADR-002 integrated `31bed30`; REVIEW-001 verdict accept-with-nits (blocking B-1/B-2/B-3 tracked as ADR-FIX-001 before recording Accepted) | `docs/adr/ADR-002-protocol-schema-and-transport.md` |
+| DEC-002 | Domain model and dependency direction | **Accepted** — ADR-001 integrated `31bed30`; REVIEW-001 corrections applied via ADR-FIX-001 (INT-007 `f474c83`) | `docs/adr/ADR-001-domain-model-and-dependency-boundaries.md` |
+| DEC-003 | Protocol serialization + transport | **Accepted** — ADR-002 integrated `31bed30`; REVIEW-001 B-1/B-2/B-3 corrections applied via ADR-FIX-001 (INT-007 `f474c83`) | `docs/adr/ADR-002-protocol-schema-and-transport.md` |
 | DEC-004 | Terminal engine selection | **Proposed** — ADR-003 integrated `78b83f2`; REVIEW-001 confirms keep `Proposed` — TERM-002 (engine-level spike) is a hard gate for the engine choice, UI-001 gates the `gpui` pin | `docs/adr/ADR-003-terminal-engine-and-gpui-artifact-pin.md` |
 | DEC-005 | Local/remote process ownership and persistence guarantees | Pending | `docs/adr/ADR-004` |
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | **Accepted** — `RELAYABLE_*`-only, no `REX_*` aliases; `ADR-005` integrated `74e7e20` | `docs/adr/ADR-005-environment-variable-namespace.md` |

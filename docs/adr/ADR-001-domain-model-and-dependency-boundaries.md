@@ -1,6 +1,6 @@
 # ADR-001 — Domain model and dependency boundaries
 
-**Status:** Proposed — Lead decision; pending Manager acceptance and DECISIONS.md index update (DEC-002 → ADR-001)
+**Status:** Accepted — Manager acceptance 2026-10-15 after REVIEW-001 corrections (DEC-002 → ADR-001); review evidence in `docs/reviews/REVIEW-001-adr-review.md`
 
 ## Context
 

@@ -1,18 +1,18 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 0 — **Wave 2 architecture reviewed (REVIEW-001 recorded); ADR-FIX-001 and TERM-002 in flight; CORE-001 next.**
-**Updated:** Clean-start handoff — see `WORKLOG.md` Checkpoint 9 and `NEXT.md`.
+**Milestone:** Phase 0 — **ADR-001/002/005 Accepted; ADR-003 stays `Proposed` pending TERM-002/UI-001; CORE-001 + TERM-002 in flight.**
+**Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)
 
 1. ~~Honest, timestamped evidence for all five reference videos + GoRex + official REX docs.~~ DONE
 2. ~~Verified toolchain inventory; no installs.~~ DONE
-3. Domain/dependency and protocol ADRs — DONE (ADR-001/002 integrated `31bed30`, `Proposed`; confirm before CORE-001).
-4. Terminal engine + GPUI pin ADR and spike — DONE phase 1 (spike + ADR-003 integrated `78b83f2`, `Proposed`); engine-level spike phase 2 pending (TERM-002).
+3. Domain/dependency and protocol ADRs — DONE (**ADR-001/002 Accepted** after REVIEW-001 + ADR-FIX-001; `31bed30` + INT-007 `f474c83`).
+4. Terminal engine + GPUI pin ADR and spike — DONE phase 1 (spike + ADR-003 integrated `78b83f2`, `Proposed`); engine-level spike phase 2 pending (TERM-002 is the hard gate for the engine choice; UI-001 for the GPUI pin).
 5. Smallest useful vertical slice (server-owned PTY, CLI-created session, terminal I/O, disconnect
    survives, reconnect recovers) — next (CORE-001).
-6. DOC-002 matrix citation repair — BLOCKED on a single writer pass; evidence complete and committed.
+6. DOC-002 matrix citation repair — DONE, integrated `16c8bc9` (INT-005).
 
 ## Wave 1 research state (all integrated on `master`)
 

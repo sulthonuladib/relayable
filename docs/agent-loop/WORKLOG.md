@@ -77,6 +77,28 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 17 — ADR-FIX-001 integrated; DEC-002/DEC-003 Accepted (2026-10-15)
+
+**Objective:** clear the REVIEW-001 blocking documentation items before CORE-001 builds on the ADRs.
+
+**Result:** ADR-FIX-001 (`a58cfc6`, 3 files +135/−86) reviewed and integrated (INT-007 `f474c83`):
+- B-1 Unverified table refreshed — items #1–#9 SETTLED with repo-tracked evidence, #10 Android QUIC still open;
+- B-2 overstated authn/authz coverage claim removed;
+- B-3 D11 row 17 added (no client-side decode→re-encode path; `prost` drops unknown fields, 24→9 bytes);
+- B-4 TLS 1.3 minimum-version disclosure (`rustls` default `tls12` feature disabled);
+- B-5 `aws-lc-rs` default provider + Android cross-compile implication disclosed;
+- ADR-001 A-2/A-6 and ADR-003 C-2 (SGR 337/2/335) corrected.
+No decision changed; ADR-003 remains `Proposed` with unchanged pins; `interface-contract.md` still `PtyProcessId`.
+
+**Status flips:** ADR-001 and ADR-002 → **Accepted** (DEC-002/DEC-003); ADR-003 stays `Proposed`
+(DEC-004) pending TERM-002/UI-001.
+
+**Commands:** `git merge --no-ff adr/review-001-fixes` → `f474c83`; ADR statuses + `DECISIONS.md` updated; pushed.
+
+**Still in flight:** CORE-001 (`w18`, scaffolding untracked), TERM-002 (`w17`, harness).
+
+---
+
 ## Checkpoint 16 — ADR-005 integrated; DEC-006 Accepted (2026-10-15)
 
 **Objective:** resolve the environment-variable namespace.

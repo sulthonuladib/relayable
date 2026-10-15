@@ -35,8 +35,8 @@ the evidence is integrated.
 | INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
 | INT-002 | Review and integrate Wave 2 branches into `master` | DOC-002, ADR-001, ADR-002, ADR-003, TERM-001 | Manager | DONE for `term-001` `78b83f2` + `adr-001-002` `31bed30` |
 | INT-003 | Integrate `research/doc-002` evidence onto `master`; retire the branch/worktree for a clean start | DOC-002 | Manager | DONE — `a1f1719` (evidence on `master`; repair still pending) |
-| ADR-001 | Domain model and dependency boundaries | DOC-001 | research/adr-001-002 | DONE — integrated `31bed30` (Proposed) |
-| ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | research/adr-001-002 | DONE — integrated `31bed30` (Proposed; DEC-006 recommendation only) |
+| ADR-001 | Domain model and dependency boundaries | DOC-001 | research/adr-001-002 | DONE — integrated `31bed30`, **Accepted** after REVIEW-001/ADR-FIX-001 |
+| ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | research/adr-001-002 | DONE — integrated `31bed30`, **Accepted** after REVIEW-001/ADR-FIX-001 |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | research/term-001-adr-003 | DONE (Proposed) — integrated `78b83f2`; engine-level phase 2 pending as TERM-002 |
 | ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | Lead | BACKLOG |
 | ADR-005 | Environment-variable namespace (`RELAYABLE_*` vs `REX_*` aliases vs both) | ADR-002 D14 | `adr/adr-005-env-namespace` | DONE — integrated `74e7e20` (INT-006); `RELAYABLE_*`-only; DEC-006 Accepted |
@@ -45,7 +45,7 @@ the evidence is integrated.
 | TERM-002 | Engine-level spike phase 2: per-engine adapters validate ADR-003's provisional pin | TERM-001 | `spike/term-002-engine-validation` | IN_PROGRESS (2026-10-15) — launched; owned path `spikes/terminal-engine-phase2/**` |
 | REVIEW-001 | Independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike (`2e41da4`) before CORE-001 builds on them — no independent review was possible during wind-down | ADR-001, ADR-002, ADR-003 | `review/review-001-adr-pass` | DONE — integrated `774d394` (INT-004); report `docs/reviews/REVIEW-001-adr-review.md` + 4 evidence files; verdicts ADR-001/002 accept-with-nits, ADR-003 keep `Proposed` |
 | AND-001 | Android project scaffold checks + `scripts/android-check.sh` (toolchain inventory delivered by ENV-001) | ENV-001 | Build/Test | DEFERRED (DEC-010) — no Android work in current scope |
-| ADR-FIX-001 | Apply REVIEW-001 corrections: ADR-002 Unverified-table refresh (B-1) + coverage-row fix (B-2) + D11 no-reserialize test (B-3) + D7 TLS/provider disclosure (B-4/B-5), `protoc` note (B-6), and ADR-001 nits A-2–A-10. Manager-owned `docs/adr/**` + `docs/architecture/interface-contract.md` | REVIEW-001 | `adr/review-001-fixes` | IN_PROGRESS (2026-10-15) — launched; documentation correctness only, no decision change |
+| ADR-FIX-001 | Apply REVIEW-001 corrections: ADR-002 Unverified-table refresh (B-1) + coverage-row fix (B-2) + D11 no-reserialize test (B-3) + D7 TLS/provider disclosure (B-4/B-5), `protoc` note (B-6), and ADR-001 nits A-2–A-10. Manager-owned `docs/adr/**` + `docs/architecture/interface-contract.md` | REVIEW-001 | `adr/review-001-fixes` | DONE — integrated `f474c83` (INT-007); 3 files +135/−86; no decision changed |
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | `core/core-001-vertical-slice` | IN_PROGRESS (2026-10-15) — launched; owns root workspace + `crates/**` + `tests/**` + `protocol/**`; must not adopt the terminal engine (TERM-002 gate) |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |
 | QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |

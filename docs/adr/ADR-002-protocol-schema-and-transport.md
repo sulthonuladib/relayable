@@ -1,6 +1,6 @@
 # ADR-002 — Protocol schema and transport
 
-**Status:** Proposed — Lead decision; pending Manager acceptance and DECISIONS.md index update (DEC-003 → ADR-002)
+**Status:** Accepted — Manager acceptance 2026-10-15 after REVIEW-001 corrections (DEC-003 → ADR-002); review evidence in `docs/reviews/REVIEW-001-adr-review.md`
 
 ## Abstract
 
