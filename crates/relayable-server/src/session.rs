@@ -22,6 +22,7 @@ use relayable_protocol::v1::{BlockKind, BlockRecord, ProgramStatus, TerminalSnap
 use relayable_pty::{PtyExitStatus, PtyHandle, PtySize};
 
 use crate::connection::{terminal_output_envelope, ConnectionShared, WriterMsg};
+use crate::events::{terminal_child_exited_event, EventBus};
 use crate::lock;
 
 /// Maximum number of queued PTY-input messages per block.
@@ -231,7 +232,8 @@ impl Subscriber {
                 "relayable-server: stream {} overflowed its bounded output queue; closing connection",
                 self.stream_id
             );
-            self.connection.close_now();
+            self.connection
+                .close_now(crate::events::DisconnectReason::FlowControlOverflow);
         }
     }
 }
@@ -254,6 +256,8 @@ pub(crate) struct CloseOutcome {
     pub(crate) status: Option<PtyExitStatus>,
     /// Whether the direct child was confirmed reaped within the bound.
     pub(crate) reaped: bool,
+    /// The writer lease this close cleared, as `(client_id, stream_id)`.
+    pub(crate) released_lease: Option<(ClientId, u64)>,
 }
 
 /// The result of enqueueing terminal input.
@@ -262,6 +266,26 @@ pub(crate) enum InputError {
     Full,
     /// The block is closing or dead.
     Closed,
+}
+
+/// The result of trying to take the single writer lease.
+pub(crate) enum WriterAcquire {
+    /// The lease was free and is now held by the caller's stream.
+    Acquired,
+    /// The lease is held by another stream and `takeover` was not requested.
+    Busy,
+    /// `takeover` was requested and the lease moved from the previous holder.
+    Taken { previous_client_id: ClientId },
+}
+
+/// Construction inputs for a [`BlockRuntime`] that are not entity identities.
+pub(crate) struct BlockInit {
+    /// Initial terminal geometry.
+    pub(crate) initial_size: TerminalSize,
+    /// Maximum retained output tail, in bytes.
+    pub(crate) output_tail_bytes: usize,
+    /// The server's retained event log, or `None` in isolated unit tests.
+    pub(crate) events: Option<Arc<EventBus>>,
 }
 
 /// The server-owned runtime for one terminal block.
@@ -285,6 +309,11 @@ pub(crate) struct BlockRuntime {
     reader_thread: Mutex<Option<JoinHandle<()>>>,
     reaper_thread: Mutex<Option<JoinHandle<()>>>,
     input_thread: Mutex<Option<JoinHandle<()>>>,
+    /// The retained event log, when this block is owned by a server. `None` in
+    /// isolated unit tests, where no event is emitted.
+    events: Option<Arc<EventBus>>,
+    /// Ensures `terminal_child_exited` is emitted at most once.
+    exit_emitted: AtomicBool,
     #[cfg(test)]
     force_unreaped: AtomicBool,
 }
@@ -296,10 +325,14 @@ impl BlockRuntime {
         window_id: WindowId,
         session_id: SessionId,
         pty_process_id: PtyProcessId,
-        initial_size: TerminalSize,
         mut pty: PtyHandle,
-        output_tail_bytes: usize,
+        init: BlockInit,
     ) -> Result<Self> {
+        let BlockInit {
+            initial_size,
+            output_tail_bytes,
+            events,
+        } = init;
         let writer = pty.take_writer().context("failed to take the pty writer")?;
         let program_pid = pty.process_id();
 
@@ -335,6 +368,8 @@ impl BlockRuntime {
             reader_thread: Mutex::new(None),
             reaper_thread: Mutex::new(None),
             input_thread: Mutex::new(Some(input_thread)),
+            events,
+            exit_emitted: AtomicBool::new(false),
             #[cfg(test)]
             force_unreaped: AtomicBool::new(false),
         })
@@ -386,6 +421,9 @@ impl BlockRuntime {
             match status {
                 Ok(Some(status)) => {
                     *lock(&self.program) = StoredStatus::exited(&status);
+                    // Emit after the pty lock is released; the atomic guard
+                    // makes a close-observed status emit at most once too.
+                    self.emit_child_exited(&status);
                     break;
                 }
                 Ok(None) => thread::sleep(Duration::from_millis(50)),
@@ -504,19 +542,41 @@ impl BlockRuntime {
     }
 
     /// Try to take the single writer lease for `(client_id, stream_id)`.
-    pub(crate) fn acquire_writer(&self, client_id: ClientId, stream_id: u64) -> bool {
+    ///
+    /// `takeover = false` preserves CORE-001 behavior (a held lease is never
+    /// stolen). `takeover = true` moves the lease and reports the previous
+    /// holder so the caller can emit `writer_lease_changed`.
+    pub(crate) fn acquire_writer(
+        &self,
+        client_id: ClientId,
+        stream_id: u64,
+        takeover: bool,
+    ) -> WriterAcquire {
         let mut lease = lock(&self.writer_lease);
-        if lease.is_some() {
-            return false;
+        match *lease {
+            None => {
+                *lease = Some(WriterLease {
+                    client_id,
+                    stream_id,
+                });
+                WriterAcquire::Acquired
+            }
+            Some(current) if takeover => {
+                *lease = Some(WriterLease {
+                    client_id,
+                    stream_id,
+                });
+                WriterAcquire::Taken {
+                    previous_client_id: current.client_id,
+                }
+            }
+            Some(_) => WriterAcquire::Busy,
         }
-        *lease = Some(WriterLease {
-            client_id,
-            stream_id,
-        });
-        true
     }
 
-    pub(crate) fn release_writer(&self, client_id: ClientId, stream_id: u64) {
+    /// Release the lease only if this `(client_id, stream_id)` still holds it.
+    /// Returns whether a release actually happened.
+    pub(crate) fn release_writer(&self, client_id: ClientId, stream_id: u64) -> bool {
         let mut lease = lock(&self.writer_lease);
         if *lease
             == Some(WriterLease {
@@ -525,6 +585,9 @@ impl BlockRuntime {
             })
         {
             *lease = None;
+            true
+        } else {
+            false
         }
     }
 
@@ -542,6 +605,11 @@ impl BlockRuntime {
 
     pub(crate) fn current_size(&self) -> TerminalSize {
         *lock(&self.size)
+    }
+
+    /// The block's current optimistic-concurrency revision.
+    pub(crate) fn revision(&self) -> u64 {
+        self.revision.load(Ordering::SeqCst)
     }
 
     /// Apply a resize to the PTY, the block record, and the block revision.
@@ -602,6 +670,7 @@ impl BlockRuntime {
             return CloseOutcome {
                 status: None,
                 reaped: false,
+                released_lease: None,
             };
         }
 
@@ -655,14 +724,19 @@ impl BlockRuntime {
         }
 
         let reaped = observed.is_some();
+        let mut released_lease = None;
         if reaped {
             if let Some(status) = &observed {
                 *lock(&self.program) = StoredStatus::exited(status);
             }
             // Detach every stream and free the lease, then mark the block dead
-            // so later input/detach on stale stream entries is rejected.
+            // so later input/detach on stale stream entries is rejected. The
+            // lease is taken (not just cleared) so a concurrent release cannot
+            // double-report the same change.
             lock(&self.output).subscribers.clear();
-            *lock(&self.writer_lease) = None;
+            released_lease = lock(&self.writer_lease)
+                .take()
+                .map(|lease| (lease.client_id, lease.stream_id));
             self.dead.store(true, Ordering::SeqCst);
             self.stop.store(true, Ordering::SeqCst);
             // Dropping the sender lets the input thread observe Disconnected.
@@ -675,7 +749,25 @@ impl BlockRuntime {
         CloseOutcome {
             status: observed,
             reaped,
+            released_lease,
         }
+    }
+
+    /// Emit `terminal_child_exited` once, when the reaper or a confirmed close
+    /// observed the exit status. Does nothing in isolated tests (no bus).
+    pub(crate) fn emit_child_exited(&self, status: &PtyExitStatus) {
+        if self.exit_emitted.swap(true, Ordering::SeqCst) {
+            return;
+        }
+        let Some(events) = &self.events else {
+            return;
+        };
+        events.append(terminal_child_exited_event(
+            &self.session_id.to_string(),
+            &self.id.to_string(),
+            self.revision.load(Ordering::SeqCst),
+            status,
+        ));
     }
 
     /// Test-only hook: make [`BlockRuntime::close`] report an unconfirmed exit
@@ -930,9 +1022,12 @@ mod tests {
                 WindowId::new(),
                 SessionId::new(),
                 PtyProcessId::new(),
-                TerminalSize::DEFAULT_SIZE,
                 pty,
-                32_768,
+                BlockInit {
+                    initial_size: TerminalSize::DEFAULT_SIZE,
+                    output_tail_bytes: 32_768,
+                    events: None,
+                },
             )
             .expect("block"),
         );

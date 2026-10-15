@@ -10,7 +10,8 @@
 //   reference docs do not document a transport/wire format
 //   (matrix §8.3 records the transport as unknown).
 // See `protocol/compatibility/core-001-method-set.md` for the frozen CORE-001
-// method/message set.
+// method/message set and `protocol/compatibility/core-002-method-set.md` for the
+// frozen CORE-002 additions (`session.resume`).
 
 syntax = "proto3";
 
@@ -75,6 +76,9 @@ message Request {
     BlockDetachRequest block_detach = 15;
     TerminalInput terminal_input = 16;
     TerminalResize terminal_resize = 17;
+    // CORE-002: resume from a server-wide event-log cursor. Tag 18 is the next
+    // free member after 17; existing members are unchanged (ADR-002 D3).
+    SessionResumeRequest session_resume = 18;
   }
 }
 
@@ -91,6 +95,8 @@ message Response {
     BlockDetachResponse block_detach = 15;
     TerminalInputAccepted terminal_input = 16;
     TerminalResizeAccepted terminal_resize = 17;
+    // CORE-002: reply to `session.resume` (tag 18, next free member).
+    SessionResumeResponse session_resume = 18;
   }
 }
 

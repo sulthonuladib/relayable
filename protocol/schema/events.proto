@@ -3,17 +3,37 @@
 // Sources: `docs/architecture/interface-contract.md` §3 (envelope `Event`
 // body) and §2 (snapshot/sequence model).
 //
-// No events are emitted by the CORE-001 slice (event dispatch is deferred);
-// these messages exist only so the `Envelope.body` `Event` variant required by
-// the frozen contract §3 has a concrete type. Event type names in the contract
-// (`client_connection_changed`, `session_...`) are reused from the matrix §10
-// Events; the payload shapes here are Relayable-defined (no REX evidence).
+// CORE-001 added the `Event` variant only so the frozen contract §3
+// `Envelope.body` shape is complete; it emitted no events. CORE-002 implements
+// event dispatch and adds the event types below. Event type names in the
+// contract (`client_connection_changed`, `session_...`) are reused from the
+// matrix §10 Events; the payload shapes here are Relayable-defined (no REX
+// evidence). Every added field/variant is additive per ADR-002 D3.
+//
+// Transport rules for events (CORE-002):
+// - An event is a control-class frame: `Envelope.stream_id = 0` and
+//   `Envelope.request_id` unset.
+// - `Envelope.sequence` equals `Event.sequence`; events are totally ordered by
+//   the server-wide `sequence` (the retained-log sequence, the resync cursor).
+// - Events MUST never carry terminal bytes. Terminal output has its own
+//   per-stream `stream_seq` ordering and is recovered through the attach-time
+//   `TerminalSnapshot`, never through this event stream.
+// - Unknown event types and unknown event fields must stay safely ignorable
+//   (unknown `oneof` members and unknown optional fields are skipped).
 
 syntax = "proto3";
 
 package relayable.protocol.v1;
 
-import "control.proto";
+// `SessionState` lives here (moved from `control.proto` in CORE-002) so this
+// file needs no import and `control.proto` can import `Event`. It is the same
+// package, same wire meaning, and same generated fully-qualified type
+// `relayable.protocol.v1.SessionState`.
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_ACTIVE = 1;
+  SESSION_STATE_CLOSED = 2;
+}
 
 message Event {
   uint64 sequence = 1;
@@ -22,6 +42,11 @@ message Event {
   oneof event {
     ClientConnectionStateChanged client_connection_state_changed = 10;
     SessionStateChanged session_state_changed = 11;
+    // CORE-002 event types: tags 12–14 are the next free members after 11;
+    // existing members (10, 11) are unchanged and never renumbered.
+    ClientDisconnected client_disconnected = 12;
+    WriterLeaseChanged writer_lease_changed = 13;
+    TerminalChildExited terminal_child_exited = 14;
   }
 }
 
@@ -33,4 +58,34 @@ message ClientConnectionStateChanged {
 message SessionStateChanged {
   string session_id = 1;
   SessionState state = 2;
+}
+
+// On disconnect, this immediately follows the
+// `client_connection_state_changed{connection_state: "disconnected"}` event:
+// two sequences, same cause, ordered. `reason` is one of `idle_timeout`,
+// `peer_closed`, `transport_error`, `flow_control_overflow`, `server_shutdown`.
+message ClientDisconnected {
+  string client_id = 1;
+  string reason = 2;
+}
+
+// Emitted on writer-lease acquire, release, and takeover. A release with no new
+// holder sets `new_client_id` empty and `lease_held = false`.
+message WriterLeaseChanged {
+  string session_id = 1;
+  string block_id = 2;
+  uint32 stream_id = 3;
+  string previous_client_id = 4;
+  string new_client_id = 5;
+  bool lease_held = 6;
+}
+
+// Emitted when a terminal child program exits/is reaped. `signal` is empty when
+// the program exited normally.
+message TerminalChildExited {
+  string session_id = 1;
+  string block_id = 2;
+  uint32 exit_code = 3;
+  string signal = 4;
+  bool exited = 5;
 }

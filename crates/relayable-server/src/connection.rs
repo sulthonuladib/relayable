@@ -24,6 +24,7 @@ use relayable_protocol::v1::{
 use relayable_protocol::PROTOCOL_VERSION;
 
 use crate::dispatch;
+use crate::events::{writer_lease_event, DisconnectReason};
 use crate::lock;
 use crate::registry::ServerShared;
 use crate::session::BlockRuntime;
@@ -49,6 +50,7 @@ pub(crate) enum WriterMsg {
 pub(crate) struct ConnectionShared {
     pub(crate) tx: SyncSender<WriterMsg>,
     close: AtomicBool,
+    reason: Mutex<Option<DisconnectReason>>,
     stream: UnixStream,
 }
 
@@ -58,13 +60,38 @@ impl ConnectionShared {
         let _ = self.tx.try_send(WriterMsg::Close);
     }
 
-    /// Abort the connection promptly: mark it closed, queue a stop, and shut the
-    /// socket down so a blocked `recv`/`send` returns immediately. The session
-    /// and child are untouched.
-    pub(crate) fn close_now(&self) {
+    /// Non-blocking enqueue of an event or response envelope into this
+    /// connection's writer queue.
+    ///
+    /// Used by the event-bus fan-out while the bus lock is held, so it must
+    /// never block and never re-enter teardown. `Err` means the bounded queue
+    /// is full or the writer is gone; the caller drops the connection after
+    /// releasing the bus lock.
+    pub(crate) fn enqueue_envelope(
+        &self,
+        envelope: Envelope,
+    ) -> Result<(), TrySendError<WriterMsg>> {
+        self.tx.try_send(WriterMsg::Frame(Box::new(envelope)))
+    }
+
+    /// Abort the connection promptly: record the first disconnect `reason`,
+    /// mark it closed, queue a stop, and shut the socket down so a blocked
+    /// `recv`/`send` returns immediately. The session and child are untouched.
+    pub(crate) fn close_now(&self, reason: DisconnectReason) {
+        {
+            let mut current = lock(&self.reason);
+            if current.is_none() {
+                *current = Some(reason);
+            }
+        }
         self.close.store(true, Ordering::SeqCst);
         let _ = self.tx.try_send(WriterMsg::Close);
         let _ = self.stream.shutdown(Shutdown::Both);
+    }
+
+    /// The recorded disconnect reason, if `close_now` ran.
+    pub(crate) fn take_reason(&self) -> Option<DisconnectReason> {
+        lock(&self.reason).take()
     }
 }
 
@@ -117,7 +144,9 @@ impl ConnectionCtx {
     fn send(&self, envelope: Envelope) {
         match self.tx.try_send(WriterMsg::Frame(Box::new(envelope))) {
             Ok(()) => {}
-            Err(TrySendError::Full(_) | TrySendError::Disconnected(_)) => self.conn.close_now(),
+            Err(TrySendError::Full(_) | TrySendError::Disconnected(_)) => {
+                self.conn.close_now(DisconnectReason::TransportError);
+            }
         }
     }
 
@@ -156,6 +185,9 @@ impl ConnectionCtx {
     }
 
     /// Release every stream this connection attached and free the writer leases.
+    ///
+    /// Each freed lease emits `writer_lease_changed` after the entity lock is
+    /// released (never while holding an entity lock).
     pub(crate) fn release_streams(&self) {
         let entries: Vec<(u64, StreamEntry)> = {
             let mut streams = lock(&self.streams);
@@ -163,8 +195,16 @@ impl ConnectionCtx {
         };
         for (stream_id, entry) in entries {
             entry.block.remove_subscriber(self.client_id, stream_id);
-            if entry.writer {
-                entry.block.release_writer(self.client_id, stream_id);
+            if entry.writer && entry.block.release_writer(self.client_id, stream_id) {
+                self.shared.events.append(writer_lease_event(
+                    &entry.block.session_id.to_string(),
+                    &entry.block.id.to_string(),
+                    stream_id,
+                    entry.block.revision(),
+                    &self.client_id.to_string(),
+                    "",
+                    false,
+                ));
             }
         }
     }
@@ -177,21 +217,15 @@ pub(crate) fn spawn_connection(shared: Arc<ServerShared>, stream: UnixStream) ->
 
 fn run_connection(shared: Arc<ServerShared>, stream: UnixStream) {
     let client_id = ClientId::new();
-    {
-        let mut clients = lock(&shared.clients);
-        clients.insert(
-            client_id,
-            Client {
-                id: client_id,
-                kind: String::new(),
-                platform: String::new(),
-                version: String::new(),
-                connection_state: ConnectionState::TransportConnected,
-                principal: None,
-                connected_at: Timestamp::new(crate::registry::now_millis()),
-            },
-        );
-    }
+    shared.insert_client(Client {
+        id: client_id,
+        kind: String::new(),
+        platform: String::new(),
+        version: String::new(),
+        connection_state: ConnectionState::TransportConnected,
+        principal: None,
+        connected_at: Timestamp::new(crate::registry::now_millis()),
+    });
 
     let max_frame_bytes = shared.config.limits.max_frame_bytes;
     let read_timeout = Duration::from_millis(u64::from(shared.config.limits.idle_timeout_millis));
@@ -201,14 +235,14 @@ fn run_connection(shared: Arc<ServerShared>, stream: UnixStream) {
     let shutdown_stream = match stream.try_clone() {
         Ok(clone) => clone,
         Err(_) => {
-            lock(&shared.clients).remove(&client_id);
+            shared.client_disconnected(client_id, DisconnectReason::TransportError);
             return;
         }
     };
     let reader_stream = match stream.try_clone() {
         Ok(clone) => clone,
         Err(_) => {
-            lock(&shared.clients).remove(&client_id);
+            shared.client_disconnected(client_id, DisconnectReason::TransportError);
             return;
         }
     };
@@ -217,6 +251,7 @@ fn run_connection(shared: Arc<ServerShared>, stream: UnixStream) {
     let conn = Arc::new(ConnectionShared {
         tx: tx.clone(),
         close: AtomicBool::new(false),
+        reason: Mutex::new(None),
         stream: shutdown_stream,
     });
     lock(&shared.connections).push(Arc::clone(&conn));
@@ -248,27 +283,38 @@ fn run_connection(shared: Arc<ServerShared>, stream: UnixStream) {
         streams: Mutex::new(HashMap::new()),
     };
 
-    if handshake(&mut reader, &ctx) {
+    // The first close reason wins; a reader-detected cause is the fallback.
+    let detected = if handshake(&mut reader, &ctx) {
         loop {
             if conn.close.load(Ordering::SeqCst) {
-                break;
+                break None;
             }
             match reader.recv() {
                 Ok(Some(envelope)) => dispatch::handle_envelope(&ctx, envelope),
-                Ok(None) => break,
-                Err(TransportError::Io(error)) if is_read_timeout(&error) => break,
+                Ok(None) => break Some(DisconnectReason::PeerClosed),
                 Err(error) => {
-                    eprintln!("relayable-server: client {client_id} disconnected: {error}");
-                    break;
+                    let reason = classify_read_error(&error);
+                    if reason != DisconnectReason::IdleTimeout {
+                        eprintln!("relayable-server: client {client_id} disconnected: {error}");
+                    }
+                    break Some(reason);
                 }
             }
         }
-    }
+    } else {
+        None
+    };
+    let reason = conn
+        .take_reason()
+        .or(detected)
+        .unwrap_or(DisconnectReason::TransportError);
 
+    // Tear down the transport only: the session, block, PTY, and child stay up.
     ctx.release_streams();
+    shared.events.unsubscribe(&conn);
     conn.request_close();
     lock(&shared.connections).retain(|candidate| !Arc::ptr_eq(candidate, &conn));
-    lock(&shared.clients).remove(&client_id);
+    shared.client_disconnected(client_id, reason);
     let _ = writer_handle.join();
 }
 
@@ -321,15 +367,7 @@ fn handshake(reader: &mut FrameConnection, ctx: &ConnectionCtx) -> bool {
         return false;
     }
 
-    {
-        let mut clients = lock(&ctx.shared.clients);
-        if let Some(client) = clients.get_mut(&ctx.client_id) {
-            client.kind = handshake.client_kind;
-            client.platform = handshake.platform;
-            client.version = handshake.client_version;
-            client.connection_state = ConnectionState::Ready;
-        }
-    }
+    ctx.shared.client_negotiated(ctx.client_id, &handshake);
 
     ctx.send_result(
         request_id,
@@ -363,7 +401,7 @@ fn writer_loop(
         match receiver.recv_timeout(wait) {
             Ok(WriterMsg::Frame(envelope)) => {
                 if connection.send(&envelope).is_err() {
-                    shared.close_now();
+                    shared.close_now(DisconnectReason::TransportError);
                     break;
                 }
                 last_send = Instant::now();
@@ -383,7 +421,7 @@ fn writer_loop(
                     })),
                 };
                 if connection.send(&beat).is_err() {
-                    shared.close_now();
+                    shared.close_now(DisconnectReason::TransportError);
                     break;
                 }
                 last_send = Instant::now();
@@ -416,6 +454,35 @@ fn major_version(version: &str) -> Option<u64> {
     major.parse().ok()
 }
 
+/// Classify a frame-read error as an idle read timeout or a genuine transport
+/// error.
+///
+/// A read timeout can surface **either** directly (`TransportError::Io`) **or**
+/// wrapped by the frame codec (`TransportError::Codec(CodecError::Io)`, because
+/// the length-prefixed reader wraps every `io::Error` it observes). Rather than
+/// match the known variants — which silently misclassified the real reader path
+/// as `transport_error` — walk the `std::error::Error` source chain to the
+/// underlying `io::Error`. Any current or future wrapping layer that preserves
+/// its source is therefore covered by this single decision point.
+fn classify_read_error(error: &TransportError) -> DisconnectReason {
+    match source_io_error(error) {
+        Some(io) if is_read_timeout(io) => DisconnectReason::IdleTimeout,
+        _ => DisconnectReason::TransportError,
+    }
+}
+
+/// The first `io::Error` in an error's `source()` chain, if any.
+fn source_io_error<'a>(error: &'a (dyn std::error::Error + 'static)) -> Option<&'a std::io::Error> {
+    let mut current = Some(error);
+    while let Some(error) = current {
+        if let Some(io) = error.downcast_ref::<std::io::Error>() {
+            return Some(io);
+        }
+        current = error.source();
+    }
+    None
+}
+
 fn is_read_timeout(error: &std::io::Error) -> bool {
     matches!(error.kind(), ErrorKind::WouldBlock | ErrorKind::TimedOut)
 }
@@ -431,12 +498,14 @@ pub(crate) fn expected_method(operation: &request::Operation) -> &'static str {
         request::Operation::BlockDetach(_) => relayable_protocol::methods::BLOCK_DETACH,
         request::Operation::TerminalInput(_) => relayable_protocol::methods::TERMINAL_INPUT,
         request::Operation::TerminalResize(_) => relayable_protocol::methods::TERMINAL_RESIZE,
+        request::Operation::SessionResume(_) => relayable_protocol::methods::SESSION_RESUME,
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use relayable_protocol::codec::CodecError;
 
     #[test]
     fn request_window_rejects_duplicates() {
@@ -465,5 +534,39 @@ mod tests {
         assert_eq!(major_version("2.5"), Some(2));
         assert_eq!(major_version("1"), None);
         assert_eq!(major_version("nope"), None);
+    }
+
+    #[test]
+    fn read_timeouts_classify_as_idle_timeout_in_both_shapes() {
+        // Direct shape: `TransportError::Io`.
+        let direct = TransportError::Io(std::io::Error::from(ErrorKind::WouldBlock));
+        assert_eq!(classify_read_error(&direct), DisconnectReason::IdleTimeout);
+
+        // Real reader shape: the frame codec wraps the socket timeout.
+        let wrapped =
+            TransportError::Codec(CodecError::Io(std::io::Error::from(ErrorKind::TimedOut)));
+        assert_eq!(classify_read_error(&wrapped), DisconnectReason::IdleTimeout);
+    }
+
+    #[test]
+    fn other_read_errors_classify_as_transport_error() {
+        let direct = TransportError::Io(std::io::Error::from(ErrorKind::ConnectionReset));
+        assert_eq!(
+            classify_read_error(&direct),
+            DisconnectReason::TransportError
+        );
+
+        let wrapped =
+            TransportError::Codec(CodecError::Io(std::io::Error::from(ErrorKind::BrokenPipe)));
+        assert_eq!(
+            classify_read_error(&wrapped),
+            DisconnectReason::TransportError
+        );
+
+        // A non-I/O codec failure is never a timeout.
+        assert_eq!(
+            classify_read_error(&TransportError::Codec(CodecError::Truncated)),
+            DisconnectReason::TransportError
+        );
     }
 }

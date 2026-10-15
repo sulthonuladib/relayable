@@ -15,9 +15,10 @@ use relayable_protocol::v1::{
 };
 
 use crate::connection::{expected_method, ConnectionCtx, StreamEntry};
+use crate::events::{writer_lease_event, DisconnectReason};
 use crate::lock;
 use crate::registry::CloseSessionOutcome;
-use crate::session::{InputError, Subscriber};
+use crate::session::{InputError, Subscriber, WriterAcquire};
 
 /// Handle one inbound envelope.
 pub(crate) fn handle_envelope(ctx: &ConnectionCtx, envelope: Envelope) {
@@ -84,6 +85,7 @@ fn handle_request(ctx: &ConnectionCtx, request_id: Option<u64>, request: Request
         request::Operation::BlockDetach(detach) => detach_block(ctx, request_id, detach),
         request::Operation::TerminalInput(input) => terminal_input(ctx, request_id, input),
         request::Operation::TerminalResize(resize) => terminal_resize(ctx, request_id, resize),
+        request::Operation::SessionResume(resume) => resume_session(ctx, request_id, resume),
     }
 }
 
@@ -133,7 +135,12 @@ fn view_session(ctx: &ConnectionCtx, request_id: u64, request: v1::SessionSnapsh
         }
     };
     match ctx.shared.snapshot(session_id) {
-        Some(snapshot) => ctx.send_result(request_id, response::Result::SessionView(snapshot)),
+        Some(snapshot) => {
+            ctx.send_result(request_id, response::Result::SessionView(snapshot));
+            // A completed view synchronizes the connection; it does NOT
+            // subscribe it to live events (frozen CORE-002 §C).
+            ctx.shared.client_ready(ctx.client_id);
+        }
         None => ctx.send_error(
             request_id,
             ErrorCode::UnknownEntity,
@@ -141,6 +148,37 @@ fn view_session(ctx: &ConnectionCtx, request_id: u64, request: v1::SessionSnapsh
             HashMap::new(),
             false,
         ),
+    }
+}
+
+/// `session.resume`: replay retained events or fall back to a fresh snapshot.
+///
+/// The response enqueue and subscriber registration happen inside the single
+/// [`crate::registry::ServerShared::resume_session`] bus-lock critical section,
+/// so the response always precedes any event with sequence greater than the
+/// captured head.
+fn resume_session(ctx: &ConnectionCtx, request_id: u64, request: v1::SessionResumeRequest) {
+    let session_id = match ids::session_id_from_wire(&request.session_id) {
+        Ok(id) => id,
+        Err(error) => {
+            return ctx.send_error(
+                request_id,
+                ErrorCode::BadRequest,
+                &format!("invalid session id: {error}"),
+                HashMap::new(),
+                false,
+            );
+        }
+    };
+    match ctx.shared.resume_session(
+        request_id,
+        session_id,
+        request.last_sequence_applied,
+        &ctx.conn,
+    ) {
+        Ok(true) => ctx.shared.client_ready(ctx.client_id),
+        Ok(false) => ctx.conn.close_now(DisconnectReason::TransportError),
+        Err(code) => ctx.send_error(request_id, code, "no such session", HashMap::new(), false),
     }
 }
 
@@ -238,14 +276,40 @@ fn attach_block(ctx: &ConnectionCtx, request_id: u64, request: v1::BlockAttachRe
     }
 
     let stream_id = ctx.next_stream.fetch_add(1, Ordering::SeqCst) + 1;
-    if writer && !block.acquire_writer(ctx.client_id, stream_id) {
-        return ctx.send_error(
-            request_id,
-            ErrorCode::InputNotOwned,
-            "another client already holds the writer lease for this block",
-            HashMap::new(),
-            false,
-        );
+    if writer {
+        match block.acquire_writer(ctx.client_id, stream_id, request.takeover) {
+            WriterAcquire::Busy => {
+                return ctx.send_error(
+                    request_id,
+                    ErrorCode::InputNotOwned,
+                    "another client already holds the writer lease for this block",
+                    HashMap::new(),
+                    false,
+                );
+            }
+            WriterAcquire::Acquired => {
+                ctx.shared.events.append(writer_lease_event(
+                    &block.session_id.to_string(),
+                    &block.id.to_string(),
+                    stream_id,
+                    block.revision(),
+                    "",
+                    &ctx.client_id.to_string(),
+                    true,
+                ));
+            }
+            WriterAcquire::Taken { previous_client_id } => {
+                ctx.shared.events.append(writer_lease_event(
+                    &block.session_id.to_string(),
+                    &block.id.to_string(),
+                    stream_id,
+                    block.revision(),
+                    &previous_client_id.to_string(),
+                    &ctx.client_id.to_string(),
+                    true,
+                ));
+            }
+        }
     }
 
     let subscriber = std::sync::Arc::new(Subscriber::new(
@@ -275,8 +339,16 @@ fn detach_block(ctx: &ConnectionCtx, request_id: u64, request: v1::BlockDetachRe
     match entry {
         Some(entry) if !entry.block.is_dead() => {
             entry.block.remove_subscriber(ctx.client_id, stream_id);
-            if entry.writer {
-                entry.block.release_writer(ctx.client_id, stream_id);
+            if entry.writer && entry.block.release_writer(ctx.client_id, stream_id) {
+                ctx.shared.events.append(writer_lease_event(
+                    &entry.block.session_id.to_string(),
+                    &entry.block.id.to_string(),
+                    stream_id,
+                    entry.block.revision(),
+                    &ctx.client_id.to_string(),
+                    "",
+                    false,
+                ));
             }
             ctx.send_result(
                 request_id,

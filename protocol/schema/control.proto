@@ -11,13 +11,21 @@
 //   behavior; §13 Connection lifecycle): `session_id`, `block_id`, `window_id`,
 //   `revision`, `client_id`, `principal`, `connection_state`,
 //   `connected_at`, `exit_code`, `pwd`, `title`, `state`, `progress`.
-// See `protocol/compatibility/core-001-method-set.md`.
+// See `protocol/compatibility/core-001-method-set.md` and
+// `protocol/compatibility/core-002-method-set.md`.
+//
+// CORE-002 note: `SessionState` is defined in `events.proto` and re-exported to
+// this file by import. The definition moved (same package, same wire meaning,
+// same generated fully-qualified type `relayable.protocol.v1.SessionState`) so
+// that `events.proto` needs no import and `control.proto` can import the `Event`
+// type carried by `SessionResumeResponse` without a protobuf import cycle.
 
 syntax = "proto3";
 
 package relayable.protocol.v1;
 
 import "terminal.proto";
+import "events.proto";
 
 message SessionCreateRequest {
   optional string label = 1;
@@ -125,6 +133,11 @@ message SessionCloseResponse {
 message BlockAttachRequest {
   string block_id = 1;
   AttachMode mode = 2;
+  // CORE-002: `takeover = true` from a second client holding a valid session
+  // takes the single writer lease from the previous holder (contract §5).
+  // Default `false` preserves the CORE-001 behavior (reject with
+  // `input_not_owned`). Additive new tag 3 per ADR-002 D3.
+  bool takeover = 3;
 }
 
 message BlockAttachResponse {
@@ -153,11 +166,39 @@ message TerminalResizeAccepted {
   uint32 rows = 3;
 }
 
-enum SessionState {
-  SESSION_STATE_UNSPECIFIED = 0;
-  SESSION_STATE_ACTIVE = 1;
-  SESSION_STATE_CLOSED = 2;
+// CORE-002 control operations: `session.resume` (see
+// `protocol/compatibility/core-002-method-set.md`).
+//
+// `session.resume` synchronizes a (re)connecting client with the server-wide
+// retained control-event log. A cursor of `last_sequence_applied = 0` means
+// "no cursor": the server answers with a fresh snapshot, never a false replay.
+message SessionResumeRequest {
+  string session_id = 1;
+  uint64 last_sequence_applied = 2;
 }
+
+// Reply to `session.resume`.
+//
+// Exactly one of two shapes is returned. Replayable cursor:
+// `snapshot_required = false`, `snapshot` unset, `snapshot_sequence =
+// last_sequence_applied`, and `events` holds the contiguous retained events
+// `last_sequence_applied + 1 ..= current_sequence`. Otherwise
+// `snapshot_required = true`, `events` is EMPTY, `snapshot` is a fresh
+// consistent projection at `current_sequence`, `snapshot_sequence ==
+// snapshot.sequence == current_sequence`, and live events start at
+// `snapshot_sequence + 1`.
+message SessionResumeResponse {
+  bool snapshot_required = 1;
+  string snapshot_required_reason = 2;
+  SessionSnapshotResponse snapshot = 3;
+  repeated Event events = 4;
+  uint64 snapshot_sequence = 5;
+  uint64 current_sequence = 6;
+  uint64 retained_floor_sequence = 7;
+  uint32 retained_event_count = 8;
+}
+
+// `SessionState` is defined in `events.proto` (see the file header note).
 
 enum BlockKind {
   BLOCK_KIND_UNSPECIFIED = 0;

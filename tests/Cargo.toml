@@ -26,6 +26,10 @@ path = "reconnect/main.rs"
 name = "multi-client"
 path = "multi-client/main.rs"
 
+[[test]]
+name = "events"
+path = "events/main.rs"
+
 [dependencies]
 relayable-model = { workspace = true }
 relayable-protocol = { workspace = true, features = ["transport-unix"] }

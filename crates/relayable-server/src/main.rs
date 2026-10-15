@@ -46,7 +46,13 @@ fn main() -> ExitCode {
 }
 
 fn run() -> ExitCode {
-    let config = relayable_server::ServerConfig::from_env();
+    let config = match relayable_server::ServerConfig::from_env() {
+        Ok(config) => config,
+        Err(error) => {
+            eprintln!("relayable-server: invalid configuration: {error}");
+            return ExitCode::from(1);
+        }
+    };
     let socket = config.socket_path.display().to_string();
     match relayable_server::Server::bind(config) {
         Ok(server) => {
