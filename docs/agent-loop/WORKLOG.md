@@ -96,11 +96,12 @@ DEC-009 remediation decision is pending.
 system change; no leaked panes. This is a time-boxed stopgap only — the permanent fix is still the
 pending DEC-009 decision.
 
-**Result so far:** the stopgap worked — after the retry instruction, `research/ui-reference` has 2
-active Agents and `research/protocol-compat` has 2 active Agents (its herd run owns the handoff
-until they settle); `research/env-audit` is working. Outcomes (files, commits, validation) are
-pending the Leads' reports. The daemon window expires ~30 min after activation; if a later wave
-(e.g. a writer after workers) still needs it, restart the daemon or apply the permanent fix.
+**Result so far:** the stopgap worked — after the retry instruction, all three Leads have 2 active
+Agents each (`ui-reference`, `protocol-compat`, `env-audit`); outcomes (files, commits, validation)
+are pending the Leads' reports. The Leads' earlier "fleet-wide blocked" escalations describe the
+pre-retry state and are superseded by this result; their "pane leak" caution is not supported by
+`herdr pane list` observations (rollback cleans up failed attempts). The daemon window now expires
+~00:05; if a later wave still needs it, restart the daemon or apply the permanent fix.
 
 **Window extended:** the 30-minute instance was replaced with a fresh 3600 s instance (pid 2781970,
 stop file unchanged, expires ~00:05) so the planned workers → writer → reviewer waves are covered.

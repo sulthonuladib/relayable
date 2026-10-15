@@ -57,6 +57,8 @@ resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
 | 25 | `message_staff` to the three Lead sessions | all returned `ok: true` (delivery ids `2b82f497…`, `fe14f159…`, `68ede95e…`) | 0 |
 | 26 | Fresh supervision snapshot after the retry instruction | Option D stopgap working: `research/ui-reference` active=2 Agents, `research/protocol-compat` active=2 Agents (herd run owns its handoff), `research/env-audit` working; no `agent_start` failures reported in this window | observation |
 | 27 | Restart bounded stopgap for the full wave: stop old daemon via `/tmp/relayable-wake-daemon.stop`, then `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 wX wY wZ` | old daemon exited; new daemon pid 2781970 running (expires ~00:05) | 0 |
+| 28 | Fresh supervision snapshot after the retry window | all three Leads have 2 active Agents each (`ui-reference` 2, `protocol-compat` 2, `env-audit` 2); the Leads' earlier "fleet-wide blocked" escalations are superseded by this result | observation |
+| 29 | `herdr pane list` after rollbacks (earlier check) | no leaked panes: only the four base panes and the transient agent panes existed; Herdsman rollback cleans up failed attempts | 0 |
 
 **Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
 fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`
