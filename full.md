@@ -209,7 +209,7 @@ Never make up benchmark values, command flags, shortcut keys, layouts, architect
 - Confidence and unresolved details.
 - Corresponding Relayable implementation path and screenshot-test name.
 
-The catalogue must represent actual observed screens, not a list of screens we merely wish the product to have.
+The catalogue must represent actual observed screens, not a list of screens we merely wish the product to have. Cross-reference the independent GoRex review where it clarifies a component or interaction.
 
 ## 2.4 UI fidelity requirement
 
@@ -249,13 +249,41 @@ Record connection setup, host discovery, authentication/pairing, the transport s
 
 Capture commands, arguments, output, target resolution, contextual defaults, JSON output, exit codes, environment variables, Lua calls, events, waiting/capture, and API inspection. Reconcile against official REX documentation and document differences between reference behavior and Relayable design.
 
-## 2.6 Exit gate
+## 2.6 Supplemental reference implementation: GoRex
+
+Inspect the public repository https://github.com/egoist/gorex as an additional, unusually useful UI/behavior reference. Its README explicitly describes it as a clone of Superlogical's REX terminal. As of the initial research pass, its README describes tabs and split panes, pane headers with program/icon/directory, resizing and zoom controls, persistent sessions, program activity indicators, notifications, host information, a command palette, appearance settings, text sizing, and keyboard shortcuts.
+
+**This repository is a supplemental reference, not the product's source of truth.** Use:
+
+- The five original videos to ground what was actually shown in the original product.
+- Official REX documentation to ground documented CLI/API/protocol-visible behavior.
+- GoRex to inspect concrete UI composition, interaction details, layout behavior, shortcut conventions, persistence UX, and potential edge cases not easy to see in brief video footage.
+- Relayable's own tests and architecture decisions to determine what Relayable actually supports.
+
+Create `docs/research/gorex-review.md` containing:
+
+- Repository URL and commit hash reviewed.
+- Screenshots or screenshot descriptions for each useful UI state, with a local-only evidence folder if needed.
+- Component hierarchy, relative measurements, typography/color observations, window/tab/pane behaviors, menus/popovers, keyboard shortcuts, focus, resizing, empty/error states, and accessibility observations.
+- What behavior is confirmed by running the application versus merely described in the README or inferred by reading code.
+- A feature comparison table: original videos/docs, GoRex, Relayable implementation, discrepancies, and confidence.
+- Explicit limitations: GoRex README states that remote server connections are not replicated and that its server listens on a local socket. Do not use GoRex as evidence for the remote protocol or remote-host workflows.
+
+### Intellectual property and clean-room rules
+
+At the initial research pass, a root `LICENSE` file was not found at the expected GitHub path. Re-check the repository's current license and any license notices before reusing any code or assets. Public availability is not permission to copy source code, icons, images, branding, or other assets.
+
+Unless a verified license expressly permits reuse, do **not** copy, vendor, translate, or mechanically port GoRex source code or bundle its non-system assets. It is okay to study the running application's user-visible behavior and create an independent implementation from a written behavior/layout specification. Keep the observation and implementation work separated: the research agent writes the behavior catalogue; the GPUI agent implements against that catalogue and screenshots rather than copying source files. Use Relayable branding and independently created assets. Reuse third-party libraries only under their own verified licenses and notices.
+
+The requested UI fidelity remains high: recreate the same visible information architecture, relative geometry, density, visual hierarchy, pane/tab interactions, command palette behavior, keyboard conventions, and state transitions to the extent supported by evidence. Do not redesign it into a generic dashboard. If original video frames and the GoRex implementation differ, record the discrepancy and prefer direct original-product evidence for the intended original behavior.
+
+## 2.7 Exit gate
 
 Do not finish the first UI milestone until:
 
 - All five video review sections have been attempted and honestly labeled.
 - At least the main visible workspace in Video 1 and the remote workflow in Video 4 have been visually inspected, or a concrete access blocker is documented.
-- The UI catalogue has implementable screen/state specifications.
+- The UI catalogue and `docs/research/gorex-review.md` have implementable screen/state specifications, with original-product evidence distinguished from clone-derived observation.
 - The top 10 highest-impact visual/interaction discrepancies are tracked.
 
 If the videos remain inaccessible, implement only what is supported, avoid claims of full fidelity, and leave the fidelity gate explicitly open.
@@ -872,7 +900,7 @@ Owns only:
 - `docs/research/open-questions.md`
 - `docs/compatibility/reference-behavior-matrix.md` (research portion only; coordinate before shared edits)
 
-Tasks: inspect the five videos and official docs, record timestamped evidence, extract visible layouts/workflows/CLI behavior, identify UI tokens and unknowns. Do not write production UI code or alter architecture. Report evidence with URLs/timestamps and confidence.
+Tasks: inspect the five videos and official docs, review GoRex as a supplementary reference, record timestamped/source-specific evidence, extract visible layouts/workflows/CLI behavior, identify UI tokens and unknowns, and verify license status before proposing any reuse. Do not write production UI code or alter architecture. Report evidence with URLs/timestamps and confidence. Do not copy GoRex source or assets into the project.
 
 ### C. Protocol / Server agent
 
@@ -1228,6 +1256,7 @@ Use these URLs as research entry points and verify current content when implemen
 - Video 3, server memory optimizations: https://youtu.be/T5gV6anSt-4?si=60tv3fmAbn1iu3OQ
 - Video 4, remote sessions demo: https://youtu.be/PdwTjSBW6Y8?si=m9GAagbhNl0IFpQS
 - Video 5, CLI demo: https://youtu.be/9fcfDF8SBnc?si=SEC1FMxrXnEGK8eR
+- Supplemental public UI/behavior reference: GoRex (Rex clone): https://github.com/egoist/gorex
 - Official REX CLI: https://www.superlogical.com/rex/docs/automate/cli
 - Official REX server API: https://www.superlogical.com/rex/docs/automate/server-api
 - Official REX Lua API: https://www.superlogical.com/rex/docs/reference/lua
