@@ -1,0 +1,28 @@
+# Relayable Linux desktop app (GPUI).
+#
+# `full.md` §5.3: GPUI-specific code lives only in `apps/linux`. This package is
+# intentionally its own Cargo workspace (empty `[workspace]` table below) so its
+# dependency pins and `Cargo.lock` can never affect the repository-root workspace
+# or the shared `crates/**`.
+#
+# The `gpui = "=0.2.2"` pin matches ADR-003 (Option H). On this host the pin
+# resolves but does not compile at `xattr 0.2.3` -> `libc 0.2.190` (removed
+# `libc::ENOATTR`); see `evidence/TERM-002-remedy.md` for the contained remedy
+# (`libc` held at 0.2.189 in this workspace's `Cargo.lock` only).
+
+[package]
+name = "relayable-linux"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+description = "Relayable Linux desktop app (GPUI), UI-001 minimal window"
+
+[[bin]]
+name = "relayable"
+path = "src/main.rs"
+
+[dependencies]
+gpui = "=0.2.2"
+
+[workspace]
