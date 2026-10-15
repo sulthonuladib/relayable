@@ -152,3 +152,23 @@ Environment: Linux `falcon` x86_64, repo `/home/sulthonuladib/work/relayable`, `
 
 **Not yet verified:** REVIEW-001 branch not committed/merged at re-check time; TERM-002 and CORE-001
 in flight; `ADR-FIX-001` (ADR-002 B-1/B-2/B-3 + ADR-001 nits) not started.
+
+## 2026-10-15 — CORRECTION: the DOC-002 recheck (rows 71–72) was a false positive
+
+Rows 71–72 above flagged 10 "defective" numeric citations in the DOC-002 repair using the automatic
+`docs/compatibility/doc-002-audit/audit.py`. **That was the wrong standard.** The assignment's authority
+is the *adjudicated* `docs/compatibility/doc-002-audit/citation-audit.md` (produced by `adjudicate.py`,
+which manually resolves rows where `audit.py`'s automatic fragment union is unreliable). Re-adjudicating
+each flagged row directly against `/tmp/doc002/raw/**`:
+
+- `events.md:71` — sanctioned (audit row 446† says "keep 71"); line 71 really is the
+  `client_connection_changed | client_id, principal, connection_state` row.
+- `program-status.md:168` / `:169` — sanctioned; they really are the `title` / `msg` rows (the shared
+  "base64 UTF-8" quote makes `audit.py` report `actual=168-169` for both, a SHIFT false positive).
+- `cli.md:81`, `server-api.md:63–71`, `server-api.md:85–86`, `lua.md:125–132`, `lua.md:313–327`,
+  `program-status.md:79–81`, `program-status.md:110–111` — all adjudicated MATCH or corrected in
+  `citation-audit.md`.
+
+`audit.py` re-derives spans automatically and false-positives on paraphrased evidence and on repeated
+quotes. The repaired matrix agrees with the adjudicated audit (0 invented refs; 78 NOT_FOUND converted
+to heading anchors). **DOC-002 is accepted; the revision request (`ea419e3b`/`88505e2b`) was withdrawn.**
