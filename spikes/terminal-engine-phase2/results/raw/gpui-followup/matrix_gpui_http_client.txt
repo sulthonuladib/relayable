@@ -1,0 +1,58 @@
+# ---- provenance ----
+# command: timeout 900 cargo check --locked -p gpui_http_client (cwd: gpui-pin-probe)
+# exit_code: 101
+# utc_timestamp: 2026-10-15T18:39:29Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# attempt: gpui_http_client
+# manifest_variant: canonical gpui = "=0.2.2"; -p gpui_http_client --locked
+# wall_clock_s: 0.5
+# compiling_lines: 2
+# checking_lines: 3
+# last_error_line: error: could not compile `xattr` (lib) due to 1 previous error
+# ---- output ----
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+    Checking xattr v0.2.3
+    Checking shlex v1.3.0
+    Checking ipnet v2.12.2
+error[E0425]: cannot find value `ENOATTR` in crate `::libc`
+   --> /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-0.2.3/src/sys/mod.rs:12:56
+    |
+ 12 |               pub const ENOATTR: ::libc::c_int = ::libc::ENOATTR;
+    |                                                          ^^^^^^^
+...
+ 37 | / platforms! {
+ 38 | |     "android"; "linux"; "macos" => linux_macos,
+ 39 | |     "freebsd"; "netbsd" => bsd
+ 40 | | }
+    | |_- in this macro invocation
+    |
+   ::: /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/linux_like/linux/gnu/b64/x86_64/mod.rs:424:1
+    |
+424 |   pub const ENOSTR: c_int = 60;
+    |   ----------------------- similarly named constant `ENOSTR` defined here
+    |
+    = note: this error originates in the macro `platforms` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a constant with a similar name exists
+    |
+ 12 -             pub const ENOATTR: ::libc::c_int = ::libc::ENOATTR;
+ 12 +             pub const ENOATTR: ::libc::c_int = ::libc::ENOSTR;
+    |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `xattr` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

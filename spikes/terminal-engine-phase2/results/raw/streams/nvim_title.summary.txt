@@ -1,0 +1,18 @@
+== capture: nvim_title ==
+PROGRAM=nvim
+PROGRAM_ARGS=["--clean", "+set title"]
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+COLORTERM=truecolor
+DURATION_MS=6000
+SEND_AT_MS=2500 SPEC=":qa!\\r"
+BYTES_RECEIVED=12764
+SHA256=a7acb071888575736d4f54bc405b1887b915ea36a1c20ab3c9abb6ef85a2fa27
+CHILD_EXIT=exited:0
+CHILD_EXIT_CODE=Some(0)
+KILLED=false
+TIMED_OUT=false
+READER_STALLED=false
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_title.bin
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_title.meta
+VERDICT=PASS

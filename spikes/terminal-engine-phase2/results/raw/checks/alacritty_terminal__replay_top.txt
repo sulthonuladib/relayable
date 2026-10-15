@@ -1,0 +1,62 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: replay_top
+# title: Secondary cross-check of phase-1 committed capture
+# kind: replayed-real-capture
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: spikes/terminal-engine/results/raw/top.bin kind=replayed-real-capture sha256=d1da1e148aa6cd4626f764902bcc44b1993d25bbff145b663c89fcbf51b0ba5e
+# ---- expected vs actual ----
+ASSERT capture_processed
+  EXPECTED non-empty capture processed
+  ACTUAL   5771 bytes
+  STATUS   PASS
+ASSERT raw_bytes_1049h_count
+  EXPECTED 0
+  ACTUAL   0
+  STATUS   PASS
+ASSERT raw_bytes_1049l_count
+  EXPECTED 0
+  ACTUAL   0
+  STATUS   PASS
+ASSERT final_screen_signature
+  EXPECTED final engine screen contains "Tasks:"
+  ACTUAL   present=["Tasks: 496 total, 2 running, 492 sleep, 1 d-sleep, 0 stopped, 1 zombie"] final_first_rows=["Tasks: 496 total, 2 running, 492 sleep, 1 d-sleep, 0 stopped, 1 zombie", "%Cpu(s):  3.5 us,  0.4 sy,  0.0 ni, 95.4 id,  0.1 wa,  0.4 hi,  0.2 si,  0.0 st", "MiB Mem :  31746.9 total,   5289.7 free,  10633.9 used,  18912.5 buff/cache", "MiB Swap:  63492.5 total,  60926.2 free,   2566.3 used.  21113.0 avail Mem"]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| Tasks: 496 total, 2 running, 492 sleep, 1 d-sleep, 0 stopped, 1 zombie
+| %Cpu(s):  3.5 us,  0.4 sy,  0.0 ni, 95.4 id,  0.1 wa,  0.4 hi,  0.2 si,  0.0 st
+| MiB Mem :  31746.9 total,   5289.7 free,  10633.9 used,  18912.5 buff/cache
+| MiB Swap:  63492.5 total,  60926.2 free,   2566.3 used.  21113.0 avail Mem
+| 
+|     PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+| 3211487 sulthon+  20   0   17.8g 251892  61616 R  36.8   0.8   0:21.13 pi
+| 3219008 sulthon+  20   0   17.8g 219420  61684 S  16.9   0.7   0:08.11 pi
+| 3151246 sulthon+  20   0   17.8g 235368  61784 S   5.0   0.7   0:53.56 pi
+| 2564925 sulthon+  20   0 2294604 213484 109656 S   4.0   0.7   6:47.13 ghostty
+| 2606778 sulthon+  20   0  156872  50396  19384 S   2.0   0.2   3:39.84 herdr
+| 3081742 sulthon+  20   0   17.8g 275460  62100 S   2.0   0.8   0:39.07 pi
+|      16 root      -2   0       0      0      0 I   1.0   0.0   3:16.77 rcu_pre+
+|     910 root      20   0       0      0      0 S   1.0   0.0   8:25.24 napi/ph+
+| 2815693 sulthon+  20   0 1448.5g 254856 174220 S   1.0   0.8   0:11.01 Discord
+| 3097242 sulthon+  20   0   17.8g 251388  61868 S   1.0   0.8   0:41.82 pi
+| 3198691 root      20   0       0      0      0 I   1.0   0.0   0:00.90 kworker+
+| 3226264 sulthon+  20   0   10416   5996   3812 R   1.0   0.0   0:00.01 top
+|       1 root      20   0   21612   9592   5376 S   0.0   0.0   0:08.10 systemd
+|       2 root      20   0       0      0      0 S   0.0   0.0   0:00.13 kthreadd
+|       3 root      20   0       0      0      0 S   0.0   0.0   0:00.00 pool_wo+
+|       4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker+
+|       5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker+
+# ---- notes ----
+- phase-1 source commit (last change to spikes/terminal-engine/results/raw): 085375c5fe02e79fbecb6d057a5aea306c7a3565
+- Expectations were established by feeding the committed phase-1 capture into alacritty_terminal 0.26.0 and reading the engine's own screen/title/mode state; the 1049 counts match phase-1's CATEGORY_CHECKLIST (spikes/terminal-engine/results/raw/<name>.summary.txt).
+- Alt-screen transitions are chunk-independent (raw-byte scan + engine flag per transition). Mouse state is asserted only for the mouse-specific capture (replay_nvim_mouse) and is accumulated from per-chunk snapshots, which is labelled as chunk-sampled.
+STATUS=PASS

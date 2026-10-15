@@ -1,0 +1,19 @@
+
+engine: avt 0.18.0
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=479.411 bytes_per_sec=17497791 rss_before_kb=12172 rss_after_kb=15176 rss_delta_kb=3004 vmhwm_kb=15176
+  pass 2: elapsed_ms=496.503 bytes_per_sec=16895429 rss_before_kb=15176 rss_after_kb=15176 rss_delta_kb=0 vmhwm_kb=15176
+  pass 3: elapsed_ms=495.111 bytes_per_sec=16942944 rss_before_kb=15176 rss_after_kb=15176 rss_delta_kb=0 vmhwm_kb=15176
+bytes_per_sec_min: 16895429.145
+bytes_per_sec_median: 16942944.171
+bytes_per_sec_max: 17497790.867
+rss_baseline_kb: 11976
+rss_after_kb: 15176
+rss_delta_kb: 3200
+vmhwm_kb: 15176

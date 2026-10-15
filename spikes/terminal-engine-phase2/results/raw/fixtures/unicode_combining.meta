@@ -1,0 +1,5 @@
+kind=fixture
+name=unicode_combining
+description=combining acute U+0301 over 'e', then 'x'
+bytes=4
+sha256=39f31f5c4f17ba7a53d54228a448a052236b39f75e942aa46038c61b7efe2d51

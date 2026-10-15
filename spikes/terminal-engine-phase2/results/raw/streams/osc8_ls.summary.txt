@@ -1,0 +1,17 @@
+== capture: osc8_ls ==
+PROGRAM=ls
+PROGRAM_ARGS=["--hyperlink=always", "--color=never", "-1", "/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/fixtures/hyperlink_dir"]
+PTY_SIZE=24 rows x 80 cols
+TERM=xterm-256color
+COLORTERM=truecolor
+DURATION_MS=2000
+BYTES_RECEIVED=382
+SHA256=f7f96a1750fa71c920101805767be7be7a5ffc04202ca2c0a8dff82fe3981815
+CHILD_EXIT=exited:0
+CHILD_EXIT_CODE=Some(0)
+KILLED=false
+TIMED_OUT=false
+READER_STALLED=false
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/osc8_ls.bin
+WROTE=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/osc8_ls.meta
+VERDICT=PASS

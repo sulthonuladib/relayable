@@ -1,0 +1,160 @@
+# ---- provenance ----
+# command: analyze --results-dir results/raw --perf --perf-mib 8
+# exit_code: 0
+# utc_timestamp: 2026-10-15T20:12:35Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc --version -v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- output ----
+relayable-terminal-engine-phase2-spike 0.0.0 (rustc 1.98.1, edition 2021) engines: alacritty_terminal 0.26.0 + vte 0.15.0, portable-pty 0.9.0
+analyze: results_dir=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw
+analyze: repo_root=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation
+analyze: wrote 23 fixtures + 3 engine-input payloads
+analyze: loaded 10 real-program captures: ["bell", "cursor_keys", "nvim_alt", "nvim_mouse", "nvim_title", "osc8_ls", "resize_winch", "seq_20000", "tmux", "unicode"]
+  alacritty_terminal         vt_basics                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__vt_basics.txt
+  alacritty_terminal         alt_screen                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__alt_screen.txt
+  alacritty_terminal         osc_title                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__osc_title.txt
+  alacritty_terminal         osc8_hyperlink               PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__osc8_hyperlink.txt
+  alacritty_terminal         bell                         PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__bell.txt
+  alacritty_terminal         unicode_wide                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__unicode_wide.txt
+  alacritty_terminal         unicode_combining            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__unicode_combining.txt
+  alacritty_terminal         unicode_emoji                PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__unicode_emoji.txt
+  alacritty_terminal         colors                       PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__colors.txt
+  alacritty_terminal         cursor_keys                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__cursor_keys.txt
+  alacritty_terminal         bracketed_paste_mode         PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__bracketed_paste_mode.txt
+  alacritty_terminal         bracketed_paste_payload      UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__bracketed_paste_payload.txt
+  alacritty_terminal         mouse_modes                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__mouse_modes.txt
+  alacritty_terminal         resize_reflow                PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__resize_reflow.txt
+  alacritty_terminal         scrollback_bound             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__scrollback_bound.txt
+  alacritty_terminal         selection                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__selection.txt
+  alacritty_terminal         chunk_boundary_invariance    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__chunk_boundary_invariance.txt
+  alacritty_terminal         alt_screen_real              PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__alt_screen_real.txt
+  alacritty_terminal         osc_title_real               PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__osc_title_real.txt
+  alacritty_terminal         osc8_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__osc8_real.txt
+  alacritty_terminal         bell_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__bell_real.txt
+  alacritty_terminal         unicode_real                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__unicode_real.txt
+  alacritty_terminal         cursor_keys_real             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__cursor_keys_real.txt
+  alacritty_terminal         mouse_modes_real             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__mouse_modes_real.txt
+  alacritty_terminal         resize_real                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__resize_real.txt
+  alacritty_terminal         scrollback_bound_real        PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__scrollback_bound_real.txt
+  alacritty_terminal         tmux_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__tmux_real.txt
+  alacritty_terminal         replay_less                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_less.txt
+  alacritty_terminal         replay_nvim                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_nvim.txt
+  alacritty_terminal         replay_nvim_mouse            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_nvim_mouse.txt
+  alacritty_terminal         replay_nvim_title            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_nvim_title.txt
+  alacritty_terminal         replay_osc8_ls               PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_osc8_ls.txt
+  alacritty_terminal         replay_top                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/alacritty_terminal__replay_top.txt
+  vt100                      vt_basics                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__vt_basics.txt
+  vt100                      alt_screen                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__alt_screen.txt
+  vt100                      osc_title                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__osc_title.txt
+  vt100                      osc8_hyperlink               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__osc8_hyperlink.txt
+  vt100                      bell                         PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__bell.txt
+  vt100                      unicode_wide                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__unicode_wide.txt
+  vt100                      unicode_combining            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__unicode_combining.txt
+  vt100                      unicode_emoji                PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__unicode_emoji.txt
+  vt100                      colors                       PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__colors.txt
+  vt100                      cursor_keys                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__cursor_keys.txt
+  vt100                      bracketed_paste_mode         PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__bracketed_paste_mode.txt
+  vt100                      bracketed_paste_payload      UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__bracketed_paste_payload.txt
+  vt100                      mouse_modes                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__mouse_modes.txt
+  vt100                      resize_reflow                UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__resize_reflow.txt
+  vt100                      scrollback_bound             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__scrollback_bound.txt
+  vt100                      selection                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__selection.txt
+  vt100                      chunk_boundary_invariance    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__chunk_boundary_invariance.txt
+  vt100                      alt_screen_real              PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__alt_screen_real.txt
+  vt100                      osc_title_real               PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__osc_title_real.txt
+  vt100                      osc8_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__osc8_real.txt
+  vt100                      bell_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__bell_real.txt
+  vt100                      unicode_real                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__unicode_real.txt
+  vt100                      cursor_keys_real             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__cursor_keys_real.txt
+  vt100                      mouse_modes_real             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__mouse_modes_real.txt
+  vt100                      resize_real                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__resize_real.txt
+  vt100                      scrollback_bound_real        PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__scrollback_bound_real.txt
+  vt100                      tmux_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__tmux_real.txt
+  vt100                      replay_less                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_less.txt
+  vt100                      replay_nvim                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_nvim.txt
+  vt100                      replay_nvim_mouse            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_nvim_mouse.txt
+  vt100                      replay_nvim_title            PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_nvim_title.txt
+  vt100                      replay_osc8_ls               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_osc8_ls.txt
+  vt100                      replay_top                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/vt100__replay_top.txt
+  avt                        vt_basics                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__vt_basics.txt
+  avt                        alt_screen                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__alt_screen.txt
+  avt                        osc_title                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__osc_title.txt
+  avt                        osc8_hyperlink               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__osc8_hyperlink.txt
+  avt                        bell                         UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__bell.txt
+  avt                        unicode_wide                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__unicode_wide.txt
+  avt                        unicode_combining            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__unicode_combining.txt
+  avt                        unicode_emoji                UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__unicode_emoji.txt
+  avt                        colors                       PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__colors.txt
+  avt                        cursor_keys                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__cursor_keys.txt
+  avt                        bracketed_paste_mode         UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__bracketed_paste_mode.txt
+  avt                        bracketed_paste_payload      UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__bracketed_paste_payload.txt
+  avt                        mouse_modes                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__mouse_modes.txt
+  avt                        resize_reflow                PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__resize_reflow.txt
+  avt                        scrollback_bound             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__scrollback_bound.txt
+  avt                        selection                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__selection.txt
+  avt                        chunk_boundary_invariance    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__chunk_boundary_invariance.txt
+  avt                        alt_screen_real              PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__alt_screen_real.txt
+  avt                        osc_title_real               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__osc_title_real.txt
+  avt                        osc8_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__osc8_real.txt
+  avt                        bell_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__bell_real.txt
+  avt                        unicode_real                 PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__unicode_real.txt
+  avt                        cursor_keys_real             PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__cursor_keys_real.txt
+  avt                        mouse_modes_real             UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__mouse_modes_real.txt
+  avt                        resize_real                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__resize_real.txt
+  avt                        scrollback_bound_real        PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__scrollback_bound_real.txt
+  avt                        tmux_real                    PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__tmux_real.txt
+  avt                        replay_less                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_less.txt
+  avt                        replay_nvim                  PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_nvim.txt
+  avt                        replay_nvim_mouse            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_nvim_mouse.txt
+  avt                        replay_nvim_title            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_nvim_title.txt
+  avt                        replay_osc8_ls               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_osc8_ls.txt
+  avt                        replay_top                   PASS     /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/avt__replay_top.txt
+  termwiz                    vt_basics                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__vt_basics.txt
+  termwiz                    alt_screen                   UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__alt_screen.txt
+  termwiz                    osc_title                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__osc_title.txt
+  termwiz                    osc8_hyperlink               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__osc8_hyperlink.txt
+  termwiz                    bell                         UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__bell.txt
+  termwiz                    unicode_wide                 UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__unicode_wide.txt
+  termwiz                    unicode_combining            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__unicode_combining.txt
+  termwiz                    unicode_emoji                UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__unicode_emoji.txt
+  termwiz                    colors                       UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__colors.txt
+  termwiz                    cursor_keys                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__cursor_keys.txt
+  termwiz                    bracketed_paste_mode         UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__bracketed_paste_mode.txt
+  termwiz                    bracketed_paste_payload      UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__bracketed_paste_payload.txt
+  termwiz                    mouse_modes                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__mouse_modes.txt
+  termwiz                    resize_reflow                UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__resize_reflow.txt
+  termwiz                    scrollback_bound             UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__scrollback_bound.txt
+  termwiz                    selection                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__selection.txt
+  termwiz                    chunk_boundary_invariance    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__chunk_boundary_invariance.txt
+  termwiz                    alt_screen_real              UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__alt_screen_real.txt
+  termwiz                    osc_title_real               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__osc_title_real.txt
+  termwiz                    osc8_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__osc8_real.txt
+  termwiz                    bell_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__bell_real.txt
+  termwiz                    unicode_real                 UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__unicode_real.txt
+  termwiz                    cursor_keys_real             UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__cursor_keys_real.txt
+  termwiz                    mouse_modes_real             UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__mouse_modes_real.txt
+  termwiz                    resize_real                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__resize_real.txt
+  termwiz                    scrollback_bound_real        UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__scrollback_bound_real.txt
+  termwiz                    tmux_real                    UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__tmux_real.txt
+  termwiz                    replay_less                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_less.txt
+  termwiz                    replay_nvim                  UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_nvim.txt
+  termwiz                    replay_nvim_mouse            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_nvim_mouse.txt
+  termwiz                    replay_nvim_title            UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_nvim_title.txt
+  termwiz                    replay_osc8_ls               UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_osc8_ls.txt
+  termwiz                    replay_top                   UNSUPPORTED /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/checks/termwiz__replay_top.txt
+
+TALLY: {"PASS": 77, "UNSUPPORTED": 55}
+VERDICT=PASS (no engine check FAILed; self-check clean)

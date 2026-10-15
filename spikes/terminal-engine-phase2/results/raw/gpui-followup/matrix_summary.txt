@@ -1,0 +1,10 @@
+attempt|manifest_variant|exit_code|duration_s|compiling_lines|checking_lines|last_error_line
+isolated_xattr|canonical gpui = "=0.2.2"; -p xattr --locked|101|0.3|0|1|error: could not compile `xattr` (lib) due to 1 previous error
+isolated_xattr_no_default_features|canonical gpui = "=0.2.2"; -p xattr --no-default-features --locked|101|0.0|0|0|error: cannot specify features for packages outside of workspace
+gpui_http_client|canonical gpui = "=0.2.2"; -p gpui_http_client --locked|101|0.5|2|3|error: could not compile `xattr` (lib) due to 1 previous error
+no_default_features|canonical gpui = "=0.2.2" (root pkg has no features); --no-default-features --locked|101|2.0|4|21|error: could not compile `xattr` (lib) due to 1 previous error
+no_default_features_gpui|gpui = { version = "=0.2.2", default-features = false }|101|7.5|6|17|error: could not compile `xattr` (lib) due to 1 previous error
+x11_only|gpui = { version = "=0.2.2", default-features = false, features = ["x11"] }|101|6.3|7|14|error: could not compile `xattr` (lib) due to 1 previous error
+wayland_only|gpui = { version = "=0.2.2", default-features = false, features = ["wayland"] }|101|4.8|5|18|error: could not compile `xattr` (lib) due to 1 previous error
+# (e) skipped: every gpui feature variant still reached and failed at the xattr ENOATTR path.
+cold_full_check|canonical gpui = "=0.2.2" --locked; FRESH EMPTY target dir (true cold check)|101|20.8|146|246|error: could not compile `xattr` (lib) due to 1 previous error

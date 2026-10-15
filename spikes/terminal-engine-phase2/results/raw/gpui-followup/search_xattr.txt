@@ -1,0 +1,43 @@
+# ---- provenance ----
+# command: cargo search xattr --limit 20
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:41Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.457
+# ---- output ----
+xattr = "1.6.1"                   # unix extended filesystem attributes
+ghee = "0.6.1"                    # That thin layer of data change management over the filesystem
+mattress = "0.2.1"                # A command line tool for working with Linux extended attributes (xattrs)
+xattrs = "0.1.0"                  # Cross-platform xattr support.
+fstool = "0.4.35"                 # Build disk images and filesystems (ext2/3/4, MBR, GPT) from a directory tree and TOML spec, i…
+tokio-xattr = "0.2.1-alpha.1"     # Filesystem xattr (extended attributes) API for Tokio. 
+am-fs-ext4 = "0.7.2"              # Renamed to rust-fs-ext4: this crate receives no further versions. Depend on rust-fs-ext4 inst…
+rust-fs-ext4 = "0.8.0"            # Pure-Rust ext4 filesystem driver. Exposes a C ABI (fs_ext4_*) suitable for FFI from C/C++/Go/…
+linprov-common = "0.2.0"          # Shared types and constants for the linprov daemon and its BPF program (OriginRecord, AllowRul…
+linprov = "0.4.0"                 # eBPF mark-of-the-web for Linux: tag network-touched files and enforce who can exec them.
+cpcopy = "0.1.0"                  # Independent Rust cp engine with a library and CLI
+cmpfs = "0.1.0"                   # Read-only decoder for Apple decmpfs transparent filesystem compression
+tarzan = "0.5.0"                  # Random-access, seekable .tar.zst archives with an embedded table-of-contents index
+xplore-cli = "0.1.1"              # A high-performance, full-screen CLI file manager and metadata tagger using extended attribute…
+extattr = "1.0.0"                 # Extended Attributes API bindings for Rust
+virtiofsd = "1.14.0"              # A virtio-fs vhost-user device daemon
+am-fs-erofs = "0.3.1"             # Renamed to rust-fs-erofs: this crate receives no further versions. Depend on rust-fs-erofs in…
+newtua-apfs = "0.2.0-newtua.2"    # Forced fork of SecurityRonin's `apfs-core` with the `forensicnomicon` dependency removed. Not…
+dano = "0.10.1"                   # A CLI tool for generating checksums of media bitstreams
+xtagger = "1.2.1"                 # Command line application for managing and searching tags stored in filesystem extended attrib…
+... and 449 crates more (use --limit N to see more)
+note: to learn more about a package, run `cargo info <name>`

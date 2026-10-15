@@ -1,0 +1,65 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: scrollback_bound_real
+# title: Scrollback bound (real seq 1 20000)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/seq_20000.bin kind=real-program sha256=2a3211286c9175af88866db6522eb223e92f5546fc5946ad9a18c130a2c66aa6
+# ---- expected vs actual ----
+ASSERT retained_lines_le_configured_bound
+  EXPECTED retained_lines <= configured_bound
+  ACTUAL   retained_lines=1000 configured_bound=1000
+  STATUS   PASS
+ASSERT retained_lines_bounded
+  EXPECTED retained_lines <= 1000
+  ACTUAL   1000
+  STATUS   PASS
+ASSERT retained_lines_positive
+  EXPECTED retained_lines > 0 under real overflow
+  ACTUAL   1000
+  STATUS   PASS
+ASSERT newest_present
+  EXPECTED visible screen contains 20000
+  ACTUAL   last_non_blank_visible_row=Some((22, "20000")); present=["20000"]
+  STATUS   PASS
+ASSERT oldest_gone
+  EXPECTED visible screen does not show the first line '1'
+  ACTUAL   present=[] (lines whose trimmed text == "1"); first_visible_non_blank_row=Some((0, "19978"))
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 19978
+| 19979
+| 19980
+| 19981
+| 19982
+| 19983
+| 19984
+| 19985
+| 19986
+| 19987
+| 19988
+| 19989
+| 19990
+| 19991
+| 19992
+| 19993
+| 19994
+| 19995
+| 19996
+| 19997
+| 19998
+| 19999
+| 20000
+# ---- notes ----
+- lines produced by child = 20000; retained_lines = 1000 (configured_bound = 1000, informational only)
+- unique client lines in capture = 20000
+STATUS=PASS

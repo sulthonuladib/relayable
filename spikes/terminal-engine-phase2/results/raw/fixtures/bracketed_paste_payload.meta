@@ -1,0 +1,5 @@
+kind=fixture
+name=bracketed_paste_payload
+description=ESC[200~ pasted payload containing ESC and 0x03, then ESC[201~ and 'Z'
+bytes=22
+sha256=139bb87a1083e79fee4762d5a2f202bc00ed5c7cf1893262c0cfe40732bd2780

@@ -1,0 +1,5 @@
+kind=fixture
+name=unicode_vs16
+description=U+2764 + U+FE0F (VS16 emoji-presentation variation selector)
+bytes=6
+sha256=16e81418a36c58995e00aeb9c261c9ef7fb739b37c72351f511dc3b3a89e5962

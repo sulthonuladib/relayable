@@ -1,0 +1,71 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: replay_nvim
+# title: Secondary cross-check of phase-1 committed capture
+# kind: replayed-real-capture
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: spikes/terminal-engine/results/raw/nvim.bin kind=replayed-real-capture sha256=466117a7a47a1e5f9d1611001d68cacd59ed823e9a4e251eaf29600b9e4c38bb
+# ---- expected vs actual ----
+ASSERT capture_processed
+  EXPECTED non-empty capture processed
+  ACTUAL   12725 bytes
+  STATUS   PASS
+ASSERT raw_bytes_1049h_count
+  EXPECTED 1
+  ACTUAL   1
+  STATUS   PASS
+ASSERT raw_bytes_1049l_count
+  EXPECTED 1
+  ACTUAL   1
+  STATUS   PASS
+ASSERT engine_alt_true_after_every_1049h
+  EXPECTED engine alt_screen == true after every observed 1049h
+  ACTUAL   engine_alt_after_each_1049h=[true]
+  STATUS   PASS
+ASSERT engine_alt_false_after_every_1049l
+  EXPECTED engine alt_screen == false after every observed 1049l
+  ACTUAL   engine_alt_after_each_1049l=[false]
+  STATUS   PASS
+ASSERT alt_screen_signature
+  EXPECTED alt screen snapshot before the final 1049l contains "NVIM v0.12.5"
+  ACTUAL   alt_nonblank=true present=["~                                 NVIM v0.12.5"] first_nonblank_rows=["~", "~", "~                                    │ ╲ ││", "~                                    ││╲╲││"]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| ~
+| ~
+| ~                                    │ ╲ ││
+| ~                                    ││╲╲││
+| ~                                    ││ ╲ │
+| ~
+| ~                                 NVIM v0.12.5
+| ~                 ────────────────────────────────────────────
+| ~                 Nvim is open source and freely distributable
+| ~                           https://neovim.io/#chat
+| ~                 ────────────────────────────────────────────
+| ~                 type  :help nvim<Enter>     if you are new!
+| ~                 type  :checkhealth<Enter>   to optimize Nvim
+| ~                 type  :q<Enter>             to exit
+| ~                 type  :help<Enter>          for help
+| ~                 ────────────────────────────────────────────
+| ~                 type  :help news<Enter>     for v0.12 notes
+| ~                 ────────────────────────────────────────────
+| ~                        Help poor children in Uganda!
+| ~                 type  :help Kuwasha<Enter>  for information
+| ~
+| [No Name]                                                     0,0-1          All
+| :qa!
+# ---- notes ----
+- phase-1 source commit (last change to spikes/terminal-engine/results/raw): 085375c5fe02e79fbecb6d057a5aea306c7a3565
+- Expectations were established by feeding the committed phase-1 capture into alacritty_terminal 0.26.0 and reading the engine's own screen/title/mode state; the 1049 counts match phase-1's CATEGORY_CHECKLIST (spikes/terminal-engine/results/raw/<name>.summary.txt).
+- Alt-screen transitions are chunk-independent (raw-byte scan + engine flag per transition). Mouse state is asserted only for the mouse-specific capture (replay_nvim_mouse) and is accumulated from per-chunk snapshots, which is labelled as chunk-sampled.
+STATUS=PASS

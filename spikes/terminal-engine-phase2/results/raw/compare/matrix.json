@@ -1,0 +1,353 @@
+{
+  "source": "results/raw/summary.json",
+  "engines": [
+    {
+      "name": "alacritty_terminal",
+      "version": "0.26.0"
+    },
+    {
+      "name": "vt100",
+      "version": "0.16.2"
+    },
+    {
+      "name": "avt",
+      "version": "0.18.0"
+    },
+    {
+      "name": "termwiz",
+      "version": "0.23.3"
+    }
+  ],
+  "checks": [
+    {
+      "check": "vt_basics",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "alt_screen",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "osc_title",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "osc8_hyperlink",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "UNSUPPORTED",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "bell",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "unicode_wide",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "unicode_combining",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "unicode_emoji",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "colors",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "cursor_keys",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "bracketed_paste_mode",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "bracketed_paste_payload",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "UNSUPPORTED",
+        "vt100": "UNSUPPORTED",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "mouse_modes",
+      "kind": "fixture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "resize_reflow",
+      "kind": "engine",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "UNSUPPORTED",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "scrollback_bound",
+      "kind": "engine",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "selection",
+      "kind": "engine",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "chunk_boundary_invariance",
+      "kind": "engine",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "alt_screen_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "osc_title_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "osc8_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "UNSUPPORTED",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "bell_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "unicode_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "cursor_keys_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "mouse_modes_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "resize_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "scrollback_bound_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "tmux_real",
+      "kind": "real-program",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_less",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_nvim",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_nvim_mouse",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_nvim_title",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_osc8_ls",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "UNSUPPORTED",
+        "avt": "UNSUPPORTED",
+        "termwiz": "UNSUPPORTED"
+      }
+    },
+    {
+      "check": "replay_top",
+      "kind": "replayed-real-capture",
+      "statuses": {
+        "alacritty_terminal": "PASS",
+        "vt100": "PASS",
+        "avt": "PASS",
+        "termwiz": "UNSUPPORTED"
+      }
+    }
+  ]
+}

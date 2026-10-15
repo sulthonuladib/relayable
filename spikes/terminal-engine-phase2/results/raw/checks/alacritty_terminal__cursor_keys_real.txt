@@ -1,0 +1,65 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: cursor_keys_real
+# title: Application cursor keys round-trip (real sh + injected arrow)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:31Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/cursor_keys.bin kind=real-program sha256=844db1632f1b7a170fabb1293538d7ec39143816b4b048565647f89246fd44b6
+# ---- expected vs actual ----
+ASSERT engine_cursor_at_known_cup
+  EXPECTED Cursor { row: 4, col: 9, visible: true }
+  ACTUAL   Cursor { row: 4, col: 9, visible: true }
+  STATUS   PASS
+ASSERT engine_cursor_after_capture
+  EXPECTED Cursor { row: 5, col: 0, visible: true }
+  ACTUAL   Cursor { row: 5, col: 0, visible: true }
+  STATUS   PASS
+ASSERT engine_app_cursor_keys_mode_after_capture
+  EXPECTED false (the capture never sends DECSET 1)
+  ACTUAL   false
+  STATUS   PASS
+ASSERT engine_cursor_before_arrow
+  EXPECTED Cursor { row: 9, col: 4, visible: true }
+  ACTUAL   Cursor { row: 9, col: 4, visible: true }
+  STATUS   PASS
+ASSERT engine_cursor_after_esc_A_is_cuu
+  EXPECTED Cursor { row: 8, col: 4, visible: true }
+  ACTUAL   Cursor { row: 8, col: 4, visible: true }
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| 
+| 
+| 
+|          ^[[A
+| GOT:
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- secondary capture-bytes observation: raw ESC[A present=true, line-discipline echo ^[[A present=true, capture bytes=15
+- Engine expectations were established by feeding this committed capture (results/raw/streams/cursor_keys.bin) into alacritty_terminal 0.26.0 and reading the resulting Cursor point; the arrow leg feeds the literal 3-byte ESC[A present in the capture at CUP(10,5).
+STATUS=PASS

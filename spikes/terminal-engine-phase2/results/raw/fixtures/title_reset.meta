@@ -1,0 +1,5 @@
+kind=fixture
+name=title_reset
+description=OSC 0 with empty payload (title reset/clear)
+bytes=5
+sha256=f5a3c94a5050a7070a5cee1811c824afb207042763299c59e7f1301ef47b1b1e

@@ -1,0 +1,94 @@
+# ---- provenance ----
+# command: bash -c echo "=== $0/Cargo.toml.orig [features] ==="; sed -n "/^\[features\]/,/^\[dependencies\]/p" "$0/Cargo.toml.orig" | cat -n; echo; echo "=== deps on http_client / async-tar / xattr ==="; grep -n "http_client\|async-tar\|zed-async-tar\|xattr" "$0/Cargo.toml.orig" /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gpui-0.2.2
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:42Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.005
+# ---- output ----
+=== /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gpui-0.2.2/Cargo.toml.orig [features] ===
+     1	[features]
+     2	default = ["font-kit", "wayland", "x11", "windows-manifest"]
+     3	test-support = [
+     4	    "leak-detection",
+     5	    "collections/test-support",
+     6	    "rand",
+     7	    "util/test-support",
+     8	    "http_client/test-support",
+     9	    "wayland",
+    10	    "x11",
+    11	]
+    12	inspector = ["gpui_macros/inspector"]
+    13	leak-detection = ["backtrace"]
+    14	runtime_shaders = []
+    15	macos-blade = [
+    16	    "blade-graphics",
+    17	    "blade-macros",
+    18	    "blade-util",
+    19	    "bytemuck",
+    20	    "objc2",
+    21	    "objc2-metal",
+    22	]
+    23	wayland = [
+    24	    "blade-graphics",
+    25	    "blade-macros",
+    26	    "blade-util",
+    27	    "bytemuck",
+    28	    "ashpd/wayland",
+    29	    "cosmic-text",
+    30	    "font-kit",
+    31	    "calloop-wayland-source",
+    32	    "wayland-backend",
+    33	    "wayland-client",
+    34	    "wayland-cursor",
+    35	    "wayland-protocols",
+    36	    "wayland-protocols-plasma",
+    37	    "filedescriptor",
+    38	    "xkbcommon",
+    39	    "open",
+    40	]
+    41	x11 = [
+    42	    "blade-graphics",
+    43	    "blade-macros",
+    44	    "blade-util",
+    45	    "bytemuck",
+    46	    "ashpd",
+    47	    "cosmic-text",
+    48	    "font-kit",
+    49	    "as-raw-xcb-connection",
+    50	    "x11rb",
+    51	    "xkbcommon",
+    52	    "xim",
+    53	    "x11-clipboard",
+    54	    "filedescriptor",
+    55	    "open",
+    56	    "scap?/x11",
+    57	]
+    58	screen-capture = [
+    59	    "scap",
+    60	]
+    61	windows-manifest = []
+    62	
+    63	[lib]
+    64	path = "src/gpui.rs"
+    65	doctest = false
+    66	
+    67	[dependencies]
+
+=== deps on http_client / async-tar / xattr ===
+26:    "http_client/test-support",
+99:http_client.workspace = true
+240:http_client = { workspace = true, features = ["test-support"] }

@@ -1,0 +1,104 @@
+# ---- provenance ----
+# command: bash -c 
+    for V in 0.2.147 0.2.189 0.2.190; do
+      L="/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-$V"
+      echo "======== libc $V ========"
+      grep -rn "ENOATTR" "$L/src" 2>/dev/null || echo "(no ENOATTR anywhere under src/)"
+      echo
+    done
+    echo "======== libc 0.2.189 linux definition context ========"
+    sed -n "1345,1360p" "/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/linux_like/linux/mod.rs" | cat -n
+    echo
+    echo "======== libc 0.2.147 linux definition context ========"
+    sed -n "2224,2240p" "/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/linux_like/linux/mod.rs" | cat -n
+  
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:41:42Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+# wall_clock_s: 0.022
+# ---- output ----
+======== libc 0.2.147 ========
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/fuchsia/mod.rs:2655:pub const ENOATTR: ::c_int = ::ENODATA;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/aix/mod.rs:1379:pub const ENOATTR: ::c_int = 112;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/bsd/apple/mod.rs:3187:pub const ENOATTR: ::c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/bsd/freebsdlike/mod.rs:738:pub const ENOATTR: ::c_int = 87;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/bsd/netbsdlike/netbsd/mod.rs:1463:pub const ENOATTR: ::c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/bsd/netbsdlike/openbsd/mod.rs:967:pub const ENOATTR: ::c_int = 83;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/haiku/mod.rs:941:pub const ENOATTR: ::c_int = -2147454916;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/linux_like/android/mod.rs:2645:    note = "ENOATTR is not available on Android; use ENODATA instead"
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/linux_like/android/mod.rs:2647:pub const ENOATTR: ::c_int = ::ENODATA;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/linux_like/linux/mod.rs:2231:    note = "ENOATTR is not available on Linux; use ENODATA instead"
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.147/src/unix/linux_like/linux/mod.rs:2233:pub const ENOATTR: ::c_int = ::ENODATA;
+
+======== libc 0.2.189 ========
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/fuchsia/mod.rs:2372:pub const ENOATTR: c_int = crate::ENODATA;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/aix/mod.rs:1296:pub const ENOATTR: c_int = 112;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/bsd/apple/mod.rs:2390:pub const ENOATTR: c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/bsd/freebsdlike/mod.rs:690:pub const ENOATTR: c_int = 87;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/bsd/netbsdlike/netbsd/mod.rs:910:pub const ENOATTR: c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/bsd/netbsdlike/openbsd/mod.rs:937:pub const ENOATTR: c_int = 83;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/haiku/mod.rs:760:pub const ENOATTR: c_int = -2147454916;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/linux_like/android/mod.rs:2646:    note = "ENOATTR is not available on Android; use ENODATA instead"
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/linux_like/android/mod.rs:2648:pub const ENOATTR: c_int = crate::ENODATA;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/linux_like/linux/mod.rs:1352:    note = "ENOATTR is not available on Linux; use ENODATA instead"
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.189/src/unix/linux_like/linux/mod.rs:1354:pub const ENOATTR: c_int = crate::ENODATA;
+
+======== libc 0.2.190 ========
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/fuchsia/mod.rs:2495:pub const ENOATTR: c_int = crate::ENODATA;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/aix/mod.rs:1301:pub const ENOATTR: c_int = 112;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/bsd/apple/mod.rs:2605:pub const ENOATTR: c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/bsd/freebsdlike/mod.rs:695:pub const ENOATTR: c_int = 87;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/bsd/netbsdlike/netbsd/mod.rs:910:pub const ENOATTR: c_int = 93;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/bsd/netbsdlike/openbsd/mod.rs:937:pub const ENOATTR: c_int = 83;
+/home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190/src/unix/haiku/mod.rs:767:pub const ENOATTR: c_int = -2147454916;
+
+======== libc 0.2.189 linux definition context ========
+     1	pub const FALLOC_FL_COLLAPSE_RANGE: c_int = 0x08;
+     2	pub const FALLOC_FL_ZERO_RANGE: c_int = 0x10;
+     3	pub const FALLOC_FL_INSERT_RANGE: c_int = 0x20;
+     4	pub const FALLOC_FL_UNSHARE_RANGE: c_int = 0x40;
+     5	
+     6	#[deprecated(
+     7	    since = "0.2.55",
+     8	    note = "ENOATTR is not available on Linux; use ENODATA instead"
+     9	)]
+    10	pub const ENOATTR: c_int = crate::ENODATA;
+    11	
+    12	pub const SO_ORIGINAL_DST: c_int = 80;
+    13	
+    14	pub const IP_RECVFRAGSIZE: c_int = 25;
+    15	
+    16	pub const IPV6_FLOWINFO: c_int = 11;
+
+======== libc 0.2.147 linux definition context ========
+     1	pub const FALLOC_FL_COLLAPSE_RANGE: ::c_int = 0x08;
+     2	pub const FALLOC_FL_ZERO_RANGE: ::c_int = 0x10;
+     3	pub const FALLOC_FL_INSERT_RANGE: ::c_int = 0x20;
+     4	pub const FALLOC_FL_UNSHARE_RANGE: ::c_int = 0x40;
+     5	
+     6	#[deprecated(
+     7	    since = "0.2.55",
+     8	    note = "ENOATTR is not available on Linux; use ENODATA instead"
+     9	)]
+    10	pub const ENOATTR: ::c_int = ::ENODATA;
+    11	
+    12	pub const SO_ORIGINAL_DST: ::c_int = 80;
+    13	
+    14	pub const IP_RECVFRAGSIZE: ::c_int = 25;
+    15	
+    16	pub const IPV6_FLOWINFO: ::c_int = 11;
+    17	pub const IPV6_FLOWLABEL_MGR: ::c_int = 32;

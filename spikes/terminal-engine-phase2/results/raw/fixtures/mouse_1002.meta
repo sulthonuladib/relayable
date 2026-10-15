@@ -1,0 +1,5 @@
+kind=fixture
+name=mouse_1002
+description=DECSET 1002 (drag) mouse reporting
+bytes=8
+sha256=b730dc3176832cb1704afd3011e2481d903e62718696edae73fd1b6f4a54a094

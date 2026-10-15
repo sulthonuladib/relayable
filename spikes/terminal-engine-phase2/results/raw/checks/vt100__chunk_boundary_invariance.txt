@@ -1,0 +1,206 @@
+# ---- provenance ----
+# engine: vt100 0.16.2
+# check: chunk_boundary_invariance
+# title: Feed chunk-boundary invariance (one slice vs one byte at a time)
+# kind: engine
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# (none)
+# ---- expected vs actual ----
+ASSERT fixture_vt_basics_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=03b2edb491dbc66350a97d81d864cb5b8b9f20a1a1b347109d693477e28783c5 plain_len=49 cursor=(row=5,col=3,visible=true) cells=1920 first_nonblank_row=Some((0, "AB")) last_nonblank_row=Some((7, "         Z")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_vt_basics_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=0e66bde004eb207504173673287984a4fe82aa6db911040a894c1fc7546560d0; plain_sha256=03b2edb491dbc66350a97d81d864cb5b8b9f20a1a1b347109d693477e28783c5 plain_len=49 cursor=(row=5,col=3,visible=true) cells=1920 first_nonblank_row=Some((0, "AB")) last_nonblank_row=Some((7, "         Z")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_alt_enter_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=bee08f917193961cbc216eedca7f61ec2d8a9c95f3a13db49672b18d0258598d plain_len=26 cursor=(row=0,col=3,visible=true) cells=1920 first_nonblank_row=Some((0, "alt")) last_nonblank_row=Some((0, "alt")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_alt_enter_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce; plain_sha256=bee08f917193961cbc216eedca7f61ec2d8a9c95f3a13db49672b18d0258598d plain_len=26 cursor=(row=0,col=3,visible=true) cells=1920 first_nonblank_row=Some((0, "alt")) last_nonblank_row=Some((0, "alt")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_alt_leave_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=44eabb3d48aa98b3e70f9319cdfc7c318f2747fa7a813885633e3a7828c6eb2d plain_len=27 cursor=(row=0,col=4,visible=true) cells=1920 first_nonblank_row=Some((0, "back")) last_nonblank_row=Some((0, "back")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_alt_leave_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd; plain_sha256=44eabb3d48aa98b3e70f9319cdfc7c318f2747fa7a813885633e3a7828c6eb2d plain_len=27 cursor=(row=0,col=4,visible=true) cells=1920 first_nonblank_row=Some((0, "back")) last_nonblank_row=Some((0, "back")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_0_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_0_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=c3c053809ba7e85f93458dc64fffad42c4f317256c5687e7c990883f454cb864; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_2_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_2_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=8813d5ecfeaadc159817e058f438c0cb6e4fba6e9a0428121d13f2f3b605fcc7; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_reset_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_title_reset_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=f5a3c94a5050a7070a5cee1811c824afb207042763299c59e7f1301ef47b1b1e; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_osc8_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=932c9e8cbbf5bb8d701bd6e5d868261b9ebdb523879402135f1f679b1122c04d plain_len=28 cursor=(row=0,col=5,visible=true) cells=1920 first_nonblank_row=Some((0, "LINKX")) last_nonblank_row=Some((0, "LINKX")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_osc8_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=150806394eab4ca4d6e8c1805f76913f42e0aba5f4b768b62bfc260df2d34930; plain_sha256=932c9e8cbbf5bb8d701bd6e5d868261b9ebdb523879402135f1f679b1122c04d plain_len=28 cursor=(row=0,col=5,visible=true) cells=1920 first_nonblank_row=Some((0, "LINKX")) last_nonblank_row=Some((0, "LINKX")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bell_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=ecc33bce3351c736e8897e49328c150e9c23f07e7eaf149a336b0aea7c83d5e8 plain_len=25 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "AB")) last_nonblank_row=Some((0, "AB")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bell_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=9f069067bda2832e7ce0b0957917882e35680e3f36dd6b850a3c2c40a6441046; plain_sha256=ecc33bce3351c736e8897e49328c150e9c23f07e7eaf149a336b0aea7c83d5e8 plain_len=25 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "AB")) last_nonblank_row=Some((0, "AB")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_wide_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=939992c9a13d0c2895806fc33ebdc475a5a04f2b478912b66a536b535c0f37e8 plain_len=32 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "寬字元")) last_nonblank_row=Some((0, "寬字元")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_wide_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=10d6fe7a99e9aef6a0cfba3a5e15a0db9ffbdc36337e90163711031987ef35f8; plain_sha256=939992c9a13d0c2895806fc33ebdc475a5a04f2b478912b66a536b535c0f37e8 plain_len=32 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "寬字元")) last_nonblank_row=Some((0, "寬字元")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_combining_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6462438f8f040028f386f1df3e91fc7089e41a2ed56f9ab6033b9c79df997f1a plain_len=27 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "e\u{301}x")) last_nonblank_row=Some((0, "e\u{301}x")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_combining_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=39f31f5c4f17ba7a53d54228a448a052236b39f75e942aa46038c61b7efe2d51; plain_sha256=6462438f8f040028f386f1df3e91fc7089e41a2ed56f9ab6033b9c79df997f1a plain_len=27 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "e\u{301}x")) last_nonblank_row=Some((0, "e\u{301}x")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_emoji_base_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=a598c5fb691fe523bb2f8e8d19df2b5a0194f13f0ef5630774eb6a5215b5e8f1 plain_len=27 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "😀")) last_nonblank_row=Some((0, "😀")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_emoji_base_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=f0443a342c5ef54783a111b51ba56c938e474c32324d90c3a60c9c8e3a37e2d9; plain_sha256=a598c5fb691fe523bb2f8e8d19df2b5a0194f13f0ef5630774eb6a5215b5e8f1 plain_len=27 cursor=(row=0,col=2,visible=true) cells=1920 first_nonblank_row=Some((0, "😀")) last_nonblank_row=Some((0, "😀")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_vs16_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=9d4ce0ef7c97fef3dabce88e64fd1517d026d20d6b47543bb8a30b75835288e2 plain_len=29 cursor=(row=0,col=1,visible=true) cells=1920 first_nonblank_row=Some((0, "❤\u{fe0f}")) last_nonblank_row=Some((0, "❤\u{fe0f}")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_vs16_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=16e81418a36c58995e00aeb9c261c9ef7fb739b37c72351f511dc3b3a89e5962; plain_sha256=9d4ce0ef7c97fef3dabce88e64fd1517d026d20d6b47543bb8a30b75835288e2 plain_len=29 cursor=(row=0,col=1,visible=true) cells=1920 first_nonblank_row=Some((0, "❤\u{fe0f}")) last_nonblank_row=Some((0, "❤\u{fe0f}")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_zwj_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=1040ccad84510efe3c0160bb27342b3391976c6911f7d9bb6c58ad77da544e01 plain_len=41 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "👨\u{200d}👩\u{200d}👧")) last_nonblank_row=Some((0, "👨\u{200d}👩\u{200d}👧")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_unicode_zwj_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=cc3baf32248d766570483335ce273f90c99f020f4bc530d05ffe869cd3ac2ae8; plain_sha256=1040ccad84510efe3c0160bb27342b3391976c6911f7d9bb6c58ad77da544e01 plain_len=41 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "👨\u{200d}👩\u{200d}👧")) last_nonblank_row=Some((0, "👨\u{200d}👩\u{200d}👧")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_colors_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=f7999193ecbeb02f82f7c8e5d1513b2bb45a26b88dd7dcd3e2d0cc592ec05ff9 plain_len=29 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "rRIbTU")) last_nonblank_row=Some((0, "rRIbTU")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_colors_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=a8b1de85653c32512104ffacb38eaaa77f45554f4a59d4257f45eae1cdcb2d11; plain_sha256=f7999193ecbeb02f82f7c8e5d1513b2bb45a26b88dd7dcd3e2d0cc592ec05ff9 plain_len=29 cursor=(row=0,col=6,visible=true) cells=1920 first_nonblank_row=Some((0, "rRIbTU")) last_nonblank_row=Some((0, "rRIbTU")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_cursor_keys_on_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_cursor_keys_on_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=a45567c3f79d91d50db4a5be7cb15bc4dfb2a08c50ac7350ad70bb15c20b649d; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_cursor_keys_off_expected_noop
+  EXPECTED expected no-op (DECRST 1 when the engine default is already application-cursor-keys off); snapshot identical to pristine
+  ACTUAL   changed_vs_pristine=false; reason=DECRST 1 when the engine default is already application-cursor-keys off; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_cursor_keys_off_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; expected_noop=true; reason=DECRST 1 when the engine default is already application-cursor-keys off; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1000_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1000_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=b600fe89f5237793cc03353cc5f0abb93b143280d05902f34f4567b15c33a034; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1002_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1002_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=b730dc3176832cb1704afd3011e2481d903e62718696edae73fd1b6f4a54a094; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1003_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1003_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=307d8e099000c61f2c8d66f26ff96f7938aea8893a70f25f852724179d6d30b9; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1006_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_mouse_1006_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=fc3966766c991c15b89b3b57e2b0bf53166472cdd932b261ed7deb385b786700; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_on_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_on_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=dfe5456fed7d6508bcf91708c48eb9d48213ca34668e6238e94cace519f39755; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_payload_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; changed_vs_pristine=true; no differences; plain_sha256=0f389e500334e54027560c9bc8947da52f152605dfbf3bf9679495b01a4fe39a plain_len=27 cursor=(row=0,col=4,visible=true) cells=1920 first_nonblank_row=Some((0, "abcZ")) last_nonblank_row=Some((0, "abcZ")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_payload_changed_vs_pristine
+  EXPECTED feeding the fixture changes the snapshot relative to a pristine engine (non-no-op)
+  ACTUAL   changed_vs_pristine=true; fixture_sha256=139bb87a1083e79fee4762d5a2f202bc00ed5c7cf1893262c0cfe40732bd2780; plain_sha256=0f389e500334e54027560c9bc8947da52f152605dfbf3bf9679495b01a4fe39a plain_len=27 cursor=(row=0,col=4,visible=true) cells=1920 first_nonblank_row=Some((0, "abcZ")) last_nonblank_row=Some((0, "abcZ")) constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_off_expected_noop
+  EXPECTED expected no-op (DECRST 2004 when the engine default is already bracketed-paste off); snapshot identical to pristine
+  ACTUAL   changed_vs_pristine=false; reason=DECRST 2004 when the engine default is already bracketed-paste off; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+ASSERT fixture_bracketed_paste_off_chunk_invariant
+  EXPECTED identical snapshot for 1-slice and byte-at-a-time feeds
+  ACTUAL   same=true; expected_noop=true; reason=DECRST 2004 when the engine default is already bracketed-paste off; no differences; plain_sha256=6e0ce65031e802f83e9c1e92b66a459ada9f1f5f6522ba6c8d8198228fd219c3 plain_len=23 cursor=(row=0,col=0,visible=true) cells=1920 first_nonblank_row=None last_nonblank_row=None constant_by_declaration=[]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| <empty>
+# ---- notes ----
+- Compares, for every fixture, the full visible grid (per-cell text, fg/bg, bold/italic/underline/reverse and OSC 8 hyperlink), the cursor, and every neutral-model flag (alt screen, bracketed paste, app cursor keys, mouse mode, mouse SGR, title, bell count). Terms that are constant-by-declaration for vt100 and therefore cannot discriminate: []. Every PASS also emits the compared snapshot evidence (plain-text sha256 + length + first/last non-blank rows, cursor, cell count, constant-by-declaration list) and asserts each non-no-op fixture actually changes the screen relative to a pristine engine, so an engine that ignores its input cannot PASS. Expected no-ops (excluded from the changed-vs-pristine term by name, each re-asserted as a no-op above): ["cursor_keys_off: DECRST 1 when the engine default is already application-cursor-keys off", "bracketed_paste_off: DECRST 2004 when the engine default is already bracketed-paste off"].
+STATUS=PASS

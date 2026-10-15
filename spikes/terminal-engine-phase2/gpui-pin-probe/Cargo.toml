@@ -1,0 +1,23 @@
+# GPUI pin probe (TERM-002 / ADR-003, phase 2).
+#
+# Standalone package whose ONLY job is to answer: does the exact ADR-003 pin
+# `gpui = "=0.2.2"` resolve from crates.io, and does `cargo check` complete on
+# this host?  It is a separate workspace root (its own empty `[workspace]`
+# table) so it can never be absorbed into the phase-2 spike workspace or the
+# repository root.
+#
+# It must not be run (no window/display proof here); window/display behaviour is
+# deferred to UI-001.  See ../results/raw/deps/gpui_*.txt for verbatim evidence.
+
+[package]
+name = "relayable-gpui-pin-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+description = "Resolve/check probe for the ADR-003 gpui =0.2.2 pin"
+
+[dependencies]
+gpui = "=0.2.2"
+
+[workspace]

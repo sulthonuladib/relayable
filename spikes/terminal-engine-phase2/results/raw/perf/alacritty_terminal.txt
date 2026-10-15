@@ -1,0 +1,19 @@
+
+engine: alacritty_terminal 0.26.0
+isolation: measured in a dedicated process that constructed only this engine
+description: generated numbered lines, fed in 64 KiB chunks, cols=80 rows=24 scrolling_history=1000, passes=3
+bytes_fed: 8388632
+lines_produced: 149797
+retained_lines: 1000
+configured_bound: 1000
+passes: 3
+  pass 1: elapsed_ms=571.144 bytes_per_sec=14687419 rss_before_kb=12484 rss_after_kb=14472 rss_delta_kb=1988 vmhwm_kb=14476
+  pass 2: elapsed_ms=590.578 bytes_per_sec=14204098 rss_before_kb=14476 rss_after_kb=14476 rss_delta_kb=0 vmhwm_kb=14476
+  pass 3: elapsed_ms=587.971 bytes_per_sec=14267096 rss_before_kb=14476 rss_after_kb=14476 rss_delta_kb=0 vmhwm_kb=14476
+bytes_per_sec_min: 14204097.699
+bytes_per_sec_median: 14267095.787
+bytes_per_sec_max: 14687419.127
+rss_baseline_kb: 12480
+rss_after_kb: 14476
+rss_delta_kb: 1996
+vmhwm_kb: 14476

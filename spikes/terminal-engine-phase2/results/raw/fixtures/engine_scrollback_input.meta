@@ -1,0 +1,5 @@
+kind=engine-input
+name=engine_scrollback_input
+description=1500 numbered lines 'line 0000'..'line 1499' (CRLF) to overflow scrolling_history=1000
+bytes=16500
+sha256=a200b916c02d0d7b32b2ce535a31b2278272a03bb31e4faef1b54d571a1f67fa

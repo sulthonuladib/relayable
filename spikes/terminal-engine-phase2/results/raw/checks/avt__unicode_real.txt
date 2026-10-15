@@ -1,0 +1,56 @@
+# ---- provenance ----
+# engine: avt 0.18.0
+# check: unicode_real
+# title: Unicode text (real sh printf)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:34Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/unicode.bin kind=real-program sha256=a3250847264a2acb6b5af847a53f09d0570d02af6184aedd3e51271769cba2e5
+# ---- expected vs actual ----
+ASSERT plain_contains_寬字元
+  EXPECTED to_plain() contains "寬字元"
+  ACTUAL   plain="寬字元 日本語 e\u{301} 😀\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+  STATUS   PASS
+ASSERT plain_contains_日本語
+  EXPECTED to_plain() contains "日本語"
+  ACTUAL   plain="寬字元 日本語 e\u{301} 😀\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+  STATUS   PASS
+ASSERT plain_contains_😀
+  EXPECTED to_plain() contains "😀"
+  ACTUAL   plain="寬字元 日本語 e\u{301} 😀\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 寬字元 日本語 é 😀
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- (none)
+STATUS=PASS

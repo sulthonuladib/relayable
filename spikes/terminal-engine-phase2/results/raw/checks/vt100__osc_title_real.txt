@@ -1,0 +1,49 @@
+# ---- provenance ----
+# engine: vt100 0.16.2
+# check: osc_title_real
+# title: OSC 0/2 title (real nvim '+set title')
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/nvim_title.bin kind=real-program sha256=a7acb071888575736d4f54bc405b1887b915ea36a1c20ab3c9abb6ef85a2fa27
+# ---- expected vs actual ----
+ASSERT title_set_observed
+  EXPECTED a non-empty engine title observed
+  ACTUAL   ["[No Name] (~) - Nvim"]
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- titles observed: ["[No Name] (~) - Nvim"]
+- engine title at end: Some("[No Name] (~) - Nvim")
+STATUS=PASS

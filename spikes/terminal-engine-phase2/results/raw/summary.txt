@@ -1,0 +1,162 @@
+Relayable TERM-002 phase B — engine check summary
+================================================
+
+utc_timestamp: 2026-10-15T20:12:35Z
+hostname: falcon
+uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+git_status_short: ?? ./
+
+Per-check status:
+engine                     check                        kind                     status
+alacritty_terminal         vt_basics                    fixture                  PASS
+alacritty_terminal         alt_screen                   fixture                  PASS
+alacritty_terminal         osc_title                    fixture                  PASS
+alacritty_terminal         osc8_hyperlink               fixture                  PASS
+alacritty_terminal         bell                         fixture                  PASS
+alacritty_terminal         unicode_wide                 fixture                  PASS
+alacritty_terminal         unicode_combining            fixture                  PASS
+alacritty_terminal         unicode_emoji                fixture                  PASS
+alacritty_terminal         colors                       fixture                  PASS
+alacritty_terminal         cursor_keys                  fixture                  PASS
+alacritty_terminal         bracketed_paste_mode         fixture                  PASS
+alacritty_terminal         bracketed_paste_payload      fixture                  UNSUPPORTED
+alacritty_terminal         mouse_modes                  fixture                  PASS
+alacritty_terminal         resize_reflow                engine                   PASS
+alacritty_terminal         scrollback_bound             engine                   PASS
+alacritty_terminal         selection                    engine                   PASS
+alacritty_terminal         chunk_boundary_invariance    engine                   PASS
+alacritty_terminal         alt_screen_real              real-program             PASS
+alacritty_terminal         osc_title_real               real-program             PASS
+alacritty_terminal         osc8_real                    real-program             PASS
+alacritty_terminal         bell_real                    real-program             PASS
+alacritty_terminal         unicode_real                 real-program             PASS
+alacritty_terminal         cursor_keys_real             real-program             PASS
+alacritty_terminal         mouse_modes_real             real-program             PASS
+alacritty_terminal         resize_real                  real-program             PASS
+alacritty_terminal         scrollback_bound_real        real-program             PASS
+alacritty_terminal         tmux_real                    real-program             PASS
+alacritty_terminal         replay_less                  replayed-real-capture    PASS
+alacritty_terminal         replay_nvim                  replayed-real-capture    PASS
+alacritty_terminal         replay_nvim_mouse            replayed-real-capture    PASS
+alacritty_terminal         replay_nvim_title            replayed-real-capture    PASS
+alacritty_terminal         replay_osc8_ls               replayed-real-capture    PASS
+alacritty_terminal         replay_top                   replayed-real-capture    PASS
+vt100                      vt_basics                    fixture                  PASS
+vt100                      alt_screen                   fixture                  PASS
+vt100                      osc_title                    fixture                  PASS
+vt100                      osc8_hyperlink               fixture                  UNSUPPORTED
+vt100                      bell                         fixture                  PASS
+vt100                      unicode_wide                 fixture                  PASS
+vt100                      unicode_combining            fixture                  PASS
+vt100                      unicode_emoji                fixture                  PASS
+vt100                      colors                       fixture                  PASS
+vt100                      cursor_keys                  fixture                  PASS
+vt100                      bracketed_paste_mode         fixture                  PASS
+vt100                      bracketed_paste_payload      fixture                  UNSUPPORTED
+vt100                      mouse_modes                  fixture                  PASS
+vt100                      resize_reflow                engine                   UNSUPPORTED
+vt100                      scrollback_bound             engine                   PASS
+vt100                      selection                    engine                   PASS
+vt100                      chunk_boundary_invariance    engine                   PASS
+vt100                      alt_screen_real              real-program             PASS
+vt100                      osc_title_real               real-program             PASS
+vt100                      osc8_real                    real-program             UNSUPPORTED
+vt100                      bell_real                    real-program             PASS
+vt100                      unicode_real                 real-program             PASS
+vt100                      cursor_keys_real             real-program             PASS
+vt100                      mouse_modes_real             real-program             PASS
+vt100                      resize_real                  real-program             PASS
+vt100                      scrollback_bound_real        real-program             PASS
+vt100                      tmux_real                    real-program             PASS
+vt100                      replay_less                  replayed-real-capture    PASS
+vt100                      replay_nvim                  replayed-real-capture    PASS
+vt100                      replay_nvim_mouse            replayed-real-capture    PASS
+vt100                      replay_nvim_title            replayed-real-capture    PASS
+vt100                      replay_osc8_ls               replayed-real-capture    UNSUPPORTED
+vt100                      replay_top                   replayed-real-capture    PASS
+avt                        vt_basics                    fixture                  PASS
+avt                        alt_screen                   fixture                  PASS
+avt                        osc_title                    fixture                  UNSUPPORTED
+avt                        osc8_hyperlink               fixture                  UNSUPPORTED
+avt                        bell                         fixture                  UNSUPPORTED
+avt                        unicode_wide                 fixture                  PASS
+avt                        unicode_combining            fixture                  UNSUPPORTED
+avt                        unicode_emoji                fixture                  UNSUPPORTED
+avt                        colors                       fixture                  PASS
+avt                        cursor_keys                  fixture                  PASS
+avt                        bracketed_paste_mode         fixture                  UNSUPPORTED
+avt                        bracketed_paste_payload      fixture                  UNSUPPORTED
+avt                        mouse_modes                  fixture                  UNSUPPORTED
+avt                        resize_reflow                engine                   PASS
+avt                        scrollback_bound             engine                   PASS
+avt                        selection                    engine                   UNSUPPORTED
+avt                        chunk_boundary_invariance    engine                   PASS
+avt                        alt_screen_real              real-program             PASS
+avt                        osc_title_real               real-program             UNSUPPORTED
+avt                        osc8_real                    real-program             UNSUPPORTED
+avt                        bell_real                    real-program             UNSUPPORTED
+avt                        unicode_real                 real-program             PASS
+avt                        cursor_keys_real             real-program             PASS
+avt                        mouse_modes_real             real-program             UNSUPPORTED
+avt                        resize_real                  real-program             PASS
+avt                        scrollback_bound_real        real-program             PASS
+avt                        tmux_real                    real-program             PASS
+avt                        replay_less                  replayed-real-capture    PASS
+avt                        replay_nvim                  replayed-real-capture    PASS
+avt                        replay_nvim_mouse            replayed-real-capture    UNSUPPORTED
+avt                        replay_nvim_title            replayed-real-capture    UNSUPPORTED
+avt                        replay_osc8_ls               replayed-real-capture    UNSUPPORTED
+avt                        replay_top                   replayed-real-capture    PASS
+termwiz                    vt_basics                    fixture                  UNSUPPORTED
+termwiz                    alt_screen                   fixture                  UNSUPPORTED
+termwiz                    osc_title                    fixture                  UNSUPPORTED
+termwiz                    osc8_hyperlink               fixture                  UNSUPPORTED
+termwiz                    bell                         fixture                  UNSUPPORTED
+termwiz                    unicode_wide                 fixture                  UNSUPPORTED
+termwiz                    unicode_combining            fixture                  UNSUPPORTED
+termwiz                    unicode_emoji                fixture                  UNSUPPORTED
+termwiz                    colors                       fixture                  UNSUPPORTED
+termwiz                    cursor_keys                  fixture                  UNSUPPORTED
+termwiz                    bracketed_paste_mode         fixture                  UNSUPPORTED
+termwiz                    bracketed_paste_payload      fixture                  UNSUPPORTED
+termwiz                    mouse_modes                  fixture                  UNSUPPORTED
+termwiz                    resize_reflow                engine                   UNSUPPORTED
+termwiz                    scrollback_bound             engine                   UNSUPPORTED
+termwiz                    selection                    engine                   UNSUPPORTED
+termwiz                    chunk_boundary_invariance    engine                   UNSUPPORTED
+termwiz                    alt_screen_real              real-program             UNSUPPORTED
+termwiz                    osc_title_real               real-program             UNSUPPORTED
+termwiz                    osc8_real                    real-program             UNSUPPORTED
+termwiz                    bell_real                    real-program             UNSUPPORTED
+termwiz                    unicode_real                 real-program             UNSUPPORTED
+termwiz                    cursor_keys_real             real-program             UNSUPPORTED
+termwiz                    mouse_modes_real             real-program             UNSUPPORTED
+termwiz                    resize_real                  real-program             UNSUPPORTED
+termwiz                    scrollback_bound_real        real-program             UNSUPPORTED
+termwiz                    tmux_real                    real-program             UNSUPPORTED
+termwiz                    replay_less                  replayed-real-capture    UNSUPPORTED
+termwiz                    replay_nvim                  replayed-real-capture    UNSUPPORTED
+termwiz                    replay_nvim_mouse            replayed-real-capture    UNSUPPORTED
+termwiz                    replay_nvim_title            replayed-real-capture    UNSUPPORTED
+termwiz                    replay_osc8_ls               replayed-real-capture    UNSUPPORTED
+termwiz                    replay_top                   replayed-real-capture    UNSUPPORTED
+
+Tally:
+  PASS: 77
+  UNSUPPORTED: 55
+
+Per-engine tally:
+  alacritty_terminal: PASS=32 UNSUPPORTED=1
+  avt: PASS=17 UNSUPPORTED=16
+  termwiz: UNSUPPORTED=33
+  vt100: PASS=28 UNSUPPORTED=5
+
+Engine implementation status:
+  alacritty_terminal: implemented [PASS=32 UNSUPPORTED=1] - one sub-check UNSUPPORTED: engine parsed ESC[31m as SGR; row0="abcZ"; cell(0,1).fg=Indexed(1)
+  avt: implemented [PASS=17 UNSUPPORTED=16] - one sub-check UNSUPPORTED: avt 0.18.0 does not provide 'title' (declared absent in its Capabilities)
+  termwiz: NOT_IMPLEMENTED [UNSUPPORTED=33] - termwiz 0.23.3 is deliberately NOT implemented for the comparison leg: escape::parser::Parser::parse (src/escape/parser/mod.rs:86) only decodes into escape::Action (src/escape/mod.rs:28) and nothing maps Action->surface::Surface (src/surface/mod.rs:105 has no Action reference), while terminal::UnixTerminal::new opens /dev/tty (src/terminal/unix.rs:266) and captures tty termios via Termios::from_fd (src/terminal/unix.rs:171), so it cannot be driven headlessly from captured bytes.
+  vt100: implemented [PASS=28 UNSUPPORTED=5] - one sub-check UNSUPPORTED: vt100 0.16.2 does not provide 'osc8_hyperlinks' (declared absent in its Capabilities)

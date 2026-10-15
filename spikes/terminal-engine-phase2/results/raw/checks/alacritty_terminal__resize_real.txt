@@ -1,0 +1,133 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: resize_real
+# title: PTY resize SIGWINCH round-trip (real sh + stty size)
+# kind: real-program
+# utc_timestamp: 2026-10-15T20:12:32Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: /home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/streams/resize_winch.bin kind=real-program sha256=1b678a35c5f3ce05bf42ead8bd41dc09851706c6bd976c86fc96a072a3dd5ddb
+# ---- expected vs actual ----
+ASSERT child_reported_new_size
+  EXPECTED captured stream contains "100 30" (stty size output)
+  ACTUAL   contains=true
+  STATUS   PASS
+ASSERT engine_grid_cols_after_resize
+  EXPECTED 30
+  ACTUAL   30
+  STATUS   PASS
+ASSERT engine_grid_rows_after_resize
+  EXPECTED 100
+  ACTUAL   100
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| READY
+| WINCHED
+| 100 30
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- requested resize sequence: [(1001, 30, 100)]; pre-size=80x24, post-size=30x100
+- real command used: /bin/sh -c 'trap "echo WINCHED; stty size" WINCH; echo READY; while :; do sleep 0.1; done'. The brief's `sleep 5` form is NOT usable on this host: /bin/sh is bash and a WINCH trap that arrives during a single long foreground `sleep` is not run until that sleep exits (verified: no trap output). The 0.1s sleep loop keeps the same trap/stty mechanism but makes the trap run promptly; the captured stream shows WINCHED and the new '100 30'.
+STATUS=PASS

@@ -1,0 +1,5 @@
+kind=fixture
+name=unicode_wide
+description=CJK wide glyphs (3 chars, 6 columns)
+bytes=9
+sha256=10d6fe7a99e9aef6a0cfba3a5e15a0db9ffbdc36337e90163711031987ef35f8

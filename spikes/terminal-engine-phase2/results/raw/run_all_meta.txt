@@ -1,0 +1,65 @@
+# Relayable TERM-002 phase B — run_all.sh provenance
+# utc_timestamp: 2026-10-15T20:12:05Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# TERM=xterm-256color
+# COLORTERM=truecolor
+# rustc_version_v:
+  rustc 1.98.1 (48a229cea 2026-09-01)
+  binary: rustc
+  commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+  commit-date: 2026-09-01
+  host: x86_64-unknown-linux-gnu
+  release: 1.98.1
+  LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_head_note: git_head is the BASE commit the spike branch was cut from; the phase-2 code is untracked during the spike, so git_head is NOT the code revision. Use source_tree_sha256 for the code revision.
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# source_tree_sha256_note: sha256 over the sorted newline-joined '<relative_path>:<file_sha256>' list for spikes/terminal-engine-phase2/{Cargo.toml,Cargo.lock,src/**,scripts/run_all.sh}; recompute with the recipe in README.md and report::source_tree_sha256().
+# git_status_short:
+  ?? ./
+# tool_paths:
+#   nvim=/usr/bin/nvim
+#   vim=(absent)
+#   htop=(absent)
+#   tmux=/usr/bin/tmux
+#   less=/usr/bin/less
+#   top=/usr/bin/top
+#   ls=/usr/bin/ls
+#   seq=/usr/bin/seq
+#   printf=printf
+#   sh=/usr/bin/sh
+#   stty=/usr/bin/stty
+#   python3=/usr/bin/python3
+# nvim_version_head1: NVIM v0.12.5
+# tmux_version: tmux 3.7c
+# vim_presence: absent (nvim NVIM v0.12.5 is used instead)
+# htop_presence: absent
+# pinned_crates (from Cargo.lock):
+#   portable-pty=0.9.0
+#   alacritty_terminal=0.26.0
+#   vte=0.15.0
+#   vt100=0.16.2
+#   termwiz=0.23.3
+#   avt=0.18.0
+gating_engine_not_tested_all=
+gating_engine_not_tested_undocumented=
+gating_engine_not_tested_gate_exit=0
+nvim_present=1
+vim_present=0
+htop_present=0
+tmux_present=1
+
+# ---- end of run summary ----
+capture_failures=0
+analyze_exit=0
+perf_isolated_exit=0
+matrix_generation_exit=0
+gating_engine_not_tested_gate_exit=0
+cargo_fmt_check_exit=0
+cargo_build_exit=0
+cargo_clippy_exit=0
+cargo_test_exit=0
+summary_txt=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/summary.txt
+summary_json=/home/sulthonuladib/.herdr/worktrees/relayable/spike-term-002-engine-validation/spikes/terminal-engine-phase2/results/raw/summary.json

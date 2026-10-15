@@ -1,0 +1,14 @@
+# TERM-002 feature-selection variant probe.  Own workspace + own lockfile; the
+# canonical gpui-pin-probe manifest/lock are NOT touched.  Read-only w.r.t.
+# source; no [patch]; version pin is the exact ADR-003 pin.
+[package]
+name = "relayable-gpui-feature-probe-wayland_gpui"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+
+[dependencies]
+gpui = { version = "=0.2.2", default-features = false, features = ["wayland"] }
+
+[workspace]

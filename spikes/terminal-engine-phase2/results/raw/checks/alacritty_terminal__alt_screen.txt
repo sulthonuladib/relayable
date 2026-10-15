@@ -1,0 +1,65 @@
+# ---- provenance ----
+# engine: alacritty_terminal 0.26.0
+# check: alt_screen
+# title: Alternate screen DECSET/DECRST 1049
+# kind: fixture
+# utc_timestamp: 2026-10-15T20:12:31Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# rustc: rustc 1.98.1 (48a229cea 2026-09-01)
+# cargo: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# source_tree_sha256: cc5529d4584f054e531f0a0eca4a1981b3ba0d6172f5dd5e20e4047a9a9f521d
+# git_status_short:
+#   ?? ./
+# ---- inputs ----
+# source: results/raw/fixtures/alt_enter.bin kind=fixture sha256=22895cb533646f00faffd8632494c4fa640c83250226775e70a417f7ac7f05ce
+# source: results/raw/fixtures/alt_leave.bin kind=fixture sha256=9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd
+# ---- expected vs actual ----
+ASSERT alt_screen_after_1049h
+  EXPECTED true
+  ACTUAL   true
+  STATUS   PASS
+ASSERT alt_row0_contains_alt
+  EXPECTED alternate-screen row0 contains 'alt'
+  ACTUAL   row0="   alt"
+  STATUS   PASS
+ASSERT primary_text_gone_from_alt
+  EXPECTED alternate screen does not show primary 'top' text
+  ACTUAL   alt_plain="   alt\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+  STATUS   PASS
+ASSERT alt_screen_after_1049l
+  EXPECTED false
+  ACTUAL   false
+  STATUS   PASS
+ASSERT primary_row0_restored_text
+  EXPECTED "topback"
+  ACTUAL   "topback"
+  STATUS   PASS
+# ---- screen dump (final visible screen) ----
+| topback
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+# ---- notes ----
+- DECSET 1049 clears and switches to the alternate screen and does NOT home the cursor when the cursor is shared across screens: alacritty carries the primary cursor (col 3) into the alt grid, so row0 is '   alt'. vt100's alt grid owns a separate cursor, so its row0 is 'alt' (observed row0="   alt"). The exact column is an engine-specific cursor-convention detail; this check asserts alt-screen entry/exit, that the primary text is gone from the alt screen, and that the primary screen/cursor are restored on 1049l.
+STATUS=PASS

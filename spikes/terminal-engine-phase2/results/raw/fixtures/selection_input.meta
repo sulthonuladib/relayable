@@ -1,0 +1,5 @@
+kind=engine-input
+name=selection_input
+description=three text rows ('alpha beta gamma' / 'delta epsilon' / 'zeta') for the selection range -> string check
+bytes=39
+sha256=af49764a1fc2685f8d762ad250b355dcf35b1c152fe6dbac252c6b728acb8a27

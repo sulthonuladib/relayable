@@ -1,0 +1,5 @@
+kind=fixture
+name=alt_leave
+description=DECRST 1049 leave alternate screen, then write 'back'
+bytes=12
+sha256=9d86169370a29069cd021cce610bad12cef25efa4927bab61dfd3256cbdd69bd

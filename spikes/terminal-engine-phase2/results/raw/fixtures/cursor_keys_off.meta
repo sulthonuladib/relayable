@@ -1,0 +1,5 @@
+kind=fixture
+name=cursor_keys_off
+description=DECRST 1 application cursor keys off
+bytes=5
+sha256=38b33297c9170dfcfc3adf22cacfbf99b799c6ecaaa60f91c4eb3b431e30edcd

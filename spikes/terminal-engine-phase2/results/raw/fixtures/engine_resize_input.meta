@@ -1,0 +1,5 @@
+kind=engine-input
+name=engine_resize_input
+description=100 'A' bytes fed at cols=20 to force a wrapped line before resizing to cols=40
+bytes=100
+sha256=d82c6aa133a0fc25b087f46ad7ed2a3042772e612e015571e61753ff55ba6da8

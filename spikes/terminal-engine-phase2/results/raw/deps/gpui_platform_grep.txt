@@ -1,0 +1,145 @@
+# ---- provenance ----
+# command: bash -c src=$(ls -d "$HOME"/.cargo/registry/src/index.crates.io-*/gpui-0.2.2 2>/dev/null | head -1); echo "gpui source: ${src:-<not fetched>}"; if [ -n "$src" ]; then echo '--- [features] section ---'; sed -n '/^\[features\]/,/^\[/p' "$src/Cargo.toml"; echo '--- x11/wayland/xkbcommon target deps ---'; grep -nE 'x11|wayland|xkbcommon|blade|cosmic-text|font-kit' "$src/Cargo.toml"; fi
+# exit_code: 0
+# utc_timestamp: 2026-10-15T18:28:11Z
+# hostname: falcon
+# uname: Linux falcon 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
+# git_head: a1091e58f32d363ceb2614ab4915329b5de6a869
+# git_status_short:
+#   ?? ../
+# rustc_version_v:
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   binary: rustc
+#   commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+#   commit-date: 2026-09-01
+#   host: x86_64-unknown-linux-gnu
+#   release: 1.98.1
+#   LLVM version: 22.1.8
+# cargo_version: cargo 1.98.1 (797e8a9bc 2026-08-05)
+# ---- output ----
+gpui source: /home/sulthonuladib/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gpui-0.2.2
+--- [features] section ---
+[features]
+default = [
+    "font-kit",
+    "wayland",
+    "x11",
+    "windows-manifest",
+]
+inspector = ["gpui_macros/inspector"]
+leak-detection = ["backtrace"]
+macos-blade = [
+    "blade-graphics",
+    "blade-macros",
+    "blade-util",
+    "bytemuck",
+    "objc2",
+    "objc2-metal",
+]
+runtime_shaders = []
+screen-capture = ["scap"]
+test-support = [
+    "leak-detection",
+    "collections/test-support",
+    "rand",
+    "util/test-support",
+    "http_client/test-support",
+    "wayland",
+    "x11",
+]
+wayland = [
+    "blade-graphics",
+    "blade-macros",
+    "blade-util",
+    "bytemuck",
+    "ashpd/wayland",
+    "cosmic-text",
+    "font-kit",
+    "calloop-wayland-source",
+    "wayland-backend",
+    "wayland-client",
+    "wayland-cursor",
+    "wayland-protocols",
+    "wayland-protocols-plasma",
+    "filedescriptor",
+    "xkbcommon",
+    "open",
+]
+windows-manifest = []
+x11 = [
+    "blade-graphics",
+    "blade-macros",
+    "blade-util",
+    "bytemuck",
+    "ashpd",
+    "cosmic-text",
+    "font-kit",
+    "as-raw-xcb-connection",
+    "x11rb",
+    "xkbcommon",
+    "xim",
+    "x11-clipboard",
+    "filedescriptor",
+    "open",
+    "scap?/x11",
+]
+
+[lib]
+--- x11/wayland/xkbcommon target deps ---
+39:    "font-kit",
+40:    "wayland",
+41:    "x11",
+46:macos-blade = [
+47:    "blade-graphics",
+48:    "blade-macros",
+49:    "blade-util",
+62:    "wayland",
+63:    "x11",
+65:wayland = [
+66:    "blade-graphics",
+67:    "blade-macros",
+68:    "blade-util",
+70:    "ashpd/wayland",
+71:    "cosmic-text",
+72:    "font-kit",
+73:    "calloop-wayland-source",
+74:    "wayland-backend",
+75:    "wayland-client",
+76:    "wayland-cursor",
+77:    "wayland-protocols",
+78:    "wayland-protocols-plasma",
+80:    "xkbcommon",
+84:x11 = [
+85:    "blade-graphics",
+86:    "blade-macros",
+87:    "blade-util",
+90:    "cosmic-text",
+91:    "font-kit",
+93:    "x11rb",
+94:    "xkbcommon",
+96:    "x11-clipboard",
+99:    "scap?/x11",
+241:[dependencies.blade-graphics]
+245:[dependencies.blade-macros]
+249:[dependencies.blade-util]
+463:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.blade-graphics]
+467:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.blade-macros]
+471:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.blade-util]
+482:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.calloop-wayland-source]
+486:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.cosmic-text]
+497:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.font-kit]
+501:package = "zed-font-kit"
+515:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.wayland-backend]
+523:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.wayland-client]
+527:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.wayland-cursor]
+531:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.wayland-protocols]
+540:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.wayland-protocols-plasma]
+545:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.x11-clipboard]
+549:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.x11rb]
+565:    "x11rb-xcb",
+566:    "x11rb-client",
+571:[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies.xkbcommon]
+574:    "wayland",
+575:    "x11",
+617:[target.'cfg(target_os = "macos")'.dependencies.font-kit]
+620:package = "zed-font-kit"
