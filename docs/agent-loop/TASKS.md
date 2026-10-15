@@ -46,7 +46,8 @@ the evidence is integrated.
 | REVIEW-001 | Independent reviewer pass over ADR-001/002 (`69e5600`) and ADR-003/spike (`2e41da4`) before CORE-001 builds on them — no independent review was possible during wind-down | ADR-001, ADR-002, ADR-003 | `review/review-001-adr-pass` | DONE — integrated `774d394` (INT-004); report `docs/reviews/REVIEW-001-adr-review.md` + 4 evidence files; verdicts ADR-001/002 accept-with-nits, ADR-003 keep `Proposed` |
 | AND-001 | Android project scaffold checks + `scripts/android-check.sh` (toolchain inventory delivered by ENV-001) | ENV-001 | Build/Test | DEFERRED (DEC-010) — no Android work in current scope |
 | ADR-FIX-001 | Apply REVIEW-001 corrections: ADR-002 Unverified-table refresh (B-1) + coverage-row fix (B-2) + D11 no-reserialize test (B-3) + D7 TLS/provider disclosure (B-4/B-5), `protoc` note (B-6), and ADR-001 nits A-2–A-10. Manager-owned `docs/adr/**` + `docs/architecture/interface-contract.md` | REVIEW-001 | `adr/review-001-fixes` | DONE — integrated `f474c83` (INT-007); 3 files +135/−86; no decision changed |
-| CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | `core/core-001-vertical-slice` | IN_PROGRESS (2026-10-15) — launched; owns root workspace + `crates/**` + `tests/**` + `protocol/**`; must not adopt the terminal engine (TERM-002 gate) |
+| CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | `core/core-001-vertical-slice` | DONE — integrated `d3e0286` (INT-008); 53 files/+12010; `cargo test --workspace` 104 pass; 5 acceptance properties verified independently |
+| CTX-001 | Context-resolution test + set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005 Decision 2 + the §8.1 test) | ADR-005, CORE-001 | TBD | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot | CORE-001 | Lead | BACKLOG |
 | QA-001 | Smoke/CI scripts and build matrix | CORE-001 | Lead | BACKLOG |
 

@@ -153,6 +153,30 @@ Environment: Linux `falcon` x86_64, repo `/home/sulthonuladib/work/relayable`, `
 **Not yet verified:** REVIEW-001 branch not committed/merged at re-check time; TERM-002 and CORE-001
 in flight; `ADR-FIX-001` (ADR-002 B-1/B-2/B-3 + ADR-001 nits) not started.
 
+## 2026-10-15 — CORE-001 vertical slice: independent Manager validation on `master` (`d3e0286`)
+
+Environment: Linux `falcon` x86_64, rustc/cargo 1.98.1, `protoc` libprotoc 36.1, repo
+`/home/sulthonuladib/work/relayable`. Run AFTER `git merge --no-ff core/core-001-vertical-slice`
+(INT-008 `d3e0286`).
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 76 | `bash scripts/validate.sh` | fmt/clippy(`-D warnings`)/build all exit 0; `cargo test --workspace` all suites green (Σ ≈ 104 passed / 0 failed); lifecycle acceptance 4/4; ADR-001 dependency-direction check passed; `cargo build` in `spikes/terminal-engine` exit 0; **All CORE-001 validation checks passed** | 0 |
+| 77 | `cargo test -p relayable-integration-tests --offline --test lifecycle -- --nocapture` | property-0 server start (socket mode `0600`); property-1 server-owned PTY (`ppid == server pid`, `fd0=/dev/pts/*`, `stty '24 80'`); property-1b resize(100,40)→`stty '40 100'`; property-2 `session_id=session:01a1412f-…` + tagged window/block/pty; property-3 I/O round-trip; property-4 disconnect survival (same pid active after client drop); property-5 reconnect (same ids + dims + writer lease + survival nonce); property-6 close reaps pid; property-7 SIGTERM exit 0 + socket removed; 4 passed / 0 failed | 0 |
+| 78 | `cargo build --workspace --offline` (post-merge) | `Finished dev profile` (5.36 s) | 0 |
+
+**Decisions recorded:** the CORE-001 first-release method set (`protocol/compatibility/core-001-method-set.md`)
+and CLI/JSON surface (`core-001-cli-json.md`) are accepted as the server-API task’s decision (the parent
+contract defers the method list to it). `RELAYABLE_SERVER`/`RELAYABLE_SESSION` are CLI inputs; no `REX_*`
+is read. `rust-toolchain.toml` intentionally not created (1.98.1 is not an installed rustup toolchain
+name); `rust-version = "1.98"` is used instead.
+
+**Known residual gap:** the server does not yet set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
+in the managed child terminal (ADR-005 Decision 2) and the ADR-005 §8.1 context test does not exist —
+tracked as `CTX-001`.
+
+**Not yet verified:** TERM-002 engine verdict; UI-001 (GPUI pin build/run).
+
 ## 2026-10-15 — CORRECTION: the DOC-002 recheck (rows 71–72) was a false positive
 
 Rows 71–72 above flagged 10 "defective" numeric citations in the DOC-002 repair using the automatic

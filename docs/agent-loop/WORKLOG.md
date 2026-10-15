@@ -77,6 +77,34 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 18 — CORE-001 integrated: first engineering vertical slice (2026-10-15)
+
+**Objective:** land the first real Linux vertical slice and verify it independently.
+
+**Deliverable:** CORE-001 (`653326e`, 53 files, +12010) merged as INT-008 `d3e0286`. The repo now has
+the Cargo workspace root + `crates/relayable-{model,protocol,pty,server,client,cli}` + `protocol/schema/*.proto`
++ `tests/{lifecycle,protocol,reconnect,multi-client,fixtures}` + `scripts/validate.sh`.
+
+**Independent validation on `master` (full detail in `TESTS.md` 76–78):** `scripts/validate.sh` → all
+exit 0; `cargo test --workspace` green (Σ ≈ 104); acceptance test proves the five required properties
+(server-owned PTY with `ppid == server pid`; CLI session `session:<uuidv7>`; I/O round-trip; disconnect
+survival with the same pid; reconnect restoring ids/dims/writer-lease/survival-nonce) plus resize,
+close-reap, SIGTERM shutdown, and bounded input; ADR-001 dependency-direction check passed; the
+phase-1 spike still builds (`crates`/`spikes` isolation holds); DEC-010 Unix-symbol guard passed.
+
+**Accepted decisions:** the first-release method set and CLI/JSON surface are recorded in
+`protocol/compatibility/core-001-{method-set,cli-json}.md` (the parent contract defers the method list
+to the server-API task); `RELAYABLE_*`-only, no `REX_*`; no `rust-toolchain.toml` (1.98.1 is not an
+installed rustup toolchain name).
+
+**Residual gap:** ADR-005 Decision 2 (set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
+in the managed terminal) and its §8.1 test are not implemented — tracked as `CTX-001`.
+
+**Still in flight:** TERM-002 (`w17`). **Next:** CORE-002 (disconnect survival + reattach snapshot;
+now largely demonstrated at the protocol level) → UI-001/UI-002 → QA-001 → ADR-004.
+
+---
+
 ## Checkpoint 17 — ADR-FIX-001 integrated; DEC-002/DEC-003 Accepted (2026-10-15)
 
 **Objective:** clear the REVIEW-001 blocking documentation items before CORE-001 builds on the ADRs.

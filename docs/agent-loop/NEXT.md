@@ -33,22 +33,20 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 - **REVIEW-001** (`774d394`, report + evidence in `docs/reviews/**`) and **DOC-002** citation repair
   (`16c8bc9`) integrated.
 - `docs/architecture/interface-contract.md` is frozen and uses `PtyProcessId`.
-- **In flight:** **CORE-001** (`core/core-001-vertical-slice`) and **TERM-002** (`spike/term-002-engine-validation`).
+- **In flight:** **TERM-002** (`spike/term-002-engine-validation`) is the only active project; CORE-001 is integrated.
 - Host: `protoc` = `libprotoc 36.1`; both spike crates self-root with an empty `[workspace]` table.
 
 ## Open tasks, in order
 
-1. **CORE-001** (in progress) — Cargo workspace + `relayable-{model,protocol,pty,server,client,cli}`
-   per ADR-001/002 + the interface contract. The automated integration test must prove: foreground
-   server owns a PTY; CLI creates a session and returns a stable ID; terminal I/O round-trips; client
-   disconnect leaves the child alive; reconnect retrieves current state. Use `portable-pty 0.9.0`; do
-   **not** adopt `alacritty_terminal`/`vte` (TERM-002 gate); do not absorb `spikes/**`.
-2. **TERM-002** (in progress) — engine-level spike validating ADR-003's provisional pin; verdict
+1. **TERM-002** (in progress) — engine-level spike validating ADR-003's provisional pin; verdict
    accept as-is / accept with caveats / change the pin.
-3. **CORE-002** — disconnect survival + reattach snapshot.
-4. **UI-001/UI-002** — GPUI workspace against `docs/research/` + `design-tokens.md`; UI-001 also proves
+2. **CORE-002** — harden disconnect survival + reattach snapshot (CORE-001 already demonstrates the
+   basic flow; CORE-002 adds the documented hard cases).
+3. **UI-001/UI-002** — GPUI workspace against `docs/research/` + `design-tokens.md`; UI-001 also proves
    the `gpui` pin builds/runs on this host.
-5. **QA-001** — smoke/CI scripts and build matrix.
+4. **QA-001** — smoke/CI scripts and build matrix (extend `scripts/validate.sh`).
+5. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
+   add the ADR-005 §8.1 context-resolution test (currently not implemented).
 6. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
 7. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build evidence spike (ADR-003 reconsideration trigger #10).

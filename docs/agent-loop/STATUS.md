@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 0 — **ADR-001/002/005 Accepted; ADR-003 stays `Proposed` pending TERM-002/UI-001; CORE-001 + TERM-002 in flight.**
+**Milestone:** Phase 1 — **first engineering vertical slice integrated and verified (`d3e0286`); TERM-002 pending; UI-001 next.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)
@@ -11,7 +11,8 @@
 3. Domain/dependency and protocol ADRs — DONE (**ADR-001/002 Accepted** after REVIEW-001 + ADR-FIX-001; `31bed30` + INT-007 `f474c83`).
 4. Terminal engine + GPUI pin ADR and spike — DONE phase 1 (spike + ADR-003 integrated `78b83f2`, `Proposed`); engine-level spike phase 2 pending (TERM-002 is the hard gate for the engine choice; UI-001 for the GPUI pin).
 5. Smallest useful vertical slice (server-owned PTY, CLI-created session, terminal I/O, disconnect
-   survives, reconnect recovers) — next (CORE-001).
+   survives, reconnect recovers) — **DONE**, integrated `d3e0286` (INT-008); 104 tests pass, 5
+   acceptance properties independently verified (`TESTS.md` 76–78).
 6. DOC-002 matrix citation repair — DONE, integrated `16c8bc9` (INT-005).
 
 ## Wave 1 research state (all integrated on `master`)

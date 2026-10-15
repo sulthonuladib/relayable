@@ -2,35 +2,34 @@
 
 Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view plus current state.
 
-## Current execution state (Wave 2 handoff, 2026-10-15)
+## Current execution state (Manager integration session, 2026-10-15)
 
-- **Repository:** `/home/sulthonuladib/work/relayable`, `master` clean after INT-002. Wave 2 architecture
-  integrated: `31bed30` (ADR-001/002 + `docs/architecture/interface-contract.md`) and `78b83f2`
-  (TERM-001 PTY spike + ADR-003).
-- **On `master` now:** `docs/adr/ADR-001..003`, `docs/architecture/interface-contract.md`,
-  `spikes/terminal-engine/**` (58 files), plus all Wave 1 research.
-- **Live agents:** none — all three Wave 2 Leads stopped after integration (user wind-down). All
-  three branches (`research/{doc-002,adr-001-002,term-001-adr-003}`) are now merged into `master`
-  (`a1f1719`, `31bed30`, `78b83f2`); their worktrees were removed (`remove_worktree`, branches
-  preserved) so new agents start on fresh worktrees.
-- **Blocked:** DOC-002 matrix repair needs one writer pass; the full audit evidence is integrated on
-  `master` at `docs/compatibility/doc-002-audit/` (merge `a1f1719`).
+- **Repository:** `/home/sulthonuladib/work/relayable`, `master` clean and pushed at `d3e0286` (INT-008).
+- **Accepted:** ADR-001 (domain/dependency), ADR-002 (proto3+prost framing/transport), ADR-005
+  (`RELAYABLE_*`-only env namespace). **ADR-003** (terminal engine + GPUI pin) stays `Proposed` until
+  TERM-002 (engine) and UI-001 (GPUI pin).
+- **Integrated:** REVIEW-001 (`774d394`), DOC-002 (`16c8bc9`), ADR-FIX-001 (`f474c83`), ADR-005
+  (`74e7e20`), CORE-001 (`d3e0286`). The repo now has the full Cargo workspace + `crates/**` +
+  `protocol/schema/**` + `tests/**` + `scripts/validate.sh`.
+- **Live agents:** TERM-002 (`spike/term-002-engine-validation`) is the only active project; the
+  REVIEW-001/DOC-002/ADR-005/ADR-FIX-001/CORE-001 Leads are stopped (worktrees/branches preserved).
 - **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred
-  (DEC-010; Android is not in current scope).
-- **Failing tests:** none — no workspace/test suite yet; the standalone spike crate builds with
-  `cargo build`, `cargo clippy --all-targets`, `cargo fmt --check` all exit 0 (raw logs committed).
+  (DEC-010).
+- **Failing tests:** none — `scripts/validate.sh` passes on `master` (fmt/clippy/build/test 104,
+  dependency-direction, DEC-010 guard, spike build); evidence `TESTS.md` 76–78.
 - **Next integration step:** none pending.
 
 ## Priority order (next first)
 
 | Rank | Task | Branch | Depends on | State |
 |---|---|---|---|---|
-| 1 | DOC-002 writer pass — apply `citation-audit.md` to the matrix | TBD | evidence on `master` `a1f1719` | BLOCKED (needs writer) |
-| 2 | TERM-002 — engine-level spike phase 2 validates ADR-003's provisional pin | TBD | TERM-001 | READY |
-| 3 | CORE-001 — server-owned PTY + CLI session + terminal I/O + reconnect | TBD | ADR-001/002 interface contract | READY |
-| 4 | CORE-002 — disconnect survival + reattach snapshot | TBD | CORE-001 | waiting |
-| 5 | UI-001/UI-002 — GPUI workspace against catalogue + tokens | TBD | UI evidence + ADR-003 | waiting |
-| 6 | ADR-004 (DEC-005 ownership/persistence), ADR-005 (DEC-006 env namespace), QA-001 | TBD | ADR-001 | waiting |
+| 1 | TERM-002 — engine-level spike validates ADR-003's provisional pin | `spike/term-002-engine-validation` | TERM-001 | IN_PROGRESS |
+| 2 | CORE-002 — disconnect survival + reattach snapshot hardening | TBD | CORE-001 | READY |
+| 3 | UI-001/UI-002 — GPUI workspace against catalogue + tokens; UI-001 proves the gpui pin | TBD | UI evidence + ADR-003 | READY (UII-001 gated on gpui pin) |
+| 4 | QA-001 — smoke/CI scripts and build matrix | TBD | CORE-001 | READY |
+| 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | TBD | ADR-005, CORE-001 | READY |
+| 6 | ADR-004 (DEC-005 ownership/persistence) | TBD | CORE-002 | waiting |
+| 7 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
 
 ## Operating rules
 
