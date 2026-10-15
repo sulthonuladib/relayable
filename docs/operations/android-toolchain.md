@@ -671,8 +671,10 @@ loaded), and **`adb` works** (server already running, no devices attached).
   probes; this audit did not write them directly. The `android init` state
   (`~/.android/cli/skills`, `bundles`) predates the audit (2026-10-14 20:41–20:44) and was
   not modified.
-- **Repository:** `git status --short` was empty before and after the probes. This audit
-  created `docs/operations/` and this file only.
+- **Repository:** `git status --short` was empty before the probes. The only file written by
+  this audit is `docs/operations/android-toolchain.md`; `docs/operations/toolchain-audit.md`
+  belongs to the parallel ENV-001 worker and was not modified (it already existed when this
+  audit began writing).
 - **SDK/emulator/AVD/Gradle/Java:** no state existed to change; nothing was installed or
   configured.
 
