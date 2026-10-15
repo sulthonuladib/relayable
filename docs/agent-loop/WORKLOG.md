@@ -96,6 +96,12 @@ DEC-009 remediation decision is pending.
 system change; no leaked panes. This is a time-boxed stopgap only — the permanent fix is still the
 pending DEC-009 decision.
 
+**Result so far:** the stopgap worked — after the retry instruction, `research/ui-reference` has 2
+active Agents and `research/protocol-compat` has 2 active Agents (its herd run owns the handoff
+until they settle); `research/env-audit` is working. Outcomes (files, commits, validation) are
+pending the Leads' reports. The daemon window expires ~30 min after activation; if a later wave
+(e.g. a writer after workers) still needs it, restart the daemon or apply the permanent fix.
+
 **Next:** collect the Leads' retry results; if agents start, review/integrate Wave 1 (INT-001). If
 `agent_start` still fails, stop the daemon (`touch /tmp/relayable-wake-daemon.stop`) and report the
 fresh evidence.
