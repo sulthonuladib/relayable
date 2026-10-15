@@ -497,7 +497,14 @@ The verdict below is the lead's technical decision, reproduced faithfully.
 
 * **`alacritty_terminal 0.26.0` + `vte 0.15.0` (parser/grid) + `portable-pty 0.9.0`: ACCEPT.**
   The engine-level spike passes on real PTYs with **32 PASS / 1 documented UNSUPPORTED / 0 FAIL /
-  0 NOT_TESTED**, and all 13 assigned items are covered.
+  0 NOT_TESTED**. All 13 assigned items were exercised and have committed artifacts; **11 of
+  the 13 are fully asserted**. Two carry deliberate, documented gaps that the lead accepts:
+  **item 2** uses `nvim v0.12.5` + `less` because `vim` is not installed on this host (a
+  substitution, not a missing capability), and **item 9**'s bracketed-paste "bytes as data"
+  semantics is an input-path (terminal→app) property that an output-feed engine spike cannot
+  assert — the mode toggle itself **is** asserted (`bracketed_paste_mode`) and the payload leg is
+  recorded `UNSUPPORTED` with its reason. **Item 13**'s RSS figures are per-engine isolated
+  observations only, with no threshold asserted.
 * **`gpui = "=0.2.2"`: ACCEPT WITH CAVEATS — not build-verified.** It resolves but does not
   compile on this host. ADR-003 should be amended to record the blocker and a mandatory remedy
   before UI-001 relies on the pin — **not re-pinned**, because 0.2.2 is the latest published
