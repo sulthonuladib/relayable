@@ -48,7 +48,10 @@ nothing was pushed; no tracked media exists in any branch.
 
 1. Spot-check the integrated research docs while consuming them (they are evidence, not truth):
    cited URLs/timestamps/frame references were verified by the Leads' own review loops, but re-check
-   any claim an ADR depends on.
+   any claim an ADR depends on. Known follow-ups: `design-tokens.md:210` mixes a 29 px palette-row
+   value (a 480p video estimate) into clone-derived numbers — tracked as REF-004; and `ui-reference`
+   tip `4102de1` (provenance/attribution fixes) is self-validated only (the independent audit covered
+   `269018c`).
 2. **TERM-001 + ADR-003:** terminal-engine candidates, GPUI pin decision (crates.io `gpui` 0.2.2
    Apache-2.0 vs `Glass-HQ/gpui` with no root LICENSE), then the terminal spike.
 3. **ADR-001 + ADR-002:** domain/dependency boundaries and protocol serialization/transport, using

@@ -28,6 +28,7 @@ the evidence is integrated.
 | REF-001 | Review video 1 (pre-alpha demo); catalogue main UI | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-002 | Review videos 2–5; timestamped evidence each | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
+| REF-004 | Fix `design-tokens.md:210` mixed attribution (29 px palette rows) + queued calibration items from `open-questions.md` | REF-003 | branch TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
 | DOC-002 | Fix DOC-001 citation defects (`events.md` line refs) and re-check the 7 source URLs for live drift | DOC-001 | branch TBD | BACKLOG |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |

@@ -109,6 +109,14 @@ by the wrap-up — all facts are as-of 2026-10-15 16:03–16:08Z; (c) the indepe
 live-drift pass and consolidated review were stopped (its non-live cache check matched every
 sampled high-risk fact).
 
+**ui-reference final tip (`4102de1`):** provenance pins and catalogue attributions fixed (3 files,
++15/−11; commit only `docs/research/**`), merged in `55d8147`. It is self-validated by its author
+(the stop instruction forbade another verification wave); the last independent audit covers
+`269018c`. Known follow-up tracked as **REF-004**: `design-tokens.md:210` mixes a 29 px palette-row
+value (a 480p video estimate) into clone-derived numbers; calibration items remain in
+`open-questions.md`. The fidelity gate stays partially open for un-footaged states (settings,
+inspector, in-app disconnected/loading/error, stacked splits, hover/drag, notifications).
+
 **Next:** ADR-003/TERM-001 and ADR-001/002 from the integrated evidence, then CORE-001/002 and UI
 work; Android install and Herdr remediation are approval gates.
 
