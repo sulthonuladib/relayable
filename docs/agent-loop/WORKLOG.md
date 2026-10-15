@@ -77,6 +77,23 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 11 — Scope: Android client deferred (DEC-010, user direction) (2026-10-15)
+
+**Objective:** the user directed that Android apps are not needed for now and that the remaining
+Linux platform work is the main goal.
+
+**Decision:** DEC-010 recorded — no Android app/scaffold/SDK/emulator/Gradle work in the current
+phase; AND-001 deferred; the Android SDK/JDK-pin approval gate is removed. The model/protocol stay
+Android-ready (`full.md` §1.3.6, §5.2). Consistent with `full.md` §1.4 (Android is a future client)
+and §1.5 (defer full Android implementation until foundations stabilize).
+
+**Files changed:** `docs/agent-loop/{DECISIONS,TASKS,BACKLOG,STATUS,NEXT,WORKLOG}.md`.
+
+**Next tasks:** the Linux slice is unchanged — REVIEW-001 → DOC-002 writer pass → TERM-002 →
+CORE-001 → CORE-002 → UI-001/UI-002 → QA-001; plus ADR-004 (DEC-005) and ADR-005 (DEC-006).
+
+---
+
 ## Checkpoint 10 — Herdr auto-rename plugin fully disabled (2026-10-15)
 
 **Objective:** the user asked where the `herdr-automatic-rename` plugin is documented and directed

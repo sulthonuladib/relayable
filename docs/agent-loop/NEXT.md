@@ -59,13 +59,14 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 - **Independent-review gap (REVIEW-001):** do the reviewer pass before building CORE-001 on the ADRs.
 - No REX wire/binary compatibility claims (`full.md` §3); no GoRex source/asset reuse (§2.6).
 - UI fidelity: catalogue + design tokens are the acceptance gate; unverified states stay labelled.
-- Android Studio is not a dependency; commit a Gradle wrapper when Android work starts (§10).
+- Android is deferred (DEC-010): no Android app/SDK/emulator/Gradle work now, but keep
+  `relayable-model`/`relayable-protocol` Android-ready (no Linux-only assumptions; §1.3.6, §5.2).
 - Never claim server-crash or host-reboot session survival (§6.3).
 - Only the standalone `spikes/terminal-engine` crate exists in-repo; no Cargo workspace yet.
 
 ## Approval gates
 
-- **Android SDK/emulator install + project JDK pin** — only needed for Android work; unresolved.
+- **None active.** Android SDK/emulator + JDK pin are deferred (DEC-010); Android is not in scope.
 
 ## Environment / cleanup
 

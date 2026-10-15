@@ -15,7 +15,8 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
   preserved) so new agents start on fresh worktrees.
 - **Blocked:** DOC-002 matrix repair needs one writer pass; the full audit evidence is integrated on
   `master` at `docs/compatibility/doc-002-audit/` (merge `a1f1719`).
-- **Approval gates:** Android SDK/emulator install + project JDK pin (AND-001) — Android work only.
+- **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred
+  (DEC-010; Android is not in current scope).
 - **Failing tests:** none — no workspace/test suite yet; the standalone spike crate builds with
   `cargo build`, `cargo clippy --all-targets`, `cargo fmt --check` all exit 0 (raw logs committed).
 - **Next integration step:** none pending.

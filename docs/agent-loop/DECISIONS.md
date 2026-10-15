@@ -14,6 +14,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
 | DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — hook disabled + plugin uninstalled 2026-10-15** | — |
+| DEC-010 | Android client deferred from current scope; keep the model/protocol Android-ready | **Accepted** — user direction 2026-10-15; consistent with `full.md` §1.4/§1.5 | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -121,14 +122,35 @@ user's explicit instruction. The Wave 1 Option D wake daemon remains a documente
 
 **Reconsider if:** Herdr changes its pane-readiness check, or the plugin fixes the hook.
 
+## DEC-010 — Android client deferred (keep Android readiness)
+
+**Context:** the user directed that Android apps are not needed for now and the remaining Linux
+platform work is the main goal. `full.md` §1.4 lists Android as a future client; §1.5 defers "full
+Android implementation before protocol/test foundations stabilize"; §1.3.6 still requires Android
+readiness (reconnects, slow links, client lifecycle, device authorization, event resynchronization)
+to be designed in from day one.
+
+**Decision:** no Android app/scaffold/SDK/emulator/Gradle work in the current phase. AND-001 is
+deferred and the Android SDK/JDK-pin approval gate is not required. The protocol/model/data design
+must remain Android-ready: ADR-001/002 and `docs/architecture/interface-contract.md` are built with a
+future Kotlin client in mind, and no Linux-only assumption may leak into `relayable-model` /
+`relayable-protocol` (`full.md` §5.2).
+
+**Consequences:** Phase 5/6 (Android) leave the active roadmap; the Linux server + CLI + GPUI client +
+terminal + reconnection slice is the priority. `docs/operations/android-toolchain.md` stays as
+evidence for whenever Android resumes. No Android dependency changes the default Cargo build.
+
+**Reconsider if:** the user asks to build the Android client, or a protocol change is needed for
+mobile.
+
 ## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).
 - Env namespace: `RELAYABLE_*` vs REX-compatible aliases vs both (§8.1).
-- **Android SDK/emulator install (approval gate):** ENV-001 found no SDK/emulator/images/licenses
-  and no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified); install + license acceptance need
-  explicit user approval. Evidence: `docs/operations/android-toolchain.md`.
+- **Android SDK/emulator install — DEFERRED (DEC-010):** ENV-001 found no SDK/emulator/images/licenses
+  and no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified). Android work is out of current
+  scope, so no install/approval is needed now. Evidence: `docs/operations/android-toolchain.md`.
 - **GPUI artifact/license pin:** crates.io `gpui` 0.2.2 (Apache-2.0) vs `Glass-HQ/gpui` (no root
   LICENSE, manifests declare Apache-2.0) — decide in ADR-003 before pinning.
 - Whether any REX wire protocol is documented enough to attempt interoperability (currently assumed **not**).

@@ -51,10 +51,9 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
   **uninstalled** (residual dirs cleared; `herdr plugin list` → `No plugins installed.`); verified
   with `fish -n` and a successful `delegate_project`. The Option D wake daemon remains a documented
   fallback. Details: `DECISIONS.md` DEC-009, `WORKLOG.md` Checkpoints 7 and 10.
-- **Android SDK/emulator install (AND-001 gate):** no SDK, sdkmanager/avdmanager/emulator, AVDs,
-  images, or licenses; no project JDK pin (JDK 25 only; AGP-on-JDK-25 unverified). Install and
-  license acceptance need explicit user approval; disk is 68% used. Evidence:
-  `docs/operations/android-toolchain.md`.
+- **Android — DEFERRED (DEC-010, 2026-10-15):** Android apps are out of scope for now; no SDK/
+  emulator install, JDK pin, or Gradle work is required. ENV-001's inventory remains as evidence:
+  `docs/operations/android-toolchain.md`. The model/protocol must stay Android-ready (§1.3.6).
 
 ## Known risks
 
