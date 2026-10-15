@@ -8,7 +8,8 @@
 - **Scope:** Rust toolchain + cargo/mise, GPUI crates.io/GitHub evidence, Linux + systemd user mode, display/host facts, GPUI system libraries.
 - **Excluded (other worker / out of scope):** Android CLI, `adb`, JDK, SDK, Gradle, emulator (worker B owns `docs/operations/android-toolchain.md`).
 - **Method:** strictly read-only. No installs, no `sudo`, no service enable/start/stop, no port/firewall or config changes, no builds, no `cargo fetch`/`build`/`search`/`add`, no writes outside this file. Commands were time-boxed; none hung. Exit codes were captured after each command; the seven HTTP probe rows whose exit codes were added in the 2026-10-15 remediation pass are re-captures (see remediation provenance below). Raw output is trimmed only of obvious noise (long HTTP header dumps, `head`-truncated listings noted inline).
-- **Remediation provenance (2026-10-15):** the seven A2 HTTP probe rows flagged as missing exit codes in the independent ENV-001 verification were re-captured in a follow-up read-only pass on 2026-10-15 by re-running the same GETs with the recorded descriptive `User-Agent`; HTTP statuses and bodies matched (byte counts 21647 / 2702 / 109692 / 5975; license endpoint `HTTP 404`). The two `| head -40` rows report the shell pipeline exit; `curl`'s own pipe status is annotated inline (it varies when `head` closes the pipe).
+- **Remediation provenance (2026-10-15):** the seven A2 HTTP probe rows flagged as missing exit codes in the independent ENV-001 verification were re-captured in a follow-up read-only pass on 2026-10-15 by re-running the same GETs with the recorded descriptive `User-Agent`; HTTP statuses and bodies matched (byte counts 21647 / 2702 / 5975; license endpoint `HTTP 404`), except the sparse-index byte count (see caveat below). The two `| head -40` rows report the shell pipeline exit; `curl`'s own pipe status is annotated inline (it varies when `head` closes the pipe).
+- **Sparse-index byte-count caveat (2026-10-15 final accuracy pass):** `index.crates.io/gp/ui/gpui` was recorded as **109692** bytes at the original audit and at the remediation pass, but a later independent re-check on 2026-10-15 consistently measures **109693** (`wc -c` = 109693; `content-length: 109693`; response sha256 `11870f61cf6cd84f1a08122f20ff7c8b3c6d815efa14ae4dab77f8df480f124a`; stable across repeated `curl` and `urllib` fetches). The cause is unresolved (possible recording/counting discrepancy or served/transfer byte variation); the live index `last-modified` is `Sun, 01 Feb 2026 11:58:08 GMT`, which predates this audit. The one-byte difference is immaterial to every conclusion (identical version set, yank flags, and metadata); no single "true" count is asserted.
 
 ## Header block (raw)
 
@@ -315,14 +316,17 @@ Sparse index cross-check (same metadata, raw JSON lines):
 ```text
 $ curl -s -m 20 -H 'User-Agent: relayable-env-audit/0.1 (local read-only research)' \
     https://index.crates.io/gp/ui/gpui
-# bytes: 109692; index line count: 7
+# bytes: 109692 recorded at audit and remediation; 109693 on the 2026-10-15 final re-check
+#   (wc -c = 109693, content-length: 109693, sha256 11870f61cf6cd84f1a08122f20ff7c8b3c6d815efa14ae4dab77f8df480f124a).
+#   Cause unresolved and immaterial (see sparse-index byte-count caveat above). index line count: 7
 version: 0.2.1-test3 | yanked: True
 version: 0.2.1       | yanked: False
 version: 0.2.2       | yanked: False
-# from the tail of the 0.2.2 line:
-"features":{"default":["font-kit","wayland","x11","windows-manifest"],
-            "test-support":[...], "x11":[...]}
-EXIT: 0            # HTTP 200; byte count (109692) and yank flags matched in the 2026-10-15 re-run
+# from the tail of the 0.2.2 line (exact key is "features2"; the separate
+# "features" object holds the remaining feature groups):
+"features2":{"default":["font-kit","wayland","x11","windows-manifest"],
+             "test-support":[...], "x11":[...]}
+EXIT: 0            # HTTP 200; yank flags matched all passes; byte count 109692 (audit/remediation) vs 109693 (final re-check)
 ```
 
 ### `github.com/Glass-HQ/gpui` (the repo linked in full.md §20)
