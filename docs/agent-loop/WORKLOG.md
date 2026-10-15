@@ -77,6 +77,25 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 15 — DOC-002 integrated; recheck false positive corrected (2026-10-15)
+
+**Objective:** settle the DOC-002 citation repair.
+
+**What happened:** my automatic `audit.py` recheck appeared to show 10 defective numeric citations, and
+I sent the Lead a revision request. Re-adjudicating each row against the raw sources and the
+*adjudicated* `citation-audit.md` proved the recheck was a false positive (`audit.py` mis-handles
+paraphrased evidence and repeated quotes). The request was withdrawn, the Lead confirmed the branch was
+unchanged, and the correction was recorded in `TESTS.md`. DOC-002 verified against the adjudicated
+audit: 0 invented refs, all 78 NOT_FOUND converted to heading anchors, URL set unchanged, evidence-label
+counts byte-identical pre/post (verified independently).
+
+**Commands:** `git merge --no-ff docs/doc-002-matrix-repair` → INT-005 `16c8bc9` (only
+`docs/compatibility/reference-behavior-matrix.md`, +197/−193); pushed.
+
+**In flight:** TERM-002 (`w17`), CORE-001 (`w18`), ADR-FIX-001 (`w19`).
+
+---
+
 ## Checkpoint 14 — REVIEW-001 integrated; DOC-002 sent back; ADR-FIX-001 + CORE-001 launched (2026-10-15)
 
 **Objective:** integrate the review, correct the DOC-002 repair, and start the fix pass.

@@ -30,7 +30,7 @@ the evidence is integrated.
 | REF-003 | Review GoRex clone; behavioral catalogue + license check | BOOT-001 | research/ui-reference | DONE (integrated c0578ca) |
 | REF-004 | Fix `design-tokens.md:210` mixed attribution (29 px palette rows) + queued calibration items from `open-questions.md` | REF-003 | branch TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
-| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | `docs/doc-002-matrix-repair` | IN_PROGRESS (2026-10-15) — writer pass launched on fresh branch; evidence integrated on `master` `a1f1719` |
+| DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | `docs/doc-002-matrix-repair` | DONE — integrated `16c8bc9` (INT-005); 193 MATCH kept, 115 SHIFT renumbered, 78 NOT_FOUND → heading anchors, 0 drift; labels unchanged |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |
 | INT-001 | Review Wave 1 diffs; integrate research branches into `master`; resolve conflicts | REF-001, REF-002, REF-003, DOC-001, ENV-001 | Manager | DONE (env b24133c, ref c0578ca, doc 49795a0) |
 | INT-002 | Review and integrate Wave 2 branches into `master` | DOC-002, ADR-001, ADR-002, ADR-003, TERM-001 | Manager | DONE for `term-001` `78b83f2` + `adr-001-002` `31bed30` |
