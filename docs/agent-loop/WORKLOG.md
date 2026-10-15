@@ -77,6 +77,67 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 7 — Wave 2 kickoff: DEC-009 resolved, DOC-002 + TERM-001/ADR-003 + ADR-001/002 launched (2026-10-15)
+
+**Objective:** resume from `NEXT.md`; clear the DEC-009 agent-provisioning gate; launch the Wave 2
+work in the user's requested order (DOC-002 → TERM-001+ADR-003 → ADR-001/002 → CORE-001/002 →
+UI-001/002) with one writer per branch/path (DEC-008).
+
+**Recovered context:** read `full.md` completely, `AGENTS.md`, `.pi/settings.json`, and
+`docs/agent-loop/{NEXT,STATUS,BACKLOG,TASKS,DECISIONS,TESTS,WORKLOG}.md`. Git: `master` at `b96da27`,
+clean, up to date with `origin/master`; only the primary worktree `w11` existed; the Wave 1 research
+worktrees had been removed; `/tmp/relayable-wake-daemon.stop` present and no daemon process running.
+
+**DEC-009 gate resolved (option A, user-authorized):** the automatic-rename fish hook block in
+`~/.config/fish/config.fish` (original lines 40–43) is now commented out with an in-file restore
+pointer. Backup `/tmp/relayable-config.fish.bak` (md5 `60a6536db6ac375f7c0e4d4f2872d609`). Verified
+`fish -n` exit 0 and a fresh `fish -c 'functions | grep …'` shows no hook functions loaded. This is a
+host config change made under the user's explicit instruction; no repo file depends on it.
+
+**Wave 2 projects launched (all base `master` @ `b96da27`):**
+
+| Workspace | Branch | Session | Tasks | Owned paths |
+|---|---|---|---|---|
+| `w12` | `research/doc-002` | `3534d553-bec1-455c-83df-807ee3ca724a` | DOC-002 | `docs/compatibility/reference-behavior-matrix.md` |
+| `w13` | `research/term-001-adr-003` | `8f442f6e-6f8c-4a03-9016-dcf3f5827aa1` | TERM-001, ADR-003 | `docs/adr/ADR-003-*.md`, `spikes/terminal-engine/**` |
+| `w14` | `research/adr-001-002` | `6a4c1607-f4d3-42fb-b1fc-d6e2dce6e7ba` | ADR-001, ADR-002 | `docs/adr/ADR-001-*.md`, `docs/adr/ADR-002-*.md`, `docs/architecture/**` |
+
+`delegate_project` returned `ok` for all three; a `list_staff` immediately after showed
+`research/doc-002` `runtime_state: working` with 1 active agent — the option A fix works. Paths are
+disjoint (one file / docs-adr files / spike dir), so no overlapping writers. The three Leads were
+told to read `full.md` and `AGENTS.md` from their own checkouts rather than have them injected
+(DEC-008).
+
+**Commands run:**
+
+| Command | Result | Exit |
+|---|---|---|
+| `cp -a ~/.config/fish/config.fish /tmp/relayable-config.fish.bak` | backup created | 0 |
+| comment out the hook block in `~/.config/fish/config.fish` | 3 code lines commented | — |
+| `fish -n ~/.config/fish/config.fish` | no syntax errors | 0 |
+| `fish -c 'functions \| grep -i -E "har_\|automatic"'` | `no automatic-rename hook functions loaded` | 0 |
+| `delegate_project` ×3 (doc-002, term-001-adr-003, adr-001-002) | `ok:true`, sessions/workspaces as above | 0 |
+| `list_staff` | `w12` Lead `working`, 1 active agent; `w11` + 3 linked worktrees | 0 |
+
+**Risks / caveats:**
+
+- Option A is a host-level change outside the repo; it is reversible (uncomment the block) and the
+  backup hash is recorded. The wake-daemon stopgap stays as fallback documentation.
+- The Wave 2 Leads are fresh sessions; their briefs point at repo evidence, not prior chat.
+- `docs/agent-loop/**` is Manager-owned; the three branches must not touch it.
+- The `~/.herdr/worktrees/relayable/research-reference-ui` directory from the pre-move repoKey is a
+  stale, non-registered worktree stub (broken `.git` pointer); left untouched and noted, not removed.
+
+**Next tasks:**
+
+1. Monitor the three Leads; review their diffs and claimed validation independently (INT-002).
+2. Integrate DOC-002, then ADR-001/002 and TERM-001/ADR-003 into `master` as they complete.
+3. Launch CORE-001 (server-owned PTY + CLI session + terminal I/O) once ADR-001/002 are integrated;
+   then CORE-002, UI-001/UI-002, QA-001.
+4. Keep `docs/agent-loop/**` updated after each integration; ask the user only for genuine blockers.
+
+---
+
 ## Checkpoint 6 — Wave 1 complete, all research integrated; handoff (2026-10-15)
 
 **Objective:** finalize the research wave at a state acceptable for the next phase, per the user's

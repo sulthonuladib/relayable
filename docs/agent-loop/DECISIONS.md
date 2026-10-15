@@ -13,7 +13,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-006 | Env var namespace: `RELAYABLE_*`, REX aliases, or both | Pending — ADR + tests required (§8.1) | `docs/adr/ADR-005` |
 | DEC-007 | Wave 1 research split into three branch-isolated, documentation-only projects with exclusive path ownership; Manager integrates before Wave 2 | **Accepted** | — |
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
-| DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | Pending — user approval required | — |
+| DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — option A applied 2026-10-15** | — |
 
 ## DEC-000 — Work state in-repository
 
@@ -85,6 +85,30 @@ reported rather than worked around by restarting processes.
 **Reconsider if:** the user explicitly asks for compaction, or repository-file discipline proves
 insufficient for a bounded session.
 
+## DEC-009 — Herdr agent-provisioning fault: option A applied
+
+**Context:** `herdr agent start` failed with `agent_pane_busy` for every programmatic delegation
+while the `herdr-automatic-rename` plugin's fish hook spawned background `bash` on every
+`fish_preexec`/`fish_postexec`. Diagnosis and A/B evidence: `WORKLOG.md` Checkpoint 3, `TESTS.md`
+rows 15–23.
+
+**Decision (user-authorized, 2026-10-15):** apply option A — stop sourcing the hook in
+`~/.config/fish/config.fish` (the block at original lines 40–43). New panes now start without the
+hook's background `bash` children, so Herdr accepts `agent_start`. The Wave 1 Option D wake daemon
+stays stopped; it remains a documented fallback if a future environment regresses.
+
+**Change made:** the `for _f in …herdr-automatic-rename-*/shell/hook.fish` block is commented out with
+a pointer to the restore lines. Backup: `/tmp/relayable-config.fish.bak` (md5
+`60a6536db6ac375f7c0e4d4f2872d609`). Restore = uncomment the commented block. Verified with
+`fish -n` (exit 0) and a fresh `fish -c 'functions'` check showing no hook functions loaded; a real
+`delegate_project` then succeeded (`w12`/`research/doc-002`).
+
+**Consequences:** live per-command tab auto-renaming stops (cosmetic; event-based naming unaffected).
+No repo file depends on the hook. This is a host-configuration change outside the repo, made under
+the user's explicit instruction naming that file and action.
+
+**Reconsider if:** Herdr changes its pane-readiness check, or the plugin fixes the hook.
+
 ## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
@@ -96,8 +120,5 @@ insufficient for a bounded session.
 - **GPUI artifact/license pin:** crates.io `gpui` 0.2.2 (Apache-2.0) vs `Glass-HQ/gpui` (no root
   LICENSE, manifests declare Apache-2.0) — decide in ADR-003 before pinning.
 - Whether any REX wire protocol is documented enough to attempt interoperability (currently assumed **not**).
-- **DEC-009 (approval gate):** which remediation for the Herdr agent-provisioning fault — A) stop
-  sourcing the automatic-rename fish hook in `~/.config/fish/config.fish` (recommended; cosmetic
-  loss of live tab renaming), B) project-local `managed-lead` overlay granting Leads bash/edit/write
-  so they execute directly (repo-only, changes the delegation model), or C) update/reinstall the
-  plugin. Diagnosis and A/B evidence: `WORKLOG.md` Checkpoint 3, `TESTS.md` rows 15–23.
+- **DEC-009 — RESOLVED 2026-10-15:** option A applied (hook sourcing disabled); delegation verified
+  working. Details above and in `WORKLOG.md` Checkpoint 7.
