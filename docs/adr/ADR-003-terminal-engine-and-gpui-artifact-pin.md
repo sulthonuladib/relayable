@@ -161,7 +161,10 @@ and it ships `LICENSE-APACHE` sha256 `752daf2fb234ca4a1fa372c073fe127f44b7b90fd2
 **byte-identical** to `https://raw.githubusercontent.com/zed-industries/zed/main/LICENSE-APACHE`
 (same sha256). The published `Cargo.toml.orig` declares `license = "Apache-2.0"`, `publish = true`.
 Caveat: `.cargo_vcs_info.json` pins `sha1 = 69e2130295c2649963eb639fc70b4f2ee8ea1624` with
-**`"dirty": true`** — the published tree is not a clean tagged revision. Note also that the crates.io
+**`"dirty": true`** — the published tree is not a clean tagged revision. This dirty-flag/sha1 pair is
+this ADR's own quote of the extracted tarball's file (evidence set not repo-tracked); independent
+review verified artifact resolution and checksum match only, not the dirty flag or sha1
+(`docs/reviews/evidence/adr-003-spike-rerun.md` §7–8). Note also that the crates.io
 **crate-level** object carries **no `license` field** (absent/unset) while the **version-level**
 `version.license` is `"Apache-2.0"`; the two are recorded separately and not collapsed.
 
@@ -235,7 +238,7 @@ but no engine-level spike has validated the engine choice itself.
 
 | §5.4 bullet | Chosen-engine mechanism (published source) | Spike evidence — TERM-001 phase 1, engine-independent (`spikes/terminal-engine`) | Status |
 |---|---|---|---|
-| VT/ANSI coverage | consumes `vte` 0.15.0 (`pub use vte;`, `ansi` feature) | real byte streams captured from nvim 0.12.5, less 704, top 4.0.7; SGR counts 337 / 2 / 374 (`results/raw/*.summary.txt`) — proves the sequences are emitted on the wire | mechanism evidenced; **engine-level rendering spike-pending** |
+| VT/ANSI coverage | consumes `vte` 0.15.0 (`pub use vte;`, `ansi` feature) | real byte streams captured from nvim 0.12.5, less 704, top 4.0.7; SGR counts 337 / 2 / 335 (`results/raw/*.summary.txt`) — proves the sequences are emitted on the wire | mechanism evidenced; **engine-level rendering spike-pending** |
 | Alternate screen | `TermMode::ALT_SCREEN`, `Term::swap_alt` (`src/term/mod.rs:69,714`) | `?1049h/l` OBSERVED for nvim and less; `?47`/`?1047` and top's alt screen `NOT_OBSERVED` (`results/raw/{nvim,less,top}.summary.txt`); detector proven sound by `results/raw/esc_selftest.txt` | evidenced (mechanism + wire) |
 | OSC | `vte::osc_dispatch` (`src/ansi.rs:1329`): title 0/2 (`:1350`), color 4/10/11/12 (`:1366,1422`), hyperlink 8 (`:1392`), clipboard 52 (`:1483`) | `OSC 0;…` title OBSERVED (`results/raw/nvim_title.seq`), `OSC 11;?` color query OBSERVED (`results/raw/nvim.seq`), `OSC 8` OBSERVED (`results/raw/osc8_ls.seq`) | evidenced (mechanism + wire) |
 | Mouse modes | `MOUSE_REPORT_CLICK`/`MOUSE_MOTION`/`MOUSE_DRAG`/`SGR_MOUSE`/`UTF8_MOUSE` (`src/term/mod.rs:60–80`) | `?1002h/l` + `?1006h/l` OBSERVED for nvim; `?1000`/`?1003`/`?1005`/`?1015` `NOT_OBSERVED` by these programs (`results/raw/nvim*.seq`) | evidenced (mechanism + wire) |
@@ -301,7 +304,9 @@ or Unicode/wide glyphs behave correctly, or that memory bounds are met. Those re
   packages `gpui_collections`, `gpui_http_client`, `gpui_util`, `gpui_refineable`,
   `gpui_semantic_version`, `gpui_sum_tree`, `gpui_util_macros`, `gpui-macros`). The exact pins must be
   recorded in `Cargo.lock`; the `.cargo_vcs_info` `dirty: true` flag means the published tree is not a
-  clean commit and the crate should always be consumed at the pinned version/checksum.
+  clean commit and the crate should always be consumed at the pinned version/checksum. That flag is
+  self-quoted by this ADR from the extracted tarball (see Option H); independent verification covered
+  resolution and checksum only (`docs/reviews/evidence/adr-003-spike-rerun.md` §7–8).
 - **Pin-verification method for the future workspace:**
   `cargo update -p gpui --precise 0.2.2` (and equivalent for `alacritty_terminal`, `vte`,
   `portable-pty`), then commit `Cargo.lock` so the `checksum`
@@ -390,6 +395,8 @@ recorded checksum (see `license-artifacts/CHECKSUM-CROSSCHECK.txt`), including
 ```
 $ cat gpui-0.2.2/.cargo_vcs_info.json
 { "git": { "sha1": "69e2130295c2649963eb639fc70b4f2ee8ea1624", "dirty": true }, "path_in_vcs": "crates/gpui" }
+# self-quoted by this ADR from the extracted tarball (evidence set not repo-tracked); independent
+#   verification covered pin resolution + checksum only (docs/reviews/evidence/adr-003-spike-rerun.md §7–8)
 $ sha256sum gpui-0.2.2/LICENSE-APACHE raw/zed-main-LICENSE-APACHE
 752daf2fb234ca4a1fa372c073fe127f44b7b90fd2529ae44273a64f9d53da7a  gpui-0.2.2/LICENSE-APACHE
 752daf2fb234ca4a1fa372c073fe127f44b7b90fd2529ae44273a64f9d53da7a  zed-main-LICENSE-APACHE
@@ -618,6 +625,18 @@ and `cargo clippy --all-targets` at exit 0 and `./scripts/run.sh` at `aggregate_
 (`results/raw/checks/*`, `results/raw/run_meta.txt`); these are the spike crate's own checks, **not**
 checks of any engine or of the Relayable workspace. Phase 2 (per-engine adapters) was cancelled and
 produced nothing (`spikes/terminal-engine/STATUS.md`, `README.md`, `results/README.md`).
+
+**Reproducibility limit of the committed raw captures.** The `results/raw/*` set is a historical
+artifact of a specific tree/run, not a reproducible-from-current-HEAD output. All files carry the
+same provenance `git_head b96da276…` (the pre-integration base the TERM-001 branch started from, not
+current HEAD), and the `capture_stream`/`clippy` commands embed the since-retired worktree path
+`…/worktrees/relayable/research-term-001-adr-003/…` (e.g. `results/raw/checks/cargo_clippy.txt:11`),
+which also leaks into the OSC 8 `file://` payload (`results/raw/osc8_ls.seq` lines 35, 42, 44).
+`scripts/run.sh` deletes and regenerates `results/raw/` and re-stamps `git_head`/paths, so re-running
+it **replaces** the committed bytes rather than reproducing them. Only the self-contained `pty_size`
+and `esc_selftest` probes were independently reproduced from the current checkout; the byte-capture
+claims depend on the host program versions at capture time and are historical observations, not
+independently re-verified (`docs/reviews/evidence/adr-003-spike-rerun.md` §6).
 
 **Worktree fact recorded by this ADR:** `docs/adr/` did not exist before this file was written
 (`ls docs/adr` → `No such file or directory`). `full.md` §5.2 defines the required ADR sections; no

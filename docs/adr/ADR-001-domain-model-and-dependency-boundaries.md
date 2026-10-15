@@ -26,7 +26,7 @@ Three constraints bound the decision space:
 2. **Model purity and dependency direction.** "Model types must not depend on GPUI, Android, OS
    views, or transport." and "Protocol maps model operations to versioned requests/events."
    (`full.md` §5.2, `full.md:405–406`); "No cycles between crates." (`full.md:412`).
-3. **Security is a release gate** (`full.md` §11, `full.md:758`): per-principal authorization
+3. **Security is a release gate** (`full.md` §11, `full.md:760`): per-principal authorization
    (`full.md:447`) and restrictive local socket permissions (`full.md:762`).
 
 This ADR decides the durable shape of the domain layer and the crate dependency graph. It does not
@@ -39,9 +39,9 @@ choose a serialization format or transport (ADR-002) or a terminal engine (ADR-0
 - **DOC-001 (`docs/compatibility/reference-behavior-matrix.md`)** — documented reference behavior with
   per-row labels, cited by section heading only, never by its Source-column upstream line numbers;
   DOC-002 recorded that DOC-001's `events.md` line references do not match canonical numbers.
-- **`docs/agent-loop/`** — `TASKS.md:98–100` states ADR-001 acceptance: context, options, decision,
+- **`docs/agent-loop/`** — `TASKS.md:107–109` states ADR-001 acceptance: context, options, decision,
   consequences, reconsideration evidence; no option may violate `full.md` §5.2 or §6 transport
-  security. `DECISIONS.md` maps DEC-002 to ADR-001 and records the row as Pending.
+  security. `DECISIONS.md` maps DEC-002 to ADR-001 and records the row as Proposed.
 
 **External citations.** This ADR makes one external technical claim, RFC 9562 (UUIDv7), cited with the
 key `[RFC9562-local]` (local file path, source URL, UTC retrieval date, HTTP status, sha256 defined in
@@ -54,7 +54,7 @@ in this ADR is marked **Relayable-defined (no REX evidence)**.
 ## Options considered
 
 Every option is admissible only if it satisfies `full.md` §5.2 dependency direction and §6 security
-requirements (`docs/agent-loop/TASKS.md:98–100`). An option that would leak a UI/OS/transport
+requirements (`docs/agent-loop/TASKS.md:107–109`). An option that would leak a UI/OS/transport
 dependency into the model, or introduce a security side channel, is rejected on that ground alone.
 
 | Option | Pros | Cons | Not chosen because |
@@ -65,10 +65,10 @@ dependency into the model, or introduce a security side channel, is rejected on 
 | 4. Tagged wire form plus distinct Rust newtypes (**chosen**) | Self-describing wire form *and* compile-time misuse detection; matches DOC-001 §5 | Explicit parse/serialize layer and per-kind boilerplate | Chosen: the only option making cross-entity ambiguity both a compile-time and runtime error |
 | 5. Model derives serialization and doubles as the wire type | Fewer types; no conversions; less day-one code | Serialization attributes and codegen leak into the domain, violating `full.md:405`; wire changes force domain edits | `full.md` §5.2:405–406 separates model from protocol; the conversion layer is accepted as cost |
 | 6. Snapshot plus unbounded in-memory event log | Trivial replay while the process lives; simple reconnect | Unbounded memory | Violates `full.md` §12 ("bounded scrollback and queues", `full.md:799`) and §6.4:500 ("Bound per-terminal scrollback and outgoing queues.") |
-| 7. Persisted event log as resume source of truth | Stronger resume across restart; complete audit history | Durable terminal-adjacent state conflicts with `full.md:490` ("Do not store unbounded PTY output as ordinary rows.") and `full.md:804`; crash-consistent replay is a large first-release commitment | `full.md:480` forbids promising crash/reboot survival unless implemented and tested; first release uses bounded retention plus `snapshot_required` |
+| 7. Persisted event log as resume source of truth | Stronger resume across restart; complete audit history | Storing unbounded terminal output durably conflicts with `full.md:490` ("Do not store unbounded PTY output as ordinary rows.") and `full.md:804`; `full.md:490` does permit selected durable audit/event data, so this rejection rests on the first-release scope and §6.3:480 rather than a blanket prohibition; crash-consistent replay is a large first-release commitment | `full.md:480` forbids promising crash/reboot survival unless implemented and tested; first release uses bounded retention plus `snapshot_required` |
 | 8. Crate granularity: all nine §5.1 crates day one | Matches the §5.1 sketch literally | Creates boundaries whose content is undecided before ADR-003 | `full.md:401`: "Don't create a crate for every label on day one. Split only when it establishes a useful dependency boundary." |
 | 9. Single crate with modules | Fastest start; no inter-crate wiring | Model/protocol/server boundary is a convention, not a compiler edge; §5.2 cycles cannot be mechanically checked | `full.md:405–412` is only checkable with real crate boundaries |
-| 10. Six crates plus explicitly deferred splits (**chosen**) | Every rule-bearing boundary is a real crate; deferrals are named and justified; `cargo test` stays Android-free | Two later splits remain; first-release terminal/status code sits in `relayable-server` modules temporarily | Satisfies `full.md:401` while keeping §5.2 checkable; defers only boundaries depending on ADR-003 |
+| 10. Six crates plus explicitly deferred splits (**chosen**) | Every rule-bearing boundary is a real crate; deferrals are named and justified; `cargo test` stays Android-free | Three deferred crates remain; first-release terminal/status code sits in `relayable-server` modules temporarily | Satisfies `full.md:401` while keeping §5.2 checkable; defers only boundaries depending on ADR-003 |
 | 11. Layout owned by each client | Simple for one client; no layout revision traffic | Attached clients diverge; `full.md:338` requires separating shared layout from local UI preferences; DOC-001 §10.2 documents a revisioned session-level `session_view_changed` | Shared layout is a server-owned, revisioned entity; only window size/position and theme stay client-local |
 | 12. ProgramStatus model is an OSC parser | One place to parse and store status | Puts byte-level terminal parsing in the domain layer, violating `full.md:405` | `full.md:631`: OSC 7501 is "a terminal-level integration, not the native Relayable wire protocol"; parsing lives in the terminal/status layer |
 | 13. Lua embedded in the first release | Automation available sooner | `full.md:619`: "The initial goal is not to embed a full automation runtime before the typed API and event model stabilize."; risks an untyped second call path, forbidden by `full.md:411` | The typed API and event model must stabilize first; `relayable-automation` is deferred |
@@ -91,7 +91,7 @@ details" and "Proposed crate layout and dependency direction".
 | I | Layout: server-owned tree of Blocks with split ratios inside a Window; local UI preferences stay client-local. |
 | J | ProgramStatus: normalized record, not an OSC parser; terminal-level ingestion. |
 | K | AutomationScript: Lua client of the same typed API under the same authorization model; embedding deferred. |
-| L | Crate layout: six crates plus two named deferrals (below). |
+| L | Crate layout: six crates plus three named deferred crates (below). |
 | M | Dependency direction: the allowed and forbidden edge sets (below). |
 | N | Lua path: same model/protocol path; no side channel. |
 
@@ -104,22 +104,23 @@ and a proposed Rust type name added. The entity set is frozen for the first rele
 
 | # | Spec name (`full.md` §4) | Proposed Rust type | ID kind | Owning scope |
 |---|---|---|---|---|
-| 1 | Server | `Server` | `server` | process |
+| 1 | Server | `Server` | `server` | service instance |
 | 2 | Host profile | `HostProfile` | `host` | client-local |
 | 3 | Session | `Session` | `session` | server |
 | 4 | Window | `Window` | `window` | session |
 | 5 | Block | `Block` | `block` | window (carries `session_id`) |
-| 6 | Client | `Client` | `client` | server / session |
+| 6 | Client | `Client` | `client` | attached client record / server |
 | 7 | PTY/process | `PtyProcess` | `pty` | server |
 | 8 | Layout | `Layout` | — (tree inside `Window`) | window |
 | 9 | Event | `Event` | — (envelope) | server |
 | 10 | ProgramStatus | `ProgramStatus` | — (keyed by record `id`) | block/terminal |
-| 11 | Automation script | `AutomationScript` | `script` | client/server |
+| 11 | Automation script | `AutomationScript` | `script` | server |
 
-`Layout`, `Event`, and `ProgramStatus` are value types owned by their container entity; they have no
-ID namespace because they are not independently addressable by target resolution. `ProgramStatus`
-records are addressed by the terminal-level record `id` documented in DOC-001 §11.2 Records, IDs, and
-lifetimes, not by a Relayable entity ID.
+`Layout`, `Event`, and `ProgramStatus` are value types owned by their container entity; that they
+have no ID namespace because they are not independently addressable by target resolution is
+**Relayable-defined (no REX evidence)** (`full.md` §4:331–343 is silent on addressability).
+`ProgramStatus` records are addressed by the terminal-level record `id` documented in DOC-001 §11.2
+Records, IDs, and lifetimes, not by a Relayable entity ID.
 
 **ID encoding (B).** IDs are opaque, never reused (`full.md` §4:329: "IDs that are never reused"), and
 encoded as `<kind>:<uuid>` with a singular lowercase kind.
@@ -213,7 +214,10 @@ This ADR owns the snapshot model required by `full.md` §6.1.
 - Every entity carries `revision: u64`, starting at 1 and incremented on every committed mutation of
   that entity. It is the optimistic-concurrency token for mutations on that entity, satisfying
   "Stable entity IDs and monotonically increasing revisions where state changes." (`full.md` §6.1,
-  `full.md:449`).
+  `full.md:449`). Relayable starts at 1, which is narrower than the reference's documented output
+  schema `"revision": { "type": "integer", "minimum": 0 }` (DOC-001 §8.2 Schemas and examples,
+  `docs/compatibility/reference-behavior-matrix.md:216`); the reference permits 0, and this ADR
+  discloses the narrower Relayable starting value without changing that documented definition.
 - The server maintains a monotonic `sequence: u64` assigned to every committed event. It defines total
   order and is the resynchronization cursor.
 - A **snapshot** is a consistent projection of entities at a given server `sequence`, requested
@@ -225,7 +229,10 @@ This ADR owns the snapshot model required by `full.md` §6.1.
   fallback when events/output cannot be replayed." (`full.md` §6.1, `full.md:455`).
 - Event retention is bounded in memory with a documented, configurable retention floor. There is no
   persisted event log in the first release; `full.md` §6.4 permits a small transactional store for
-  durable metadata only (`full.md:490`). Retention and queue sizes are configuration parameters, not
+  durable metadata including "selected audit/event data" (`full.md:490`). Rejecting a persisted event
+  log as the resume source of truth rests on `full.md` §6.3:480 (no crash/reboot survival promise) and
+  first-release scope, not on a blanket prohibition of persisted metadata. Retention and queue sizes
+  are configuration parameters, not
   hard-coded constants: "Add regression thresholds only after a stable baseline exists."
   (`full.md` §12, `full.md:796`).
 - A terminal **screen snapshot** and **scrollback recovery** are distinct capabilities. Relayable
@@ -245,6 +252,10 @@ Every state change is an `Event` with:
 | `revision` | Entity revision at commit | DOC-001 §10.1 and §10.2 document per-event `revision` |
 | `sequence` | Server-wide monotonic order/cursor | Relayable-defined; DOC-001 §10.1 marks a universal envelope sequence `unknown` |
 | timestamp | Optional commit time | `full.md` §8.4:625 ("timestamp where useful") |
+
+An `Event` is identified by the tuple `(scope, sequence)` — the contract's `(scope_id,
+server_sequence)` — rather than by a standalone entity ID; `entity_id` is an optional correlation
+field, not the event's identity (`docs/architecture/interface-contract.md` §1).
 
 A versioned envelope carries event type, payload, entity/session context, sequence or revision, and
 timestamp (`full.md` §8.4, `full.md:625`). Unknown optional fields and unknown event types must be
@@ -431,7 +442,7 @@ fails on any forbidden edge or cycle. `Cargo.toml` is Lead-owned, so a worker ca
 - `full.md` §0.1:22; §1.1:94; §1.3:111,121; §3:323; §4:329,331–341,338,343; §5.1:401;
   §5.2:405–412; §5.3:418.
 - `full.md` §6.1:447,449,450,455,460; §6.3:475,476,478,480; §6.4:490,492,495,500.
-- `full.md` §7.1:513–515 (XDG state/runtime paths); §8.1:605; §8.3:619; §8.4:625; §8.5:631.
+- `full.md` §7.1:513 (XDG state path), 514–515 (XDG runtime paths); §8.1:605; §8.3:619; §8.4:625; §8.5:631.
 - `full.md` §11:758,762,765; §12:796,799,804; §13.1:813; §14.4:962; §17:1182.
 - DOC-001 §2 No binary/wire-compatibility claim; §3 Label legend; §5 Domain hierarchy and stable IDs;
   §6 Target resolution; §7.5 Exit codes; §9.2 Key bindings, actions, hosts, logging.
@@ -439,7 +450,10 @@ fails on any forbidden edge or cycle. `Cargo.toml` is Lead-owned, so a worker ca
   events; §10.6 Events on the CLI.
 - DOC-001 §11 Program Status Protocol (OSC 7501), incl. §11.2 Records, IDs, and lifetimes, §11.3
   States, §11.4 Keys; §13 Connection lifecycle; §14 Relayable deltas (D-06, D-18, D-32).
-- `docs/agent-loop/TASKS.md:98–100`; `docs/agent-loop/DECISIONS.md` (DEC-002).
+- `docs/architecture/interface-contract.md` — sibling frozen interface contract required by
+  `full.md` §14.4:962; its entity/ID, snapshot, envelope, and dependency-direction tables mirror this
+  ADR's.
+- `docs/agent-loop/TASKS.md:107–109`; `docs/agent-loop/DECISIONS.md` (DEC-002).
 
 ## Unverified / outstanding verification
 
