@@ -82,3 +82,23 @@ before `agent start`.
 project-local `managed-lead` overlay granting Leads bash/edit/write so they execute directly
 (repo-only, reversible, changes the delegation model); C — update/reinstall the plugin (unproven)
 or report upstream. See `WORKLOG.md` Checkpoint 3.
+
+## 2026-10-15 — Wave 2 kickoff: DEC-009 option A applied; three Wave 2 projects launched
+
+Environment: Linux `falcon` x86_64 (omarchy), `pi 1.2.0`, pi-herdsman 0.27.0, repo
+`/home/sulthonuladib/work/relayable` (`master` @ `b96da27`).
+
+| # | Command / action | Observed result | Exit |
+|---|---|---|---|
+| 40 | `cp -a ~/.config/fish/config.fish /tmp/relayable-config.fish.bak` | backup created; `md5sum` matches source (`60a6536db6ac375f7c0e4d4f2872d609`) | 0 |
+| 41 | comment out the automatic-rename hook block (original lines 41–43) in `~/.config/fish/config.fish` | block commented; restore pointer added in-file | 0 |
+| 42 | `fish -n ~/.config/fish/config.fish` | no syntax errors | 0 |
+| 43 | `fish -c 'functions \| grep -i -E "har_\|automatic"'` | `no automatic-rename hook functions loaded` | 0 |
+| 44 | `delegate_project` `research/doc-002` (base `master`) | `ok:true`; session `3534d553-bec1-455c-83df-807ee3ca724a`; workspace `w12` | 0 |
+| 45 | `list_staff` | `research/doc-002` Lead `runtime_state: working`, 1 active agent; worktrees `w11` + `w12` | 0 |
+| 46 | `delegate_project` `research/term-001-adr-003` | `ok:true`; session `8f442f6e-6f8c-4a03-9016-dcf3f5827aa1`; workspace `w13` | 0 |
+| 47 | `delegate_project` `research/adr-001-002` | `ok:true`; session `6a4c1607-f4d3-42fb-b1fc-d6e2dce6e7ba`; workspace `w14` | 0 |
+
+**Interpretation:** option A resolves the `agent_pane_busy` fault (rows 42–45); three disjoint-path
+Wave 2 projects are running. No repo code changed by the host fix; the repo work is on the three
+branches pending INT-002 review.

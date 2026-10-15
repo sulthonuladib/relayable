@@ -7,80 +7,57 @@ Read `full.md` completely, then `AGENTS.md`, `STATUS.md`, `BACKLOG.md`, `TASKS.m
 
 ```bash
 cd /home/sulthonuladib/work/relayable && git status --short --branch && git log --oneline -8
-git worktree list && ls docs/research docs/compatibility docs/operations
+git worktree list && git branch -a
 ```
 
-## Context-window policy (DEC-008)
+## Current state (Wave 2 kickoff)
 
-- `.pi/settings.json` sets `compaction.enabled: false`; never invoke `/compact` unless the user
-  explicitly asks. Repo files are authoritative; use fresh bounded agents and concise handoffs; do
-  not inject full reports or `full.md` into task briefs. Checkpoint before context pressure.
+`master` @ `b96da27` (pushed) contains all Wave 1 research. Wave 2 is in flight on three branches,
+all based on `master` @ `b96da27`:
 
-## Current state (end of Wave 1 — research complete and integrated)
+| Workspace | Branch | Session | Tasks | Owned paths |
+|---|---|---|---|---|
+| `w12` | `research/doc-002` | `3534d553-bec1-455c-83df-807ee3ca724a` | DOC-002 | `docs/compatibility/reference-behavior-matrix.md` |
+| `w13` | `research/term-001-adr-003` | `8f442f6e-6f8c-4a03-9016-dcf3f5827aa1` | TERM-001, ADR-003 | `docs/adr/ADR-003-*.md`, `spikes/terminal-engine/**` |
+| `w14` | `research/adr-001-002` | `6a4c1607-f4d3-42fb-b1fc-d6e2dce6e7ba` | ADR-001, ADR-002 | `docs/adr/ADR-001-*.md`, `docs/adr/ADR-002-*.md`, `docs/architecture/**` |
 
-`master` contains all Wave 1 research:
+Manager (this session) owns `docs/agent-loop/**` and integration (INT-002).
 
-| Path | Content | Merge |
-|---|---|---|
-| `docs/operations/` | `toolchain-audit.md`, `android-toolchain.md` (ENV-001) | `b24133c` (tip `a31a839`) |
-| `docs/research/` | `video-review.md`, `gorex-review.md`, `ui-catalog.md`, `open-questions.md`, `design-tokens.md` (REF-001..003) | `c0578ca` (tip `269018c`) |
-| `docs/compatibility/` | `reference-behavior-matrix.md` (DOC-001) | `49795a0` (tip `9b0fe37`) |
+## DEC-009 gate — RESOLVED (option A applied 2026-10-15)
 
-INT-001 is complete. All three research Leads are idle with open assignments and clean worktrees;
-nothing was pushed; no tracked media exists in any branch.
-
-## Environment / operational facts
-
-- Host: Linux `falcon`; rustc/cargo 1.98.1; pi 1.2.0; pi-herdsman 0.27.0; herdr 0.9.5; Node 26 via
-  mise; Android CLI 1.0.16500706 + adb 1.0.41 + KVM + Temurin 25.0.4.1; no Gradle (wrapper required);
-  no Android SDK/images/licenses.
-- Worktrees: primary `/home/sulthonuladib/work/relayable` (`master`); linked research worktrees at
-  `~/.herdr/worktrees/relayable/research-{ui-reference,protocol-compat,env-audit}`.
-- **Herdr agent-start fault is NOT fixed.** `herdr agent start` fails with `agent_pane_busy` while
-  the automatic-rename fish hook spawns background bash on every prompt. The Option D wake daemon
-  was **stopped** (`/tmp/relayable-wake-daemon.stop`). Before any future agent delegation either
-  apply DEC-009 option A (comment out the hook source in `~/.config/fish/config.fish` lines 40–43)
-  or restart the daemon: `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 wX wY wZ`.
-  The daemon only helps panes in workspaces `wX/wY/wZ`; new worktrees/workspaces need their IDs added.
-- Android SDK/emulator install, license acceptance, and a project JDK pin are an approval gate.
+The automatic-rename fish hook block in `~/.config/fish/config.fish` (original lines 40–43) is
+commented out; backup `/tmp/relayable-config.fish.bak` (md5
+`60a6536db6ac375f7c0e4d4f2872d609`). `delegate_project` now succeeds. Restore = uncomment the
+block. The wake daemon `/tmp/relayable-wake-daemon.py` remains a fallback but is **stopped**;
+restart only if delegation regresses:
+`setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <workspace-ids...>`.
 
 ## Next actions (in order)
 
-1. Spot-check the integrated research docs while consuming them (they are evidence, not truth):
-   cited URLs/timestamps/frame references were verified by the Leads' own review loops, but re-check
-   any claim an ADR depends on. Known follow-ups: `design-tokens.md:210` mixes a 29 px palette-row
-   value (a 480p video estimate) into clone-derived numbers — tracked as REF-004; and `ui-reference`
-   tip `4102de1` (provenance/attribution fixes) is self-validated only (the independent audit covered
-   `269018c`).
-2. **TERM-001 + ADR-003:** terminal-engine candidates, GPUI pin decision (crates.io `gpui` 0.2.2
-   Apache-2.0 vs `Glass-HQ/gpui` with no root LICENSE), then the terminal spike.
-3. **ADR-001 + ADR-002:** domain/dependency boundaries and protocol serialization/transport, using
-   `docs/compatibility/reference-behavior-matrix.md`. No REX wire/binary compatibility claims;
-   DEC-006 (`RELAYABLE_*` vs REX aliases) still open. **First run DOC-002:** re-derive or drop the
-   `events.md` line-number citations (quoted text was verified verbatim) and re-check the 7 source
-   URLs for drift — the matrix's facts are as-of 2026-10-15 16:03–16:08Z and its reviewer's
-   live-drift pass was stopped by the session wrap-up.
-4. **CORE-001** (server-owned PTY + CLI-created session + terminal I/O + reconnection) with an
-   automated integration test, then **CORE-002**; **UI-001/UI-002** against `docs/research/`
-   catalogue + `design-tokens.md`; **QA-001** smoke/CI.
-5. Update `BACKLOG.md`, `TESTS.md`, `WORKLOG.md`, `NEXT.md`, `STATUS.md` after every iteration.
+1. Monitor the three Leads; when each reports, independently review its diff (`git diff --stat`,
+   scope check, secret scan), run any claimed validation where feasible, then integrate into
+   `master` (INT-002). Update `docs/agent-loop/**` after each merge.
+2. Integrate DOC-002 (matrix citation fix + URL drift), then ADR-001/002, then TERM-001/ADR-003.
+3. After ADR-001/002 are on `master`: launch CORE-001 (server-owned PTY + CLI-created session +
+   terminal I/O + reconnection) with an automated integration test; then CORE-002; then UI-001/UI-002
+   against `docs/research/` + `design-tokens.md`; then QA-001 smoke/CI.
+4. Keep one writer per branch/path; update `STATUS.md`, `BACKLOG.md`, `TASKS.md`, `TESTS.md`,
+   `WORKLOG.md`, `NEXT.md` after every meaningful iteration.
 
 ## Review gates (do not skip)
 
-- UI fidelity: frames were actually inspected (see `docs/research/video-review.md`); no generic
-  redesign; unverified states stay labelled.
+- UI fidelity: frames were actually inspected; no generic redesign; unverified states stay labelled.
 - No REX wire/binary compatibility claims (§3).
 - No GoRex source/asset reuse; no repo-level license found (§2.6).
 - Android Studio is not a dependency; commit a Gradle wrapper (§10).
 - Never claim server-crash or host-reboot session survival (§6.3).
 
-## Open questions (approval gates)
+## Open approval gates
 
-- **DEC-009:** Herdr fault remediation — A) stop sourcing the automatic-rename fish hook
-  (recommended), B) project-local `managed-lead` overlay with write tools, C) update/reinstall the
-  plugin. Without a fix or the daemon, agent starts fail.
-- **Android:** install SDK/emulator + accept licenses + choose project JDK pin? (user approval)
-- **Packaging target** (`.deb`/`.rpm`) and **DEC-006 env namespace** can wait.
+- **Android SDK/emulator install + project JDK pin** — only needed for Android work; unresolved.
+- **DEC-006 env namespace** (`RELAYABLE_*` vs REX aliases) — ADR-001/002 Lead will recommend; Manager
+  decides on integration.
+- **Packaging target** (`.deb`/`.rpm`) — later.
 
 ## If context pressure hits
 
