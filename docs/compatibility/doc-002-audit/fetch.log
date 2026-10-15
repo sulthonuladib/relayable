@@ -1,0 +1,233 @@
+BATCH_START=2026-10-15T16:57:25Z
+########## SLUG=cli.html ##########
+--- date_before ---
+2026-10-15T16:57:25Z
+--- curl ---
+HTTP=200 SIZE=25586 URL=https://www.superlogical.com/rex/docs/automate/cli
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:26Z
+--- sha256 ---
+feb7a664dcce882e2196d83a1eb9c266add551ef48ce4bbefc8690ef4d753dab  /tmp/doc002/raw/cli.html
+SLUGRECORD|cli.html|https://www.superlogical.com/rex/docs/automate/cli|2026-10-15T16:57:25Z|2026-10-15T16:57:26Z|0
+########## SLUG=cli.md ##########
+--- date_before ---
+2026-10-15T16:57:26Z
+--- curl ---
+HTTP=200 SIZE=4664 URL=https://www.superlogical.com/rex/docs/automate/cli.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:26Z
+--- sha256 ---
+e61162828b0876173085622831cbdae56ab8072bbc8f83c7dee51ea933912b93  /tmp/doc002/raw/cli.md
+SLUGRECORD|cli.md|https://www.superlogical.com/rex/docs/automate/cli.md|2026-10-15T16:57:26Z|2026-10-15T16:57:26Z|0
+########## SLUG=server-api.html ##########
+--- date_before ---
+2026-10-15T16:57:26Z
+--- curl ---
+HTTP=200 SIZE=38860 URL=https://www.superlogical.com/rex/docs/automate/server-api
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:26Z
+--- sha256 ---
+4e8d5040b54d88f6dcdf26b2f50a582f0d46fd022297e4ac3d2065741f51cdec  /tmp/doc002/raw/server-api.html
+SLUGRECORD|server-api.html|https://www.superlogical.com/rex/docs/automate/server-api|2026-10-15T16:57:26Z|2026-10-15T16:57:26Z|0
+########## SLUG=server-api.md ##########
+--- date_before ---
+2026-10-15T16:57:26Z
+--- curl ---
+HTTP=200 SIZE=7088 URL=https://www.superlogical.com/rex/docs/automate/server-api.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:27Z
+--- sha256 ---
+6e31118649040ff616fd83d4fc743aadb657ef0ad93e7d0a4100eb0785882038  /tmp/doc002/raw/server-api.md
+SLUGRECORD|server-api.md|https://www.superlogical.com/rex/docs/automate/server-api.md|2026-10-15T16:57:26Z|2026-10-15T16:57:27Z|0
+########## SLUG=lua.html ##########
+--- date_before ---
+2026-10-15T16:57:27Z
+--- curl ---
+HTTP=200 SIZE=50429 URL=https://www.superlogical.com/rex/docs/reference/lua
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:27Z
+--- sha256 ---
+80ec081d2cb4ac9cd0a94a2b64b2462d2a0e270e839a456575a09f4b2afc1509  /tmp/doc002/raw/lua.html
+SLUGRECORD|lua.html|https://www.superlogical.com/rex/docs/reference/lua|2026-10-15T16:57:27Z|2026-10-15T16:57:27Z|0
+########## SLUG=lua.md ##########
+--- date_before ---
+2026-10-15T16:57:27Z
+--- curl ---
+HTTP=200 SIZE=12854 URL=https://www.superlogical.com/rex/docs/reference/lua.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:27Z
+--- sha256 ---
+934773e17693cc6222eff8e40bf79911247500fdc130e92e887bb27678bd1a0f  /tmp/doc002/raw/lua.md
+SLUGRECORD|lua.md|https://www.superlogical.com/rex/docs/reference/lua.md|2026-10-15T16:57:27Z|2026-10-15T16:57:27Z|0
+########## SLUG=events.html ##########
+--- date_before ---
+2026-10-15T16:57:27Z
+--- curl ---
+HTTP=200 SIZE=31465 URL=https://www.superlogical.com/rex/docs/reference/events
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:28Z
+--- sha256 ---
+2f49cd8dc63077723262955f45c8fc1b2aa2d40890c795202106a39c0f6629ac  /tmp/doc002/raw/events.html
+SLUGRECORD|events.html|https://www.superlogical.com/rex/docs/reference/events|2026-10-15T16:57:27Z|2026-10-15T16:57:28Z|0
+########## SLUG=events.md ##########
+--- date_before ---
+2026-10-15T16:57:28Z
+--- curl ---
+HTTP=200 SIZE=7308 URL=https://www.superlogical.com/rex/docs/reference/events.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:28Z
+--- sha256 ---
+e0c8b1cdfb0967f674f4dece59f7bc3d17782ab0e928920d8070902c92c7d5a0  /tmp/doc002/raw/events.md
+SLUGRECORD|events.md|https://www.superlogical.com/rex/docs/reference/events.md|2026-10-15T16:57:28Z|2026-10-15T16:57:28Z|0
+########## SLUG=lua-events.html ##########
+--- date_before ---
+2026-10-15T16:57:28Z
+--- curl ---
+HTTP=200 SIZE=33998 URL=https://www.superlogical.com/rex/docs/automate/lua-events
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:29Z
+--- sha256 ---
+ae6e2b5864cccf526ba61bda462461543e7463fda9407ab1f034f147de8bcec5  /tmp/doc002/raw/lua-events.html
+SLUGRECORD|lua-events.html|https://www.superlogical.com/rex/docs/automate/lua-events|2026-10-15T16:57:28Z|2026-10-15T16:57:29Z|0
+########## SLUG=lua-events.md ##########
+--- date_before ---
+2026-10-15T16:57:29Z
+--- curl ---
+HTTP=200 SIZE=5863 URL=https://www.superlogical.com/rex/docs/automate/lua-events.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:29Z
+--- sha256 ---
+312426e5edef5c80abb34785cda150de4c30acb8045912c4b6139b388d6af4a9  /tmp/doc002/raw/lua-events.md
+SLUGRECORD|lua-events.md|https://www.superlogical.com/rex/docs/automate/lua-events.md|2026-10-15T16:57:29Z|2026-10-15T16:57:29Z|0
+########## SLUG=lua-scripts.html ##########
+--- date_before ---
+2026-10-15T16:57:29Z
+--- curl ---
+HTTP=200 SIZE=43105 URL=https://www.superlogical.com/rex/docs/automate/lua-scripts
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:29Z
+--- sha256 ---
+4abac36d940f3a2f3468006b04e5932632328868000fdcf125fd280fa727fbd7  /tmp/doc002/raw/lua-scripts.html
+SLUGRECORD|lua-scripts.html|https://www.superlogical.com/rex/docs/automate/lua-scripts|2026-10-15T16:57:29Z|2026-10-15T16:57:29Z|0
+########## SLUG=lua-scripts.md ##########
+--- date_before ---
+2026-10-15T16:57:29Z
+--- curl ---
+HTTP=200 SIZE=6860 URL=https://www.superlogical.com/rex/docs/automate/lua-scripts.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:30Z
+--- sha256 ---
+0d8b1547357bda30e9b85e86f054f240fcf604711cf805d66d98f81da556a372  /tmp/doc002/raw/lua-scripts.md
+SLUGRECORD|lua-scripts.md|https://www.superlogical.com/rex/docs/automate/lua-scripts.md|2026-10-15T16:57:29Z|2026-10-15T16:57:30Z|0
+########## SLUG=program-status.html ##########
+--- date_before ---
+2026-10-15T16:57:30Z
+--- curl ---
+HTTP=200 SIZE=45357 URL=https://www.superlogical.com/rex/docs/build/program-status
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:30Z
+--- sha256 ---
+0e1f209b29201f167c944ee1f20465ebfb1c7c9390cbf19ea364eeeb9f5b05f7  /tmp/doc002/raw/program-status.html
+SLUGRECORD|program-status.html|https://www.superlogical.com/rex/docs/build/program-status|2026-10-15T16:57:30Z|2026-10-15T16:57:30Z|0
+########## SLUG=program-status.md ##########
+--- date_before ---
+2026-10-15T16:57:30Z
+--- curl ---
+HTTP=200 SIZE=16582 URL=https://www.superlogical.com/rex/docs/build/program-status.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:31Z
+--- sha256 ---
+9b3f32f6e53989c3d0909ce13cda4fb7dc15e29718f5a096281eb3ac4a951829  /tmp/doc002/raw/program-status.md
+SLUGRECORD|program-status.md|https://www.superlogical.com/rex/docs/build/program-status.md|2026-10-15T16:57:30Z|2026-10-15T16:57:31Z|0
+########## SLUG=docs-index.html ##########
+--- date_before ---
+2026-10-15T16:57:31Z
+--- curl ---
+HTTP=200 SIZE=15943 URL=https://www.superlogical.com/rex/docs/installation
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:32Z
+--- sha256 ---
+f668b09c300daf7b2ddef8f6a62cc0355f50c08b41aa853d49d8aadc34b461c1  /tmp/doc002/raw/docs-index.html
+SLUGRECORD|docs-index.html|https://www.superlogical.com/rex/docs|2026-10-15T16:57:31Z|2026-10-15T16:57:32Z|0
+########## SLUG=installation.md ##########
+--- date_before ---
+2026-10-15T16:57:32Z
+--- curl ---
+HTTP=200 SIZE=611 URL=https://www.superlogical.com/rex/docs/installation.md
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:32Z
+--- sha256 ---
+514e3a81ded0e1d7413e06d6e51c3c071ab5cad0955752b8d204f908816d09c7  /tmp/doc002/raw/installation.md
+SLUGRECORD|installation.md|https://www.superlogical.com/rex/docs/installation.md|2026-10-15T16:57:32Z|2026-10-15T16:57:32Z|0
+########## SLUG=sitemap-xml-1 ##########
+--- date_before ---
+2026-10-15T16:57:32Z
+--- curl ---
+HTTP=404 SIZE=5642 URL=https://www.superlogical.com/sitemap.xml
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:32Z
+--- sha256 ---
+cc0f75799dae4f9e64665f415c936fb1d12d7c26b88e3841368e3a7fe48e2a3d  /tmp/doc002/raw/sitemap-xml-1
+SLUGRECORD|sitemap-xml-1|https://www.superlogical.com/sitemap.xml|2026-10-15T16:57:32Z|2026-10-15T16:57:32Z|0
+########## SLUG=sitemap-index-xml ##########
+--- date_before ---
+2026-10-15T16:57:33Z
+--- curl ---
+HTTP=404 SIZE=5642 URL=https://www.superlogical.com/sitemap-index.xml
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:33Z
+--- sha256 ---
+cc0f75799dae4f9e64665f415c936fb1d12d7c26b88e3841368e3a7fe48e2a3d  /tmp/doc002/raw/sitemap-index-xml
+SLUGRECORD|sitemap-index-xml|https://www.superlogical.com/sitemap-index.xml|2026-10-15T16:57:33Z|2026-10-15T16:57:33Z|0
+########## SLUG=sitemap_index-xml ##########
+--- date_before ---
+2026-10-15T16:57:33Z
+--- curl ---
+HTTP=404 SIZE=5642 URL=https://www.superlogical.com/sitemap_index.xml
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:33Z
+--- sha256 ---
+cc0f75799dae4f9e64665f415c936fb1d12d7c26b88e3841368e3a7fe48e2a3d  /tmp/doc002/raw/sitemap_index-xml
+SLUGRECORD|sitemap_index-xml|https://www.superlogical.com/sitemap_index.xml|2026-10-15T16:57:33Z|2026-10-15T16:57:33Z|0
+########## SLUG=sitemap-0-xml ##########
+--- date_before ---
+2026-10-15T16:57:33Z
+--- curl ---
+HTTP=404 SIZE=5642 URL=https://www.superlogical.com/sitemap-0.xml
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:34Z
+--- sha256 ---
+cc0f75799dae4f9e64665f415c936fb1d12d7c26b88e3841368e3a7fe48e2a3d  /tmp/doc002/raw/sitemap-0-xml
+SLUGRECORD|sitemap-0-xml|https://www.superlogical.com/sitemap-0.xml|2026-10-15T16:57:33Z|2026-10-15T16:57:34Z|0
+########## SLUG=robots.txt ##########
+--- date_before ---
+2026-10-15T16:57:34Z
+--- curl ---
+HTTP=200 SIZE=63 URL=https://www.superlogical.com/robots.txt
+curl_exit=0
+--- date_after ---
+2026-10-15T16:57:34Z
+--- sha256 ---
+b033243267bcbdab84cb01e940811d6d77a894d78f0470faaf0eb43f8e4efcc9  /tmp/doc002/raw/robots.txt
+SLUGRECORD|robots.txt|https://www.superlogical.com/robots.txt|2026-10-15T16:57:34Z|2026-10-15T16:57:34Z|0
+BATCH_END=2026-10-15T16:57:34Z
