@@ -20,7 +20,7 @@ checkpoint; keep it short.
   `managed-lead` overlay granting Leads bash/edit/write so they execute directly; Option C —
   update/reinstall the plugin.
 - **Uncommitted changes:** none after the blocker checkpoint.
-- **Stopgap active (Option D, no config change):** bounded wake daemon running (~30 min) and the
+- **Stopgap active (Option D, no config change):** bounded wake daemon running (~60 min) and the
   three Leads instructed to retry delegation; see `WORKLOG.md` Checkpoint 4. Result so far: Agents
   started in `research/ui-reference` (2 active) and `research/protocol-compat` (2 active); outcomes
   pending. The permanent fix is still the pending DEC-009 decision.

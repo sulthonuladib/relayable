@@ -102,6 +102,11 @@ until they settle); `research/env-audit` is working. Outcomes (files, commits, v
 pending the Leads' reports. The daemon window expires ~30 min after activation; if a later wave
 (e.g. a writer after workers) still needs it, restart the daemon or apply the permanent fix.
 
+**Window extended:** the 30-minute instance was replaced with a fresh 3600 s instance (pid 2781970,
+stop file unchanged, expires ~00:05) so the planned workers → writer → reviewer waves are covered.
+Stop it with `touch /tmp/relayable-wake-daemon.stop` once the permanent fix is applied or the wave
+settles.
+
 **Next:** collect the Leads' retry results; if agents start, review/integrate Wave 1 (INT-001). If
 `agent_start` still fails, stop the daemon (`touch /tmp/relayable-wake-daemon.stop`) and report the
 fresh evidence.

@@ -56,6 +56,7 @@ resume, Lead→Agent `delegate_agent`, and any Herdsman-spawned writer agent.
 | 24 | `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 1800 wX wY wZ` | daemon running (pid 2765519); `ps` confirms the exact command line; stop file `/tmp/relayable-wake-daemon.stop` | 0 |
 | 25 | `message_staff` to the three Lead sessions | all returned `ok: true` (delivery ids `2b82f497…`, `fe14f159…`, `68ede95e…`) | 0 |
 | 26 | Fresh supervision snapshot after the retry instruction | Option D stopgap working: `research/ui-reference` active=2 Agents, `research/protocol-compat` active=2 Agents (herd run owns its handoff), `research/env-audit` working; no `agent_start` failures reported in this window | observation |
+| 27 | Restart bounded stopgap for the full wave: stop old daemon via `/tmp/relayable-wake-daemon.stop`, then `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 wX wY wZ` | old daemon exited; new daemon pid 2781970 running (expires ~00:05) | 0 |
 
 **Root cause:** `~/.config/fish/config.fish` (lines 40–43) sources the `herdr-automatic-rename`
 fish hook (`shell/hook.fish`). Its `fish_preexec`/`fish_postexec` handlers spawn background `bash`
