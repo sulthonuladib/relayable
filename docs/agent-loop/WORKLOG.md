@@ -107,11 +107,15 @@ pre-retry state and are superseded by this result; their "pane leak" caution is 
 stop file unchanged, expires ~00:05) so the planned workers → writer → reviewer waves are covered.
 All three Leads were notified of the extension.
 
-**Wave 1 started:** `ui-reference`'s two writer Agents started on the first attempt with no rollback —
-`ref-video` (session `01a1404e-6f78-704c-9851-9401bd0ee55d`) and `gorex` (session
-`01a1404e-7db4-7182-826f-8f8615acf878`). `env-audit` has its two audit Agents running; `protocol-compat`
-has two Agents running. Stop the daemon with `touch /tmp/relayable-wake-daemon.stop` once the
-permanent fix is applied or the wave settles.
+**Wave 1 delivered (`research/ui-reference`):** `docs/research/video-review.md` (`f067f92`,
++562 lines) and `docs/research/gorex-review.md` (`a7e14a3`, +420 lines). All five videos were actually
+inspected (metadata + auto-captions + downloaded frames; 332 JPEGs in the gitignored
+`docs/research/evidence/`); two transient capture errors were retried and recorded, not hidden;
+video 3's figures are quoted verbatim with the stated environment and labelled non-reproducible;
+video 5 yielded verbatim `rex` CLI commands. Wave 2 (`ref-catalog`: `ui-catalog.md` +
+`open-questions.md`) is in flight under the same stopgap, and an independent read-only audit of the
+GoRex artifact is running. 0/3 `agent_start` failures. Stop the daemon with
+`touch /tmp/relayable-wake-daemon.stop` once the permanent fix is applied or the wave settles.
 
 **Next:** collect the Leads' retry results; if agents start, review/integrate Wave 1 (INT-001). If
 `agent_start` still fails, stop the daemon (`touch /tmp/relayable-wake-daemon.stop`) and report the
