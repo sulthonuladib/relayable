@@ -21,7 +21,7 @@
 //!   [`Confidence`] and caveat travel together, so a reviewer cannot lose them.
 //! * [`Approx`] keeps measurement *spread* honest: values the document gives as
 //!   ranges stay ranges; single measurements use [`Approx::point`].
-//! * [`Rgb8::to_u32_0xRRGGBB`] lets the GPUI binary call `gpui::rgb(...)`
+//! * [`Rgb8::to_packed_rgb_u32`] lets the GPUI binary call `gpui::rgb(...)`
 //!   without this module depending on GPUI.
 //!
 //! This file must stay **GPUI-free** (no `use gpui` anywhere): it is part of the
@@ -110,7 +110,7 @@ impl Approx {
 /// A 24-bit sRGB colour with 8 bits per channel.
 ///
 /// The GPUI binary converts this to the packed `0xRRGGBB` form that
-/// `gpui::rgb` expects via [`Rgb8::to_u32_0xRRGGBB`], so this module never
+/// `gpui::rgb` expects via [`Rgb8::to_packed_rgb_u32`], so this module never
 /// imports GPUI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Rgb8 {
@@ -128,12 +128,8 @@ impl Rgb8 {
         Self { r, g, b }
     }
 
-    /// Pack as `0xRRGGBB` for `gpui::rgb(..)`.
-    ///
-    /// The name is intentionally `0xRRGGBB` (the GPUI-facing packed form) and is
-    /// fixed by the UI-001 spec; allow the snake-case lint rather than rename it.
-    #[allow(non_snake_case)]
-    pub const fn to_u32_0xRRGGBB(self) -> u32 {
+    /// Pack the channels into the `0xRRGGBB` form expected by `gpui::rgb(..)`.
+    pub const fn to_packed_rgb_u32(self) -> u32 {
         ((self.r as u32) << 16) | ((self.g as u32) << 8) | (self.b as u32)
     }
 }
@@ -543,6 +539,26 @@ pub mod colors {
         "V1 0:24 `v1-t0024.png`",
         Confidence::High,
         "no visible separation between header and terminal",
+    );
+
+    /// Pane card border / focused (V4): rgb ≈(31,82,115).
+    ///
+    /// `docs/research/design-tokens.md:127` (restated at `:201`).
+    pub const PANE_CARD_BORDER_FOCUSED: Measured<Rgb8> = Measured::new(
+        Rgb8::new(31, 82, 115),
+        "V4 0:58 `v4-t0058.png`",
+        Confidence::MediumHigh,
+        "includes antialias",
+    );
+
+    /// Pane card border / unfocused (V4): rgb ≈(17,54,71).
+    ///
+    /// `docs/research/design-tokens.md:128` (restated at `:201`).
+    pub const PANE_CARD_BORDER_UNFOCUSED: Measured<Rgb8> = Measured::new(
+        Rgb8::new(17, 54, 71),
+        "V4 0:58 `v4-t0058.png`",
+        Confidence::Medium,
+        "one frame",
     );
 
     /// Palette panel background: rgb(10,29,41).
@@ -1141,6 +1157,16 @@ mod tests {
                 colors::PANE_HEADER_SURFACE_V1.caveat,
             ),
             (
+                "colors::PANE_CARD_BORDER_FOCUSED",
+                colors::PANE_CARD_BORDER_FOCUSED.source,
+                colors::PANE_CARD_BORDER_FOCUSED.caveat,
+            ),
+            (
+                "colors::PANE_CARD_BORDER_UNFOCUSED",
+                colors::PANE_CARD_BORDER_UNFOCUSED.source,
+                colors::PANE_CARD_BORDER_UNFOCUSED.caveat,
+            ),
+            (
                 "colors::PALETTE_PANEL_BACKGROUND",
                 colors::PALETTE_PANEL_BACKGROUND.source,
                 colors::PALETTE_PANEL_BACKGROUND.caveat,
@@ -1268,14 +1294,24 @@ mod tests {
             colors::SELECTION_SESSION_PICKER_ROW.value,
             Rgb8::new(68, 156, 255)
         );
+        // §3.2 line 127: "Pane card border / focused | 2–3 px, rgb ≈ (31,82,115)".
+        assert_eq!(
+            colors::PANE_CARD_BORDER_FOCUSED.value,
+            Rgb8::new(31, 82, 115)
+        );
+        // §3.2 line 128: "Pane card border / unfocused | 2–3 px, rgb ≈ (17,54,71)".
+        assert_eq!(
+            colors::PANE_CARD_BORDER_UNFOCUSED.value,
+            Rgb8::new(17, 54, 71)
+        );
     }
 
     #[test]
     fn rgb_packs_to_0x_rrggbb() {
-        assert_eq!(Rgb8::new(4, 27, 46).to_u32_0xRRGGBB(), 0x04_1B_2E);
-        assert_eq!(Rgb8::new(255, 255, 255).to_u32_0xRRGGBB(), 0xFF_FF_FF);
-        assert_eq!(Rgb8::new(0, 0, 0).to_u32_0xRRGGBB(), 0x00_00_00);
-        assert_eq!(Rgb8::new(191, 219, 228).to_u32_0xRRGGBB(), 0xBF_DB_E4);
+        assert_eq!(Rgb8::new(4, 27, 46).to_packed_rgb_u32(), 0x04_1B_2E);
+        assert_eq!(Rgb8::new(255, 255, 255).to_packed_rgb_u32(), 0xFF_FF_FF);
+        assert_eq!(Rgb8::new(0, 0, 0).to_packed_rgb_u32(), 0x00_00_00);
+        assert_eq!(Rgb8::new(191, 219, 228).to_packed_rgb_u32(), 0xBF_DB_E4);
     }
 
     #[test]

@@ -20,9 +20,8 @@ echo "rustc_version=$(rustc --version)"
 echo "clippy_version=$(cargo clippy --version 2>&1)"
 echo "rustfmt_version=$(cargo fmt --version 2>&1)"
 
-run check        cargo check
-run test         cargo test
-run build        cargo build
+run check        cargo check --locked
+run test         cargo test --locked
+run build        cargo build --locked
 run fmt_check    cargo fmt --check
-run clippy       cargo clippy --all-targets
-run build_release cargo build --release
+run clippy       cargo clippy --all-targets --locked

@@ -86,7 +86,13 @@ The root view applies two documented tokens from `src/tokens.rs` (see README
 §5): `colors::PANE_HEADER_SURFACE_V1` = rgb(9,30,46) as the window background
 (confidence **high**) and `colors::PRIMARY_TEXT` = rgb(191,219,228) for the
 label (confidence **medium**), converted with
-`Rgb8::to_u32_0xRRGGBB()` → `gpui::rgb(..)`.
+`Rgb8::to_packed_rgb_u32()` → `gpui::rgb(..)`.
+
+> Corrective-round note: these two colour tokens and their values are unchanged
+> by the review fixes (`to_u32_0xRRGGBB` was renamed to `to_packed_rgb_u32`; the
+> pane-card border colours were added as new tokens). The app's rendered output
+> is identical, so this screenshot was **not** re-captured and still reflects the
+> committed code. See `evidence/corrective-round.md`.
 
 Pixel sampling of the saved screenshot (ImageMagick): the flat background
 sampled as `srgb(10,30,45)` — a ±1 R/B render/compositing difference from the

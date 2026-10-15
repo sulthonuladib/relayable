@@ -142,7 +142,7 @@ hover/active animation requires font and motion evidence the research has not pr
 | `colors::PANE_HEADER_SURFACE_V1` = rgb(9,30,46) | window root background | **high** |
 | `colors::PRIMARY_TEXT` = rgb(191,219,228) | placeholder label colour | **medium** |
 
-This is a deliberate token smoke test (it exercises `to_u32_0xRRGGBB` -> `gpui::rgb`), not the
+This is a deliberate token smoke test (it exercises `to_packed_rgb_u32` -> `gpui::rgb`), not the
 UI-002 workspace UI. In the captured screenshot the flat background sampled as `srgb(10,30,45)` — a
 ±1 R/B render/compositing difference from the token's rgb(9,30,46).
 

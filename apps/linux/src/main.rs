@@ -35,10 +35,12 @@ impl Render for RelayableRoot {
             .justify_center()
             .items_center()
             // Documented V1 pane-header/surface colour (confidence high).
-            .bg(rgb(colors::PANE_HEADER_SURFACE_V1.value.to_u32_0xRRGGBB()))
+            .bg(rgb(colors::PANE_HEADER_SURFACE_V1
+                .value
+                .to_packed_rgb_u32()))
             .text_xl()
             // Documented primary-text colour (confidence medium).
-            .text_color(rgb(colors::PRIMARY_TEXT.value.to_u32_0xRRGGBB()))
+            .text_color(rgb(colors::PRIMARY_TEXT.value.to_packed_rgb_u32()))
             .child(self.label.clone())
     }
 }
