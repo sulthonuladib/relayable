@@ -19,7 +19,7 @@ lives in [`evidence/ui-002-comparison.md`](./evidence/ui-002-comparison.md).
 | Path | Role |
 |---|---|
 | `src/lib.rs` | Library crate `relayable_linux`. Declares `api`, `app`, `geometry`, `term`, `theme`, `tokens`, `ui`. **Not** GPUI-free as a whole: `app` and `ui` carry GPUI views (`full.md` §5.3 only requires GPUI code to live inside `apps/linux`). |
-| `src/tokens.rs` | The design-token sheet, encoded **only** from `docs/research/design-tokens.md`. No GPUI. |
+| `src/tokens.rs` | Re-export root of the design-token sheet (`src/tokens/**`), encoded **only** from `docs/research/design-tokens.md`. No GPUI. |
 | `src/geometry.rs` | Measured reference geometry as pure data (`v1` / `v4` namespaces) plus layout helpers; reused `tokens::Measured`. No GPUI. |
 | `src/theme.rs` | Packed `0xRRGGBB` colours mapped from `tokens`, plus clearly-labelled `*_ORIGINAL` Relayable-original values. No GPUI. |
 | `src/term/mod.rs` | GPUI-free headless terminal model: `alacritty_terminal` 0.26.0 + `vte` 0.15.0. |
@@ -57,15 +57,15 @@ research evidence only — Relayable branding and assets are used (`full.md` §0
 
 | # | Catalogue entry | Source timestamp(s) | Relayable component (implemented) |
 |---|---|---|---|
-| 1 | `desktop/workspace-default` | **V1 0:24** | `src/app.rs` (`render` / `render_top_bar` / `render_body`), `src/main.rs` (1099×706 window) |
-| 2 | `desktop/tab-strip` | **V1 0:42–0:47 / 2:22** | `src/app.rs` (`render_top_bar`, pill, inactive divider, duplicate-label `-1` rule) |
-| 3 | `desktop/pane-header` | **V1 0:42–0:47 / 1:33 + V4 0:58 / 4:49** | `src/app.rs` (`render_pane_header`, four icon buttons on the focused split pane) |
-| 4 | `desktop/terminal-body` | **V1 0:47 / 1:33–1:40** | `src/ui/terminal.rs` + `src/term/mod.rs` (ramp, 17.25 px pitch, block cursor, scrollbar) |
-| 5 | `desktop/split-layout` | **V4 0:58 / 4:49** | `src/app.rs` (`render_pane`, `SplitAxis`, focused/unfocused surfaces + 2.5 px borders) |
-| 6 | `desktop/session-picker` | **V1 1:40** | `src/app.rs` (`render_picker`, `picker_*`) |
+| 1 | `desktop/workspace-default` | **V1 0:24** | `src/app/render.rs` (`render`), `src/app/top_bar.rs` (`render_top_bar`), `src/app/panes.rs` (`render_body`), `src/main.rs` (1099×706 window) |
+| 2 | `desktop/tab-strip` | **V1 0:42–0:47 / 2:22** | `src/app/top_bar.rs` (`render_top_bar`, pill, inactive divider, duplicate-label `-1` rule) |
+| 3 | `desktop/pane-header` | **V1 0:42–0:47 / 1:33 + V4 0:58 / 4:49** | `src/app/panes.rs` (`render_pane_header`, four icon buttons on the focused split pane) |
+| 4 | `desktop/terminal-body` | **V1 0:47 / 1:33–1:40** | `src/ui/terminal.rs` + `src/term/model.rs` (ramp, 17.25 px pitch, block cursor, scrollbar) |
+| 5 | `desktop/split-layout` | **V4 0:58 / 4:49** | `src/app/panes.rs` (`render_pane`), `src/app/state.rs` (`SplitAxis`), focused/unfocused surfaces + 2.5 px borders |
+| 6 | `desktop/session-picker` | **V1 1:40** | `src/app/picker.rs` (`render_picker`, `picker_*`) |
 
 Additional observed behaviour implemented: live program/cwd in tab + header from shell **OSC 2 / OSC 7**
-(`src/api/mod.rs` OSC tracker), tab switching, split/focus/close, runtime `terminal.resize`.
+(`src/api/osc.rs` OSC tracker), tab switching, split/focus/close, runtime `terminal.resize`.
 
 ### 2.2 Not implemented (with source timestamp)
 
@@ -95,27 +95,27 @@ from a reference and must not be presented as such.
 
 | Screen / state | Source files |
 |---|---|
-| Top bar, separator, tab strip, pill, `+`, inactive dividers | `src/app.rs` (`render_top_bar`), `src/geometry.rs` (`workspace_columns*`), `src/theme.rs` |
-| Pane card, split axis, focus, borders, pane header + icon buttons | `src/app.rs` (`render_body`, `render_pane`, `render_pane_header`, `render_icon_button`, `icon_glyph`) |
-| Terminal body (grid, ramps, cursor, scrollbar, scroll) | `src/ui/terminal.rs`, `src/term/mod.rs`, `src/ui/mod.rs` (`lerp_packed`) |
+| Top bar, separator, tab strip, pill, `+`, inactive dividers | `src/app/top_bar.rs` (`render_top_bar`), `src/geometry.rs` (`workspace_columns*`), `src/theme.rs` |
+| Pane card, split axis, focus, borders, pane header + icon buttons | `src/app/panes.rs` (`render_body`, `render_pane`, `render_pane_header`, `render_icon_button`, `icon_glyph`) |
+| Terminal body (grid, ramps, cursor, scrollbar, scroll) | `src/ui/terminal.rs`, `src/term/model.rs`, `src/ui/mod.rs` (`lerp_packed`) |
 | ANSI cell colours | `src/ui/palette.rs` (**non-reference** xterm-256) |
-| Session picker popup | `src/app.rs` (`render_picker`, `handle_picker_key`, `picker_matches`, `picker_accept`) |
-| Connection / mock banners, empty state | `src/app.rs` (`render_connection_banner`, `render_mock_banner`, `render_empty_state`) |
-| Live server I/O, OSC title/cwd, reconnect, mock | `src/api/mod.rs` |
+| Session picker popup | `src/app/picker.rs` (`render_picker`, `picker_matches`, `picker_accept`), `src/app/keys.rs` (`handle_picker_key`) |
+| Connection / mock banners, empty state | `src/app/top_bar.rs` (`render_connection_banner`, `render_mock_banner`), `src/app/panes.rs` (`render_empty_state`) |
+| Live server I/O, OSC title/cwd, reconnect, mock | `src/api/mod.rs` (`data.rs`, `control.rs`, `osc.rs`, `mock.rs`) |
 | Window creation, options, keybinding help | `src/main.rs` |
-| Measured tokens | `src/tokens.rs` (sheet) → `src/geometry.rs` / `src/theme.rs` (typed access) |
+| Measured tokens | `src/tokens/**` (sheet) → `src/geometry.rs` / `src/theme.rs` (typed access) |
 
 ## 4. Design tokens
 
 **Single source:** `docs/research/design-tokens.md` (measurements with per-value method and
-confidence). No value exists in `src/tokens.rs` that is not stated there. Every token carries its
+confidence). No value exists in `src/tokens/**` that is not stated there. Every token carries its
 `source` stamp, `confidence` label and `caveat` in the type system (`Measured<T>`); ranges stay
 ranges (`Approx`).
 
 - **`geometry` / `theme` split:** `src/geometry.rs` holds pure layout data (namespaced `v1` at
   1170×1080 and `v4` at 1624×1080) and helpers; `src/theme.rs` holds packed `0xRRGGBB` colours
   mapped from `tokens`, because gpui 0.2.2 takes `rgb(hex: u32)`. `src/tokens.rs` remains the
-  provenance sheet for both.
+  re-export root of the provenance sheet values under `src/tokens/**`.
 - **`ORIGINAL_INVENTED` labelling:** anything never measured is marked Relayable-original in code —
   `theme::*_ORIGINAL`, `geometry::invented::*_ORIGINAL`, `ui/palette.rs`. No invented value is
   presented as a reference token.
