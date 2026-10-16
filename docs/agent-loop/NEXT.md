@@ -43,8 +43,9 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **Backlog (dependency-free):** `CLIENT-API-001` (client incremental raw-byte streaming — needed to
-   drive a live terminal in the GPUI view), `MEM-001` (memory baseline), `REF-004` remainder,
+1. **CLIENT-API-001 (in flight)** — `client/client-api-001-incremental-output` (Herdr `w1H`): add a public
+   `Client::next_output` incremental terminal-bytes API + backpressure integration test so the GPUI view can
+   drive a live terminal. Then dependency-free backlog: `MEM-001` (memory baseline), `REF-004` remainder,
    `CI-HOST-001`. (CTX-001 = INT-015 `dd1b986` and INSTALL-001 = INT-016 `39e5d49` are integrated.)
 2. **STORE-001** — `crates/relayable-store` (SQLite metadata/audit) + server start-up reconciliation,
    `flock`, prune, write path per ADR-004 (designed, not implemented). Start only after CTX-001 lands.

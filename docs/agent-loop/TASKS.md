@@ -56,7 +56,7 @@ the evidence is integrated.
 | QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | `qa/qa-001-smoke-ci` | DONE — integrated `4a258c2` (INT-013); bounded ≤ window + one frame flush then `flow_control_overflow` |
 | MEM-001 | Measured idle/active memory baseline + regression thresholds (`full.md` §12) | QA-001 | TBD | BACKLOG |
 | CI-HOST-001 | Decide whether to host CI (`.github/workflows`) given a hosted runner cannot build this tree without network/vendoring | QA-001 | TBD | BACKLOG |
-| CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | TBD | BACKLOG |
+| CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | `client/client-api-001-incremental-output` (Herdr `w1H`) | IN_PROGRESS — add public `Client::next_output` incremental API + backpressure integration test |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
 (parallel, disjoint paths) → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →

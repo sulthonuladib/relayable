@@ -21,8 +21,11 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
   `systemd --user`-runnable server + the GPUI client + a user install path (INSTALL-001).
 - **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred (DEC-010).
 - **Failing tests:** none.
-- **Next integration step:** dependency-free backlog — CLIENT-API-001 (list-item 9); STORE-001 awaits the
-  SQLite binding decision. Primary user goal (locally installable app) is delivered by INSTALL-001.
+- **In flight:** **CLIENT-API-001** (`client/client-api-001-incremental-output`, Herdr project `w1H`):
+  public `Client::next_output` incremental terminal-bytes API + backpressure integration test. Owns
+  `crates/relayable-client/src/lib.rs`, `tests/Cargo.toml`, `tests/client-output/**`.
+- **Primary user goal reached:** a locally installable/testable Linux app (server + CLI + GPUI client +
+  user install path) is delivered and verified (`scripts/install-user.sh`, `systemd --user` unit).
 
 ## Priority order (next first)
 
@@ -35,7 +38,7 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | `ctx/ctx-001-context-env` | ADR-005, CORE-001 | DONE — `dd1b986` (INT-015); 4 integration + 2 unit tests |
 | 6 | INSTALL-001 — user install path (script + systemd user unit + desktop entry + README) | `install/install-001-user-install` | CORE-001, UI-002 | DONE — `39e5d49` (INT-016) + `a3ff5c0`; sandbox install + live round-trip; `--with-desktop` builds |
 | 7 | ADR-004 (DEC-005 ownership/persistence) | `adr/adr-004-ownership-persistence` | CORE-002 | DONE — `9a3fb27`; Accepted; store work → `STORE-001` |
-| 9 | STORE-001 (after CTX-001) / MEM-001 / CI-HOST-001 / CLIENT-API-001 / REF-004 remainder | TBD | — | BACKLOG |
+| 9 | CLIENT-API-001 (in flight) / STORE-001 (blocked: SQLite binding decision) / MEM-001 / CI-HOST-001 / REF-004 remainder | TBD | — | IN_PROGRESS / BACKLOG |
 | 8 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
 
 ## Operating rules
