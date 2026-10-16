@@ -1,8 +1,58 @@
 use std::collections::HashMap;
 
+use crate::api::ConnectionState;
 use crate::theme;
 
-use super::state::Tab;
+use super::state::{CreateIntent, Tab};
+
+/// Stage-1 auto-session invariant (DEC-019): the app must end up with a session
+/// on its own, so a session is requested exactly when the app has no tabs, is
+/// connected, and has no create in flight.
+///
+/// Pure, so the invariant is unit-testable without a gpui context. The
+/// `Connected` term is also the retry bound: after a failed create the view's
+/// own state is `Error`/`Disconnected`, so this cannot re-send from the failure
+/// path and spin into a create loop.
+pub(super) fn needs_session(
+    connection: &ConnectionState,
+    tabs_empty: bool,
+    create_in_flight: bool,
+) -> bool {
+    tabs_empty && !create_in_flight && matches!(connection, ConnectionState::Connected)
+}
+
+/// Text for the empty surface (zero tabs).
+///
+/// Relayable-original: the research catalogue records the empty, loading, error
+/// and disconnected surfaces as `not observed` in all five reference videos, so
+/// this copy is not reference-derived (see
+/// `apps/linux/evidence/ui-004-notes.md`). It states the real state and never
+/// claims a create is in flight unless one is.
+pub(super) fn empty_state_message(
+    connection: &ConnectionState,
+    create_in_flight: bool,
+) -> &'static str {
+    match connection {
+        ConnectionState::Connected if create_in_flight => "No sessions yet — creating one…",
+        ConnectionState::Connected => "No session — Ctrl+Shift+N creates one",
+        ConnectionState::Connecting => "Connecting to the Relayable server…",
+        ConnectionState::Reconnecting { .. } => "Reconnecting…",
+        ConnectionState::Disconnected => "Disconnected — no live server connection",
+        ConnectionState::Error(_) => "Server error — see the banner",
+    }
+}
+
+/// Drop an in-flight create whose reply can no longer arrive (DEC-019 defect 2).
+///
+/// The only positive reply for a `session.create` is `SessionCreated`; an error
+/// or a disconnect means the request will not be answered. Leaving the intent set
+/// would refuse every later create (`create_session` returns early while it is
+/// set), wedging auto-create and `Ctrl+Shift+N`. Returns whether an intent was
+/// actually dropped. Pure, so the re-arm rule is unit-testable without a gpui
+/// context; it cannot loop, because clearing never re-sends.
+pub(super) fn abandon_create(pending_create: &mut Option<CreateIntent>) -> bool {
+    pending_create.take().is_some()
+}
 
 /// Pane ids that have no live stream and therefore must be (re-)attached.
 ///

@@ -1,4 +1,3 @@
-use crate::api::ConnectionState;
 use crate::geometry;
 use crate::theme;
 use crate::ui::terminal::TerminalCanvas;
@@ -7,6 +6,7 @@ use gpui::{
     SharedString,
 };
 
+use super::helpers::empty_state_message;
 use super::state::{PaneAction, SplitAxis};
 use super::WorkspaceView;
 
@@ -60,13 +60,11 @@ impl WorkspaceView {
     }
 
     fn render_empty_state(&self) -> AnyElement {
-        let message = match &self.connection {
-            ConnectionState::Connected => "No sessions yet — creating one…",
-            ConnectionState::Connecting => "Connecting to the Relayable server…",
-            ConnectionState::Reconnecting { .. } => "Reconnecting…",
-            ConnectionState::Disconnected => "Disconnected — no live server connection",
-            ConnectionState::Error(_) => "Server error — see the banner",
-        };
+        // Message selection only: the empty surface keeps its measured shape, so
+        // the body geometry cannot move. The copy is Relayable-original — the
+        // reference videos show no empty/loading/error/disconnected surface (see
+        // `apps/linux/evidence/ui-004-notes.md`).
+        let message = empty_state_message(&self.connection, self.pending_create.is_some());
         div()
             .flex()
             .flex_1()

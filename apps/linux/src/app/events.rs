@@ -20,13 +20,10 @@ impl WorkspaceView {
                 self.connection = state.clone();
                 if matches!(state, ConnectionState::Connected) {
                     self.api.send(ApiCommand::RefreshSessions);
-                    if self.tabs.is_empty() && self.pending_create.is_none() {
-                        self.pending_create = Some(CreateIntent {
-                            kind: CreateKind::NewTab,
-                            label: None,
-                        });
-                        self.api.send(ApiCommand::CreateSession { label: None });
-                    }
+                    // Stage-1 auto-session invariant (DEC-019): the `Connected`
+                    // edge is one of the points where the app can be connected
+                    // with zero tabs, so the check lives in `ensure_session`.
+                    self.ensure_session();
                     // After a reconnect, existing panes have no live stream (they
                     // were invalidated on disconnect); attach them again so they
                     // re-seed from the returned snapshots.
@@ -167,6 +164,9 @@ impl WorkspaceView {
                             "relayable-ui: data plane reconnected; connection state restored to Connected"
                         );
                     }
+                    // That restore is another path to `Connected` with zero tabs,
+                    // so the auto-session invariant is re-checked here too.
+                    self.ensure_session();
                     self.reattach_missing_panes();
                 }
                 self.push_status(format!("{kind}: {detail}"));
@@ -174,6 +174,12 @@ impl WorkspaceView {
             ApiEvent::Disconnected { reason } => {
                 eprintln!("relayable-ui: disconnected reason={reason}");
                 self.connection = ConnectionState::Disconnected;
+                // Commands are not replayed across a restart of the control
+                // plane (`api/control.rs` keeps draining the same queue), so a
+                // `session.create` in flight when the transport dies is never
+                // answered. Clear it, or the next `Connected` edge would find
+                // `pending_create` still set and never create (DEC-019 defect 2).
+                self.abandon_pending_create("connection lost");
                 self.push_status(format!("disconnected: {reason}"));
                 self.invalidate_streams();
                 // The connection is gone: a queued attach reply will never
@@ -183,6 +189,18 @@ impl WorkspaceView {
             ApiEvent::Error { message } => {
                 eprintln!("relayable-ui: error {message}");
                 self.connection = ConnectionState::Error(message.clone());
+                // The only positive reply for a `session.create` is
+                // `SessionCreated`, so an error while a create is in flight means
+                // it did not succeed. Leaving the intent set would refuse every
+                // later create (`create_session` returns early while it is set)
+                // and wedge auto-create *and* `Ctrl+Shift+N` for the rest of the
+                // run (DEC-019 defect 2).
+                self.abandon_pending_create("error");
+                // Re-check the invariant: the state is now `Error`, so
+                // `needs_session` is false and this cannot re-send — a failed
+                // create never spins into a retry loop. The retry is the next
+                // `Connected` edge, or `Ctrl+Shift+N`.
+                self.ensure_session();
                 // A failed `block.attach` produced no `Attached`, so consume its
                 // queue slot to keep the correlation FIFO aligned.
                 if message.starts_with("block.attach") {

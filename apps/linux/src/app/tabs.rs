@@ -1,5 +1,6 @@
 use crate::api::ApiCommand;
 
+use super::helpers::{abandon_create, needs_session};
 use super::state::{CreateIntent, CreateKind, PaneAction, SplitAxis};
 use super::WorkspaceView;
 
@@ -79,6 +80,34 @@ impl WorkspaceView {
         self.pending_create = Some(intent);
     }
 
+    /// Drop an in-flight create whose reply can no longer arrive.
+    ///
+    /// The rule itself is [`abandon_create`], so the re-arm behaviour is
+    /// unit-tested without a gpui context; this wrapper only logs it.
+    pub(super) fn abandon_pending_create(&mut self, cause: &str) {
+        if abandon_create(&mut self.pending_create) {
+            eprintln!("relayable-ui: session.create did not complete ({cause}); create re-armed");
+        }
+    }
+
+    /// Stage-1 auto-session invariant (DEC-019): zero tabs ∧ connected ∧ no
+    /// create in flight ⇒ request a session.
+    ///
+    /// Called on the `Connected` edge, when the last tab closes, and after a
+    /// failed create, so the app ends up with a session without a manual `new`.
+    /// The `Connected` term is the retry bound: a failure leaves the view in
+    /// `Error`/`Disconnected`, so this cannot re-send from the failure path.
+    pub(super) fn ensure_session(&mut self) {
+        if needs_session(
+            &self.connection,
+            self.tabs.is_empty(),
+            self.pending_create.is_some(),
+        ) {
+            eprintln!("relayable-ui: no session and no create in flight; requesting one");
+            self.request_new_tab();
+        }
+    }
+
     pub(super) fn request_new_tab(&mut self) {
         self.create_session(CreateIntent {
             kind: CreateKind::NewTab,
@@ -135,6 +164,10 @@ impl WorkspaceView {
                 self.tabs.remove(tab_index);
                 if self.tabs.is_empty() {
                     self.active_tab = 0;
+                    // The last tab is gone: run the auto-session invariant so the
+                    // app gets a session again without a manual `new` (DEC-019
+                    // defect 1). No-op while not connected or mid-create.
+                    self.ensure_session();
                     return;
                 }
                 if self.active_tab >= self.tabs.len() {
