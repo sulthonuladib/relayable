@@ -77,6 +77,34 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 37 — REF-006 integrated; refactor queue complete but REF-008 (INT-020) (2026-10-16)
+
+**Objective:** integrate the refactor of oversized files on the free paths.
+
+**Review:** branch `refactor/ref-006-free-crates` HEAD `8df3ee1`; 60 files, all under
+`apps/linux/src/**`, `apps/linux/README.md` (authorized), `crates/relayable-{model,pty,cli,protocol}/src/**`;
+no manifest/lock changes; no secret matches; no public-path changes.
+
+| # | Command (branch worktree + post-merge) | Observed result | Exit |
+|---|---|---|---|
+| 131 | `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --offline -- -D warnings`; `cargo build --workspace --offline` | clean | 0 |
+| 132 | `cargo test --workspace --offline` (branch) | 156 passed / 0 failed | 0 |
+| 133 | `apps/linux`: `fmt --check` / `test --locked` / `clippy --all-targets --locked` | 58 passed / 0 failed; clippy clean | 0 |
+| 134 | post-merge `cargo build --workspace` + `cargo test --workspace` | **194 passed / 0 failed** | 0 |
+| 135 | post-merge `bash scripts/validate.sh` + `bash scripts/smoke.sh` | green; `SMOKE OK` | 0 |
+| 136 | `bash scripts/check-file-sizes.sh` | 134 files; over-hard-cap 10 → **2** (both `crates/relayable-server`: `session.rs` 1037, `tests/server_e2e.rs` 1465 → REF-008) | 0 |
+
+**Integration:** merge `ba92c51` (INT-020).
+
+**Note:** an initial `cargo test --workspace` without a preceding `cargo build --workspace` aborted 10
+tests at the `tests/fixtures/binary.rs` freshness guard — the documented harness precondition (TESTS.md
+row 89), not a merge regression; building first gives 194/0. This is `QA-HARNESS-001`.
+
+**Refactor queue status:** REF-005/006/007/009 DONE. Only **REF-008** (server) remains before **REF-010**
+(`--strict` CI gate). Merged worktrees removed; branches preserved.
+
+---
+
 ## Checkpoint 36 — REF-007/009 integrated; code-org doc reconciled (INT-019) (2026-10-16)
 
 **Objective:** integrate the client + integration-test file splits.

@@ -23,9 +23,11 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **Failing tests:** none.
 - **Primary user goal reached:** a locally installable/testable Linux app (server + CLI + GPUI client +
   user install path) is delivered and verified (`scripts/install-user.sh`, `systemd --user` unit).
-- **Four projects in flight:** STORE-001 is integrated (INT-018 `f4d59f8`); in flight are REF-006
-  (`w1M`), REF-007/009 (`w1N`), and the docs-only **RESEARCH-001/002** GPUI-kit + libghostty evaluation
-  (`w1P`).
+- **Integrated:** CLIENT-API-001 (INT-017), STORE-001 (INT-018), REF-007/009 (INT-019), REF-006 (INT-020).
+- **In flight:** only **RESEARCH-001/002** (`research/gpui-kit-libghostty`, Herdr `w1P`) — docs-only.
+- **Refactor queue:** REF-005/006/007/009 DONE; **REF-008** (server) is the last hard-cap blocker before
+  **REF-010** (`--strict` CI gate); over-hard-cap now 2 (`relayable-server/src/session.rs`, `.../tests/server_e2e.rs`).
+- **Merged worktrees removed** (branches preserved).
 - **Next-phase plan:** `docs/architecture/next-phase-plan.md` — gpui-kit adoption, libghostty engine
   (ADR-003 reconsideration), desktop UX (auto-session on open, keymap helper, theming), docs
   centralization, and refactor cleanup. New tasks: RESEARCH-001/002, TERM-003, UI-004/005/006, DOCS-001.

@@ -45,13 +45,12 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 1. **Integrated & green:** CTX-001 (INT-015), INSTALL-001 (INT-016), CLIENT-API-001 (INT-017), STORE-001
    (INT-018 `f4d59f8`).
-2. **In flight / to integrate:** **REF-006** (`refactor/ref-006-free-crates`, Herdr `w1M`),
-   **REF-007/009** (`refactor/ref-007-009-client-tests`, Herdr `w1N`), and **RESEARCH-001/002**
-   (`research/gpui-kit-libghostty`, Herdr `w1P`). Review + validate + merge each as it returns.
-3. **Next-phase plan:** `docs/architecture/next-phase-plan.md`. After the refactors merge: **TERM-003**
-   (libghostty-rs spike + ADR-003 amendment, after RESEARCH-002), then **UI-004/005/006** (auto-session on
-   open, keymap helper, theming, after RESEARCH-001), then **DOCS-001** (central docs index), then
-   **REF-010** (file-size CI gate) and **REF-008** (server split).
+2. **In flight:** **RESEARCH-001/002** (`research/gpui-kit-libghostty`, Herdr `w1P`). Earlier refactors are
+   integrated: REF-006 (INT-020 `ba92c51`), REF-007/009 (INT-019 `54fe220`).
+3. **Next-phase plan:** `docs/architecture/next-phase-plan.md`. **REF-008** (server split) is the last
+   file-size blocker before **REF-010** (`--strict` CI gate). After RESEARCH-001/002: **TERM-003**
+   (libghostty-rs spike + ADR-003 amendment), then **UI-004/005/006** (auto-session on open, keymap helper,
+   theming), then **DOCS-001** (central docs index).
 4. **Cleanup:** remove merged refactor worktrees (AGENTS.md "Worktree lifecycle / cleanup") and centralize
    docs once the gpui-kit / libghostty decisions are recorded.
 5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`, `UI-003`, `QA-FLAKE-001`
