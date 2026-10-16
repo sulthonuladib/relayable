@@ -107,6 +107,15 @@ implements only `sessions`, `tombstones`, `audit_events`, and
 `schema_migrations`, so D2.3 needs a decision amendment to record the narrowed
 scope; the ADR itself is intentionally **not** edited by this slice.
 
+**Further ADR/status amendment required (post-integration, lead/Manager).** This
+slice also contradicts `ADR-004`'s non-guarantees row ("SQLite persistence store
+— Designed here; not implemented") and its "Implied future work (not done)"
+checklist (crate creation, workspace wiring, reconcile+flock, write path, prune,
+startup/shutdown ordering), as well as `ADR-001`'s `server → store` allowed-edge
+list. The stale `docs/agent-loop/STATUS.md` / "blocked" entries record the same
+gap. Those files are intentionally **not** edited here; they need a
+lead/Manager amendment after integration.
+
 ## 4. Migrations
 
 - Numbered SQL migrations in a `schema_migrations` table (not

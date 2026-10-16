@@ -203,6 +203,20 @@ impl PruneLimits {
         }
     }
 
+    /// Return these limits with `now_millis` refreshed from the system clock.
+    ///
+    /// The six retention values are preserved unchanged; only the age anchor
+    /// moves. A long-running caller that resolves the values once (e.g. the
+    /// server's `RELAYABLE_STORE_*` limits) uses this at each prune so rows
+    /// written **after** startup can still satisfy `timestamp < now_millis -
+    /// max_age` (ADR-004 D2.4).
+    pub fn with_current_time(self) -> Self {
+        Self {
+            now_millis: now_millis(),
+            ..self
+        }
+    }
+
     /// Build limits from the `RELAYABLE_STORE_*` environment variables.
     ///
     /// Names (implementation-chosen under the ADR-005 `RELAYABLE_*` namespace;
@@ -312,6 +326,25 @@ mod tests {
         assert_eq!(limits.tombstones_max_age_millis, 77);
         assert_eq!(limits.sessions_max_rows, 9);
         assert_eq!(limits.sessions_max_age_millis, 99);
+    }
+
+    #[test]
+    fn with_current_time_moves_only_the_anchor() {
+        // A frozen anchor of 1234 is far in the past; refreshing it from the
+        // system clock must leave every retention value untouched.
+        let stale = limits_from(&[("RELAYABLE_STORE_AUDIT_MAX_ROWS", "25")]);
+        let fresh = stale.clone().with_current_time();
+        assert!(fresh.now_millis >= stale.now_millis);
+        assert!(fresh.now_millis > 1234, "the anchor must come from now");
+        assert_eq!(fresh.audit_max_rows, stale.audit_max_rows);
+        assert_eq!(fresh.audit_max_age_millis, stale.audit_max_age_millis);
+        assert_eq!(fresh.tombstones_max_rows, stale.tombstones_max_rows);
+        assert_eq!(
+            fresh.tombstones_max_age_millis,
+            stale.tombstones_max_age_millis
+        );
+        assert_eq!(fresh.sessions_max_rows, stale.sessions_max_rows);
+        assert_eq!(fresh.sessions_max_age_millis, stale.sessions_max_age_millis);
     }
 
     #[test]

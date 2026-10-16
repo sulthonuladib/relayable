@@ -51,8 +51,10 @@ pub(crate) enum CloseSessionOutcome {
 /// The durable store plus the retention limits resolved **once** at startup
 /// from the `RELAYABLE_STORE_*` environment (`PruneLimits::from_env`).
 ///
-/// Resolving once keeps every server-side prune (startup and close) on exactly
-/// the same limits, so the documented overrides are honored.
+/// The six retention values stay fixed for the run, so every server-side prune
+/// (startup and close) honors the documented overrides. The age anchor is
+/// refreshed at each prune via [`PruneLimits::with_current_time`] so rows
+/// written after startup can still age out; the environment is not re-read.
 #[derive(Clone)]
 pub(crate) struct Persistence {
     pub(crate) store: Arc<Store>,
@@ -299,7 +301,7 @@ impl ServerShared {
                      {session_id}: {error}"
                 );
             }
-            if let Err(error) = store.prune(&persistence.limits) {
+            if let Err(error) = store.prune(&persistence.limits.with_current_time()) {
                 eprintln!(
                     "relayable-server: persistence prune failed for session {session_id}: {error}"
                 );

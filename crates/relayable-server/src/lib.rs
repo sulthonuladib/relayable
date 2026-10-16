@@ -165,7 +165,10 @@ impl Server {
 ///
 /// The retention limits are resolved **once** here from the `RELAYABLE_STORE_*`
 /// environment ([`PruneLimits::from_env`]) and kept with the store, so every
-/// server-side prune (startup and close) honors the documented overrides.
+/// server-side prune (startup and close) honors the documented overrides. Only
+/// the age anchor is refreshed at each prune
+/// ([`PruneLimits::with_current_time`]) so rows written after startup can still
+/// age out; the environment is never re-read after startup.
 fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Persistence>> {
     let Some(state_dir) = config.state_dir.as_deref() else {
         eprintln!(
@@ -214,12 +217,13 @@ fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Persistence>> {
         }
     }
 
-    // Retention limits are resolved once for the whole run (F1).
+    // Retention limits are resolved once for the whole run (F1); the age anchor
+    // is refreshed at every prune so post-startup rows can age out (F7).
     let limits = PruneLimits::from_env();
 
     // Pruning runs on startup and on close (ADR-004 D2.4); a prune failure is
     // not fatal because the store itself opened and reconciled.
-    if let Err(error) = store.prune(&limits) {
+    if let Err(error) = store.prune(&limits.clone().with_current_time()) {
         eprintln!("relayable-server: persistence startup prune failed: {error}");
     }
 

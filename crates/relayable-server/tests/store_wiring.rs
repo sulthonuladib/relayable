@@ -23,6 +23,9 @@
 //!    warning while protocol operations still succeed (the fail-soft policy).
 //! 6. `RELAYABLE_STORE_AUDIT_MAX_ROWS` bounds the startup-pruned audit table
 //!    end to end, proving the documented retention overrides are honored.
+//! 7. the close-time prune refreshes its age anchor: with
+//!    `RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS=0`, a session's `session_created`
+//!    audit row (written after startup) is age-pruned when it closes.
 //!
 //! Everything is bounded: short deadlines, explicit child shutdown, and a
 //! `Drop` that kills the server and every tracked PTY child.
@@ -872,5 +875,47 @@ fn startup_prune_honors_audit_max_rows_override() {
     assert!(
         rows <= CAP,
         "RELAYABLE_STORE_AUDIT_MAX_ROWS=50 must bound audit rows, got {rows}"
+    );
+}
+
+/// F7: the close-time prune refreshes its age anchor, so rows written after
+/// server startup can still age out.
+///
+/// `RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS=0` makes the age cutoff exactly the
+/// prune-time `now`. The `session_created` audit row is written tens of
+/// milliseconds before the close-time prune, so a **fresh** anchor deletes it
+/// while the frozen startup anchor (set before the session existed) cannot.
+#[test]
+fn close_prune_refreshes_age_anchor() {
+    let state_dir = tempfile::tempdir().expect("state temp dir");
+    let mut server = ServerProcess::spawn_with(
+        Some(state_dir.path()),
+        &[("RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS", "0")],
+    );
+    let mut client = Client::new(server.connect());
+    client.handshake();
+    let created = client.create("age-anchor");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session record")
+        .session_id
+        .clone();
+    server.track(created.program_pid);
+    // Guarantee the created audit row is strictly older than the close-time
+    // prune anchor, so a refreshed `now` deletes it and a frozen one cannot.
+    thread::sleep(Duration::from_millis(50));
+    client.close(&session_id);
+    assert!(server.shutdown().success(), "server must exit cleanly");
+
+    let store = Store::open(state_dir.path()).expect("reopen the store");
+    let events = store.audit_events().expect("audit");
+    assert!(
+        !events.iter().any(|event| {
+            event.kind == AuditEventKind::SessionCreated
+                && event.session_id.as_deref() == Some(session_id.as_str())
+        }),
+        "RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS=0 must age-prune the created audit row at \
+         close with a fresh anchor; remaining rows: {events:?}"
     );
 }

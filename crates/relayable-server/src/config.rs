@@ -4,7 +4,14 @@
 //! `RELAYABLE_EVENT_RETENTION_EVENTS`, `RELAYABLE_IDLE_TIMEOUT_MILLIS`,
 //! `RELAYABLE_HEARTBEAT_INTERVAL_MILLIS`, `SHELL` (shell override),
 //! `RELAYABLE_STATE_DIR` / `XDG_STATE_HOME` / `HOME` (durable state directory,
-//! via [`relayable_store::resolve_state_dir`]), and `XDG_RUNTIME_DIR` (via
+//! via [`relayable_store::resolve_state_dir`]),
+//! `RELAYABLE_STORE_AUDIT_MAX_ROWS`, `RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS`,
+//! `RELAYABLE_STORE_TOMBSTONES_MAX_ROWS`,
+//! `RELAYABLE_STORE_TOMBSTONES_MAX_AGE_MILLIS`,
+//! `RELAYABLE_STORE_SESSIONS_MAX_ROWS`, and
+//! `RELAYABLE_STORE_SESSIONS_MAX_AGE_MILLIS` (durable store retention overrides,
+//! read once at startup via [`relayable_store::PruneLimits::from_env`]), and
+//! `XDG_RUNTIME_DIR` (via
 //! [`relayable_protocol::transport::default_socket_path`]). `REX_*` names are
 //! reference evidence only and are never read (ADR-002 D14; DEC-006).
 //!
