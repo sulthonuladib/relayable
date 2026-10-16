@@ -81,28 +81,35 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **UI-003** — implementer, branch `ui/ui-003-next-output`, worktree
-  `/home/sulthonuladib/work/relayable-wt/ui-003`. **Server restart mid-session:** branch head is still
-  `494917f` and the work is **uncommitted in the tree** (568 insertions / 418 deletions across
-  `api/{data,data_thread,mock,mod,tests,types}.rs`, `app/streams.rs`, `bin/live-probe.rs`, plus untracked
-  `apps/linux/evidence/ui-003-live-probe.log` ending `PROBE_EXIT=0` after a flow-control observation).
-  Owns `apps/linux/src/api/{data,data_thread,mod,types,mock,tests}.rs`, `apps/linux/src/app/streams.rs`,
-  `apps/linux/src/bin/live-probe.rs`, `apps/linux/README.md`, `apps/linux/evidence/ui-003-*.log`.
-  Moves the terminal data plane onto `relayable_client::Client` (`next_output` +
-  `resize_with_pixels`), keeping the two-plane split and the reference geometry; **must drain every
-  attached stream each `pump()`** (credit-window acking) and must not touch `crates/**`,
-  `apps/linux/Cargo.lock`, `src/{main,ui,term,geometry*,theme*,tokens}**`.
-- **UI-004 stage 1** — implementer done, commit `ff1e8fc` on `ui/ui-004-stage1-auto-session`
-  (worktree `/home/sulthonuladib/work/relayable-wt/ui-004-stage1`). **Awaiting independent verification
-  before integration** (the verification call was aborted by the shutdown): auto-session invariant
-  re-checked at 4 sites, `abandon_pending_create` on `Error` **and** `Disconnected`, desktop tests 58→65,
-  M1–M5 mutations caught but the `close_focused` call site is not covered headlessly, defect 3 and
-  restore-session deferred (DEC-019).
-- **DOC-003** — committed `af72801` (28 split-invalidated citations repaired in ADR-004,
-  `docs/architecture/code-organization.md`, `protocol/compatibility/core-001-method-set.md`); residuals
-  and the non-split-induced drift DOC-003 proved are recorded as **DOC-004**.
-- Nothing else is in flight. The `ref-008`/`ref-010`/`client-api-002`/`qa-harness-001` worktrees were
-  removed (branches preserved).
+- **Nothing is in flight.** `master` is at **INT-027** (`6b8a80e` + doc repair `b2d0510`), clean and
+  pushed, and verified green end to end: `scripts/validate.sh` exits 0 (step 4 = **206 passed / 0 failed**),
+  `scripts/smoke.sh` → `SMOKE OK`, `scripts/check-file-sizes.sh --strict` → exit 0, desktop
+  `CARGO_NET_OFFLINE=true cargo test --locked` → **65 passed / 0 failed**, and the live probe on `master` →
+  `PROBE_EXIT=0` (2 streams, 400 384 bytes past the 256 KiB credit window, accepted `120x40`, `RELAYABLE-PROBE-ALIVE`).
+  Evidence: `WORKLOG.md` Checkpoint 43, `TESTS.md` rows 145–157.
+- **Just closed:** UI-003 (INT-027), UI-004 stage 1 (INT-026 `385f46f`), DOC-003 (`af72801`). Four
+  integrations this session were rejected or qualified by an independent verifier first; the repaired or
+  corrected versions are what landed.
+- **Worktrees on disk:** `ui-003` and `ui-004-stage1` at `/home/sulthonuladib/work/relayable-wt/` — both
+  branches are merged and pushed, so both are eligible for the standing cleanup (branches preserved).
+  Check `git worktree list` first.
+
+## Next queue (in order)
+
+1. **`UI-005`** — keymap helper / discoverable shortcut overlay, `apps/linux` only (a planner brief for
+   UI-004 in `WORKLOG.md` Checkpoint 41 maps the app modules).
+2. **`UI-006`** — local token-driven theming against `docs/research/design-tokens.md`; **not** gpui-kit
+   (DEC-014). Do not restyle: the reference geometry/hierarchy is the acceptance gate.
+3. **`DOCS-001`** — `docs/README.md` index + consolidation (evidence preserved); then **`DOC-004`** (the
+   ADR-004 residuals plus the citation drift DOC-003 proved but did not fix).
+4. Backlog: `CLIENT-API-003` (ack-rate limit; needs a core change), `QA-DESKTOP-001` (wire the live probe
+   into a script so the drain-all invariant is guarded), `UI-004-STAGE2` (attach/restore an existing
+   session — needs `api/**` + a user decision), `MEM-001`, `CI-HOST-001`, `QA-FLAKE-001`, `TOOL-001`,
+   `TOOL-002`.
+5. **Build/verify cheat-sheet:** desktop = `cd apps/linux && CARGO_NET_OFFLINE=true cargo <fmt|clippy
+   --all-targets --locked -- -D warnings|test --locked|check --locked>`; never `cargo update` in
+   `apps/linux` (the lockfile holds the TERM-002 `libc 0.2.189` remedy); root = `scripts/validate.sh`,
+   `scripts/smoke.sh`, `scripts/check-file-sizes.sh --strict`.
 
 ## Pending user decisions (the loop continues without them)
 

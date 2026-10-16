@@ -442,3 +442,27 @@ Independent verifier verdict: **accept-with-nits**.
 | 148 | verifier mutation M6 (delete `ensure_session()` in `close_focused`) | `65 passed; 0 failed` — **not caught**, the acknowledged call-site gap | 0 |
 | 149 | verifier: live `--mock --canvas 1099 706` on `wayland-1`, window focused, `Ctrl+Shift+W` | the 16 app-output lines are byte-identical to `ui-004-run.log:297-314`, including a second `…requesting one` + `session.created` | 0 |
 | 150 | post-merge on `master`: `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206 passed / 0 failed) / `SMOKE OK` / exit 0 / `65 passed / 0 failed` | 0 |
+
+## 2026-10-16 — UI-003 integrated: terminal data plane on `relayable_client` (INT-027)
+
+Environment: Linux `falcon` x86_64, `cargo`/`rustc` 1.99.1, `CARGO_NET_OFFLINE=true` for desktop.
+Reviewed branch `ui/ui-003-next-output` (HEAD `b2d0510`, feature commit `8d84a84`) and integrated it as
+`6b8a80e` (INT-027). Independent verifier verdict: **accept-with-nits**.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 151 | verifier: `git diff --name-only 494917f..8d84a84`, scope diff vs `crates/**`/`Cargo.*`/`main.rs`/`ui`/`term` | exactly the claimed 11 files; nothing outside; `apps/linux/Cargo.lock` unchanged | 0 |
+| 152 | verifier: desktop fmt / clippy / `test --locked` / `check --locked` | clean; `58 passed / 0 failed` | 0 |
+| 153 | **verifier re-ran the live probe** (scratch socket + scratch `RELAYABLE_STATE_DIR`) | `PROBE_EXIT=0`; `attached stream_id = 1`; burst `bytes=400384 delivered_in_ms=56 rate_mb_s=6.8` (past the 256 KiB window); `TerminalResizeAccepted = stream_id=1 cols=120 rows=40`; `RELAYABLE-PROBE-ALIVE` | 0 |
+| 154 | verifier falsification: mutate `DATA_READ_WINDOW` to 100 ms (ack cadence 100× slower) | acceptance burst **fails** — `credit exhausted (want 4095, have 4065)` then connection closed → the 1 ms window is load-bearing and the gate exercises the ack path | 101 (intended) |
+| 155 | verifier CPU check of the 1 ms window | ≈555–570 voluntary context switches/s, <10 ms total CPU in 0.34 s runs — a millisecond poll, not a busy spin | 0 |
+| 156 | lead: post-merge on `master` — `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206/0) / `SMOKE OK` / exit 0 / `65 passed / 0 failed` (UI-003 adds no tests; UI-004's 7 are included, and the merge compiles) | 0 |
+| 157 | lead: live probe re-run on `master` after INT-026 + INT-027 | `PROBE_EXIT=0`; `attached stream_ids = [1, 2]`; `bytes_by_stream = {1: 764, 2: 400384}`; `TerminalResizeAccepted cols=120 rows=40`; `RELAYABLE-PROBE-ALIVE` | 0 |
+
+**Corrections made at integration (verifier nits):** the README's flood trigger was wrong — the recorded
+runs log `stream 2 outbound channel full` (the bounded 8192-message queue), and `credit exhausted` never
+appears, so the credit window is the *other* bound, not the observed trigger; the `types.rs` claim
+"40-294 ms / 1.3-9.4 MB/s" was unbacked (the only committed run is `delivered_in_ms=40 rate_mb_s=9.4`) and
+was replaced with the measured value; the pre-migration comparison (`~31 KiB`/`47-297 KiB`) was withdrawn as
+unreproducible (no transcript, code deleted) — `data.rs.variantA` is byte-identical to `data.rs.orig`.
+Repaired in `b2d0510` (docs/comments only; desktop suite still 58 passed).

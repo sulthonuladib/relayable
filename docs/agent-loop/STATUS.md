@@ -11,23 +11,25 @@ integrated; **refactor wave complete** (every `REF-*` DONE; `check-file-sizes.sh
 
 ## Current execution (lead session `ses_ebab9726a`, 2026-10-16)
 
-- `master` is at **INT-026** (clean, pushed). Post-merge: `scripts/validate.sh` exits 0 (8 steps; step 4
+- `master` is at **INT-027** (clean, pushed). Post-merge: `scripts/validate.sh` exits 0 (8 steps; step 4
   = **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`, `scripts/check-file-sizes.sh --strict` →
-  exit 0 (`over-hard-cap=0`), desktop `cargo test --locked` → **65 passed / 0 failed**.
+  exit 0 (`over-hard-cap=0`), desktop `cargo test --locked` → **65 passed / 0 failed**, and the **live
+  probe re-run on `master`** → `PROBE_EXIT=0` (2 streams, 400 384 bytes past the 256 KiB credit window,
+  accepted `120x40`, `RELAYABLE-PROBE-ALIVE`).
 - **Integrated this session:** REF-008 (INT-022 `afcc631`), CLIENT-API-002 (INT-023 `494917f`),
   QA-HARNESS-001 (INT-024 `7c8f5a2` + `1a54cc4`), REF-010 (INT-025 `4a4cb16`), UI-004 stage 1
-  (INT-026 `385f46f`), plus DOC-003 (`af72801`, citation repair). Three of these were **rejected or
-  qualified by an independent verifier first**; one was repaired before landing, one after a nit, and
-  UI-004 stage 1 landed with its nits recorded as `UI-004-STAGE2`.
+  (INT-026 `385f46f`), UI-003 (INT-027 `6b8a80e` + `b2d0510`), plus DOC-003 (`af72801`, citation repair).
+  **Four** of these were rejected or qualified by an independent verifier first — two repaired at the
+  verifier's request, one landed with its nits folded into a follow-up task (`UI-004-STAGE2`), and UI-003's
+  two documentation claims were corrected (`b2d0510`) after verification found them unbacked.
 - **Refactor wave complete** — every `REF-*` task is DONE and the hard-cap gate is enforced in
   `validate.sh` + `ci.sh`.
-- **UI-003 in verification** (`ui/ui-003-next-output`, commit `8d84a84`): the `apps/linux` data plane now
-  runs on `relayable_client::Client` (`next_output` + `resize_with_pixels`), the raw
-  `FrameConnection`/`should_ack` path is deleted, `AttachBlock` carries a `session_id`,
-  `Output.stream_seq` is gone, resize reports the server-accepted geometry, and README §7/§10 are
-  rewritten. A measured ack-rate limit (**CLIENT-API-003**) means a tiny-write flood can still drop the
-  data-plane connection; the pre-migration plane failed the same way, so it is a backlog item, not a
-  regression.
+- **UI-003 DONE** — the `apps/linux` data plane runs on `relayable_client::Client` (`next_output` +
+  `resize_with_pixels`), the raw `FrameConnection`/`should_ack` path is deleted, `AttachBlock` carries a
+  `session_id`, `Output.stream_seq` is gone, resize reports the server-accepted geometry, and README §7/§10
+  are rewritten. A measured ack-rate limit (**CLIENT-API-003**) means a chatty child can still drop the
+  data-plane connection (the app reconnects); **no regression claim is made** — the pre-migration
+  comparison was not preserved and its figures are withdrawn.
 - **Environment drift (DEC-018):** `rustc`/`cargo` are now **1.99.1** (no `rust-toolchain.toml` pin);
   the `apps/linux` dependency set was missing from the offline cache and is cached again
   (`CARGO_NET_OFFLINE=true cargo build --locked` → exit 0); `spikes/terminal-engine-phase2` (`avt`) is

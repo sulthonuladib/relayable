@@ -77,6 +77,56 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 43 — UI-003 integrated (INT-027) with corrected documentation; queue handed off (2026-10-16)
+
+**Objective:** close the UI-003 thread — verify, repair the verifier's documentation findings, integrate,
+and prove it on `master` end to end.
+
+**Files changed:** `docs/agent-loop/**`; INT-027 brought `apps/linux/{README.md,src/api/**,src/app/streams.rs,
+src/bin/live-probe.rs,evidence/ui-003-*.log}` onto `master`.
+
+### Commands run and observed results
+
+| Command | Observed |
+|---|---|
+| `git merge --no-ff ui/ui-003-next-output` | INT-027 `6b8a80e` (feature commit `8d84a84`, doc repair `b2d0510`) |
+| post-merge `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206/0) / `SMOKE OK` / exit 0 / `65 passed / 0 failed` |
+| post-merge live probe (`relayable-server run` on a scratch socket + `RELAYABLE_STATE_DIR`, `cargo run --locked --bin live-probe`) | `PROBE_EXIT=0`; `attached stream_ids = [1, 2]`; `bytes_by_stream = {1: 764, 2: 400384}`; `TerminalResizeAccepted = stream_id=1 cols=120 rows=40`; `RELAYABLE-PROBE-ALIVE` |
+| verifier: mutate `DATA_READ_WINDOW` 1 ms → 100 ms | acceptance burst fails with `credit exhausted (want 4095, have 4065)` → the window is load-bearing and the gate really exercises the ack path |
+| verifier: CPU check of the 1 ms window | ≈555–570 voluntary context switches/s, <10 ms CPU in 0.34 s runs — a millisecond poll, not a busy spin |
+
+### Findings
+
+- **UI-003's two documented claims were wrong and are corrected** (`b2d0510`, docs/comments only): the
+  observed flood trigger in all four recorded runs is the bounded outbound queue
+  (`stream 2 outbound channel full`), not the 256 KiB credit window; and the `types.rs` rate range
+  (`40-294 ms`, `1.3-9.4 MB/s`) was unbacked — only `delivered_in_ms=40 rate_mb_s=9.4` exists.
+- **This checkpoint withdraws figures recorded in Checkpoint 42.** The "pre-migration plane failed the same
+  way at ~67 KB" claim (and the "~31 KiB" variant) has no transcript and cannot be reproduced — the old
+  data plane is deleted between `494917f` and `8d84a84`, and `data.rs.variantA` is byte-identical to
+  `data.rs.orig`. `CLIENT-API-003` therefore records the ack-rate limit **without** any parity claim.
+- New backlog rows opened from verification findings: **`QA-DESKTOP-001`** (the drain-all ack invariant is
+  guarded only by a hand-run `live-probe`; nothing in `scripts/` runs it) and **`TOOL-002`**
+  (`scripts/smoke.sh:88` prints `test: too many arguments` on every run — pre-existing, so `SMOKE OK` must
+  not be read as clean output).
+
+### Risks / notes
+
+- The desktop suite is 65 tests after merging UI-003 and UI-004 stage 1, so the two branches compose (the
+  `Output.stream_seq` removal and the app's wildcard match coexist).
+- No GUI/Wayland geometry re-check was performed for UI-003 (its diff touches no render/geometry/token file,
+  which is the structural argument, not an observation).
+- `UI-004-STAGE2`, `CLIENT-API-003`, `QA-DESKTOP-001`, `TOOL-001/002`, `MEM-001`, `CI-HOST-001`,
+  `QA-FLAKE-001`, `DOCS-001`, `DOC-004` remain in the backlog; `UI-005`/`UI-006` are the next queue items.
+
+### Next
+
+1. `UI-005` (keymap helper) then `UI-006` (local token-driven theming), both `apps/linux` only.
+2. Then `DOCS-001`/`DOC-004`, then the backlog rows above.
+3. `TERM-003` stays proposed pending the user's DEC-014 answer.
+
+---
+
 ## Checkpoint 42 — server-restart recovery; DOC-003 landed; UI-003/UI-004 completed and sent to verification (2026-10-16)
 
 **Objective:** recover from an OpenCode server restart without losing work, then finish the two live
