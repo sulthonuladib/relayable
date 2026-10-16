@@ -12,7 +12,7 @@
 > persistence guarantees). It is `Proposed` pending Manager acceptance and the `docs/agent-loop/DECISIONS.md`
 > index update (`DEC-005 → ADR-004`). It changes **no code**: it fixes the ownership boundary that already
 > exists in the implementation, chooses the persistence design to be built, and states plainly what is and
-> is not guaranteed today. Every choice not traceable to REX/reference evidence is marked
+> is not guaranteed today. Choices not traceable to REX/reference evidence are marked
 > **Relayable-defined (no REX evidence)** inline. No binary or wire compatibility with the reference
 > product is claimed (`full.md` §0.1, §3).
 
@@ -86,7 +86,7 @@ server crate; `full.md` §5.2:412 forbids crate cycles.
 The current server is a single foreground binary — `crates/relayable-server/src/main.rs:3`: "Usage:
 `relayable-server run` (foreground, no systemd unit, no forking)." It owns every child **in-process**:
 
-- `crates/relayable-server/src/session.rs:1-6` (module doc, verbatim): "A [`BlockRuntime`] owns the
+- `crates/relayable-server/src/session.rs:1-7` (module doc, verbatim): "A [`BlockRuntime`] owns the
   server-side PTY child for the lifetime of the session, independently of any client connection: it holds
   the [`PtyHandle`], a dedicated PTY-writer thread, the bounded output tail, the per-stream output
   sequence, and the fan-out to attached streams. Dropping a client never signals, reaps, or stops the
@@ -95,8 +95,8 @@ The current server is a single foreground binary — `crates/relayable-server/sr
   (`:301`), `writer_lease: Mutex<Option<WriterLease>>` (`:304`), and `pty: Mutex<PtyHandle>` (`:305`),
   plus reader/reaper/input thread join handles.
 - `crates/relayable-server/src/registry.rs:56` holds `sessions: Mutex<BTreeMap<SessionId,
-  Arc<SessionRuntime>>>` in `ServerShared`; `create_session` (`:94`) spawns the child at `:104` via
-  `relayable_pty::PtyHandle::spawn(...)`, with the doc at `:95-96`: "The child is owned by the registry,
+  Arc<SessionRuntime>>>` in `ServerShared`; `create_session` (`:86`) spawns the child at `:98` via
+  `relayable_pty::PtyHandle::spawn(...)`, with the doc at `:84-85`: "The child is owned by the registry,
   never by a client."
 - `session.rs:903` defines `SessionRuntime` (`label: Option<String>` at `:905`, `created_at_millis` at
   `:906`), and `:902` notes: "Closed sessions are retained as tombstones (ADR-001)."
@@ -107,19 +107,19 @@ The current server is a single foreground binary — `crates/relayable-server/sr
 
 Client teardown never touches the child. `crates/relayable-server/src/lib.rs:1-6`: "A dropped client
 never signals, reaps, or stops a child; only `session.close` (or graceful server shutdown) does."
-`crates/relayable-server/src/connection.rs:304`: "Tear down the transport only: the session, block, PTY,
-and child stay up." `connection.rs:90-92` (`close_now`): "…The session and child are untouched."
+`crates/relayable-server/src/connection.rs:312`: "Tear down the transport only: the session, block, PTY,
+and child stay up." `connection.rs:79-80` (`close_now`): "…The session and child are untouched."
 
-Graceful shutdown does terminate children. `lib.rs:118-135` requests shutdown, closes connections with
+Graceful shutdown does terminate children. `lib.rs:123-135` requests shutdown, closes connections with
 `DisconnectReason::ServerShutdown`, closes every live block (`session.block.close(500 ms)`), joins
 connection threads, and unlinks the socket. Signal handling is limited to SIGINT/SIGTERM:
-`crates/relayable-server/src/signals.rs:20-33` installs handlers that are "async-signal-safe" and only
-store `true` in an `AtomicBool` (`:42-44`); there is no `SIGHUP` handler, no `sd_notify`, and no SIGKILL
+`crates/relayable-server/src/signals.rs:19-32` installs handlers that are "async-signal-safe" and only
+store `true` in an `AtomicBool` (`:40-42`, store at `:41`); there is no `SIGHUP` handler, no `sd_notify`, and no SIGKILL
 path.
 
 Sessions and all metadata are **in memory only**. There is no database, no state directory, and no
 serde-persisted state: grep over all `Cargo.toml` manifests finds no `rusqlite`, `sqlx`, `sled`, or
-`redb` (verified — none present); `crates/relayable-server/Cargo.toml:13-21` lists only `relayable-model`,
+`redb` (verified — none present); `crates/relayable-server/Cargo.toml:13-23` lists only `relayable-model`,
 `relayable-protocol`, `relayable-pty`, `anyhow`, and `libc = "=0.2.190"` ("# Signal handling only.").
 `std::fs` appears in production server code only for `/proc` reads and socket unlink. No systemd unit
 exists (`scripts/ci.sh:197` skips "package build tests (deb/rpm/systemd packaging)" because no recipe
@@ -127,12 +127,12 @@ exists; `docs/operations/toolchain-audit.md:747` gap G5: "No relayable systemd u
 model … undecided … ADR for service/persistence model (full.md §7.2) before writing any unit").
 
 The protocol layer already states the same non-claims. `protocol/compatibility/core-001-method-set.md`
-§9 (`:122-136`) lists "**Persistence**: none; no tombstones, no retention/pruning, no metadata store",
+§9 (`:127-140`) lists "**Persistence**: none; no tombstones, no retention/pruning, no metadata store",
 "**Authn/authz**: no mechanism", and "**Peer-credential checks** (`SO_PEERCRED`) …: deferred";
 `:219` says "Crash/reboot survival is **not** provided or claimed."
 `protocol/compatibility/core-002-method-set.md` §G (`:195-205`) lists "No server-crash or host-reboot
 session survival", "Terminal output is **not** byte-exact replayable", and "No persistence / SQLite".
-The frozen `docs/architecture/interface-contract.md:92` says "No crash or host-reboot session survival
+The frozen `docs/architecture/interface-contract.md:93-95` says "No crash or host-reboot session survival
 is claimed … a restored session definition is a restart, not a resurrected process."
 
 ### Constraints already fixed by prior ADRs
@@ -144,7 +144,7 @@ holds terminal bytes", with crash/host-reboot survival explicitly not claimed (`
 retention is bounded in memory with a configurable floor, and "[t]here is no persisted event log in the
 first release" (`ADR-001:230-236`); "Relayable **never claims** byte-exact recovery of the terminal byte
 stream" (`ADR-001:239`); the server crate "Composes model, protocol, pty" and composes persistence
-(`ADR-001:337,361`); `Cargo.toml` is Lead-owned so a worker cannot change the graph (`ADR-001:384`); and
+(`ADR-001:337,361`); `Cargo.toml` is Lead-owned so a worker cannot change the graph (`ADR-001:383-384`); and
 "[n]o persisted event log means no resume across server restart, consistent with `full.md` §6.3:480"
 (`ADR-001:400`). ADR-001 explicitly deferred the exact tombstone schema to persistence (`ADR-001:433`:
 "**Tombstone schema.** Exact metadata-store schema and pruning for tombstones belong with persistence.")
@@ -170,7 +170,7 @@ first-release constraint that the implementation is a single foreground server
 
 | Option | What it would require | Cost / risk | Android-readiness (DEC-010) | First-release verdict |
 |---|---|---|---|---|
-| **Status quo: in-process ownership** (adopted) | Nothing beyond what exists: `Arc<BlockRuntime>` holds the `PtyHandle` and child, per session, independent of connections (`session.rs:1-6,292-305`; `registry.rs:56,95-97`). | None today; a server restart/Host reboot ends children (documented). | Host-independent; no POSIX supervisor assumed. | **Chosen.** Satisfies §6.3:475–478; makes no §6.3:480 promise. |
+| **Status quo: in-process ownership** (adopted) | Nothing beyond what exists: `Arc<BlockRuntime>` holds the `PtyHandle` and child, per session, independent of connections (`session.rs:1-7,292-305`; `registry.rs:56,84-85`). | None today; a server restart/Host reboot ends children (documented). | Host-independent; no POSIX supervisor assumed. | **Chosen.** Satisfies §6.3:475–478; makes no §6.3:480 promise. |
 | **(A) Separate supervisor process owns PTYs and reattaches after a server restart** (`full.md:482`) | A second privileged-adjacent process; PTY master fds must outlive the server and be handed to a restarted server — fd passing over a `SCM_RIGHTS` Unix socket; a versioned lifecycle/handshake protocol between server and supervisor; separate packaging, systemd unit, and supervision; failure-mode design (supervisor crash kills sessions); security review of the supervisor's trust boundary (`full.md` §11:760). | High: an entirely new OS-level component with its own protocol, tests, and security surface — comparable in effort to the server itself. `full.md` §6.3:480 makes it optional; no spike exists. | Adds a process/socket model Android may not be able to host; must not leak into the model/protocol (model must stay host-independent, `full.md` §5.2:405). | **Deferred.** No implemented, tested spike; meets none of the first-release acceptance criteria without new evidence. |
 | **(B) Per-session supervisor services/processes preserve PTY descriptors** (`full.md:483`) | One process/service per live session; transient systemd units or an equivalent launcher; descriptor custody and reattachment; lifecycle protocol; per-unit state/permissions; packaging (`TimeoutStopSec`, `Restart`, ownership) and security review; unbounded per-session process growth risk. | Highest operational complexity; a unit per session is a large surface with many failure modes; `full.md` §12:800 ("avoid one unbounded task per client/event") counsels against unbounded per-session machinery without measurement. | Worst Android fit: assumes a systemd-like per-user/per-session supervisor that does not exist on Android. | **Deferred.** |
 | **(C) Another proven OS-level arrangement** (`full.md:484`) | Any other tested OS mechanism (e.g., a broker); must be "proven" per §6.3:480 and tested. | Undefined until a specific mechanism is proposed with evidence. | Unknown. | **Deferred** — no candidate with tested evidence exists. |
@@ -186,12 +186,12 @@ migration, locking, and test needs." The store is metadata/audit only; it never 
 | **SQLite (in-process, single writer)** | Numbered, versioned SQL migrations in a `schema_migrations` table or `PRAGMA user_version`; SQL is inspectable and testable. | One writer serialized inside the server; `PRAGMA journal_mode=WAL`, `busy_timeout`, and `synchronous`; a `flock` single-instance guard proves no second writer. | `tempfile` (already a workspace dependency, `Cargo.toml:29-44`) provides isolated DBs per test; the server is already sync/threads-only (root `Cargo.toml` design note), so a synchronous driver fits. | **Chosen.** Best migration + locking + test story of the candidates; engine is small and embedded. |
 | `sled` / `redb` (embedded KV) | No SQL migration story; callers evolve key/value encodings by hand and must version them. | Embedded key-value; `sled` is beta-quality, so durability/locking guarantees are harder to justify as a release gate. | Workable with `tempfile`, but no query layer for schema evolution or ad-hoc inspection. | Rejected: weaker migration/query story and (for `sled`) beta maturity. |
 | `sqlx` (async driver) | SQL migrations supported. | Async pool is unnecessary for one synchronous writer and pulls async/tokio into an explicitly sync-only workspace (root `Cargo.toml` design note). | Adds build weight and a second execution model for no first-release benefit. | Rejected: async + build weight for a single-writer store. |
-| Plain files / append-only JSON | No schema versioning or migration mechanism beyond ad-hoc rewrites. | No transactions or locking; a torn write cannot be made crash-consistent. | Hard to test crash consistency. | Rejected: cannot give "crash-consistent writes" (`full.md` §6.4:496). |
+| Plain files / append-only JSON | No schema versioning or migration mechanism beyond ad-hoc rewrites. | No transactions or locking; a torn write cannot be made crash-consistent. | Hard to test crash consistency. | Rejected: cannot give "crash-consistent writes" (`full.md` §6.4:495). |
 
 **Binding choice.** The concrete Rust binding (for example `rusqlite` with the `bundled` feature versus a
 system libsqlite3) is **Relayable-defined (no REX evidence)** and is a build decision to be made when the
 store crate is created. It is not made here because Android must be able to host the same storage
-interface without breaking DEC-010 (`docs/agent-loop/DECISIONS.md:21`), and no storage crate is currently
+interface without breaking DEC-010 (`docs/agent-loop/DECISIONS.md:17`), and no storage crate is currently
 a dependency (verified: no `rusqlite`/`sqlx`/`sled`/`redb` in any manifest).
 
 ---
@@ -202,14 +202,14 @@ a dependency (verified: no `rusqlite`/`sqlx`/`sled`/`redb` in any manifest).
 
 **D1.1 (ownership boundary).** The foreground server process owns every PTY/child tree. Ownership is
 **per session, not per connection**, and is held in-process by `Arc<BlockRuntime>` inside
-`ServerShared.sessions` (`crates/relayable-server/src/session.rs:1-6,292-305`;
-`crates/relayable-server/src/registry.rs:56,95-97,104`). The PTY handle is opaque and non-`Clone`
+`ServerShared.sessions` (`crates/relayable-server/src/session.rs:1-7,292-305`;
+`crates/relayable-server/src/registry.rs:56,84-85,98`). The PTY handle is opaque and non-`Clone`
 (`crates/relayable-pty/src/lib.rs:121,148,169-176,236,270,292`). No out-of-process supervisor exists.
 
 **D1.2 (guaranteed, implemented and tested).** Closing a client window, losing the network, an idle
 timeout, a mid-request drop, or a flow-control overflow removes only the client record, its streams, and
 its writer lease. It never signals, reaps, or stops the child
-(`crates/relayable-server/src/lib.rs:1-6`; `connection.rs:90-92,304-311`). Reattaching preserves the same
+(`crates/relayable-server/src/lib.rs:1-6`; `connection.rs:79-80,312-315`). Reattaching preserves the same
 `pty_process_id`/`program_pid` and the same child. This is exercised by the test suites (function names
 and verified locations):
 
@@ -229,7 +229,7 @@ and verified locations):
 **D1.3 (guaranteed, implemented and tested).** Only `session.close` and graceful server shutdown
 terminate children. Shutdown installs SIGINT/SIGTERM handlers
 (`crates/relayable-server/src/signals.rs:20-44`) and the accept loop exits at
-`crates/relayable-server/src/lib.rs:118-135`, which closes every live block and reaps the children. Test:
+`crates/relayable-server/src/lib.rs:123-135`, which closes every live block and reaps the children. Test:
 `graceful_shutdown_kills_live_children` (`crates/relayable-server/tests/server_e2e.rs:869`).
 
 **D1.4 (supervision options deferred).** All three mechanisms named at `full.md` §6.3:480–484 — "(A) a
@@ -238,14 +238,14 @@ supervisor services/processes preserve PTY descriptors" (`:483`), "(C) another p
 arrangement" (`:484`) — are **deferred** from the first release. The first release runs one foreground
 server owning PTYs in-process (`crates/relayable-server/src/main.rs:3`). Each option's requirements and
 risks are in the Options table above; none is implemented, tested, packaged, or security-reviewed. This
-decision may be revisited only via the reconsider-if trigger (1) below.
+decision may be revisited via the reconsider-if triggers (1), (2), or (7) below.
 
 **D1.5 (service-level restarts are not session survival).** A future systemd user unit may use
-`Restart=on-failure` with bounded backoff (`full.md` §7.2:530: "`Restart=on-failure` and backoff without
+`Restart=on-failure` with bounded backoff (`full.md` §7.2:531: "`Restart=on-failure` and backoff without
 restart loops") to restart the **server process**, never sessions. User lingering is an opt-in
-post-logout availability choice, not session survival (`full.md` §7.2:534). Socket activation is used
-"only if justified and correctly implemented" (`full.md` §7.2:532). No unit exists today; installing or
-enabling a service is gated on explicit user approval (`full.md` §7.2:537, §11:777) and any future unit
+post-logout availability choice, not session survival (`full.md` §7.2:535). Socket activation is used
+"only if justified and correctly implemented" (`full.md` §7.2:534). No unit exists today; installing or
+enabling a service is gated on explicit user approval (`full.md` §7.2:537, §11:775) and any future unit
 must inspect real CLI options first (`full.md` §7.2:539).
 
 **D1.6 (confirms ADR-001).** ADR-001 already fixed "[n]o persisted event log means no resume across
@@ -254,14 +254,14 @@ reconsider-if trigger remains ADR-001:417.
 
 **D1.7 (plain non-claim).** **Server-crash and host-reboot session survival is NOT implemented and NOT
 claimed** (`full.md` §1.3:120, §6.3:480, §6.3:486; `protocol/compatibility/core-001-method-set.md:219`;
-`protocol/compatibility/core-002-method-set.md:197`; `docs/architecture/interface-contract.md:92`). SIGKILL
+`protocol/compatibility/core-002-method-set.md:197`; `docs/architecture/interface-contract.md:93-95`). SIGKILL
 and host power-loss orphan behaviour is **untested and unclaimed**: no test kills the server with SIGKILL
 and no orphan/adoption policy is documented. No systemd unit exists (`crates/relayable-server/src/main.rs:3`;
 `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747`).
 
 **D1.8 (upgrade continuity, stated honestly).** `full.md` §11:771 requires that "package upgrades must
 not silently kill sessions." **Today they do end live children**, because a restart or upgrade terminates
-the foreground server and graceful shutdown reaps every live child (`crates/relayable-server/src/lib.rs:118-135`;
+the foreground server and graceful shutdown reaps every live child (`crates/relayable-server/src/lib.rs:123-135`;
 test `graceful_shutdown_kills_live_children`, `server_e2e.rs:869`). This is a documented known gap, not a
 hidden one. The drain story for the first release is: a graceful shutdown ends children deliberately;
 clients observe the state change through the event stream (`terminal_child_exited` and session/connection
@@ -280,8 +280,11 @@ against `sled`/`redb`, `sqlx`, and plain files in the Options table. The concret
 
 **D2.2 (crate boundary).** Persistence lives behind a new `crates/relayable-store` crate so the engine is
 replaceable. `crates/relayable-server` composes persistence (`full.md` §5.2:408; `ADR-001:337,361`). The
-workspace graph is Lead-owned (`ADR-001:384`), so creating the crate and adding it to the workspace is
-Lead-integrated future work; no crate cycles are permitted (`full.md` §5.2:412).
+workspace graph is Lead-owned (`ADR-001:383-384`), so creating the crate and adding it to the workspace is
+Lead-integrated future work; no crate cycles are permitted (`full.md` §5.2:412). This is a deliberate
+extension of ADR-001's fixed day-one crate list: `crates/relayable-store` is a new crate boundary
+beyond that enumeration, while `ADR-001:337` continues to place persistence *composition* inside
+`relayable-server` (the workspace graph remains Lead-owned).
 
 **D2.3 (schema — Relayable-defined (no REX evidence)).** The first-release schema is host-independent by
 construction: it holds **no pids, no file descriptors, no hostnames, no peer credentials, and no host
@@ -293,7 +296,7 @@ identity**, consistent with `ADR-001:86` (host profiles are client-local). The s
 | `sessions` | `session_id` (UUID PK), `label`, `created_at_millis`, `closed_at_millis`, `state` (`active` \| `closed` \| `interrupted`), `last_known_revision` | Session definition, not live process state (`full.md` §6.3:486). |
 | `windows` / `blocks` **or** `session_layout` | Opaque, schema-versioned layout document (per window: `block_id` + split ratios) | Supplies the "layouts" metadata `full.md` §6.4:490 requires; shape aligns with `interface-contract.md:72-82` (`layout`). |
 | `tombstones` | `session_id`, `destroy_sequence`, `timestamp` | **Closes the deferral at `ADR-001:433`**; matches the tombstone `ADR-001:286-291` describes and the "no terminal bytes" rule (`ADR-001:89`). |
-| `identities` | `client_id`, display name, timestamps — **display records only** | No credentials: there is no authn in the first release (`protocol/compatibility/core-001-method-set.md:122-136`; `core-002-method-set.md:195-205`), so **no tokens, keys, or credential material are persisted** (`full.md` §11:764, §11:770). |
+| `identities` | `client_id`, display name, timestamps — **display records only** | No credentials: there is no authn in the first release (`protocol/compatibility/core-001-method-set.md:127-140`; `core-002-method-set.md:195-205`), so **no tokens, keys, or credential material are persisted** (`full.md` §11:764, §11:770). |
 | `preferences` | Versioned key/value, scoped per user, host-independent | Per `full.md` §6.4:490 ("preferences"). |
 | `audit_events` | Session lifecycle, session state changes, writer-lease changes, destroys | Only `full.md` §6.4:490's "selected audit/event data". |
 
@@ -313,26 +316,34 @@ for `full.md` §6.4:500, §12:799–805):
 | Retained output tail per block (`output_tail_bytes`) | default `32_768` | `crates/relayable-server/src/config.rs:41,126` |
 | Outbound queue messages per connection | `OUTBOUND_QUEUE_MESSAGES = 8192` | `crates/relayable-server/src/connection.rs:38` |
 | Duplicate-request dedup window | 64 | `connection.rs:281` (`RequestWindow::new(64)`) |
-| Retained control events (`RELAYABLE_EVENT_RETENTION_EVENTS`) | default `4096` | `crates/relayable-server/src/config.rs:19,23`; `crates/relayable-server/src/events.rs:141-153,201` |
+| Retained control events (`RELAYABLE_EVENT_RETENTION_EVENTS`) | default `4096` | `crates/relayable-server/src/config.rs:23`; `crates/relayable-server/src/events.rs:141-153,201` |
 | Per-stream credit window | `262_144` bytes | `crates/relayable-protocol/src/limits.rs:14-20` |
 
-These sizes are configuration parameters, not hard-coded constants (`ADR-001:230-236`); any new name
+Only `output_tail_bytes` and `event_retention_events` are `ServerConfig` parameters (the latter
+overridable via `RELAYABLE_EVENT_RETENTION_EVENTS`); the remaining bounds are hard-coded `const`s —
+`INPUT_QUEUE_MESSAGES`/`INPUT_QUEUE_BYTES` (`session.rs:29,31`), `OUTBOUND_QUEUE_MESSAGES`
+(`connection.rs:38`), the 64-entry dedup window (`connection.rs:281`), `THREAD_JOIN_TIMEOUT`
+(`session.rs:33`), and `credit_window_bytes` from the protocol `DEFAULT_LIMITS` (`limits.rs:14-20`).
+These may be promoted to configuration later (`ADR-001:230-236`); any new name
 lives in the ADR-005 `RELAYABLE_*` namespace, and the exact new name is fixed at implementation under
 ADR-005 (this ADR does not invent one). Server-side scrollback is **NOT PRESENT** today:
 `crates/relayable-server/src/session.rs:470` sets `scrollback_bytes: Vec::new()` in `attach_stream`
-(consistent with `core-001-method-set.md:122-136`). Today's scrollback is client-engine-owned
+(consistent with `core-001-method-set.md:136-137`). Today's scrollback is client-engine-owned
 (`apps/linux/src/term/mod.rs:31,164`). The persisted metadata has its own bounds: `audit_events`,
 `tombstones`, and closed sessions are pruned by **age and row count** on startup and on close, so DB
 growth is bounded by construction (`full.md` §6.4:494 "Retention and pruning"). The concrete age/row
 defaults are **Relayable-defined (no REX evidence)** configuration, to be measured (`full.md` §12:796)
 and named under ADR-005.
 
-**D2.5 (crash-consistent writes).** Crash consistency (`full.md` §6.4:496) is defined by:
+**D2.5 (crash-consistent writes).** Crash consistency (`full.md` §6.4:495) is defined by:
 `PRAGMA journal_mode=WAL`; an explicit `synchronous` policy (`NORMAL` in WAL mode as the default
-performance/durability trade-off, with `FULL` available for stricter durability — Relayable-defined);
-one writer serialized through the server's store task; one transaction per logical operation;
-`busy_timeout` set so contention cannot fail spuriously; and a `flock`-based single-instance guard so a
-second server cannot become a second writer. On startup, the server performs explicit reconciliation:
+performance/durability trade-off, with `FULL` available for stricter durability); one writer serialized
+through the server's store task; one transaction per logical operation; `busy_timeout` set so contention
+cannot fail spuriously; and a `flock`-based single-instance guard so a second server cannot become a
+second writer. The WAL/`synchronous` policy, the single store task, one-transaction-per-operation, the
+`busy_timeout` value, the `flock` guard, and startup reconciliation are all
+**Relayable-defined (no REX evidence)** design choices. On startup, the server performs explicit
+reconciliation:
 any row left in state `active` is marked `interrupted`, because the process that owned it is gone — it is
 **never** silently reported as live (`full.md` §6.3:486 "offer clear restart policy instead of false
 guarantees"; `ADR-001:286-291`). Memory remains authoritative for live state; the DB never substitutes
@@ -357,7 +368,7 @@ current epoch must fail with a documented reason rather than fake a reattach.
 | Audit trail | Event-sequence continuity (new epoch) |
 
 A restored session definition **is a restart, not a resurrected process** (`full.md` §6.3:486;
-`docs/architecture/interface-contract.md:92`). The protocol and UI must present restoring a definition as
+`docs/architecture/interface-contract.md:93-95`). The protocol and UI must present restoring a definition as
 an explicit **restart action**, never as a silent reattach.
 
 **D2.8 (storage location and backup/export).** Per-user persistent state lives at
@@ -367,9 +378,9 @@ stays at `$XDG_RUNTIME_DIR/relayable/` (`full.md` §7.1:514; `ADR-002:251-259`).
 system-mode state directory (FHS `/var/lib/relayable`) is **Relayable-defined (no REX evidence)** and
 applies only to the gated system mode. Directories are resolved and validated at startup without assuming
 `$HOME` or `$XDG_RUNTIME_DIR` exist (`full.md` §7.1:519). Backup/export: an online-consistent copy via
-the SQLite backup API or `VACUUM INTO`, plus a schema-versioned, host-independent JSON/NDJSON export.
-Import/restore is out of scope for the first release. Exports contain no terminal bytes because none are
-stored.
+the SQLite backup API or `VACUUM INTO`, plus a schema-versioned, host-independent JSON/NDJSON export
+(**Relayable-defined (no REX evidence)**). Import/restore is out of scope for the first release. Exports
+contain no terminal bytes because none are stored.
 
 ### Decision 3 — Multi-user and identity scope: one user per server
 
@@ -384,7 +395,7 @@ deliberate per-user execution model (per-user workers/services running as the ta
 daemon running as one `relayable` account must not silently impersonate all remote users or run
 everybody's commands under that account" (`full.md` §7.2:525; `full.md` §11:766). That mode requires
 peer-credential checks (`SO_PEERCRED`) and an authz mechanism, neither of which exists: `SO_PEERCRED` is
-deferred (`protocol/compatibility/core-001-method-set.md:122-136`) and there is "no authn/authz"
+deferred (`protocol/compatibility/core-001-method-set.md:138`) and there is "no authn/authz"
 (`core-002-method-set.md:195-205`). `full.md` §11:766 permits the first-release scope to be "one user per
 server" instead.
 
@@ -394,7 +405,7 @@ identities are display records only and carry no credentials (D2.3).
 **D3.4 (Android readiness, DEC-010).** The ownership/identity model must not assume POSIX uid
 multiplexing or a system daemon. The session and identity types stay host-independent and usable in a
 single-app-uid deployment, and no protocol field may depend on a host uid (`ADR-001:86`;
-`docs/agent-loop/DECISIONS.md:21`). This is why no pid/fd/host identity is persisted (D2.3) and why the
+`docs/agent-loop/DECISIONS.md:17`). This is why no pid/fd/host identity is persisted (D2.3) and why the
 supervisor options are evaluated against Android in the Options table.
 
 ---
@@ -404,12 +415,12 @@ supervisor options are evaluated against Android in the Options table.
 | Property | Status | Authority |
 |---|---|---|
 | Session/PTY survival across client close or network loss | **Guaranteed — implemented and tested** | `full.md` §6.3:475–477; `crates/relayable-server/src/lib.rs:1-6`; tests `server_e2e.rs:508,1319,1392`, `tests/reconnect/main.rs:42,188,308`, `tests/lifecycle/main.rs:102`, `tests/multi-client/main.rs:227`, `tests/flow-control/main.rs:131,467` |
-| Survival across server crash or host reboot | **NOT implemented, NOT claimed** | `full.md` §1.3:120, §6.3:480, §6.3:486; `core-001-method-set.md:219`; `core-002-method-set.md:197`; `interface-contract.md:92` |
+| Survival across server crash or host reboot | **NOT implemented, NOT claimed** | `full.md` §1.3:120, §6.3:480, §6.3:486, §6.4:497; `core-001-method-set.md:219`; `core-002-method-set.md:197`; `interface-contract.md:93-95` |
 | Byte-exact terminal stream recovery | **Not claimed** | `full.md` §6.1:460; `ADR-001:239`; `interface-contract.md:88-92` |
 | Event-sequence continuity across a restart | **Not claimed** (new per-run epoch) | D2.6; `interface-contract.md:63-92` |
-| Upgrade/restart continuity (children preserved) | **NOT implemented** — children end on restart | `full.md` §11:771; `crates/relayable-server/src/lib.rs:118-135`; test `server_e2e.rs:869` |
+| Upgrade/restart continuity (children preserved) | **NOT implemented** — children end on restart | `full.md` §11:771; `crates/relayable-server/src/lib.rs:123-135`; test `server_e2e.rs:869` |
 | SIGKILL / host power-loss orphan behaviour | **Untested / unclaimed** | D1.7; no SIGKILL or orphan test exists |
-| Multi-user isolation, authn, and authz | **NOT implemented** | `full.md` §11:766; `core-001-method-set.md:122-136`; `core-002-method-set.md:195-205` |
+| Multi-user isolation, authn, and authz | **NOT implemented** | `full.md` §11:766; `core-001-method-set.md:127-140`; `core-002-method-set.md:195-205` |
 | systemd unit | **Not present** | `crates/relayable-server/src/main.rs:3`; `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` |
 | SQLite persistence store | **Designed here; not implemented** | This ADR, Decision 2; verified: no storage crate in any manifest |
 | Unbounded terminal output retained in the metadata DB | **Never** — no terminal bytes are persisted | `full.md` §6.4:490, §12:804; `ADR-001:239,286-291` |
@@ -435,7 +446,7 @@ supervisor options are evaluated against Android in the Options table.
   `full.md` §11:766 permits when no per-user execution model exists, and it avoids a credential surface
   (no `SO_PEERCRED`, no authz) that is not implemented.
 - **`crates/relayable-store` is a new build dependency surface.** Adding it changes the workspace graph,
-  which is Lead-owned (`ADR-001:384`); the binding choice must preserve Android hostability (DEC-010).
+  which is Lead-owned (`ADR-001:383-384`); the binding choice must preserve Android hostability (DEC-010).
 - **Cross-cutting, not local.** Creating the store touches server startup/shutdown ordering
   (`crates/relayable-server/src/signals.rs` shutdown path), configuration naming (ADR-005), and the
   protocol/UI restart action; these are listed as implied future work.
@@ -448,9 +459,9 @@ supervisor options are evaluated against Android in the Options table.
 2. **Reboot/upgrade continuity becomes a release gate,** or `full.md` §11:771 is exercised by a real
    release and the documented child-ending behavior is judged insufficient.
 3. **A second user must be served by one daemon.** That forces the per-user worker/service model plus
-   `SO_PEERCRED` (deferred, `core-001-method-set.md:122-136`) and an authz mechanism, reopening D3.1/D3.2.
+   `SO_PEERCRED` (deferred, `core-001-method-set.md:138`) and an authz mechanism, reopening D3.1/D3.2.
 4. **SQLite proves wrong.** Measured migration, locking, or test problems with the chosen binding, or
-   Android cannot host it without breaking DEC-010 (`docs/agent-loop/DECISIONS.md:21`). The store engine
+   Android cannot host it without breaking DEC-010 (`docs/agent-loop/DECISIONS.md:17`). The store engine
    or binding is revisited.
 5. **Measured bounds contradict this ADR.** Retention/scrollback defaults measured per `full.md` §12:796
    contradict the bounds in D2.4 or the pruning policy.
@@ -465,7 +476,7 @@ Each item below is **NOT DONE** and is recorded only so it is not presented as i
 
 - [ ] **NOT DONE** — Create `crates/relayable-store` behind which the engine is replaceable.
 - [ ] **NOT DONE** — Add the store dependency to the workspace graph (`Cargo.toml`, Lead-owned,
-      `ADR-001:384`).
+      `ADR-001:383-384`).
 - [ ] **NOT DONE** — Server startup reconciliation (mark stale `active` rows `interrupted`) and the
       single-instance `flock` guard.
 - [ ] **NOT DONE** — Write path for sessions, layout, identities, preferences, tombstones, and audit in
@@ -477,7 +488,7 @@ Each item below is **NOT DONE** and is recorded only so it is not presented as i
 - [ ] **NOT DONE** — Product-level "restart session" surface (protocol + UI), which must present a restart,
       not a resurrected process (D2.7).
 - [ ] **NOT DONE** — Optional, gated systemd user unit; must inspect real CLI options first
-      (`full.md` §7.2:539) and is gated on user approval (`full.md` §7.2:537, §11:777).
+      (`full.md` §7.2:539) and is gated on user approval (`full.md` §7.2:537, §11:775).
 - [ ] **NOT DONE** — Any supervisor option from D1.4, if reconsider-if (1) fires.
 - [ ] **NOT DONE** — `SO_PEERCRED` and an authz mechanism for any multi-user mode.
 - [ ] **NOT DONE** — Exact environment-variable names for store/retention settings, fixed at
@@ -501,31 +512,31 @@ was performed because no code changed.
 | `full.md` §6.3:486 | Persist definitions separately; clear restart policy | Spec |
 | `full.md` §6.4:490, §6.4:492–498, §6.4:500 | SQLite-or-similar metadata; define list; bounded scrollback/queues | Spec |
 | `full.md` §7.1:512–519 | XDG paths; `/etc` & `/run` system-only; never assume `$HOME`/`$XDG_RUNTIME_DIR` | Spec |
-| `full.md` §7.2:523, §7.2:525, §7.2:527–534 | `systemd --user` default; per-user workers for system mode; test list | Spec |
+| `full.md` §7.2:523, §7.2:525, §7.2:527–535 | `systemd --user` default; per-user workers for system mode; test list | Spec |
 | `full.md` §11:760, §11:762, §11:764, §11:766, §11:770, §11:771 | Security release gate; socket perms; one-user scope; logging; upgrade continuity | Spec |
 | `full.md` §12:799, §12:804, §12:805 | Bounded queues/scrollback; no terminal bytes in metadata DB; idle vs high-output | Spec |
 | `full.md` §5.2:405, §5.2:408, §5.2:412, §5.2:414 | Model purity; server composes persistence; no cycles; ADR content | Spec |
-| `ADR-001:86,89,239,286-291,337,361,384,398,400,417,433` | Host profiles client-local; tombstone/no terminal bytes; no byte-exact recovery; crate roles; Lead-owned graph; snapshot fallback; no persisted event log; reconsider-if; tombstone-schema deferral to persistence | Spec/ADR |
+| `ADR-001:86,89,239,286-291,337,361,383-384,398,400,417,433` | Host profiles client-local; tombstone/no terminal bytes; no byte-exact recovery; crate roles; Lead-owned graph; snapshot fallback; no persisted event log; reconsider-if; tombstone-schema deferral to persistence | Spec/ADR |
 | `ADR-002:251-259` | Pathname Unix socket under `$XDG_RUNTIME_DIR/relayable/`; `/run` system-only; `SO_PEERCRED` connection-scoped/deferred | ADR |
 | `docs/architecture/interface-contract.md:63-92` | Snapshot schema; `revision`/`sequence`; `snapshot_required`; "a restored session definition is a restart" | Spec |
 | `docs/architecture/interface-contract.md:150-180` | Connection state model; transport drop never destroys the session | Spec |
-| `protocol/compatibility/core-001-method-set.md:122-136,210-219` | Persistence none, authn none, `SO_PEERCRED` deferred; disconnect removes only client records; crash/reboot not claimed | Spec |
+| `protocol/compatibility/core-001-method-set.md:127-140,210-219` | Persistence none, authn none, `SO_PEERCRED` deferred; disconnect removes only client records; crash/reboot not claimed | Spec |
 | `protocol/compatibility/core-002-method-set.md:195-205` | No crash/reboot survival; no byte-exact replay; no persistence/SQLite; no authn/authz | Spec |
-| `crates/relayable-server/src/session.rs:1-6,29,31,33,292,301,304,305,470,903-906` | In-process `BlockRuntime`/PTY ownership; bounds; empty server scrollback; `SessionRuntime`; tombstones | Code |
-| `crates/relayable-server/src/registry.rs:56,95-97,104,186-187` | `ServerShared.sessions`; child owned by registry; tombstone on close | Code |
-| `crates/relayable-server/src/lib.rs:1-6,89-91,118-135` | Dropped client never stops child; graceful shutdown reaps children; socket unlink | Code |
-| `crates/relayable-server/src/connection.rs:38,90-92,281,304` | Outbound bound; `close_now` leaves session/child untouched; dedup window; transport-only teardown | Code |
-| `crates/relayable-server/src/signals.rs:1-6,20-33,42-44` | SIGINT/SIGTERM only; async-signal-safe atomic flag | Code |
-| `crates/relayable-server/src/config.rs:19,23,41,43,126` | `output_tail_bytes` default; `event_retention_events` default | Code |
+| `crates/relayable-server/src/session.rs:1-7,29,31,33,292,301,304,305,470,903-906` | In-process `BlockRuntime`/PTY ownership; bounds; empty server scrollback; `SessionRuntime`; tombstones | Code |
+| `crates/relayable-server/src/registry.rs:56,84-85,98,182` | `ServerShared.sessions`; child owned by registry; tombstone on close | Code |
+| `crates/relayable-server/src/lib.rs:1-6,123-135` | Dropped client never stops child; graceful shutdown reaps children; socket unlink | Code |
+| `crates/relayable-server/src/connection.rs:38,79-80,281,312` | Outbound bound; `close_now` leaves session/child untouched; dedup window; transport-only teardown | Code |
+| `crates/relayable-server/src/signals.rs:1-6,19-32,40-42` | SIGINT/SIGTERM only; async-signal-safe atomic flag | Code |
+| `crates/relayable-server/src/config.rs:23,41,43,126` | `output_tail_bytes` default; `event_retention_events` default | Code |
 | `crates/relayable-server/src/events.rs:141-153,201` | Bounded retained event log (drop-oldest) | Code |
 | `crates/relayable-protocol/src/limits.rs:14-20` | Provisional credit window and limits | Code |
 | `crates/relayable-pty/src/lib.rs:121,148,169-176,236,270,292` | Opaque `PtyHandle`; spawn/setsid; try_wait/kill/shutdown | Code |
 | `crates/relayable-server/src/main.rs:3` | Foreground binary; no systemd unit, no forking | Code |
 | `apps/linux/src/term/mod.rs:31,164` | Scrollback is client-engine-owned today | Code |
-| `Cargo.toml:29-44`; `crates/relayable-server/Cargo.toml:13-21` | `tempfile` workspace dep; server deps; no storage crate | Code/command |
+| `Cargo.toml:29-44`; `crates/relayable-server/Cargo.toml:13-23` | `tempfile` workspace dep; server deps; no storage crate | Code/command |
 | `server_e2e.rs:508,869,1319,1392`; `tests/reconnect/main.rs:42,188,308`; `tests/lifecycle/main.rs:102,451`; `tests/multi-client/main.rs:227`; `tests/flow-control/main.rs:131,467`; `tests/events/main.rs:260` | Tests proving client-close/network-loss survival, shutdown reaping, flow-control survival | Tests |
 | `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` | No systemd/packaging recipe; service/persistence model undecided (gap G5) | Spec/audit |
-| `docs/agent-loop/DECISIONS.md:12,21` | DEC-005 index row; DEC-010 Android deferral | Spec |
+| `docs/agent-loop/DECISIONS.md:12,17,125` | DEC-005 index row; DEC-010 Android deferral | Spec |
 
 ## References
 
