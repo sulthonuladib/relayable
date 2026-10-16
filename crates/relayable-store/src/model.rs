@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::{
     DEFAULT_AUDIT_EVENTS_MAX_AGE_MILLIS, DEFAULT_AUDIT_EVENTS_MAX_ROWS,
-    DEFAULT_CLOSED_SESSIONS_MAX_AGE_MILLIS, DEFAULT_TOMBSTONES_MAX_AGE_MILLIS,
+    DEFAULT_SESSIONS_MAX_AGE_MILLIS, DEFAULT_SESSIONS_MAX_ROWS, DEFAULT_TOMBSTONES_MAX_AGE_MILLIS,
     DEFAULT_TOMBSTONES_MAX_ROWS,
 };
 
@@ -59,9 +59,9 @@ impl StoredSessionState {
 
 /// Kind of audit event recorded in `audit_events.event_kind`.
 ///
-/// `Pruned` is defined for audit readers and future callers; [`crate::Store::prune`]
-/// itself does **not** append an audit row, so the deleted counts it returns are
-/// exactly the rows removed from each table.
+/// `Pruned` is **reserved**: it exists so audit readers already recognize the
+/// value, but [`crate::Store::prune`] itself does **not** append an audit row.
+/// The deleted counts it returns are exactly the rows removed from each table.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AuditEventKind {
     /// A session row was created (or reactivated) as `active`.
@@ -70,7 +70,7 @@ pub enum AuditEventKind {
     SessionClosed,
     /// An `active` row from a previous run was marked `interrupted` at startup.
     SessionInterrupted,
-    /// Retention pruning removed rows (reserved; see the type docs).
+    /// Reserved; not currently emitted (see the type docs).
     Pruned,
 }
 
@@ -133,8 +133,10 @@ pub struct StoredSession {
     pub last_known_revision: i64,
 }
 
-/// A destroy record. `destroy_sequence` is monotonic per store
-/// (`COALESCE(MAX(destroy_sequence),0)+1`, computed inside the transaction).
+/// A destroy record. `destroy_sequence` is `MAX(destroy_sequence)+1` at write
+/// time, computed inside the close transaction (`COALESCE(MAX(...),0)+1`). It is
+/// **not** globally monotonic across pruning: once the highest-sequence rows are
+/// pruned the next write can reuse a lower sequence.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Tombstone {
     pub session_id: String,
@@ -157,8 +159,9 @@ pub struct AuditEvent {
 ///
 /// Cutoffs are `now_millis - <max_age_millis>`; a row strictly older than the
 /// cutoff is deleted. Row limits keep the newest rows by the table's monotonic
-/// order (`audit_events.sequence` / `tombstones.destroy_sequence`). A
-/// non-positive row limit keeps no rows.
+/// order (`audit_events.sequence` / `tombstones.destroy_sequence`) or, for
+/// sessions, by `created_at_millis` within the non-active set. A non-positive
+/// row limit keeps no rows.
 #[derive(Debug, Clone)]
 pub struct PruneLimits {
     /// "Current" time used to compute all age cutoffs.
@@ -171,8 +174,13 @@ pub struct PruneLimits {
     pub tombstones_max_rows: i64,
     /// Maximum age of a `tombstones` row, in milliseconds.
     pub tombstones_max_age_millis: i64,
-    /// Maximum age of a `closed` session row, in milliseconds.
-    pub closed_sessions_max_age_millis: i64,
+    /// Maximum `sessions` rows to keep in the non-active set
+    /// (`closed`/`interrupted`), newest by `created_at_millis`.
+    pub sessions_max_rows: i64,
+    /// Maximum age of a `closed`/`interrupted` session row, in milliseconds.
+    /// The age is measured from `closed_at_millis` when present, else
+    /// `created_at_millis`.
+    pub sessions_max_age_millis: i64,
 }
 
 impl PruneLimits {
@@ -190,7 +198,8 @@ impl PruneLimits {
             audit_max_age_millis: DEFAULT_AUDIT_EVENTS_MAX_AGE_MILLIS,
             tombstones_max_rows: DEFAULT_TOMBSTONES_MAX_ROWS,
             tombstones_max_age_millis: DEFAULT_TOMBSTONES_MAX_AGE_MILLIS,
-            closed_sessions_max_age_millis: DEFAULT_CLOSED_SESSIONS_MAX_AGE_MILLIS,
+            sessions_max_rows: DEFAULT_SESSIONS_MAX_ROWS,
+            sessions_max_age_millis: DEFAULT_SESSIONS_MAX_AGE_MILLIS,
         }
     }
 
@@ -202,7 +211,8 @@ impl PruneLimits {
     /// `RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS`,
     /// `RELAYABLE_STORE_TOMBSTONES_MAX_ROWS`,
     /// `RELAYABLE_STORE_TOMBSTONES_MAX_AGE_MILLIS`,
-    /// `RELAYABLE_STORE_CLOSED_SESSIONS_MAX_AGE_MILLIS`.
+    /// `RELAYABLE_STORE_SESSIONS_MAX_ROWS`,
+    /// `RELAYABLE_STORE_SESSIONS_MAX_AGE_MILLIS`.
     ///
     /// Unset, empty, or unparsable values fall back to the default.
     pub fn from_env() -> Self {
@@ -227,8 +237,10 @@ impl PruneLimits {
                 .unwrap_or(DEFAULT_TOMBSTONES_MAX_ROWS),
             tombstones_max_age_millis: value("RELAYABLE_STORE_TOMBSTONES_MAX_AGE_MILLIS")
                 .unwrap_or(DEFAULT_TOMBSTONES_MAX_AGE_MILLIS),
-            closed_sessions_max_age_millis: value("RELAYABLE_STORE_CLOSED_SESSIONS_MAX_AGE_MILLIS")
-                .unwrap_or(DEFAULT_CLOSED_SESSIONS_MAX_AGE_MILLIS),
+            sessions_max_rows: value("RELAYABLE_STORE_SESSIONS_MAX_ROWS")
+                .unwrap_or(DEFAULT_SESSIONS_MAX_ROWS),
+            sessions_max_age_millis: value("RELAYABLE_STORE_SESSIONS_MAX_AGE_MILLIS")
+                .unwrap_or(DEFAULT_SESSIONS_MAX_AGE_MILLIS),
         }
     }
 }
@@ -238,7 +250,7 @@ impl PruneLimits {
 pub struct PruneReport {
     pub audit_events_deleted: u64,
     pub tombstones_deleted: u64,
-    pub closed_sessions_deleted: u64,
+    pub sessions_deleted: u64,
 }
 
 /// Number of `active` rows marked `interrupted` by
@@ -274,9 +286,10 @@ mod tests {
             limits.tombstones_max_age_millis,
             DEFAULT_TOMBSTONES_MAX_AGE_MILLIS
         );
+        assert_eq!(limits.sessions_max_rows, DEFAULT_SESSIONS_MAX_ROWS);
         assert_eq!(
-            limits.closed_sessions_max_age_millis,
-            DEFAULT_CLOSED_SESSIONS_MAX_AGE_MILLIS
+            limits.sessions_max_age_millis,
+            DEFAULT_SESSIONS_MAX_AGE_MILLIS
         );
     }
 
@@ -287,7 +300,8 @@ mod tests {
             ("RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS", ""),
             ("RELAYABLE_STORE_TOMBSTONES_MAX_ROWS", "not-a-number"),
             ("RELAYABLE_STORE_TOMBSTONES_MAX_AGE_MILLIS", "77"),
-            ("RELAYABLE_STORE_CLOSED_SESSIONS_MAX_AGE_MILLIS", "99"),
+            ("RELAYABLE_STORE_SESSIONS_MAX_ROWS", "9"),
+            ("RELAYABLE_STORE_SESSIONS_MAX_AGE_MILLIS", "99"),
         ]);
         assert_eq!(limits.audit_max_rows, 25);
         assert_eq!(
@@ -296,7 +310,8 @@ mod tests {
         );
         assert_eq!(limits.tombstones_max_rows, DEFAULT_TOMBSTONES_MAX_ROWS);
         assert_eq!(limits.tombstones_max_age_millis, 77);
-        assert_eq!(limits.closed_sessions_max_age_millis, 99);
+        assert_eq!(limits.sessions_max_rows, 9);
+        assert_eq!(limits.sessions_max_age_millis, 99);
     }
 
     #[test]

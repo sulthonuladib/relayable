@@ -15,8 +15,14 @@
 //! 3. a second server refuses to start while the first owns the state directory
 //!    (`StateDirLocked`), and the single-writer lock refuses an in-process
 //!    second `Store::open` too.
-//! 4. with no resolvable state directory the server serves sessions normally
-//!    and creates no database.
+//! 4. with no resolvable state directory the server serves sessions normally,
+//!    creates no database/WAL/lock artifact under a fresh child cwd, and logs
+//!    the persistence-disabled warning.
+//! 5. a state directory that is a regular file, and a real store write failure
+//!    (broken `sessions` table) both degrade to in-memory operation with a
+//!    warning while protocol operations still succeed (the fail-soft policy).
+//! 6. `RELAYABLE_STORE_AUDIT_MAX_ROWS` bounds the startup-pruned audit table
+//!    end to end, proving the documented retention overrides are honored.
 //!
 //! Everything is bounded: short deadlines, explicit child shutdown, and a
 //! `Drop` that kills the server and every tracked PTY child.
@@ -24,7 +30,7 @@
 use std::io::{ErrorKind, Read};
 use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, ExitStatus, Stdio};
+use std::process::{Child, ChildStderr, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -78,6 +84,12 @@ struct ServerProcess {
     child: Option<Child>,
     socket: PathBuf,
     socket_dir: tempfile::TempDir,
+    /// Fresh working directory for the child, so "no persistence artifact was
+    /// created" can be asserted over a directory the test controls rather than
+    /// the cargo test process cwd.
+    cwd: tempfile::TempDir,
+    /// The child's stderr, piped so warnings can be asserted after exit.
+    stderr: Option<ChildStderr>,
     pids: Vec<u32>,
 }
 
@@ -85,11 +97,21 @@ impl ServerProcess {
     /// Spawn the server with `RELAYABLE_STATE_DIR` set only when `state_dir` is
     /// `Some`. The environment is otherwise hermetic.
     fn spawn(state_dir: Option<&Path>) -> Self {
+        Self::spawn_with(state_dir, &[])
+    }
+
+    /// Spawn the server with `RELAYABLE_STATE_DIR` (when `Some`) plus the given
+    /// extra environment variables, otherwise hermetic.
+    fn spawn_with(state_dir: Option<&Path>, extra_env: &[(&str, &str)]) -> Self {
         let socket_dir = tempfile::Builder::new()
             .prefix("relayable-store-wiring-")
             .tempdir()
             .expect("create socket temp dir");
         let socket = socket_dir.path().join("relayable.sock");
+        let cwd = tempfile::Builder::new()
+            .prefix("relayable-store-wiring-cwd-")
+            .tempdir()
+            .expect("create child cwd temp dir");
         let mut command = Command::new(env!("CARGO_BIN_EXE_relayable-server"));
         command
             .arg("run")
@@ -98,16 +120,23 @@ impl ServerProcess {
             .env("RELAYABLE_SERVER", &socket)
             .env("SHELL", "/bin/sh")
             .env("TERM", "xterm-256color")
+            .current_dir(cwd.path())
             .stdout(Stdio::null())
-            .stderr(Stdio::null());
+            .stderr(Stdio::piped());
         if let Some(state_dir) = state_dir {
             command.env("RELAYABLE_STATE_DIR", state_dir);
         }
-        let child = command.spawn().expect("spawn relayable-server");
+        for (name, value) in extra_env {
+            command.env(name, value);
+        }
+        let mut child = command.spawn().expect("spawn relayable-server");
+        let stderr = child.stderr.take();
         let server = Self {
             child: Some(child),
             socket,
             socket_dir,
+            cwd,
+            stderr,
             pids: Vec::new(),
         };
         assert!(
@@ -147,6 +176,21 @@ impl ServerProcess {
 
     fn socket_dir(&self) -> &Path {
         self.socket_dir.path()
+    }
+
+    /// The child's fresh working directory.
+    fn cwd(&self) -> &Path {
+        self.cwd.path()
+    }
+
+    /// Drain and return the child's stderr. Blocks until EOF, so call only after
+    /// the child has exited (`shutdown` or a confirmed exit).
+    fn take_stderr(&mut self) -> String {
+        let mut text = String::new();
+        if let Some(mut pipe) = self.stderr.take() {
+            let _ = pipe.read_to_string(&mut text);
+        }
+        text
     }
 
     /// Send `SIGTERM`, wait for graceful exit (which runs the store checkpoint
@@ -538,13 +582,19 @@ fn create_and_close_persist_metadata_without_terminal_bytes() {
 fn startup_reconciles_stale_active_rows_and_never_resurrects_them() {
     let state_dir = tempfile::tempdir().expect("state temp dir");
     let stale_id = relayable_model::SessionId::new().to_string();
+    // Recent enough to survive the default 90-day session age prune, so this
+    // test observes reconciliation rather than retention.
+    let stale_created_at_millis = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| i64::try_from(duration.as_millis()).unwrap_or(i64::MAX))
+        .unwrap_or(0);
     {
         let store = Store::open(state_dir.path()).expect("pre-create the store");
         store
             .record_session_created(&SessionCreate {
                 session_id: stale_id.clone(),
                 label: Some("stale-definition".to_string()),
-                created_at_millis: 1,
+                created_at_millis: stale_created_at_millis,
                 revision: 1,
             })
             .expect("record stale active session");
@@ -633,14 +683,194 @@ fn without_a_state_directory_the_server_runs_without_persistence() {
     );
     client.close(&session_id);
     assert!(server.shutdown().success());
+    let stderr = server.take_stderr();
 
-    // No database was created anywhere under the server's temp dir.
+    // The child's cwd is a fresh temp dir owned by this test: no database, WAL,
+    // or lock artifact may appear anywhere under it (the socket temp dir is
+    // scanned too for completeness).
     let mut files = Vec::new();
+    walk_files(server.cwd(), &mut files);
     walk_files(server.socket_dir(), &mut files);
+    let artifacts: Vec<&PathBuf> = files
+        .iter()
+        .filter(|path| is_persistence_artifact(path))
+        .collect();
     assert!(
-        !files
+        artifacts.is_empty(),
+        "no database/WAL/lock artifact may be created when the state dir is \
+         unresolvable, found {artifacts:?}"
+    );
+
+    // The documented warning must be emitted so the operator knows persistence
+    // is off for this run.
+    assert!(
+        stderr.contains("persistence disabled"),
+        "stderr must explain that persistence is disabled, got {stderr:?}"
+    );
+}
+
+/// True when `path`'s file name looks like one of the store's on-disk
+/// artifacts (`*.db`, `*.db-wal`, `*.lock`).
+fn is_persistence_artifact(path: &Path) -> bool {
+    let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+        return false;
+    };
+    name.ends_with(".db") || name.ends_with(".db-wal") || name.ends_with(".lock")
+}
+
+/// A state directory that exists as a regular FILE is "any other open error":
+/// the server degrades to in-memory operation and still serves sessions.
+#[test]
+fn state_dir_that_is_a_regular_file_degrades_instead_of_failing_startup() {
+    let dir = tempfile::tempdir().expect("temp dir");
+    let file = dir.path().join("not-a-state-directory");
+    std::fs::write(&file, b"this is a file, not a state directory").expect("write file");
+
+    let mut server = ServerProcess::spawn(Some(&file));
+    let mut client = Client::new(server.connect());
+    client.handshake();
+
+    let created = client.create("file-state-dir");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session record")
+        .session_id
+        .clone();
+    server.track(created.program_pid);
+    client.close(&session_id);
+    assert!(
+        server.shutdown().success(),
+        "server must still exit cleanly"
+    );
+    let stderr = server.take_stderr();
+
+    assert!(
+        stderr.contains("persistence"),
+        "a non-lock open error must log a persistence warning, got {stderr:?}"
+    );
+    // The pre-existing file is left untouched (we never truncate or replace it).
+    assert_eq!(
+        std::fs::read(&file).expect("read the file back"),
+        b"this is a file, not a state directory"
+    );
+}
+
+/// The documented fail-soft policy: a real store write failure while serving
+/// must NOT fail the protocol operation; it is logged and the session still
+/// creates and closes.
+#[test]
+fn store_write_failure_does_not_fail_protocol_operations() {
+    let state_dir = tempfile::tempdir().expect("state temp dir");
+    {
+        // Create a valid schema first so `schema_migrations` reads version 1.
+        let store = Store::open(state_dir.path()).expect("create schema");
+        assert_eq!(store.schema_version().expect("schema version"), 1);
+    }
+    {
+        // Break `sessions`: reconciliation still works, but the typed INSERT
+        // cannot satisfy the extra NOT NULL column.
+        let conn = rusqlite::Connection::open(Store::db_path(state_dir.path())).expect("raw open");
+        conn.execute_batch(
+            "DROP TABLE sessions;\n\
+             CREATE TABLE sessions (\n\
+                 session_id TEXT PRIMARY KEY NOT NULL,\n\
+                 label TEXT,\n\
+                 created_at_millis INTEGER NOT NULL,\n\
+                 closed_at_millis INTEGER,\n\
+                 state TEXT NOT NULL,\n\
+                 last_known_revision INTEGER NOT NULL DEFAULT 1,\n\
+                 broken_col TEXT NOT NULL\n\
+             );",
+        )
+        .expect("break the sessions table");
+    }
+
+    let mut server = ServerProcess::spawn(Some(state_dir.path()));
+    let mut client = Client::new(server.connect());
+    client.handshake();
+
+    // Both operations succeed even though every store write fails.
+    let created = client.create("store-write-failure");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session record")
+        .session_id
+        .clone();
+    server.track(created.program_pid);
+    assert!(
+        client
+            .list()
             .iter()
-            .any(|path| path.file_name().and_then(|name| name.to_str()) == Some("relayable.db")),
-        "no database may be created when the state dir is unresolvable, found {files:?}"
+            .any(|summary| summary.session_id == session_id),
+        "the session must still be served from authoritative memory"
+    );
+    client.close(&session_id);
+    assert!(
+        server.shutdown().success(),
+        "server must still exit cleanly"
+    );
+    let stderr = server.take_stderr();
+
+    assert!(
+        stderr.contains("persistence"),
+        "a store write failure must log a persistence warning, got {stderr:?}"
+    );
+    assert!(
+        stderr.contains("record_session_created failed"),
+        "the warning must name the failed store write, got {stderr:?}"
+    );
+}
+
+/// F1 end-to-end: the documented `RELAYABLE_STORE_AUDIT_MAX_ROWS` override is
+/// honored by the server's startup prune.
+#[test]
+fn startup_prune_honors_audit_max_rows_override() {
+    const SEEDED: usize = 60;
+    const CAP: usize = 50;
+
+    let state_dir = tempfile::tempdir().expect("state temp dir");
+    {
+        let store = Store::open(state_dir.path()).expect("seed store");
+        for index in 0..SEEDED {
+            store
+                .record_session_created(&SessionCreate {
+                    session_id: format!("seed-{index:03}"),
+                    label: None,
+                    created_at_millis: 1_000 + index as i64,
+                    revision: 1,
+                })
+                .expect("seed session");
+        }
+        assert_eq!(
+            store.audit_events().expect("audit").len(),
+            SEEDED,
+            "the seed must create one audit row per session"
+        );
+    }
+
+    let mut server = ServerProcess::spawn_with(
+        Some(state_dir.path()),
+        &[("RELAYABLE_STORE_AUDIT_MAX_ROWS", "50")],
+    );
+    let mut client = Client::new(server.connect());
+    client.handshake();
+    let created = client.create("post-prune");
+    let session_id = created
+        .session
+        .as_ref()
+        .expect("session record")
+        .session_id
+        .clone();
+    server.track(created.program_pid);
+    client.close(&session_id);
+    assert!(server.shutdown().success(), "server must exit cleanly");
+
+    let store = Store::open(state_dir.path()).expect("reopen the store");
+    let rows = store.audit_events().expect("audit").len();
+    assert!(
+        rows <= CAP,
+        "RELAYABLE_STORE_AUDIT_MAX_ROWS=50 must bound audit rows, got {rows}"
     );
 }

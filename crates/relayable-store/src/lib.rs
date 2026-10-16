@@ -6,6 +6,9 @@
 //! holds terminal bytes, scrollback, environment values, or full command
 //! arguments (`full.md` §6.4:490, §12:804; `ADR-001:239,286-291`).
 //!
+//! This crate contains no `unsafe` code; the process-level `unsafe` blocks live
+//! in the crates that own OS boundaries (`relayable-pty`, `relayable-server`).
+//!
 //! # Migration mechanism
 //!
 //! Migrations are **numbered SQL migrations** applied exactly once each inside
@@ -32,6 +35,8 @@
 //! `audit_events.sequence` is the **store's local audit order** (SQLite
 //! `AUTOINCREMENT`). It is not the protocol/server `sequence`, which is per-run
 //! and non-durable (`ADR-004` D2.6).
+
+#![deny(unsafe_code)]
 
 mod error;
 mod migrate;
@@ -61,5 +66,11 @@ pub const DEFAULT_TOMBSTONES_MAX_ROWS: i64 = 10_000;
 /// Default maximum age of a `tombstones` row: 90 days, in milliseconds.
 pub const DEFAULT_TOMBSTONES_MAX_AGE_MILLIS: i64 = 90 * 24 * 60 * 60 * 1000;
 
-/// Default maximum age of a `closed` session row: 90 days, in milliseconds.
-pub const DEFAULT_CLOSED_SESSIONS_MAX_AGE_MILLIS: i64 = 90 * 24 * 60 * 60 * 1000;
+/// Default maximum number of `sessions` rows retained in the non-active set
+/// (newest by `created_at_millis`). Relayable-defined (no REX evidence);
+/// `ADR-004` D2.4.
+pub const DEFAULT_SESSIONS_MAX_ROWS: i64 = 10_000;
+
+/// Default maximum age of a `closed`/`interrupted` session row: 90 days, in
+/// milliseconds.
+pub const DEFAULT_SESSIONS_MAX_AGE_MILLIS: i64 = 90 * 24 * 60 * 60 * 1000;

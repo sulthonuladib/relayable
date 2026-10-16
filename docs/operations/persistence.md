@@ -47,7 +47,7 @@ source (`RelayableStateDir`, `XdgStateHome`, `HomeFallback`).
 
 | Artifact | Path | Notes |
 |---|---|---|
-| State directory | resolved above | Created on first open with mode **0700** on Unix. |
+| State directory | resolved above | Created on first open; only the leaf is mode **0700** on Unix. Any parent directories are created with the process default permissions (they are shared application directories, not Relayable's). |
 | Database | `<state_dir>/relayable.db` | `Store::db_file_name()`. |
 | SQLite WAL | `<state_dir>/relayable.db-wal` | Present while WAL is active. |
 | SQLite SHM | `<state_dir>/relayable.db-shm` | Present while WAL is active. |
@@ -75,8 +75,10 @@ Notes:
 - **`tombstones` has no foreign key to `sessions` by design.** A destroy record
   outlives the session row it describes, so pruning a closed session must not
   delete its tombstone (`ADR-001:286-291`).
-- `tombstones.destroy_sequence` is monotonic per store: computed inside the
-  close transaction as `COALESCE(MAX(destroy_sequence), 0) + 1`.
+- `tombstones.destroy_sequence` is `MAX(destroy_sequence) + 1` computed inside
+  the close transaction (`COALESCE(MAX(...), 0) + 1`). It is **not** globally
+  monotonic across pruning: once the highest-sequence tombstones are pruned, the
+  next write can reuse a lower sequence.
 - Closing a session writes the tombstone with `INSERT OR REPLACE` keyed by
   `session_id`. If a destroy record for that session already exists it is
   **replaced** and receives a new `destroy_sequence`; the prior sequence value
@@ -84,9 +86,12 @@ Notes:
 - `interrupted` is a **store-local row state**. The wire/model `SessionState`
   has **no** `interrupted` variant yet (the frozen proto is unchanged). It marks
   a row left `active` by a previous run whose owning process is gone; it is
-  never reported as live (`ADR-004` D2.5).
+  never reported as live (`ADR-004` D2.5). It is a terminal-ish state retained
+  for a future restart surface: the row survives until retention prunes it
+  (section 6), and nothing resurrects it into a live session.
 - Row state strings: `active`, `closed`, `interrupted`. Audit kinds:
-  `session_created`, `session_closed`, `session_interrupted`, `pruned`.
+  `session_created`, `session_closed`, `session_interrupted`, and `pruned`
+  (the last is **reserved** and not currently emitted by `Store::prune`).
 
 ### Deliberately absent (ADR-004-implied future work)
 
@@ -95,6 +100,12 @@ are **not** implemented. No such durable data exists in the server model today
 (no split ratios, no preferences, no durable client records), so no schema is
 invented for them. They remain ADR-004-implied future work (D2.3) and need their
 own slice once the data exists.
+
+**ADR amendment required.** `ADR-004` D2.3 still lists this broader table set
+(`identities`, `preferences`, `session_layout`) as part of the store. This slice
+implements only `sessions`, `tombstones`, `audit_events`, and
+`schema_migrations`, so D2.3 needs a decision amendment to record the narrowed
+scope; the ADR itself is intentionally **not** edited by this slice.
 
 ## 4. Migrations
 
@@ -115,7 +126,7 @@ Set on every open:
 
 | Pragma | Value | Why |
 |---|---|---|
-| `journal_mode` | `WAL` (`MEMORY` in-memory) | Crash-consistent writes; readers do not block the writer. |
+| `journal_mode` | `WAL` (`MEMORY` in-memory) | Crash-consistent writes; readers do not block the writer. The returned mode is **verified**: on an on-disk store, a mode other than `wal` logs a loud `eprintln!` warning naming the actual mode and stating that crash-consistency now relies on the rollback journal (startup continues). In-memory stores are exempt. |
 | `synchronous` | `NORMAL` | WAL durability/performance default (`FULL` available later if needed). |
 | `busy_timeout` | `5000` ms | Contention cannot fail spuriously. |
 | `foreign_keys` | `ON` | Enforced if FKs are ever added. |
@@ -128,6 +139,11 @@ Set on every open:
   `LOCK_EX | LOCK_NB`) **before** running migrations. A second open while the
   first is alive returns `StateDirLocked`. The `File` is held for the store's
   lifetime; the lock releases when the store drops.
+- **Local-filesystem assumption.** Both the `flock` single-writer guard and the
+  WAL fallback/consistency guarantee assume the state directory is on a local
+  filesystem. On NFS or another network filesystem, advisory locking may not be
+  honored between hosts and WAL may be refused or silently degraded — weakening
+  **both** guards. Keep the state directory local.
 - `Store::open_in_memory()` skips WAL and the lock; it is for hermetic tests
   only.
 
@@ -137,9 +153,19 @@ Pruning runs in one transaction and returns exact per-table deleted counts
 (`PruneReport`). Order: (1) `audit_events` older than the age cutoff; (2)
 `audit_events` beyond the newest-by-`sequence` row cap; (3) `tombstones` older
 than the age cutoff; (4) `tombstones` beyond the newest-by-`destroy_sequence`
-row cap; (5) `closed` sessions older than the age cutoff. A row strictly older
-than `now_millis - max_age_millis` is deleted; a non-positive row cap keeps no
-rows. `active`/`interrupted` sessions are never pruned.
+row cap; (5) `closed`/`interrupted` sessions older than the age cutoff, where
+the age is measured from `closed_at_millis` when present and otherwise from
+`created_at_millis`; (6) `closed`/`interrupted` sessions beyond the
+newest-by-`created_at_millis` row cap (the same non-active set). A row strictly
+older than `now_millis - max_age_millis` is deleted; a non-positive row cap
+keeps no rows.
+
+**Bounded session states.** Only `closed` and `interrupted` rows are prunable.
+A row with `state = 'active'` is **never** deleted — the server owns live rows
+and prune runs while other sessions may be active. `interrupted` is the
+store-local terminal-ish state described in section 3: it is retained for a
+future restart surface and is bounded by exactly the same age and row-cap rules
+as `closed`.
 
 Defaults (Relayable-defined, no REX evidence; `ADR-004` D2.4):
 
@@ -149,12 +175,15 @@ Defaults (Relayable-defined, no REX evidence; `ADR-004` D2.4):
 | `audit_events` max age | 30 days |
 | `tombstones` max rows | 10 000 |
 | `tombstones` max age | 90 days |
-| `closed` sessions max age | 90 days |
+| non-active (`closed`/`interrupted`) sessions max rows | 10 000 |
+| non-active (`closed`/`interrupted`) sessions max age | 90 days |
 
 Environment overrides (implementation-chosen under the ADR-005 `RELAYABLE_*`
 namespace; **pending confirmation**, ADR-005 as accepted fixes only
 `RELAYABLE_SESSION`/`BLOCK`/`SERVER`/`CLIENT`). Unset, empty, or non-numeric
-values fall back to the default.
+values fall back to the default. `PruneLimits::from_env()` resolves **all six**
+once at server startup and the server uses that one set for every prune
+(startup and close), so these overrides are actually honored.
 
 | Variable | Effect |
 |---|---|
@@ -162,10 +191,11 @@ values fall back to the default.
 | `RELAYABLE_STORE_AUDIT_MAX_AGE_MILLIS` | `audit_events` max age (ms). |
 | `RELAYABLE_STORE_TOMBSTONES_MAX_ROWS` | `tombstones` max rows. |
 | `RELAYABLE_STORE_TOMBSTONES_MAX_AGE_MILLIS` | `tombstones` max age (ms). |
-| `RELAYABLE_STORE_CLOSED_SESSIONS_MAX_AGE_MILLIS` | `closed` session max age (ms). |
+| `RELAYABLE_STORE_SESSIONS_MAX_ROWS` | non-active session max rows. |
+| `RELAYABLE_STORE_SESSIONS_MAX_AGE_MILLIS` | non-active session max age (ms). |
 
-`PruneLimits::from_env()` reads these; slice B initially calls
-`prune_with_defaults()`.
+Tombstones remain independent of sessions (no foreign key), so pruning a
+session row never deletes its tombstone (section 3).
 
 ## 7. Backup and export
 
@@ -232,12 +262,16 @@ state dir as an explicit parameter so the hermetic config unit tests can pass
 `Server::bind` opens persistence **before** binding the socket, so a refusal
 leaves no socket artifact. When a directory resolves:
 
-1. `Store::open(dir)` creates the directory `0700`, takes the `flock`
-   single-writer lock, sets pragmas, and applies migrations.
+1. `Store::open(dir)` creates the leaf directory `0700` (parents use default
+   permissions), takes the `flock` single-writer lock, sets pragmas, and applies
+   migrations. The `journal_mode` returned by SQLite is verified; a non-`wal`
+   mode logs the fallback warning from section 5 and startup continues.
 2. `Store::reconcile_on_startup()` marks every row left `active` by a previous
    run as `interrupted` (one `session_interrupted` audit event per row). A
    non-zero count is logged; the stale rows are **never** reported live.
-3. `Store::prune_with_defaults()` applies the retention policy (section 6).
+3. `PruneLimits::from_env()` is resolved **once** and kept with the store; the
+   server applies it with `Store::prune(&limits)` (section 6). Every later
+   server-side prune uses the same set.
 
 The store is held in `ServerShared` and is reachable from `create_session` and
 `close_session`. Memory stays authoritative for live state: the server **never**
@@ -251,9 +285,14 @@ the normal unknown-entity behaviour and is not resurrected.
 |---|---|
 | No usable state dir (`RELAYABLE_STATE_DIR`, `XDG_STATE_HOME`, `HOME` all unset/empty/relative) | `eprintln!` warning naming those variables; run with in-memory metadata only (no DB, no lock). **Not** a startup error. |
 | `Store::open` fails with `StoreError::StateDirLocked(path)` | **Refuse to start**: `anyhow::bail!` naming the path; `main.rs` exits `1`. A second server must never become a second writer. |
-| Any other `Store::open`/migrate error | Loud `eprintln!` warning; continue **without** persistence (never a false-live claim, never a panic). |
+| Any other `Store::open`/migrate error | Loud `eprintln!` warning; continue **without** persistence. Store errors are never allowed to abort a protocol operation. |
 | `reconcile_on_startup()` fails | Loud warning; drop the store and continue without persistence. |
-| `prune_with_defaults()` on startup fails | Warning only; the store stays open (it opened and reconciled). |
+| Startup `prune(&limits)` fails | Warning only; the store stays open (it opened and reconciled). |
+
+**Lock failure is the one asymmetric case.** Only `StateDirLocked` refuses
+startup (a second writer must never exist). Every other open/migrate/reconcile
+error — including a state path that is an existing regular file, or an
+unusable/corrupt database — degrades to in-memory operation after a warning.
 
 All diagnostics use `eprintln!` on stderr; the repository has no logging
 framework and none was added.
@@ -271,17 +310,25 @@ existing event-append discipline (a store call must never hold the `sessions` or
 - `close_session`, only on the reaped `CloseSessionOutcome::Closed` path (not
   `NotConfirmed`, not `Unknown`) -> `record_session_closed` writes the `closed`
   row, the tombstone, and the `session_closed` audit event in **one**
-  transaction, then `prune_with_defaults()` runs (retention runs on startup and
-  on close, `ADR-004` D2.4). The idempotent re-close path and the shutdown-time
-  close do not write again.
+  transaction, then `prune(&limits)` runs with the startup-resolved limits
+  (retention runs on startup and on close, `ADR-004` D2.4). The idempotent
+  re-close path and the shutdown-time close do not write again (section 10.4).
 
 Only those fields are passed. No pids, file descriptors, hostnames, env values,
 argv, or terminal bytes ever reach the store.
 
-**Failure policy.** A store write/prune error must **never** fail the protocol
-operation and must **never** panic. It is logged as
-`relayable-server: persistence <operation> failed for session <id>: <err>` and
-the session create/close response still succeeds.
+**Failure policy.** Store errors never fail a protocol operation and are never
+allowed to panic the server: a failing `record_session_created`,
+`record_session_closed`, or `prune` is caught at the call site and logged as
+`relayable-server: persistence <operation> failed for session <id>: <err>` (or
+`persistence prune failed ...`), and the create/close response still succeeds.
+Diagnostics use `eprintln!` on stderr per repository convention. This is the
+actual guarantee; it is not a blanket "no code path can panic" claim.
+
+**Writer-lease audit is deferred.** `client`/`block` lease transitions are
+retained in the in-memory event log but are **not** written to `audit_events` in
+this slice (there is no durable lease table); only session lifecycle events are
+persisted.
 
 ### 10.4 Shutdown ordering
 
@@ -299,6 +346,13 @@ On the `Server::run` shutdown path (SIGINT/SIGTERM, or a programmatic
 A server that ended without an explicit `session.close` leaves its session rows
 `active`; the next startup's reconciliation marks them `interrupted` (never
 live).
+
+**Shutdown-time termination writes no tombstone, by design.** When `run`
+terminates live children during graceful shutdown it does **not** call
+`record_session_closed`: shutdown is not a user-authorized destroy, so no
+tombstone and no `session_closed` audit event is written. The row stays `active`
+until the next startup, which marks it `interrupted` (and it is then subject to
+the section 6 retention bounds).
 
 ### 10.5 Audit sequence reminder
 

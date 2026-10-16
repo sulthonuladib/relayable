@@ -25,3 +25,6 @@ libc = "=0.2.190"
 
 [dev-dependencies]
 tempfile = { workspace = true }
+# Used by the store-wiring tests to seed deliberately broken/oversized stores.
+# Already in the lock graph (relayable-store depends on it); no new download.
+rusqlite = { workspace = true }

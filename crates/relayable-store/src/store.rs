@@ -266,7 +266,13 @@ impl Store {
     /// Order: (1) `audit_events` older than the age cutoff; (2) `audit_events`
     /// beyond the newest-by-`sequence` row limit; (3) `tombstones` older than
     /// the age cutoff; (4) `tombstones` beyond the newest-by-`destroy_sequence`
-    /// row limit; (5) `closed` sessions older than the age cutoff.
+    /// row limit; (5) `closed`/`interrupted` sessions older than the age cutoff
+    /// (age measured from `closed_at_millis`, else `created_at_millis`);
+    /// (6) `closed`/`interrupted` sessions beyond the newest-by
+    /// `created_at_millis` row limit.
+    ///
+    /// A row with `state = 'active'` is **never** deleted: the server owns live
+    /// rows and may be serving other sessions while prune runs.
     pub fn prune(&self, limits: &PruneLimits) -> Result<PruneReport, StoreError> {
         let mut conn = self.conn();
         let tx = conn.transaction()?;
@@ -303,20 +309,35 @@ impl Store {
                 [tombstones_keep],
             )?;
 
-        let closed_cutoff = limits
+        let sessions_age_cutoff = limits
             .now_millis
-            .saturating_sub(limits.closed_sessions_max_age_millis);
-        let closed_sessions_deleted = tx.execute(
+            .saturating_sub(limits.sessions_max_age_millis);
+        let sessions_deleted = tx.execute(
             "DELETE FROM sessions \
-             WHERE state = 'closed' AND closed_at_millis IS NOT NULL AND closed_at_millis < ?1",
-            [closed_cutoff],
+             WHERE state IN ('closed','interrupted') \
+               AND COALESCE(closed_at_millis, created_at_millis) < ?1",
+            [sessions_age_cutoff],
         )?;
+        // Row-cap the same non-active set, newest by `created_at_millis`. The
+        // subquery is restricted to non-active rows so an `active` row can never
+        // be selected for deletion.
+        let sessions_keep = limits.sessions_max_rows.max(0);
+        let sessions_deleted = sessions_deleted
+            + tx.execute(
+                "DELETE FROM sessions \
+                 WHERE state IN ('closed','interrupted') \
+                   AND session_id NOT IN (\
+                       SELECT session_id FROM sessions \
+                       WHERE state IN ('closed','interrupted') \
+                       ORDER BY created_at_millis DESC LIMIT ?1)",
+                [sessions_keep],
+            )?;
 
         tx.commit()?;
         Ok(PruneReport {
             audit_events_deleted: audit_events_deleted as u64,
             tombstones_deleted: tombstones_deleted as u64,
-            closed_sessions_deleted: closed_sessions_deleted as u64,
+            sessions_deleted: sessions_deleted as u64,
         })
     }
 
@@ -420,14 +441,25 @@ impl Store {
     }
 }
 
-/// Create the state directory with restrictive permissions where supported.
+/// Create the state directory: parents use the process default permissions and
+/// only the leaf is restricted to `0700` where supported.
 fn create_state_dir(state_dir: &Path) -> Result<(), StoreError> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
-        let mut builder = std::fs::DirBuilder::new();
-        builder.recursive(true).mode(0o700);
-        builder.create(state_dir)?;
+        // Parents (e.g. `~/.local/state`) are created with default permissions;
+        // they are shared with other applications and are not ours to lock down.
+        if let Some(parent) = state_dir.parent() {
+            if !parent.exists() {
+                std::fs::create_dir_all(parent)?;
+            }
+        }
+        // Only the Relayable leaf is `0700`. An existing leaf (regular directory
+        // or any other file) is left untouched; `Store::open` then fails on the
+        // lock/database path and the caller degrades to in-memory operation.
+        if !state_dir.exists() {
+            std::fs::DirBuilder::new().mode(0o700).create(state_dir)?;
+        }
     }
     #[cfg(not(unix))]
     {
@@ -461,12 +493,20 @@ fn lock_state_dir(lock_path: &Path, state_dir: &Path) -> Result<File, StoreError
 
 /// Apply the crash-consistency pragmas (`ADR-004` D2.5).
 fn configure_pragmas(conn: &Connection, in_memory: bool) -> Result<(), StoreError> {
-    let journal_mode = if in_memory { "MEMORY" } else { "WAL" };
-    let _: String = conn.query_row(
-        &format!("PRAGMA journal_mode = {journal_mode}"),
-        [],
-        |row| row.get(0),
-    )?;
+    let requested = if in_memory { "MEMORY" } else { "WAL" };
+    let actual: String =
+        conn.query_row(&format!("PRAGMA journal_mode = {requested}"), [], |row| {
+            row.get(0)
+        })?;
+    // SQLite can silently refuse WAL (e.g. on some network/read-only filesystems)
+    // and fall back to a rollback journal. Verify instead of trusting the request
+    // and tell the operator; startup continues either way.
+    if !in_memory && !actual.eq_ignore_ascii_case("wal") {
+        eprintln!(
+            "relayable-store: WARNING: PRAGMA journal_mode = WAL was not honored (journal_mode = \
+             {actual}); crash-consistency now relies on the rollback journal"
+        );
+    }
     conn.busy_timeout(Duration::from_millis(5000))?;
     conn.execute_batch("PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;")?;
     Ok(())

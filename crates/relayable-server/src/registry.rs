@@ -17,7 +17,7 @@ use relayable_protocol::v1::{
     self, ClientRecord, Envelope, ErrorCode, Handshake, SessionRecord, SessionResumeResponse,
     SessionState, SessionSummary,
 };
-use relayable_store::{SessionClose, SessionCreate, Store};
+use relayable_store::{PruneLimits, SessionClose, SessionCreate, Store};
 
 use crate::config::ServerConfig;
 use crate::connection::ConnectionShared;
@@ -48,6 +48,17 @@ pub(crate) enum CloseSessionOutcome {
     Unknown,
 }
 
+/// The durable store plus the retention limits resolved **once** at startup
+/// from the `RELAYABLE_STORE_*` environment (`PruneLimits::from_env`).
+///
+/// Resolving once keeps every server-side prune (startup and close) on exactly
+/// the same limits, so the documented overrides are honored.
+#[derive(Clone)]
+pub(crate) struct Persistence {
+    pub(crate) store: Arc<Store>,
+    pub(crate) limits: PruneLimits,
+}
+
 /// Server-wide shared state.
 pub(crate) struct ServerShared {
     pub(crate) config: ServerConfig,
@@ -60,14 +71,15 @@ pub(crate) struct ServerShared {
     pub(crate) connections: Mutex<Vec<Arc<ConnectionShared>>>,
     pub(crate) connection_threads: Mutex<Vec<JoinHandle<()>>>,
     pub(crate) shutdown: AtomicBool,
-    /// Durable metadata/audit store; `None` when persistence is disabled for
-    /// this run (no resolvable state directory, or the store could not be
-    /// opened/migrated). Live state always remains authoritative in memory.
-    pub(crate) store: Mutex<Option<Arc<Store>>>,
+    /// Durable metadata/audit store plus its startup-resolved retention limits;
+    /// `None` when persistence is disabled for this run (no resolvable state
+    /// directory, or the store could not be opened/migrated). Live state always
+    /// remains authoritative in memory.
+    pub(crate) persistence: Mutex<Option<Persistence>>,
 }
 
 impl ServerShared {
-    pub(crate) fn new(config: ServerConfig, store: Option<Arc<Store>>) -> Self {
+    pub(crate) fn new(config: ServerConfig, persistence: Option<Persistence>) -> Self {
         let events = Arc::new(EventBus::new(config.event_retention_events));
         Self {
             config,
@@ -79,20 +91,28 @@ impl ServerShared {
             connections: Mutex::new(Vec::new()),
             connection_threads: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
-            store: Mutex::new(store),
+            persistence: Mutex::new(persistence),
         }
+    }
+
+    /// The durable store plus its resolved retention limits, when persistence
+    /// is enabled for this run.
+    pub(crate) fn persistence(&self) -> Option<Persistence> {
+        lock(&self.persistence).clone()
     }
 
     /// The durable store, when persistence is enabled for this run.
     pub(crate) fn store(&self) -> Option<Arc<Store>> {
-        lock(&self.store).clone()
+        lock(&self.persistence)
+            .as_ref()
+            .map(|persistence| Arc::clone(&persistence.store))
     }
 
-    /// Remove and return the durable store so shutdown can checkpoint it and
-    /// release the single-writer lock deterministically before the process
-    /// exits.
-    pub(crate) fn take_store(&self) -> Option<Arc<Store>> {
-        lock(&self.store).take()
+    /// Remove and return the persistence (store + limits) so shutdown can
+    /// checkpoint it and release the single-writer lock deterministically before
+    /// the process exits.
+    pub(crate) fn take_persistence(&self) -> Option<Persistence> {
+        lock(&self.persistence).take()
     }
 
     /// The log head sequence; the same total order used by snapshots and events.
@@ -266,7 +286,8 @@ impl ServerShared {
         // store transaction, then prune. This runs after every entity lock is
         // released and only on the reaped `Closed` path; a store failure never
         // fails the protocol operation (ADR-004 D2.4/D2.5).
-        if let Some(store) = self.store() {
+        if let Some(persistence) = self.persistence() {
+            let store = &persistence.store;
             let close = SessionClose {
                 session_id: session.id.to_string(),
                 closed_at_millis: to_i64(now_millis()),
@@ -278,7 +299,7 @@ impl ServerShared {
                      {session_id}: {error}"
                 );
             }
-            if let Err(error) = store.prune_with_defaults() {
+            if let Err(error) = store.prune(&persistence.limits) {
                 eprintln!(
                     "relayable-server: persistence prune failed for session {session_id}: {error}"
                 );

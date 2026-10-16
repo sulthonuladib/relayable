@@ -207,7 +207,8 @@ fn prune_applies_age_and_row_limits_with_exact_counts() {
         audit_max_age_millis: 1_000,
         tombstones_max_rows: 1,
         tombstones_max_age_millis: 1_000,
-        closed_sessions_max_age_millis: 1_000,
+        sessions_max_rows: 10,
+        sessions_max_age_millis: 1_000,
     };
     let report = store.prune(&limits).expect("prune");
 
@@ -215,8 +216,8 @@ fn prune_applies_age_and_row_limits_with_exact_counts() {
     assert_eq!(report.audit_events_deleted, 6);
     // 2 tombstones pruned by age (a, b) + 1 by row limit (c) = 3.
     assert_eq!(report.tombstones_deleted, 3);
-    // 2 old closed sessions pruned (a, b).
-    assert_eq!(report.closed_sessions_deleted, 2);
+    // 2 old closed sessions pruned (a, b) by age.
+    assert_eq!(report.sessions_deleted, 2);
 
     assert_eq!(store.audit_events().expect("audit").len(), 2);
 
@@ -235,6 +236,73 @@ fn prune_applies_age_and_row_limits_with_exact_counts() {
     // Pruning again is a no-op on already-bounded data.
     let second = store.prune(&limits).expect("second prune");
     assert_eq!(second, relayable_store::PruneReport::default());
+}
+
+/// 5b. The sessions row cap keeps the newest non-active rows and never deletes
+/// an `active` row, even while other sessions are live.
+#[test]
+fn session_prune_row_cap_keeps_newest_non_active_and_never_deletes_active() {
+    let store = Store::open_in_memory().expect("open");
+    let now = 1_000_000_000_i64;
+
+    // One interrupted row (created earliest) and five closed rows.
+    store
+        .record_session_created(&create("interrupted", None, 50))
+        .expect("create interrupted");
+    assert_eq!(
+        store.reconcile_on_startup().expect("reconcile").interrupted,
+        1
+    );
+    for (id, created) in [
+        ("c1", 100),
+        ("c2", 200),
+        ("c3", 300),
+        ("c4", 400),
+        ("c5", 500),
+    ] {
+        store
+            .record_session_created(&create(id, None, created))
+            .expect("create closed");
+        store
+            .record_session_closed(&close(id, created + 1))
+            .expect("close");
+    }
+    // A live row that prune runs alongside; it must survive.
+    store
+        .record_session_created(&create("live", None, now - 1))
+        .expect("create live");
+
+    let limits = PruneLimits {
+        now_millis: now,
+        audit_max_rows: 1_000,
+        audit_max_age_millis: i64::MAX,
+        tombstones_max_rows: 1_000,
+        tombstones_max_age_millis: i64::MAX,
+        sessions_max_rows: 2,
+        sessions_max_age_millis: i64::MAX,
+    };
+    let report = store.prune(&limits).expect("prune");
+
+    // Non-active set is {interrupted(50), c1(100)..c5(500)}; keep newest two
+    // (c5, c4), delete the other four. Tombstones/audit are untouched.
+    assert_eq!(report.sessions_deleted, 4);
+    assert_eq!(report.audit_events_deleted, 0);
+    assert_eq!(report.tombstones_deleted, 0);
+
+    assert_eq!(
+        store.session("live").expect("get live").expect("row").state,
+        StoredSessionState::Active,
+        "an active row must never be pruned"
+    );
+    assert!(store.session("interrupted").expect("get").is_none());
+    assert!(store.session("c1").expect("get").is_none());
+    assert!(store.session("c2").expect("get").is_none());
+    assert!(store.session("c3").expect("get").is_none());
+    assert!(store.session("c4").expect("get").is_some());
+    assert!(store.session("c5").expect("get").is_some());
+
+    let sessions = store.sessions().expect("sessions");
+    assert_eq!(sessions.len(), 3, "live + the two newest closed rows");
 }
 
 /// 6a. Exact column allowlist for every table (fails if a host-state column is
@@ -290,15 +358,19 @@ fn schema_has_no_host_state_columns() {
     }
 }
 
-/// 6b. No terminal bytes / env / argv in the raw DB file.
+/// 6b. Raw DB round-trip: the scan itself works (positive control).
+///
+/// The strong end-to-end "no terminal bytes are ever persisted" proof lives in
+/// the server PTY test
+/// `relayable-server/tests/store_wiring.rs::create_and_close_persist_metadata_without_terminal_bytes`,
+/// which pushes a unique sentinel through a real PTY and scans the same raw DB
+/// bytes. At the store level there is no API that accepts terminal bytes, so a
+/// negative assertion here would be vacuous; the structural guard that no
+/// host-state column can exist is the `PRAGMA table_info` allowlist in
+/// `schema_has_no_host_state_columns`.
 #[test]
-fn raw_database_contains_no_terminal_or_host_bytes() {
+fn raw_database_round_trips_a_stored_label() {
     const LABEL: &str = "MARKER-LABEL-abc123";
-    const FORBIDDEN: &[&str] = &[
-        "TERMINAL-OUTPUT-SENTINEL",
-        "ENV-SECRET-SENTINEL",
-        "ARGV-SENTINEL",
-    ];
 
     let dir = tempfile::tempdir().expect("tempdir");
     {
@@ -322,19 +394,58 @@ fn raw_database_contains_no_terminal_or_host_bytes() {
         contains(haystack, LABEL.as_bytes()),
         "legitimately stored label missing from raw DB (scan is broken)"
     );
-    for sentinel in FORBIDDEN {
-        assert!(
-            !contains(haystack, sentinel.as_bytes()),
-            "forbidden host/terminal bytes present: {sentinel}"
-        );
+}
+
+/// 6c. Store write failures surface as `StoreError::Sqlite` rather than being
+/// silently swallowed. The `sessions` table is destroyed and recreated in a
+/// shape whose `INSERT` cannot satisfy, then the typed write is exercised.
+#[test]
+fn broken_sessions_table_surfaces_sqlite_error() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    {
+        let store = Store::open(dir.path()).expect("open");
+        assert_eq!(store.schema_version().expect("schema version"), 1);
     }
+
+    // Recreate `sessions` with an extra NOT NULL column and no default, so the
+    // typed `INSERT` must fail, while `schema_migrations` still reads version 1
+    // (migrations are skipped) and reconciliation still works.
+    {
+        let conn = rusqlite::Connection::open(Store::db_path(dir.path())).expect("raw open");
+        conn.execute_batch(
+            "DROP TABLE sessions;\n\
+             CREATE TABLE sessions (\n\
+                 session_id TEXT PRIMARY KEY NOT NULL,\n\
+                 label TEXT,\n\
+                 created_at_millis INTEGER NOT NULL,\n\
+                 closed_at_millis INTEGER,\n\
+                 state TEXT NOT NULL CHECK (state IN ('active','closed','interrupted')),\n\
+                 last_known_revision INTEGER NOT NULL DEFAULT 1,\n\
+                 broken_col TEXT NOT NULL\n\
+             );",
+        )
+        .expect("recreate sessions in a broken shape");
+    }
+
+    let store = Store::open(dir.path()).expect("reopen after breakage");
+    assert_eq!(store.schema_version().expect("schema version"), 1);
+    store.reconcile_on_startup().expect("reconcile still works");
+
+    let error = store
+        .record_session_created(&create("broken", None, 1))
+        .expect_err("a broken table must surface an error");
+    assert!(
+        matches!(error, StoreError::Sqlite(_)),
+        "expected StoreError::Sqlite, got {error:?}"
+    );
 }
 
 /// 7. State-directory resolution never guesses; source is reported.
 #[test]
 fn resolve_state_dir_is_environment_driven() {
-    // This exercises the real resolver only against a serially-constructed
-    // environment; the hermetic matrix lives in `resolve.rs` unit tests.
+    // `resolve_state_dir_from` is the pure lookup variant; the ambient
+    // `resolve_state_dir()` wrapper is exercised only indirectly (through the
+    // server tests) to keep this test hermetic.
     let resolved = relayable_store::resolve_state_dir_from(|name| match name {
         "RELAYABLE_STATE_DIR" => Some("/tmp/relayable-state".to_string()),
         _ => None,

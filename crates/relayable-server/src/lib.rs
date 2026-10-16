@@ -30,10 +30,10 @@ use std::time::Duration;
 
 use anyhow::Context;
 use relayable_protocol::transport::bind_listener;
-use relayable_store::{Store, StoreError};
+use relayable_store::{PruneLimits, Store, StoreError};
 
 use crate::events::DisconnectReason;
-use crate::registry::ServerShared;
+use crate::registry::{Persistence, ServerShared};
 
 /// Lock a mutex, recovering from poisoning rather than panicking.
 pub(crate) fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
@@ -65,10 +65,10 @@ impl Server {
     /// a live listener already owns the path, or if another server already owns
     /// the state directory.
     pub fn bind(config: ServerConfig) -> anyhow::Result<Server> {
-        let store = open_store(&config)?;
+        let persistence = open_store(&config)?;
         let listener = bind_listener(&config.socket_path)
             .with_context(|| format!("failed to bind {}", config.socket_path.display()))?;
-        let shared = Arc::new(ServerShared::new(config.clone(), store));
+        let shared = Arc::new(ServerShared::new(config.clone(), persistence));
         Ok(Server {
             config,
             shared,
@@ -143,11 +143,11 @@ impl Server {
         // the WAL and then drop the store, which closes the database cleanly and
         // releases the single-writer lock before the process exits. The socket
         // is unlinked last, preserving the existing shutdown ordering.
-        if let Some(store) = shared.take_store() {
-            if let Err(error) = store.checkpoint() {
+        if let Some(persistence) = shared.take_persistence() {
+            if let Err(error) = persistence.store.checkpoint() {
                 eprintln!("relayable-server: persistence shutdown checkpoint failed: {error}");
             }
-            drop(store);
+            drop(persistence);
         }
         let _ = std::fs::remove_file(&config.socket_path);
         Ok(())
@@ -162,7 +162,11 @@ impl Server {
 /// after logging a warning; the server then runs with in-memory metadata only.
 /// The one error that refuses startup is [`StoreError::StateDirLocked`]: a
 /// second server must never become a second writer (ADR-004 D2.5).
-fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Arc<Store>>> {
+///
+/// The retention limits are resolved **once** here from the `RELAYABLE_STORE_*`
+/// environment ([`PruneLimits::from_env`]) and kept with the store, so every
+/// server-side prune (startup and close) honors the documented overrides.
+fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Persistence>> {
     let Some(state_dir) = config.state_dir.as_deref() else {
         eprintln!(
             "relayable-server: persistence disabled: no state directory resolved \
@@ -210,11 +214,17 @@ fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Arc<Store>>> {
         }
     }
 
+    // Retention limits are resolved once for the whole run (F1).
+    let limits = PruneLimits::from_env();
+
     // Pruning runs on startup and on close (ADR-004 D2.4); a prune failure is
     // not fatal because the store itself opened and reconciled.
-    if let Err(error) = store.prune_with_defaults() {
+    if let Err(error) = store.prune(&limits) {
         eprintln!("relayable-server: persistence startup prune failed: {error}");
     }
 
-    Ok(Some(Arc::new(store)))
+    Ok(Some(Persistence {
+        store: Arc::new(store),
+        limits,
+    }))
 }

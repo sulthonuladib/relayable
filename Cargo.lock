@@ -536,6 +536,7 @@ dependencies = [
  "relayable-protocol",
  "relayable-pty",
  "relayable-store",
+ "rusqlite",
  "tempfile",
 ]
 
