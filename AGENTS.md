@@ -57,6 +57,16 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 
 Android Studio is **not** required and must not be a build dependency (§10).
 
+## Code organization
+
+Keep hand-written Rust files small and focused; the binding standard is
+`docs/architecture/code-organization.md`. Summary: aim ~500 lines, **hard cap 1000** for production source;
+tests 800/**1200**; `lib.rs`/`main.rs`/`mod.rs` thin (≤150, cap 300). Generated code and `spikes/**` are
+exempt. Split by responsibility (one module, one job) using `foo.rs` + `foo/` submodules and `pub use`
+re-exports, so a split never changes a public path or behavior. `scripts/check-file-sizes.sh` reports
+offenders; `--strict` becomes a CI gate after the refactor queue (`REF-005`…`REF-010`) is done. Never
+refactor a path while another task owns it (`docs/architecture/code-organization.md` sequencing table).
+
 ## Path ownership
 
 The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration. A lead-owned path may be delegated to a bounded worker only by naming it explicitly in that worker's assignment (the lead still integrates).
