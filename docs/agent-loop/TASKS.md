@@ -31,9 +31,9 @@ the evidence is integrated.
 | REF-004 | Fix `design-tokens.md:210` mixed attribution (29 px palette rows) + queued calibration items from `open-questions.md`. **Palette-row attribution fixed 2026-10-15** (the "29 px palette rows" entry in the GoRex-not-used list corrected to GoRex's 34 px, with the 29→37.5 px own-estimate correction noted); remaining calibration items from `open-questions.md` still open | REF-003 | TBD | BACKLOG |
 | REF-005 | Code-organization standard (`docs/architecture/code-organization.md`) + `scripts/check-file-sizes.sh` (report/strict) | — | Manager | DONE — `2026-10-16`; caps calibrated to 500/1000 prod, 800/1200 tests, 150/300 entry |
 | REF-006 | Split over-cap files on free paths: `apps/linux/src/{app,tokens,api/mod,term/mod,theme,geometry}.rs`, `crates/relayable-{model,pty,cli}/src/lib.rs`, `crates/relayable-protocol/src/**` | REF-005 | TBD | READY |
-| REF-007 | Split `crates/relayable-client/src/**` (currently 1630-line `lib.rs`) | REF-005, CLIENT-API-001 | TBD | BACKLOG (blocked by CLIENT-API-001) |
+| REF-007 | Split `crates/relayable-client/src/**` (now ~2141-line `lib.rs`) | REF-005, CLIENT-API-001 | TBD | READY (unblocked; do with REF-009 or after REF-006 integration) |
 | REF-008 | Split `crates/relayable-server/src/**` + `crates/relayable-server/tests/**` (`session.rs` 1037, `registry.rs` 718, `server_e2e.rs` 1465) | REF-005, STORE-001 | TBD | BACKLOG (blocked by STORE-001) |
-| REF-009 | Split `tests/**` integration suites (`tests/events/main.rs` 1058, `tests/lifecycle/main.rs` 638, `tests/fixtures/mod.rs` 592) | REF-005, CLIENT-API-001 | TBD | BACKLOG (blocked by CLIENT-API-001) |
+| REF-009 | Split `tests/**` integration suites (`tests/events/main.rs` 1058, `tests/lifecycle/main.rs` 638, `tests/fixtures/mod.rs` 592; add `tests/client-output/**`) | REF-005, CLIENT-API-001 | TBD | READY (unblocked) |
 | REF-010 | Wire `scripts/check-file-sizes.sh --strict` into `scripts/ci.sh` + `scripts/validate.sh`; verify clean | REF-006..REF-009 | TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
 | DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | `docs/doc-002-matrix-repair` | DONE — integrated `16c8bc9` (INT-005); 193 MATCH kept, 115 SHIFT renumbered, 78 NOT_FOUND → heading anchors, 0 drift; labels unchanged |
@@ -62,7 +62,8 @@ the evidence is integrated.
 | QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | `qa/qa-001-smoke-ci` | DONE — integrated `4a258c2` (INT-013); bounded ≤ window + one frame flush then `flow_control_overflow` |
 | MEM-001 | Measured idle/active memory baseline + regression thresholds (`full.md` §12) | QA-001 | TBD | BACKLOG |
 | CI-HOST-001 | Decide whether to host CI (`.github/workflows`) given a hosted runner cannot build this tree without network/vendoring | QA-001 | TBD | BACKLOG |
-| CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | `client/client-api-001-incremental-output` (Herdr `w1H`) | IN_PROGRESS — add public `Client::next_output` incremental API + backpressure integration test |
+| CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | `client/client-api-001-incremental-output` (Herdr `w1H`) | DONE — integrated INT-017 `52433f7`; public `Client::next_output` + `tests/client-output` (524 KB across the credit window); 164 tests |
+| UI-003 | Migrate `apps/linux` terminal view off its raw `relayable-protocol` data plane onto `Client::next_output`; update `apps/linux/README.md` §7 (stale `wait_for_output` line numbers, API now exists) | CLIENT-API-001 | TBD | BACKLOG |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`
 (parallel, disjoint paths) → `CORE-001` → `CORE-002` → `UI-001` against the integrated UI catalogue →

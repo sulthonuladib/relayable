@@ -43,9 +43,9 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **CLIENT-API-001 (in flight)** — `client/client-api-001-incremental-output` (Herdr `w1H`): public
-   `Client::next_output` incremental terminal-bytes API + backpressure test so the GPUI view can drive a
-   live terminal.
+1. **CLIENT-API-001 — DONE**, integrated INT-017 `52433f7`: public `Client::next_output` incremental
+   terminal-bytes API + `tests/client-output` (524 KB across the credit window). Follow-up **UI-003**
+   migrates `apps/linux` onto it.
 2. **STORE-001 (in flight)** — `store/store-001-sqlite-metadata` (Herdr `w1J`): `crates/relayable-store`
    (SQLite metadata/audit) + server start-up reconciliation, `flock`, prune, write path per ADR-004.
    DEC-012: `rusqlite =0.40.2` bundled (one-time fetch done; builds stay offline).
@@ -54,10 +54,12 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
    (client), REF-008 (server), REF-009 (`tests/**`), then REF-010 (CI `--strict` gate).
 4. **Integrate each returning project** — review the diff, run independent validation
    (`scripts/validate.sh`, `scripts/smoke.sh`, `cargo test --workspace --offline`), merge (INT-017+).
-5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`.
-6. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
+5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`, `UI-003`.
+6. **REF-007** (client) and **REF-009** (`tests/**`) are now unblocked; **REF-008** (server) waits on
+   STORE-001; **REF-010** last.
+7. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build spike (ADR-003 reconsideration trigger #10).
-7. Update `docs/agent-loop/**` after every meaningful iteration.
+8. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## STORE-001 SQLite binding — decided: option A (2026-10-16)
 

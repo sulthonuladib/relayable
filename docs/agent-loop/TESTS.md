@@ -329,3 +329,20 @@ Manager fix commit `a3ff5c0`.
 installer never enables/starts services or uses root; the GPUI binary is installed as `relayable-desktop`.
 A minor sandbox note: overriding `HOME` alone breaks the rustup `cargo` shim, so sandbox tests override
 only the XDG dirs — this is a test-harness concern, not an installer defect.
+
+## 2026-10-16 — CLIENT-API-001 integrated: incremental terminal bytes (INT-017)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch
+`client/client-api-001-incremental-output` (HEAD `807e83f`) and integrated it as `52433f7` (INT-017).
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 115 | `git diff --name-only master...HEAD` + secret scan | exactly the 3 owned paths; no secret-like matches | 0 |
+| 116 | `cargo fmt --all --check` / `cargo clippy --workspace --all-targets --offline -- -D warnings` / `cargo build --workspace --offline` | clean | 0 |
+| 117 | `cargo test --workspace --offline` | 164 passed / 0 failed | 0 |
+| 118 | `cargo test -p relayable-integration-tests --offline --test client-output -- --nocapture` | `1 passed`; 524288-byte payload streamed across the 262144-byte credit window in 134 calls, all received, session Active | 0 |
+| 119 | post-merge `bash scripts/validate.sh` + `bash scripts/smoke.sh` | `All CORE-001 validation checks passed.`; `SMOKE OK` | 0 |
+
+**Decisions recorded:** `relayable-client` now exposes a lossless incremental API; the payload test proves
+FlowControl acks keep the server from overflowing a consumer reading continuously. `UI-003` tracks
+migrating the desktop app onto it.

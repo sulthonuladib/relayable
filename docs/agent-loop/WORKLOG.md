@@ -77,6 +77,35 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 33 — CLIENT-API-001 integrated: incremental terminal bytes (INT-017) (2026-10-16)
+
+**Objective:** integrate the `relayable-client` incremental terminal-bytes API so a live terminal view can
+be driven by the core client instead of a raw `relayable-protocol` data plane.
+
+**Review (Manager, §14.5):** branch `client/client-api-001-incremental-output` HEAD `807e83f`;
+`git diff master...HEAD` limited to the three owned paths (`crates/relayable-client/src/lib.rs`,
+`tests/Cargo.toml`, `tests/client-output/main.rs`); no secret-pattern matches; no `docs/**`/`Cargo.lock`.
+The new `Client::next_output` drains buffered frames first (order-preserving), acks exactly the returned
+bytes once per chunk, returns `Ok(None)` on timeout, heartbeats on the existing cadence, and retains
+non-target frames. `wait_for_output` is byte-identical to base (sha256-checked by the implementer).
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 115 | `git diff --name-only master...HEAD` + secret scan | exactly 3 owned paths; no secret-like matches | 0 |
+| 116 | `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --offline -- -D warnings`; `cargo build --workspace --offline` | all clean | 0 |
+| 117 | `cargo test --workspace --offline` | all suites ok (164 passed / 0 failed) | 0 |
+| 118 | `cargo test -p relayable-integration-tests --offline --test client-output -- --nocapture` | `1 passed`; `client-output-1: window=262144B payload=524288B calls=134 received=524573B`; session stayed Active, no overflow | 0 |
+| 119 | post-merge `master`: `bash scripts/validate.sh` + `bash scripts/smoke.sh` | all checks passed; `SMOKE OK` | 0 |
+
+**Integration:** merge `52433f7` (INT-017). Follow-up recorded as **UI-003** (migrate `apps/linux` onto
+`next_output`, fix the stale `apps/linux/README.md` citation). `/tmp/client-api-001-probe` (1.3 GB scratch)
+deleted.
+
+**Next:** integrate REF-006 and STORE-001 as they return; then REF-007/REF-009 (unblocked), REF-008 (after
+STORE-001), REF-010.
+
+---
+
 ## Checkpoint 32 — User-approved per-user install on this host, verified live (2026-10-16)
 
 **Trigger:** the user approved running the installer so the app is ready to launch.
