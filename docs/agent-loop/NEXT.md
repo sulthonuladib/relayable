@@ -82,15 +82,27 @@ session. Do not move a child session; name the worktree path in the brief.
 ## In flight (lead session, 2026-10-16)
 
 - **UI-003** — implementer, branch `ui/ui-003-next-output`, worktree
-  `/home/sulthonuladib/work/relayable-wt/ui-003` (fast-forwarded to `494917f`; it may be ahead now).
+  `/home/sulthonuladib/work/relayable-wt/ui-003`. **Server restart mid-session:** branch head is still
+  `494917f` and the work is **uncommitted in the tree** (568 insertions / 418 deletions across
+  `api/{data,data_thread,mock,mod,tests,types}.rs`, `app/streams.rs`, `bin/live-probe.rs`, plus untracked
+  `apps/linux/evidence/ui-003-live-probe.log` ending `PROBE_EXIT=0` after a flow-control observation).
   Owns `apps/linux/src/api/{data,data_thread,mod,types,mock,tests}.rs`, `apps/linux/src/app/streams.rs`,
   `apps/linux/src/bin/live-probe.rs`, `apps/linux/README.md`, `apps/linux/evidence/ui-003-*.log`.
   Moves the terminal data plane onto `relayable_client::Client` (`next_output` +
   `resize_with_pixels`), keeping the two-plane split and the reference geometry; **must drain every
   attached stream each `pump()`** (credit-window acking) and must not touch `crates/**`,
   `apps/linux/Cargo.lock`, `src/{main,ui,term,geometry*,theme*,tokens}**`.
-- Nothing else is in flight. INT-022/023/024/025 are merged and pushed, so the `ref-008`, `ref-010`,
-  `client-api-002`, `qa-harness-001` worktrees are eligible for the standing cleanup (branch preserved).
+- **UI-004 stage 1** — implementer done, commit `ff1e8fc` on `ui/ui-004-stage1-auto-session`
+  (worktree `/home/sulthonuladib/work/relayable-wt/ui-004-stage1`). **Awaiting independent verification
+  before integration** (the verification call was aborted by the shutdown): auto-session invariant
+  re-checked at 4 sites, `abandon_pending_create` on `Error` **and** `Disconnected`, desktop tests 58→65,
+  M1–M5 mutations caught but the `close_focused` call site is not covered headlessly, defect 3 and
+  restore-session deferred (DEC-019).
+- **DOC-003** — committed `af72801` (28 split-invalidated citations repaired in ADR-004,
+  `docs/architecture/code-organization.md`, `protocol/compatibility/core-001-method-set.md`); residuals
+  and the non-split-induced drift DOC-003 proved are recorded as **DOC-004**.
+- Nothing else is in flight. The `ref-008`/`ref-010`/`client-api-002`/`qa-harness-001` worktrees were
+  removed (branches preserved).
 
 ## Pending user decisions (the loop continues without them)
 
