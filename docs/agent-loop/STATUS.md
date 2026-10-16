@@ -73,12 +73,11 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
   DEC-015 migration, and the user restored `/usr/bin/protoc` → `libprotoc 36.1` the same day. `cargo
   fmt`, `cargo clippy`, `cargo build --workspace`, `cargo test --workspace`, the lifecycle acceptance
   test, and `check-dependency-direction.sh` all pass again (2026-10-16).
-- **Offline cargo cache gap — blocks `scripts/validate.sh` step 7 (2026-10-16):**
-  `spikes/terminal-engine/Cargo.lock` pins `cfg_aliases 0.2.2` while the offline cache holds only
-  `0.1.1`, so the spike's `cargo build --offline` fails with `attempting to make an HTTP request`.
-  The main workspace and `scripts/smoke.sh` (`SMOKE OK`) are unaffected. Fixing it needs one networked
-  `cargo fetch` for that crate — explicit user approval, same pattern as DEC-012's one-time
-  `rusqlite` fetch.
+- **Offline cargo cache gap — RESOLVED 2026-10-16:** `spikes/terminal-engine/Cargo.lock` pins
+  `cfg_aliases 0.2.2`, but the cache held only `0.1.1`, so `scripts/validate.sh` stopped at step 7. A
+  one-time networked `cargo fetch` in the spike workspace (DEC-012 pattern) pulled `cfg_aliases 0.2.2`
+  and `nix 0.31.3`. **`scripts/validate.sh` now passes end to end offline — all 7 steps exit 0, 194
+  tests pass, 0 fail; `scripts/smoke.sh` → `SMOKE OK`.**
 - **Agent runtime (DEC-015) — migrated 2026-10-16:** orchestration is OpenCode; `.pi/settings.json` was
   removed and no repository script depends on herdr. The historical herdr provisioning fault below is
   resolved and cannot recur.

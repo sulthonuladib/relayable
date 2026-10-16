@@ -107,7 +107,10 @@ without rewriting historical evidence.
 | `python3 -c "json.load(open('opencode.json'))"` | valid JSON |
 | `LOOP_DRY_RUN=1 ./scripts/agent-loop.sh 1` | clean-tree guard passes; prints the `opencode run --agent orchestrator …` command; exit 0 |
 | `./scripts/agent-loop.sh 1` on a dirty tree | exits 1 and prints the offending paths (guard works) |
-| `bash scripts/validate.sh` | **steps 1–6 pass, step 7 fails.** fmt, clippy, `cargo build --workspace`, `cargo test --workspace`, the lifecycle acceptance test, and `check-dependency-direction.sh` all exit 0 (the script stops at the first failure, so reaching step 7 proves the earlier steps passed). Step 7 (spike build) fails: `cfg_aliases v0.2.2` is not in the offline cache |
+| `bash scripts/validate.sh` | **PASSES END TO END — all 7 steps exit 0**: fmt, clippy, `cargo build --workspace`, `cargo test --workspace` (**194 passed / 0 failed**), the lifecycle acceptance test (4 passed), `check-dependency-direction.sh`, and the spike build. Final line: `All CORE-001 validation checks passed.` |
+| `cd spikes/terminal-engine && cargo fetch` (one-time, networked) | exit 0 — downloaded `cfg_aliases v0.2.2` and `nix v0.31.3`, closing the offline cache gap (DEC-012 pattern) |
+| `cd spikes/terminal-engine && cargo build --offline` | exit 0 after the fetch (previously failed with `attempting to make an HTTP request`) |
+| `git push origin master` (via SSH) | `1819f1f..74fb70f master -> master` |
 | `bash scripts/smoke.sh` | `SMOKE OK`, exit 0 — build, server launch, session create, I/O round-trip, client disconnect, process survival, reconnect, session inspect, session close, SIGTERM shutdown, socket unlink |
 
 **Findings worth keeping:**
@@ -119,12 +122,17 @@ without rewriting historical evidence.
   since. The user reinstalled it the same day; `/usr/bin/protoc` → `libprotoc 36.1` is verified again
   and steps 1–6 pass. Recorded as an environment change, not a code regression — no Rust file was
   touched by this checkpoint (`git show --stat`).
-- **Offline cache gap at step 7 (pre-existing, still open):** the spike has a **committed**
-  `spikes/terminal-engine/Cargo.lock` pinning `cfg_aliases 0.2.2`, but the cargo cache holds only
-  `cfg_aliases-0.1.1`. Reproduced directly: `cd spikes/terminal-engine && cargo build --offline` →
-  `failed to download cfg_aliases v0.2.2 … attempting to make an HTTP request`. So the recorded claim
-  "`scripts/{validate,smoke,ci}.sh` all pass" holds only for a host whose cache predates the lockfile
-  bump, or with network available. One `cargo fetch` fixes it (user approval; DEC-012 precedent).
+- **Offline cache gap at step 7 (found, then closed):** the spike has a **committed**
+  `spikes/terminal-engine/Cargo.lock` pinning `cfg_aliases 0.2.2`, but the cargo cache held only
+  `cfg_aliases-0.1.1`. Reproduced directly (`cargo build --offline` → `failed to download cfg_aliases
+  v0.2.2 … attempting to make an HTTP request`), then closed with one `cargo fetch` in the spike
+  workspace, which pulled `cfg_aliases 0.2.2` and `nix 0.31.3`. The recorded claim that
+  `scripts/{validate,smoke,ci}.sh` all pass holds again **offline**, and this is now verified rather
+  than assumed.
+- **Push authentication:** the HTTPS remote cannot authenticate non-interactively on this host (no
+  `credential.helper`, `gh` not logged in), so the first push failed. SSH keys are present and valid,
+  so `origin` was switched to `git@github.com:sulthonuladib/relayable.git`; the push then succeeded.
+  Revert with `git remote set-url origin https://github.com/sulthonuladib/relayable` if ever wanted.
 - **Driver bug found and fixed by running it:** the first `LOOP_DRY_RUN` invocation resolved the agent
   as `1`, because the ambient environment exports a generic `AGENT=1` and the script read
   `AGENT="${AGENT:-orchestrator}"`. The knobs are now `LOOP_AGENT` / `LOOP_DRY_RUN`. This is why the
@@ -153,21 +161,23 @@ without rewriting historical evidence.
   dirty-tree guard were exercised); running it spends tokens and starts a real lead session.
 - Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
   delegated task.
-- `scripts/validate.sh` cannot complete on this host until the spike's `cfg_aliases 0.2.2` is fetched
-  (step 7, offline cache). Steps 1–6 do pass. Any "suite is green" claim must state which scripts were
-  actually run and that step 7 was excluded.
-- `scripts/agent-loop.sh` has not been run end-to-end against a live agent (only `LOOP_DRY_RUN` and the
-  dirty-tree guard were exercised); running it spends tokens and starts a real lead session.
+- `scripts/validate.sh` **passes end to end offline** (all 7 steps; 194 tests pass / 0 fail) and
+  `scripts/smoke.sh` → `SMOKE OK`, both re-run at this checkpoint. `scripts/ci.sh` was **not** run.
+- `scripts/agent-loop.sh` had not been run against a live agent when this checkpoint was written; it is
+  the handoff mechanism for the next phase. Only `LOOP_DRY_RUN` and the dirty-tree guard were exercised
+  here.
 - Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
   delegated task.
 
 **Next tasks:**
 
-1. One-time `cargo fetch` for the spike workspace (user approval) so `scripts/validate.sh` step 7
-   passes; then re-run `validate.sh` and `ci.sh` end to end to re-establish the green baseline.
-2. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
-   (`--strict` CI gate). This is the last hard-cap blocker.
-3. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
+1. **REF-008** — split `relayable-server/src/session.rs` (1037) and `tests/server_e2e.rs` (1472); then
+   **REF-010** wire `scripts/check-file-sizes.sh --strict` into `scripts/ci.sh` + `scripts/validate.sh`.
+   This is the last hard-cap blocker.
+2. **UI-003/UI-004/UI-005/UI-006** — desktop UX against the existing `gpui = "=0.2.2"` pin (no new
+   deps), preserving reference-video fidelity; then **DOCS-001**.
+3. Backlog: `MEM-001`, `CI-HOST-001`, `REF-004` remainder, `QA-FLAKE-001`, `QA-HARNESS-001`.
+   **Android is out of scope (DEC-010).**
 
 ---
 

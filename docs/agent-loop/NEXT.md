@@ -99,6 +99,9 @@ builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) a
   mechanism they worked around no longer exists. Host-level herdr configuration was left untouched;
   if on-screen agent panes or SSH-attached sessions are wanted later, that is a host-level choice
   (`herdr integration install opencode`), not a repository dependency.
+- **Git remote is SSH** (`git@github.com:sulthonuladib/relayable.git`, 2026-10-16). The HTTPS remote
+  cannot authenticate non-interactively on this host (no credential helper and `gh` is not logged
+  in), so an unattended loop session cannot push over HTTPS. Push with plain `git push origin master`.
 - Worktree cleanup (AGENTS.md "Worktree lifecycle / cleanup"): done+merged task worktrees may be removed
   by the lead, preserving branches. Check `git worktree list` after any cleanup and record it in
   `WORKLOG.md`.

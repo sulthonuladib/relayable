@@ -51,7 +51,7 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 |---|---|
 | rustc / cargo | 1.98.1, `stable-x86_64-unknown-linux-gnu` (default) |
 | protoc | `/usr/bin/protoc` → `libprotoc 36.1` (required by `prost-build`; verified 2026-10-15, found absent 2026-10-16, restored by the user the same day) |
-| offline cargo cache | **incomplete for the spike:** `spikes/terminal-engine/Cargo.lock` pins `cfg_aliases 0.2.2` but only `0.1.1` is cached, so the spike's `cargo build --offline` fails and `scripts/validate.sh` stops at step 7. The main workspace builds and tests fine |
+| offline cargo cache | complete — `cfg_aliases 0.2.2` + `nix 0.31.3` fetched once on 2026-10-16 (DEC-012 pattern); `scripts/validate.sh` now passes end to end **offline** |
 | mise | `/usr/bin/mise` |
 | android CLI | `/home/sulthonuladib/.local/bin/android` |
 | adb | `/usr/bin/adb` |

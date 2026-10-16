@@ -25,7 +25,11 @@ prompt='Continue the Relayable project in this repository.
 
 Read full.md completely, then AGENTS.md and docs/agent-loop/{NEXT,STATUS,BACKLOG,TASKS,DECISIONS,TESTS}.md plus the WORKLOG.md tail, docs/architecture/{interface-contract,next-phase-plan,code-organization}.md, and docs/adr/ADR-001..005. Trust repository files over prior conversation.
 
-Then continue at the next incomplete acceptance criterion: inspect reality first (git status, git worktree list, git log), delegate bounded work with explicit path ownership, validate with real commands, integrate, and checkpoint docs/agent-loop/** before stopping. If you approach your context limit, finish a safe checkpoint and write the handoff instead of starting new work.'
+Then continue at the next incomplete acceptance criterion: inspect reality first (git status, git worktree list, git log), delegate bounded work with explicit path ownership, validate with real commands, integrate, and checkpoint docs/agent-loop/** before stopping.
+
+Scope: Android apps are OUT OF SCOPE (DEC-010) — no SDK, emulator, JDK, or Gradle work; only keep relayable-model/relayable-protocol Android-ready. Do not adopt gpui-kit or libghostty until the user answers DEC-014; UI work proceeds against the existing gpui = "=0.2.2" pin.
+
+If you approach your context limit, finish a safe checkpoint (commit + push + update docs/agent-loop/**) and write a short handoff instead of starting new work.'
 
 cd "$repo_root"
 
