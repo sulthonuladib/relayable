@@ -1,0 +1,16 @@
+relayable: MOCK mode — synthetic in-process data, no live server
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-ui: connection state = Connected
+relayable-ui: no session and no create in flight; requesting one
+relayable-ui: session.created session=session:mock block=block:mock
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=6
+relayable-ui: output stream_id=1 bytes=13 total=13
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=35 pane_px=1099x604
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=35
+relayable: PROBE ctrl=true shift=false alt=false platform=false key="?" key_char=Some("?")
+relayable: shortcut reference opened (Ctrl+Shift+?)
+relayable: PROBE ctrl=true shift=false alt=false platform=false key="/" key_char=None
+relayable: PROBE ctrl=false shift=false alt=false platform=false key="?" key_char=Some("?")
+relayable: PROBE ctrl=false shift=false alt=false platform=false key="escape" key_char=None
+relayable: shortcut reference closed (Ctrl+Shift+?)
