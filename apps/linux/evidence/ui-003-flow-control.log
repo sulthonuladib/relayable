@@ -1,0 +1,348 @@
+# UI-003 — flow-control limit of the per-chunk ack model (raw)
+
+Measured, not assumed. Same `live-probe` as `ui-003-live-probe.log`, with exactly
+one line of its burst command patched for the experiment (patch and restore are
+part of the harness below), so the burst stream writes TINY pieces:
+
+    yes x | head -c 400000      # line-buffered stdout on a tty => ~2-byte writes
+    (probe default)             # head -c 400000 /dev/zero | tr '\0' x  => multi-KiB writes
+
+`yes x` writing 2 bytes at a time makes the server's PTY reader produce ~15-50 byte
+`TerminalOutput` frames at a very high frame rate. Every frame must be acknowledged
+by one `Client::next_output` call, i.e. per frame the client pays two socket reads
+(frame prefix + body) plus one `FlowControl` write, while the server produces a
+frame with a single PTY `read`. The client therefore cannot match that frame rate,
+the server's per-stream credit window (256 KiB) or its 8192-message outbound queue
+fills, and the server closes the whole connection (`Subscriber::overflow`,
+`flow_control_overflow` / "outbound channel full").
+
+Consequence: this is a property of the protocol's per-chunk ack model plus the
+credit-window size, not of the UI-003 migration. It reproduced with both data-plane
+pump structures that were tried (a stream-targeted `next_output` read and the
+committed bulk-pull `collect_events` read; the targeted variant died after ~31 KiB,
+the committed one after 47-297 KiB). It is **not** part of the acceptance gate: the
+gate burst writes in multi-KiB blocks (a real command's output granularity) and
+passes deterministically (`ui-003-live-probe.log`).
+
+Reproduce (`/tmp/opencode/ui003-probe/flow.sh`):
+
+```
+# patch the burst command for the run:
+sed -i "s|head -c {BURST_BYTES} /dev/zero | tr '\\0' x;|yes x | head -c {BURST_BYTES};|" \
+    apps/linux/src/bin/live-probe.rs
+cd apps/linux && CARGO_NET_OFFLINE=true cargo build --locked --bin live-probe
+# scratch server (own socket + own state dir), then:
+RELAYABLE_SERVER=<sock> timeout 60 cargo run --locked --bin live-probe
+# restore the burst command and rebuild afterwards
+```
+
+Raw transcripts (four runs; four consecutive runs from the committed data plane
+structure, `apps/linux/src/api/data.rs` @ UI-003):
+
+==================================================================
+--- /tmp/opencode/flow-ui003-1.out
+==================================================================
+### temporary probe patch (burst command only):
+    sed -i "s|head -c {BURST_BYTES} /dev/zero | tr '\\\\0' x;|yes x | head -c {BURST_BYTES};|" apps/linux/src/bin/live-probe.rs
+351:        bytes: format!("yes x | head -c {BURST_BYTES}; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.27s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- build_exit=0 ---
+
+server_pid=490493 socket_ready=yes
+
+### command: cd apps/linux && RELAYABLE_SERVER=/tmp/opencode/ui003-flow/relayable.sock timeout 60 cargo run --locked --bin live-probe
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running `target/debug/live-probe`
+live-probe: socket = /tmp/opencode/ui003-flow/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: connected
+live-probe: created session session:01a14582-5fb3-7700-ae5a-a51b5cb9f792 block block:01a14582-5fb3-7700-ae5a-a51d6e67ef81
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: created second session session:01a14582-601b-70e7-9c31-c57d533fd7fe block block:01a14582-601b-70e7-9c31-c57f3b632f10
+live-probe: attached second stream_id = 2
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: received output bytes = 297496
+live-probe: attached stream_ids = [1, 2]
+live-probe: bytes_by_stream = {1: 663, 2: 296833}
+live-probe: chunks_by_stream = {1: 22, 2: 6453}
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: burst stream_id=2 bytes=296833 chunks=6453 elapsed_ms=93 delivered_ms=None
+live-probe: rendered screen (120x40), first 24 rows:
+|printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' TARGET|
+|RELAYABLE-PROBE-TARGET|
+||
+|~ ❯|
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+live-probe: FAILED: while waiting for flow-control burst marker: disconnected: data connection lost: server closed the connection
+PROBE_EXIT=1
+
+--- server stderr (/tmp/opencode/ui003-flow/server.log) ---
+relayable-server: listening on /tmp/opencode/ui003-flow/relayable.sock (protocol 1.0)
+relayable-server: subscriber client client:01a14582-5f4b-712c-9917-0d230220f589 stream 2 outbound channel full
+relayable-server: stream 2 overflowed its bounded output queue; closing connection
+
+### restoring the probe
+351:        bytes: format!("head -c {BURST_BYTES} /dev/zero | tr '\\0' x; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.41s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- rebuild_exit=0 ---
+server_wait_exit=0
+
+==================================================================
+--- /tmp/opencode/flow-ui003-2.out
+==================================================================
+### temporary probe patch (burst command only):
+    sed -i "s|head -c {BURST_BYTES} /dev/zero | tr '\\\\0' x;|yes x | head -c {BURST_BYTES};|" apps/linux/src/bin/live-probe.rs
+351:        bytes: format!("yes x | head -c {BURST_BYTES}; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.35s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- build_exit=0 ---
+
+server_pid=491396 socket_ready=yes
+
+### command: cd apps/linux && RELAYABLE_SERVER=/tmp/opencode/ui003-flow/relayable.sock timeout 60 cargo run --locked --bin live-probe
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running `target/debug/live-probe`
+live-probe: socket = /tmp/opencode/ui003-flow/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: connected
+live-probe: created session session:01a14582-6d8b-7034-a297-73ceb16a752b block block:01a14582-6d8b-7034-a297-73d023cc250d
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: created second session session:01a14582-6df2-7569-af62-2b9a2310370d block block:01a14582-6df2-7569-af62-2b9c3909a846
+live-probe: attached second stream_id = 2
+live-probe: received output bytes = 65174
+live-probe: attached stream_ids = [1, 2]
+live-probe: bytes_by_stream = {1: 601, 2: 64573}
+live-probe: chunks_by_stream = {1: 22, 2: 4351}
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: burst stream_id=2 bytes=64573 chunks=4351 elapsed_ms=63 delivered_ms=None
+live-probe: rendered screen (120x40), first 24 rows:
+|printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' TARGET|
+|RELAYABLE-PROBE-TARGET|
+||
+|~ ❯|
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+live-probe: FAILED: while waiting for flow-control burst marker: disconnected: data connection lost: transport error: frame codec error: frame transport i/o error: Broken pipe (os error 32)
+PROBE_EXIT=1
+
+--- server stderr (/tmp/opencode/ui003-flow/server.log) ---
+relayable-server: listening on /tmp/opencode/ui003-flow/relayable.sock (protocol 1.0)
+relayable-server: subscriber client client:01a14582-6d22-75fa-98a4-98150646ade0 stream 2 outbound channel full
+relayable-server: stream 2 overflowed its bounded output queue; closing connection
+
+### restoring the probe
+351:        bytes: format!("head -c {BURST_BYTES} /dev/zero | tr '\\0' x; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.33s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- rebuild_exit=0 ---
+server_wait_exit=0
+
+==================================================================
+--- /tmp/opencode/flow-ui003-3.out
+==================================================================
+### temporary probe patch (burst command only):
+    sed -i "s|head -c {BURST_BYTES} /dev/zero | tr '\\\\0' x;|yes x | head -c {BURST_BYTES};|" apps/linux/src/bin/live-probe.rs
+351:        bytes: format!("yes x | head -c {BURST_BYTES}; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.33s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- build_exit=0 ---
+
+server_pid=492262 socket_ready=yes
+
+### command: cd apps/linux && RELAYABLE_SERVER=/tmp/opencode/ui003-flow/relayable.sock timeout 60 cargo run --locked --bin live-probe
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running `target/debug/live-probe`
+live-probe: socket = /tmp/opencode/ui003-flow/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: connected
+live-probe: created session session:01a14582-7b5b-726d-8a4b-c62aabebd67f block block:01a14582-7b5b-726d-8a4b-c62c173123ea
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: created second session session:01a14582-7bc3-751f-92b0-dbc0f7aeeb03 block block:01a14582-7bc3-751f-92b0-dbc2fd98023c
+live-probe: attached second stream_id = 2
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: received output bytes = 87199
+live-probe: attached stream_ids = [1, 2]
+live-probe: bytes_by_stream = {1: 601, 2: 86598}
+live-probe: chunks_by_stream = {1: 21, 2: 4350}
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: burst stream_id=2 bytes=86598 chunks=4350 elapsed_ms=64 delivered_ms=None
+live-probe: rendered screen (120x40), first 24 rows:
+|printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' TARGET|
+|RELAYABLE-PROBE-TARGET|
+||
+|~ ❯|
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+live-probe: FAILED: while waiting for flow-control burst marker: disconnected: data connection lost: server closed the connection
+PROBE_EXIT=1
+
+--- server stderr (/tmp/opencode/ui003-flow/server.log) ---
+relayable-server: listening on /tmp/opencode/ui003-flow/relayable.sock (protocol 1.0)
+relayable-server: subscriber client client:01a14582-7aee-7691-a777-6c1b53755a27 stream 2 outbound channel full
+relayable-server: stream 2 overflowed its bounded output queue; closing connection
+
+### restoring the probe
+351:        bytes: format!("head -c {BURST_BYTES} /dev/zero | tr '\\0' x; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.35s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- rebuild_exit=0 ---
+server_wait_exit=0
+
+==================================================================
+--- /tmp/opencode/flow-ui003.out
+==================================================================
+### temporary probe patch (burst command only):
+    sed -i "s|head -c {BURST_BYTES} /dev/zero | tr '\\\\0' x;|yes x | head -c {BURST_BYTES};|" apps/linux/src/bin/live-probe.rs
+351:        bytes: format!("yes x | head -c {BURST_BYTES}; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.28s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- build_exit=0 ---
+
+server_pid=489463 socket_ready=yes
+
+### command: cd apps/linux && RELAYABLE_SERVER=/tmp/opencode/ui003-flow/relayable.sock timeout 60 cargo run --locked --bin live-probe
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.16s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running `target/debug/live-probe`
+live-probe: socket = /tmp/opencode/ui003-flow/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: connected
+live-probe: created session session:01a14582-388b-7607-982c-7f604b07ef7a block block:01a14582-388b-7607-982c-7f621bccc673
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: created second session session:01a14582-38f3-71b5-b046-06d7ce868790 block block:01a14582-38f3-71b5-b046-06d9d2531c6f
+live-probe: attached second stream_id = 2
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: received output bytes = 47642
+live-probe: attached stream_ids = [1, 2]
+live-probe: bytes_by_stream = {1: 601, 2: 47041}
+live-probe: chunks_by_stream = {1: 20, 2: 1915}
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: burst stream_id=2 bytes=47041 chunks=1915 elapsed_ms=62 delivered_ms=None
+live-probe: rendered screen (120x40), first 24 rows:
+|printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' TARGET|
+|RELAYABLE-PROBE-TARGET|
+||
+|~ ❯|
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+||
+live-probe: FAILED: while waiting for flow-control burst marker: disconnected: data connection lost: transport error: frame codec error: frame transport i/o error: Broken pipe (os error 32)
+PROBE_EXIT=1
+
+--- server stderr (/tmp/opencode/ui003-flow/server.log) ---
+relayable-server: listening on /tmp/opencode/ui003-flow/relayable.sock (protocol 1.0)
+relayable-server: subscriber client client:01a14582-3826-72b9-b941-82b463e2319f stream 2 outbound channel full
+relayable-server: stream 2 overflowed its bounded output queue; closing connection
+
+### restoring the probe
+351:        bytes: format!("head -c {BURST_BYTES} /dev/zero | tr '\\0' x; printf 'RELAYABLE-PROBE-%s\\n' BURST-OK\n")
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.47s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- rebuild_exit=0 ---
+server_wait_exit=0
+

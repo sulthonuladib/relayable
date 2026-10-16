@@ -6,8 +6,33 @@ pub const RECONNECT_MAX_ATTEMPTS: u32 = 3;
 pub const RECONNECT_BACKOFF: Duration = Duration::from_millis(500);
 /// Per-plane read poll interval; keeps command handling responsive.
 pub(super) const POLL_INTERVAL: Duration = Duration::from_millis(100);
-/// Deadline for a single request/response round trip.
-pub(super) const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
+/// Window for the data plane's one bounded blocking read per pump.
+///
+/// The read pumps the socket for this long (`Client::collect_events`) and the
+/// pump then acknowledges everything it pulled, for every attached stream. The
+/// window bounds a stream's unacknowledged volume to its production during one
+/// window, and the server closes the whole connection when a stream exhausts its
+/// credit window (`credit_window_bytes`, 256 KiB). Measured fan-out on this host
+/// is well inside that bound at 1 ms: the 400 KiB acceptance burst delivered in
+/// 40-294 ms across runs (1.3-9.4 MB/s of multi-KiB chunks;
+/// `evidence/ui-003-live-probe.log` records one run), so at most ~9 KiB of output
+/// is outstanding when a window closes. 1 ms also bounds the added latency of one
+/// output batch to one millisecond, far below a rendered frame.
+///
+/// Cost when idle: one `set_read_timeout` + `recv` per millisecond on the data
+/// thread, and no work at all for streams that are already drained. The window is
+/// deliberately not [`POLL_INTERVAL`]: a 100 ms window would let a 2.6 MB/s
+/// producer spend the whole credit window, and losing the connection detaches
+/// every pane.
+///
+/// This window cannot repair the one flow-control case the measurement found:
+/// a child writing tiny pieces fast (line-buffered `yes` produced ~15-47 byte
+/// frames at a rate the client could not acknowledge) exhausts the window
+/// whatever the window is, because acknowledging a frame costs the client two
+/// `recv` calls plus a `FlowControl` write while the server produces a frame with
+/// one `read`. That is the per-chunk ack model of the protocol plus the 256 KiB
+/// window, not this module's loop; see `evidence/ui-003-flow-control.log`.
+pub(super) const DATA_READ_WINDOW: Duration = Duration::from_millis(1);
 /// Bound applied to an attach-time recovery snapshot before it is surfaced.
 pub(super) const SNAPSHOT_TAIL_BYTES: usize = 32 * 1024;
 
@@ -72,11 +97,17 @@ pub enum ApiEvent {
         screen_bytes: Vec<u8>,
     },
     /// Live terminal output.
+    ///
+    /// **No per-chunk sequence number.** The previous raw data plane copied
+    /// `TerminalOutput.stream_seq` into this event; the data plane now reads
+    /// through `relayable_client::Client::next_output`, which returns the bytes
+    /// only and exposes no sequence, and no consumer in this tree reads one. A
+    /// counter reconstructed here could not match the server's numbering, so the
+    /// field is gone instead of being invented. Order is still preserved: chunks
+    /// are emitted in the order the client returns them.
     Output {
         /// Source stream id.
         stream_id: u64,
-        /// Per-stream monotonic sequence.
-        stream_seq: u64,
         /// Raw VT bytes.
         bytes: Vec<u8>,
     },
@@ -127,6 +158,12 @@ pub enum ApiCommand {
     },
     /// Attach the data plane to a block as writer.
     AttachBlock {
+        /// Session wire id the block belongs to (`session:<uuid>`).
+        ///
+        /// `block.attach` is addressed by block id alone; the session travels with
+        /// the command so the data plane can name the attach through
+        /// `relayable_client::Client::attach_with_takeover`, which takes both ids.
+        session_id: String,
         /// Block wire id.
         block_id: String,
         /// Take over an existing writer lease.

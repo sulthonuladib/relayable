@@ -1,10 +1,9 @@
-use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::time::Duration;
 
 use vte::Perform;
 
-use super::data::{should_ack, strip_file_uri, tail, OscPerformer, TitleTracker};
+use super::data::{strip_file_uri, tail, OscPerformer, TitleTracker};
 use super::*;
 
 fn assert_send_sync<T: Send + Sync>() {}
@@ -33,6 +32,7 @@ fn mock_replies_to_create_and_attach() {
         label: Some("demo".to_string()),
     });
     handle.send(ApiCommand::AttachBlock {
+        session_id: "session:mock".to_string(),
         block_id: "block:mock".to_string(),
         takeover: false,
     });
@@ -94,14 +94,19 @@ fn osc_tracker_records_title_and_cwd() {
 }
 
 #[test]
-fn every_attached_stream_is_credit_acked_not_just_one() {
-    let mut attached = BTreeSet::new();
-    attached.insert(3u64);
-    attached.insert(7u64);
-    assert!(should_ack(&attached, 3));
-    assert!(should_ack(&attached, 7));
-    assert!(!should_ack(&attached, 4));
-    attached.remove(&7);
-    assert!(!should_ack(&attached, 7));
-    assert!(should_ack(&attached, 3));
+fn zero_timeout_drain_is_bounded_but_never_busy() {
+    // The data plane's acknowledgement path is a zero-timeout `next_output` loop
+    // (see `data.rs::drain_attached`): it must be short enough to keep a
+    // 256 KiB per-stream credit window refilled while a pane floods
+    // (`relayable-protocol/src/limits.rs`), and long enough that an idle data
+    // thread is not a busy loop.
+    let window = super::types::DATA_READ_WINDOW;
+    assert!(
+        window >= Duration::from_micros(100),
+        "an idle plane must sleep"
+    );
+    assert!(
+        window <= Duration::from_millis(10),
+        "a busy plane must not fall behind"
+    );
 }
