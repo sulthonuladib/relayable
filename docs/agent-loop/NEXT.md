@@ -81,35 +81,36 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **Nothing is in flight.** `master` is at **INT-027** (`6b8a80e` + doc repair `b2d0510`), clean and
-  pushed, and verified green end to end: `scripts/validate.sh` exits 0 (step 4 = **206 passed / 0 failed**),
-  `scripts/smoke.sh` → `SMOKE OK`, `scripts/check-file-sizes.sh --strict` → exit 0, desktop
-  `CARGO_NET_OFFLINE=true cargo test --locked` → **65 passed / 0 failed**, and the live probe on `master` →
-  `PROBE_EXIT=0` (2 streams, 400 384 bytes past the 256 KiB credit window, accepted `120x40`, `RELAYABLE-PROBE-ALIVE`).
-  Evidence: `WORKLOG.md` Checkpoint 43, `TESTS.md` rows 145–157.
-- **Just closed:** UI-003 (INT-027), UI-004 stage 1 (INT-026 `385f46f`), DOC-003 (`af72801`). Four
-  integrations this session were rejected or qualified by an independent verifier first; the repaired or
-  corrected versions are what landed.
-- **Worktrees on disk:** `ui-003` and `ui-004-stage1` at `/home/sulthonuladib/work/relayable-wt/` — both
-  branches are merged and pushed, so both are eligible for the standing cleanup (branches preserved).
-  Check `git worktree list` first.
+- **TERM-003 stage A** — researcher (background at the time of writing): `docs/research/libghostty-adoption.md`
+  per **DEC-021** (user directive to adopt libghostty; clone authorised outside the tree). It must settle:
+  released-vs-`main` API surface, the Rust binding + its licence, the exact Zig requirement and whether
+  `mise` can supply it (**a Zig install needs the user's approval**), the adoption shape (replace
+  `alacritty_terminal`/`vte` in `apps/linux/src/term/**` vs additive), portability, attribution, and a
+  verifiable stage-B plan. Stage B (build/link spike) requires that evidence **plus an ADR-003 amendment**
+  (lead-owned); ADR-003's pins stay authoritative until then.
+- **Nothing else is in flight.** `master` is at `3fab2f0`, clean and pushed, and fully green:
+  `scripts/validate.sh` exit 0 (step 4 = **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`,
+  `scripts/check-file-sizes.sh --strict` → exit 0, desktop `cargo test --locked` → **65 passed / 0 failed**,
+  live probe `PROBE_EXIT=0`, and **`scripts/ci.sh` → `OVERALL: PASS` (16 PASS / 0 FAIL / 3 SKIP)**.
+- **Only the main checkout exists** (`git worktree list` = one entry); every merged worktree has been removed
+  with its branch preserved.
 
 ## Next queue (in order)
 
-1. **`UI-005`** — keymap helper / discoverable shortcut overlay, `apps/linux` only (a planner brief for
-   UI-004 in `WORKLOG.md` Checkpoint 41 maps the app modules).
+1. **`UI-005`** — implement from **`docs/architecture/ui-005-plan.md`** (a complete planner brief: current
+   binding table at `app/keys.rs:10-61`, the single route `render.rs:44-49`, the owned paths, the pure
+   `shortcuts()` table + `shortcut_for` interface, the `Ctrl+Shift+/` toggle decision with its live-verify
+   caveat, the display-free test list, and the acceptance commands). Bindings stay **Relayable-original**.
 2. **`UI-006`** — local token-driven theming against `docs/research/design-tokens.md`; **not** gpui-kit
-   (DEC-014). Do not restyle: the reference geometry/hierarchy is the acceptance gate.
+   (DEC-014). Do not restyle: reference geometry/hierarchy is the acceptance gate.
 3. **`DOCS-001`** — `docs/README.md` index + consolidation (evidence preserved); then **`DOC-004`** (the
    ADR-004 residuals plus the citation drift DOC-003 proved but did not fix).
-4. Backlog: `CLIENT-API-003` (ack-rate limit; needs a core change), `QA-DESKTOP-001` (wire the live probe
-   into a script so the drain-all invariant is guarded), `UI-004-STAGE2` (attach/restore an existing
-   session — needs `api/**` + a user decision), `MEM-001`, `CI-HOST-001`, `QA-FLAKE-001`, `TOOL-001`,
-   `TOOL-002`.
-5. **Build/verify cheat-sheet:** desktop = `cd apps/linux && CARGO_NET_OFFLINE=true cargo <fmt|clippy
-   --all-targets --locked -- -D warnings|test --locked|check --locked>`; never `cargo update` in
-   `apps/linux` (the lockfile holds the TERM-002 `libc 0.2.189` remedy); root = `scripts/validate.sh`,
-   `scripts/smoke.sh`, `scripts/check-file-sizes.sh --strict`.
+4. Backlog: `CLIENT-API-003` (ack-rate limit; core change), `QA-DESKTOP-001` (wire the live probe into a
+   script so the drain-all ack invariant is guarded automatically), `UI-004-STAGE2` items (b) and (c) only —
+   (a) is **declined** by DEC-020 — plus `MEM-001`, `CI-HOST-001`, `QA-FLAKE-001`, `TOOL-001`, `TOOL-002`.
+5. **Cheat-sheet:** desktop = `cd apps/linux && CARGO_NET_OFFLINE=true cargo <fmt|clippy --all-targets --locked
+   -- -D warnings|test --locked|check --locked>`; never `cargo update` there. Root = `scripts/validate.sh`,
+   `scripts/smoke.sh`, `scripts/check-file-sizes.sh --strict`, `scripts/ci.sh`.
 
 ## Pending user decisions (the loop continues without them)
 
