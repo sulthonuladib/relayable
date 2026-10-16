@@ -13,8 +13,8 @@ use relayable_protocol::v1::{
 use relayable_protocol::{CONTROL_STREAM_ID, PROTOCOL_VERSION};
 use vte::Parser;
 
-use super::control::{emit, translate_wire_event};
 use super::types::{ApiEvent, POLL_INTERVAL, REQUEST_TIMEOUT, SNAPSHOT_TAIL_BYTES};
+use super::wire::{emit, translate_wire_event};
 
 pub(super) use super::data_thread::data_thread;
 #[cfg(test)]

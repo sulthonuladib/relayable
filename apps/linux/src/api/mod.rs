@@ -58,6 +58,7 @@ mod data_thread;
 mod mock;
 mod osc;
 mod types;
+mod wire;
 
 pub use control::ApiHandle;
 pub use types::{

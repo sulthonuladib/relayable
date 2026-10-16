@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 use std::sync::mpsc::{Receiver, Sender};
 
-use super::control::emit;
 use super::data::DataPlane;
 use super::types::{
     ApiCommand, ApiEvent, POLL_INTERVAL, RECONNECT_BACKOFF, RECONNECT_MAX_ATTEMPTS,
 };
+use super::wire::emit;
 
 /// Connect the data plane and, on success, tell the UI it is usable again.
 ///

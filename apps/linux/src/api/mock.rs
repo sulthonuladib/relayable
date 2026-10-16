@@ -1,7 +1,7 @@
 use std::sync::mpsc::{Receiver, Sender};
 
-use super::control::emit;
 use super::types::{ApiCommand, ApiEvent, ConnectionState, SessionSummaryView};
+use super::wire::emit;
 
 // --- mock ------------------------------------------------------------------
 
