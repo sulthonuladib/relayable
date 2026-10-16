@@ -146,6 +146,12 @@ a live `relayable-server` on a private socket under `/tmp`); it prints one `CHEC
 claim, counts its own failures, and ends with `UI-005 CAPTURE OK` (exit 0, `check_failures=0`, 30
 checks). Real output in `ui-005-run.log`; highlights:
 
+The harness was run twice — once while the feature was being verified and once after the final
+`cargo fmt`/commit, on this branch's committed source. Between the two runs the 15 **window-only**
+PNGs are byte-identical (only the full-screen companions, which include the desktop bar and its
+clock, and the log's timestamps and pids differ), which is itself a determinism check on the
+rendering.
+
 - `CHECK PASS: toggle opened the overlay (log) = 1` / `Esc closed the overlay (log) = 1`;
   `toggle opened twice` / `toggle closed it` = 2 (both edges, both routes).
 - `CHECK PASS: window geometry unchanged by the overlay = 10,40 1099x706` (pre/post
