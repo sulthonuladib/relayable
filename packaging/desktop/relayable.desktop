@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Relayable
+Comment=Terminal session workspace backed by a local Relayable server
+# The GPUI desktop binary is installed as `relayable-desktop` so it can never
+# collide with the `relayable` CLI (see scripts/install-user.sh --with-desktop).
+Exec=relayable-desktop
+Terminal=false
+Categories=Development;System;TerminalEmulator;
+Keywords=terminal;shell;session;workspace;
+StartupNotify=true
