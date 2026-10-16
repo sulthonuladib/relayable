@@ -361,11 +361,14 @@ server-confirmed resize.
 change responsible (a pristine export of `afcc631` failed identically). `rustc`/`cargo` also report
 **1.99.1**, while `AGENTS.md`/`STATUS.md` documented 1.98.1; there is no `rust-toolchain.toml` pin.
 
-**What happened:** the desktop dependency set was repopulated by an implementer's first
-`cargo build --locked` inside the `ui-003` worktree at ~22:49 (registry cache entries written 22:49;
-`apps/linux/Cargo.lock` unchanged, verified with `git status`). `CARGO_NET_OFFLINE=true cargo build
---locked` in `apps/linux` now succeeds (exit 0, ~60 s). The `spikes/terminal-engine-phase2` set is
-still absent, so that one `ci.sh` row cannot pass offline.
+**What happened:** the desktop dependency set was repopulated by an **explicit networked `cargo fetch
+--locked`** run inside the `ui-003` worktree at ~22:49 by that task's implementer, because the shared
+cache had been pruned and the workspace could not resolve `gpui`/`alacritty_terminal` offline. It was
+reported transparently by that implementer and it preceded the `AGENTS.md` guidance added in this
+decision; no `cargo update` was ever run and `apps/linux/Cargo.lock` is unchanged (verified).
+`CARGO_NET_OFFLINE=true cargo build --locked` in `apps/linux` now succeeds (exit 0, ~60 s). The
+`spikes/terminal-engine-phase2` set (`avt`, …) is still absent, so that one `ci.sh` row cannot pass
+offline.
 
 **Decision (this session):** do **not** run a further networked fetch at agent initiative. `apps/linux`
 builds offline again, so UI-003/UI-004 are unblocked; the phase-2 spike row is recorded as a known

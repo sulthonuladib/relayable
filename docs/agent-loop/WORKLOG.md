@@ -77,6 +77,64 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 42 — server-restart recovery; DOC-003 landed; UI-003/UI-004 completed and sent to verification (2026-10-16)
+
+**Objective:** recover from an OpenCode server restart without losing work, then finish the two live
+implementation threads (UI-003 data plane, UI-004 stage 1) and route both through independent verification.
+
+**Files changed:** `docs/agent-loop/**`; `docs/adr/ADR-004-*`, `docs/architecture/code-organization.md`,
+`protocol/compatibility/core-001-method-set.md` (DOC-003, `af72801`).
+
+### Commands run and observed results
+
+| Command | Observed |
+|---|---|
+| `git status` / `git worktree list` after the restart | `master` clean at `6ce97de` apart from the uncommitted DOC-003 edits; `ui-003` at `494917f` with 9 uncommitted paths; `ui-004-stage1` at `ff1e8fc` |
+| DOC-003 spot-check (lead): `sed -n <new-line>p` on 8 repaired anchors | all 8 resolve to the cited item (`session/block.rs:69` `BlockRuntime`, `server_e2e/end_to_end.rs:22` `server_end_to_end`, `server_e2e/lifecycle.rs:121`, `server_e2e/heartbeat.rs:31`, `session/threads.rs:11` `INPUT_QUEUE_MESSAGES`, `relayable-pty/src/handle.rs:39` `PtyHandle`, `apps/linux/src/term/model.rs:44`, `tests/events/stream.rs:19`) |
+| `git push origin master` | `af72801` (DOC-003), then `f0da27b`, `77e79d6` (ledger recovery) pushed |
+| UI-003 (branch worktree): `cargo fmt --check`, `clippy --all-targets --locked -D warnings`, `test --locked`, `check --locked` | all exit 0; desktop 58 passed |
+| UI-003 headless live probe (2 streams, scratch socket + state dir) | `PROBE_EXIT=0`; `TerminalResizeAccepted = stream_id=1 cols=120 rows=40`; burst `bytes=400384 delivered_in_ms=40 rate_mb_s=9.4`; `RELAYABLE-PROBE-ALIVE` |
+| UI-003 root: `validate.sh` / `smoke.sh` / `check-file-sizes.sh --strict` | exit 0 / `SMOKE OK` / exit 0 (`checked=150; over-hard-cap=0`) |
+| UI-004 (branch worktree): desktop fmt/clippy/test/check | exit 0; desktop tests **58 → 65** |
+| UI-004 root: `validate.sh` / `smoke.sh` / `--strict` | exit 0 / `SMOKE OK` / exit 0 |
+
+### Findings
+
+- **The restart lost no work**: both implementation threads were recovered from their worktrees (UI-003's
+  edits were uncommitted and intact; UI-004 had committed `ff1e8fc`). Two delegation calls were aborted by
+  the shutdown and were relaunched afterwards.
+- **DOC-003 landed** (`af72801`): 28 split-invalidated citations repaired across ADR-004, the code-org
+  standard and `protocol/compatibility/core-001-method-set.md`; no decision sentence changed. Residuals
+  (the "verbatim" quote's one-token drift, ADR-004's pre-STORE Context claims, and non-split-induced drift
+  the worker proved) are recorded as **DOC-004**.
+- **UI-003 is a behaviour migration, not a move**: `ApiEvent::Output.stream_seq` is gone (unused),
+  `AttachBlock` gained `session_id`, `REQUEST_TIMEOUT` → `DATA_READ_WINDOW = 1 ms`, and the pump is
+  `drain_attached → one bounded collect_events → drain_attached → drain_events` (the second drain is what
+  refunds credit for every stream). The implementer **measured a structural limit** and reported it rather
+  than hiding it: a tiny-write flood out-runs the one-chunk-per-call ack rate and the server closes the
+  data-plane connection; the pre-migration plane failed the same way at ~67 KB delivered, so this is
+  recorded as **CLIENT-API-003**, not as a regression.
+- **UI-004 stage 1** turned the one-shot auto-create into an invariant (`needs_session`) re-checked at four
+  sites and clears the wedged `pending_create` on `Error` **and** `Disconnected`; M1–M5 mutations are
+  caught by the headless suite, while deleting the `close_focused` call site is **not** (recorded gap).
+
+### Risks / notes
+
+- Both commits are **unverified at the time of writing** — verification was launched for each and nothing
+  is integrated until it returns (`UI-003` `8d84a84`, `UI-004` `ff1e8fc`).
+- The measured ack-rate limit (CLIENT-API-003) means a chatty child can still drop the data-plane
+  connection on this build; the app degrades to its reconnect banner and re-attaches.
+- DEC-018's attribution is now precise: the networked `cargo fetch --locked` was run by the UI-003
+  implementer before the no-fetch guidance existed; no `cargo update`, lockfile unchanged.
+
+### Next
+
+1. Integrate UI-003 and UI-004 stage 1 if their verifiers accept (or repair first, as with QA-HARNESS-001).
+2. Then UI-005 (keymap helper) and UI-006 (local token-driven theming), then DOCS-001/DOC-004, then the
+   backlog (`MEM-001`, `CI-HOST-001`, `QA-FLAKE-001`, `TOOL-001`, `CLIENT-API-003`).
+
+---
+
 ## Checkpoint 41 — INT-023/INT-024/INT-025 integrated; verifier reject→repair cycle; environment drift recorded (2026-10-16)
 
 **Objective:** continue the ordered queue; integrate only independently verified work; record the
