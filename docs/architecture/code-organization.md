@@ -49,10 +49,13 @@ when a natural seam exists (the review record may require it). Files **above the
 
 ## Enforcement
 
-`scripts/check-file-sizes.sh` reports every file over its cap. It is **report-only** (`--report`,
-default) until the refactor queue is complete, then becomes a hard gate (`--strict`) wired into
-`scripts/ci.sh` and `scripts/validate.sh` (`REF-010`). No file-size check is added to CI while known
-violations exist.
+`scripts/check-file-sizes.sh` reports every file over its cap. Since `REF-010` the **`--strict` mode
+is a hard gate**: it exits 1 when any file is above its hard cap, and it is wired into both
+`scripts/validate.sh` (step 7) and `scripts/ci.sh` (matrix row `file-sizes`, a required check that
+makes `OVERALL: FAIL`), so an over-cap file fails the canonical validation instead of only being
+reported. `--report` (the default) remains available for a non-failing listing. The gate exists only
+now that the refactor queue is complete: every file is under its cap, so the check passes on merge
+and a regression is caught immediately.
 
 ## Safe-split procedure (per crate)
 
@@ -75,12 +78,15 @@ violations exist.
 | R6 (`REF-010`) | Flip `check-file-sizes.sh --strict` into `ci.sh`/`validate.sh` | R2–R5 complete |
 
 Known offenders (live list: `bash scripts/check-file-sizes.sh`; measured 2026-10-16 after the
-REF-006/REF-007/REF-009 integrations). **Above the hard cap → must split (REF-008):**
-`crates/relayable-server/src/session.rs` 1037 (production cap 1000) and
-`crates/relayable-server/tests/server_e2e.rs` 1472 (test cap 1200). **Over target but under cap (split
-when a seam is clear, not mandatory):** `crates/relayable-server/tests/store_wiring.rs` 921,
-`crates/relayable-server/src/registry.rs` 808, `crates/relayable-server/src/connection.rs` 572,
-`crates/relayable-store/src/store.rs` 566, `crates/relayable-server/src/dispatch.rs` 509. The earlier
-offender list here was stale: REF-006/REF-007/REF-009 already split `apps/linux/src/**`,
-`crates/relayable-{model,pty,cli}/src/lib.rs`, `crates/relayable-protocol/src/**`,
-`crates/relayable-client/src/**`, `tests/events/**` and `tests/fixtures/**`, and those offenders are gone.
+REF-008 integration, which closed the queue). **Above the hard cap: none** — `over-hard-cap=0` across
+149 checked files; REF-008 split the last two, `crates/relayable-server/src/session.rs` (1037,
+production cap 1000) and `crates/relayable-server/tests/server_e2e.rs` (1472, test cap 1200). **Over
+target but under cap (split when a seam is clear, not mandatory):**
+`crates/relayable-server/tests/store_wiring.rs` 921, `crates/relayable-server/src/registry.rs` 808,
+`crates/relayable-server/src/session/block.rs` 613, `crates/relayable-server/src/connection.rs` 572,
+`crates/relayable-store/src/store.rs` 566, `crates/relayable-server/src/dispatch.rs` 509, and the two
+entry files `crates/relayable-server/src/lib.rs` 234 and `apps/linux/src/main.rs` 188 (entry target
+150). The earlier offender list here was stale: REF-006/REF-007/REF-009 already split
+`apps/linux/src/**`, `crates/relayable-{model,pty,cli}/src/lib.rs`,
+`crates/relayable-protocol/src/**`, `crates/relayable-client/src/**`, `tests/events/**` and
+`tests/fixtures/**`, and those offenders are gone.
