@@ -77,6 +77,36 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 36 — REF-007/009 integrated; code-org doc reconciled (INT-019) (2026-10-16)
+
+**Objective:** integrate the client + integration-test file splits.
+
+**Review:** branch `refactor/ref-007-009-client-tests` HEAD `b23b76d`; 29 files all within
+`crates/relayable-client/src/**`, `tests/events/**`, `tests/fixtures/**`; no secret matches; no manifest/docs
+changes. `lib.rs` 2139→78 + modules; `tests/events/main.rs` 1058→28 + 7 modules; `tests/fixtures/mod.rs`
+592→27 + 5 modules.
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 126 | `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --offline -- -D warnings`; `cargo build --workspace --offline` | clean | 0 |
+| 127 | `cargo test --workspace --offline` | 164 passed / 0 failed (unchanged) | 0 |
+| 128 | `RUSTDOCFLAGS='-D warnings' cargo doc -p relayable-client --no-deps --offline` | clean | 0 |
+| 129 | `bash scripts/check-file-sizes.sh` | no owned-path rows; `over-hard-cap` 10→9 | 0 |
+| 130 | post-merge `bash scripts/validate.sh`; `bash scripts/smoke.sh` | green; `SMOKE OK` | 0 |
+
+**Integration:** merge `54fe220` (INT-019).
+
+**Reconciled:** `docs/architecture/code-organization.md` now states the path-first classification (anything
+under `tests/**` is a test file → 800/1200, even when named `main.rs`/`mod.rs`) and the offender list was
+refreshed post-split; the doc and `scripts/check-file-sizes.sh` now agree. Added `QA-HARNESS-001` for the
+`tests/fixtures/binary.rs` freshness-guard heuristic (scans `#[cfg(test)]` sources → can trip exit 101 on a
+test-only edit).
+
+**Next:** integrate REF-006 (`w1M`) and the gpui-kit/libghostty research (`w1P`); then clean merged
+worktrees; then REF-008 (`server`) and REF-010 (`--strict` gate).
+
+---
+
 ## Checkpoint 35 — STORE-001 integrated (INT-018); next-phase plan + no-polling rule (2026-10-16)
 
 **Objective:** integrate STORE-001, then record the user's next-phase directives (gpui-kit, libghostty,

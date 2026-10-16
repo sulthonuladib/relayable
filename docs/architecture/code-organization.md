@@ -13,9 +13,14 @@ about 500, and treat 1000 as the hard ceiling.
 |---|---|---|
 | Production source (`crates/*/src/**`, `apps/linux/src/**`) | ≤ 500 lines | **1000** |
 | Tests (`tests/**`, `*/tests/**`, `tests.rs`, `#[cfg(test)]` modules) | ≤ 800 lines | **1200** |
-| Crate entry / re-export (`lib.rs`, `main.rs`, `mod.rs`) | ≤ 150 lines | **300** |
+| Crate entry / re-export (`lib.rs`, `main.rs`, `mod.rs`, excluding test paths) | ≤ 150 lines | **300** |
 | Generated code (prost `OUT_DIR`, checked-in generated) | exempt | exempt |
 | `spikes/**` (throwaway evidence crates) | exempt | exempt |
+
+Classification is **path-first**: any file under `tests/**` or `*/tests/**`, or named `tests.rs`, is a
+**test** file (800/1200) even when its basename is `main.rs` or `mod.rs`. The entry limits apply to
+`lib.rs`/`main.rs`/`mod.rs` in production paths only. `scripts/check-file-sizes.sh` implements exactly this
+order.
 
 A file under the target is comfortable. A file between target and cap is acceptable but should be split
 when a natural seam exists (the review record may require it). Files **above the hard cap must be split**
@@ -69,15 +74,15 @@ violations exist.
 | R5 (`REF-009`) | `tests/**` (integration suites) | CLIENT-API-001 merged |
 | R6 (`REF-010`) | Flip `check-file-sizes.sh --strict` into `ci.sh`/`validate.sh` | R2–R5 complete |
 
-Known offenders (measured 2026-10-16). **Above the hard cap → must split:** `apps/linux/src/app.rs` 1876,
-`crates/relayable-client/src/lib.rs` 1630, `crates/relayable-server/tests/server_e2e.rs` 1465,
-`apps/linux/src/tokens.rs` 1453, `apps/linux/src/api/mod.rs` 1448, `crates/relayable-server/src/session.rs`
-1037, `apps/linux/src/term/mod.rs` 497, `crates/relayable-model/src/lib.rs` 563,
+Known offenders (latest measurement 2026-10-16 after INT-019). **Above the hard cap → must split:**
+`apps/linux/src/app.rs` 1876, `apps/linux/src/tokens.rs` 1453, `apps/linux/src/api/mod.rs` 1448,
+`crates/relayable-server/tests/server_e2e.rs` 1465, `crates/relayable-server/src/session.rs` 1037,
+`apps/linux/src/term/mod.rs` 497, `crates/relayable-model/src/lib.rs` 563,
 `crates/relayable-pty/src/lib.rs` 338, `crates/relayable-cli/src/lib.rs` 367. **Over target but under cap
-(split when a seam is clear, not mandatory):** `tests/events/main.rs` 1058,
-`crates/relayable-server/src/registry.rs` 718, `tests/lifecycle/main.rs` 638,
-`tests/flow-control/main.rs` 594, `tests/fixtures/mod.rs` 592, `apps/linux/src/theme.rs` 579,
-`crates/relayable-server/src/connection.rs` 572, `apps/linux/src/geometry.rs` 550,
-`crates/relayable-server/src/dispatch.rs` 509, `apps/linux/src/ui/terminal.rs` 476,
-`tests/protocol/main.rs` 442, `crates/relayable-cli/src/json.rs` 420,
-`crates/relayable-protocol/src/codec.rs` 338.
+(split when a seam is clear, not mandatory):** `crates/relayable-server/src/registry.rs` 718,
+`apps/linux/src/theme.rs` 579, `crates/relayable-server/src/connection.rs` 572,
+`apps/linux/src/geometry.rs` 550, `crates/relayable-server/src/dispatch.rs` 509,
+`apps/linux/src/ui/terminal.rs` 476, `crates/relayable-cli/src/json.rs` 420,
+`crates/relayable-protocol/src/codec.rs` 338. (Run `bash scripts/check-file-sizes.sh` for the live list;
+INT-019 already split `crates/relayable-client/src/lib.rs`, `tests/events/main.rs`, and
+`tests/fixtures/mod.rs`.)

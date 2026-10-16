@@ -365,3 +365,20 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch `store/s
 `sessions`, `tombstones`, `audit_events`; `identities`/`preferences`/`session_layout` deferred (D2.3
 amendment); `Mutex<Connection>` single writer + `flock` guard (D2.5 wording amended). No terminal bytes are
 persisted (verified by probe). `scripts/smoke.sh` was updated to isolate `RELAYABLE_STATE_DIR`.
+
+## 2026-10-16 — REF-007/009 integrated: client + test file splits (INT-019)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch
+`refactor/ref-007-009-client-tests` (HEAD `b23b76d`) and integrated it as `54fe220` (INT-019).
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 126 | `cargo fmt --all --check` / `cargo clippy --workspace --all-targets --offline -- -D warnings` / `cargo build --workspace --offline` | clean | 0 |
+| 127 | `cargo test --workspace --offline` | 164 passed / 0 failed (unchanged) | 0 |
+| 128 | `RUSTDOCFLAGS='-D warnings' cargo doc -p relayable-client --no-deps --offline` | clean | 0 |
+| 129 | `bash scripts/check-file-sizes.sh` | no owned-path rows; `over-hard-cap` 10→9 | 0 |
+| 130 | post-merge `bash scripts/validate.sh` + `bash scripts/smoke.sh` | green; `SMOKE OK` | 0 |
+
+**Decisions recorded:** the code-org standard's test-classification was reconciled with the checker
+(path-first: `tests/**` → test limits). Public API of `relayable-client` unchanged (same `pub` items and
+signatures). `QA-HARNESS-001` tracks the test-harness freshness-guard heuristic.
