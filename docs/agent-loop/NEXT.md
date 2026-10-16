@@ -43,41 +43,26 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **CLIENT-API-001 (in flight)** — `client/client-api-001-incremental-output` (Herdr `w1H`): add a public
-   `Client::next_output` incremental terminal-bytes API + backpressure integration test so the GPUI view can
-   drive a live terminal. Then dependency-free backlog: `MEM-001` (memory baseline), `REF-004` remainder,
-   `CI-HOST-001`. (CTX-001 = INT-015 `dd1b986` and INSTALL-001 = INT-016 `39e5d49` are integrated.)
-2. **STORE-001** — `crates/relayable-store` (SQLite metadata/audit) + server start-up reconciliation,
-   `flock`, prune, write path per ADR-004 (designed, not implemented). Start only after CTX-001 lands.
-   **Blocked on a dependency decision (see below).**
-4. Backlog (dependency-free): `CLIENT-API-001` (client raw-byte streaming), `MEM-001` (memory
-   baseline), `CI-HOST-001` (hosted CI), `REF-004` remainder (design-token calibration).
-4. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
+1. **CLIENT-API-001 (in flight)** — `client/client-api-001-incremental-output` (Herdr `w1H`): public
+   `Client::next_output` incremental terminal-bytes API + backpressure test so the GPUI view can drive a
+   live terminal.
+2. **STORE-001 (in flight)** — `store/store-001-sqlite-metadata` (Herdr `w1J`): `crates/relayable-store`
+   (SQLite metadata/audit) + server start-up reconciliation, `flock`, prune, write path per ADR-004.
+   DEC-012: `rusqlite =0.40.2` bundled (one-time fetch done; builds stay offline).
+3. **Integrate each returning project** — review the diff, run independent validation
+   (`scripts/validate.sh`, `scripts/smoke.sh`, `cargo test --workspace --offline`), merge (INT-017+).
+4. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`.
+5. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build spike (ADR-003 reconsideration trigger #10).
-5. Update `docs/agent-loop/**` after every meaningful iteration.
+6. Update `docs/agent-loop/**` after every meaningful iteration.
 
-## Decision needed by the user — STORE-001 SQLite binding (2026-10-16)
+## STORE-001 SQLite binding — decided: option A (2026-10-16)
 
-STORE-001 (ADR-004 Decision 2) requires an SQLite binding in `crates/relayable-store`. The root
-workspace builds `--offline` and pins exact versions; **no SQLite Rust crate is present in the local
-cargo registry cache** (verified: `rusqlite`, `libsqlite3-sys`, `sqlx`, `sled`, `redb` all absent). The
-host does have `/usr/lib/libsqlite3.so.3.53.4`, `/usr/include/sqlite3.h`, and the `sqlite3` CLI.
-
-Options (the Manager will not change the offline posture without approval):
-
-- **A — one-time network fetch (needs approval).** `cargo add rusqlite` (+ lockfile), then a networked
-  `cargo fetch`; subsequent builds stay offline. Lowest risk, standard binding (`libsqlite3-sys` with the
-  `bundled` feature, or system-linked). Cost: the repo's "no network dependency" posture changes once,
-  and the lockfile/graph grows.
-- **B — hand-written minimal FFI to the system `libsqlite3` (offline, no new crates).** A small
-  `unsafe`-reviewed wrapper for open/prepare/step/bind/finalize + WAL/busy_timeout pragmas. No network,
-  but it introduces hand-written unsafe FFI into a project that currently denies `unsafe_code` in the
-  PTY crate and uses it only for signals in the server; it needs an independent review.
-- **C — defer STORE-001.** ADR-004 remains `Accepted` (design), the store stays unimplemented, and the
-  project continues with dependency-free work (CLIENT-API-001, MEM-001, REF-004). Persistence is not on
-  the primary "locally installable app" path.
-
-Awaiting the user's choice before any SQLite work starts. No network access is used until then.
+**User approved option A.** STORE-001 (ADR-004 Decision 2) now uses `rusqlite = "=0.40.2"` with the
+`bundled` feature (`libsqlite3-sys 0.38.2`, SQLite compiled from the amalgamation; no runtime system
+SQLite dependency). A one-time networked fetch populated the cargo cache (2026-10-16); **all subsequent
+builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) and no further deferral
+(option C).
 
 ## Review gates (do not skip)
 

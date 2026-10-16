@@ -16,6 +16,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — hook disabled + plugin uninstalled 2026-10-15** | — |
 | DEC-010 | Android client deferred from current scope; keep the model/protocol Android-ready | **Accepted** — user direction 2026-10-15; consistent with `full.md` §1.4/§1.5 | — |
 | DEC-011 | ADR-005 Decision 5 clarification: a **unique** session is not an ambiguous match, so the accepted CORE-001 CLI unique-session default is retained (flag → env → unique-default); zero/multiple sessions still fail with documented codes | **Accepted** — Manager reconciliation 2026-10-16 (addendum in ADR-005) | `docs/adr/ADR-005-environment-variable-namespace.md` |
+| DEC-012 | STORE-001 SQLite binding: use `rusqlite = "=0.40.2"` with the `bundled` SQLite (`libsqlite3-sys 0.38.2`); one-time user-approved networked fetch, then offline builds | **Accepted** — user approval 2026-10-16 (option A) | `docs/adr/ADR-004-process-ownership-and-persistence.md` (Decision 2 binding deferred here) |
 
 ## DEC-000 — Work state in-repository
 
@@ -164,6 +165,27 @@ test exercises zero-session and two-session no-context failures (CTX-001). `full
 
 **Reconsider if:** `full.md` or the reference docs require strict failure on any unset context even with a
 unique match, or a user workflow shows the convenience default causing wrong targeting.
+
+## DEC-012 — STORE-001 SQLite binding (option A: networked fetch once, then offline)
+
+**Context:** ADR-004 Decision 2 chose SQLite for the metadata/audit store and deferred the concrete Rust
+binding to crate creation. The root workspace builds `--offline`; no SQLite crate was in the local cargo
+cache (verified 2026-10-16). The host has system `libsqlite3` 3.53.4 + headers, but the offline posture
+meant the store could not be built without either a network fetch or hand-written FFI.
+
+**Decision (user-approved 2026-10-16, option A):** adopt `rusqlite = "=0.40.2"` with the `bundled`
+feature (`libsqlite3-sys 0.38.2`, SQLite compiled from the crate's amalgamation, so no runtime system
+SQLite dependency). Perform a **one-time networked fetch** to populate the cargo cache; after that, all
+builds stay `--offline`. The user explicitly approved this network access. The cache was warmed on
+2026-10-16 (`rusqlite`, `libsqlite3-sys`, `hashlink`, `fallible-iterator`, `fallible-streaming-iterator`).
+
+**Consequences:** the repo's "no network dependency" posture changes exactly once; the dependency graph
+and `Cargo.lock` grow; the store crate and its consumers build offline thereafter. `bundled` keeps
+Relayable self-contained and avoids depending on a system SQLite version. No terminal bytes are stored
+(ADR-004 D2.3 unchanged).
+
+**Reconsider if:** the added dependency breaks offline reproducibility on a fresh machine (then vendor it),
+or ADR-004 reconsider-if (4) fires.
 
 ## Open questions requiring evidence (not yet decidable)
 
