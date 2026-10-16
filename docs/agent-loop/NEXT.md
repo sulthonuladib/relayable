@@ -114,44 +114,23 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## Pending user decisions (the loop continues without them)
 
-1. **DEC-014 — gpui-kit / libghostty.** Unchanged: research recommends Reject/Defer, ADR-003's pins
-   stay. UI-006 (theming) is therefore scoped as a **local token-driven theme** inside `apps/linux`,
-   not as adopting a component layer.
-2. **DEC-018 — `spikes/terminal-engine-phase2` offline cache gap.** `avt` is not in the cargo cache, so
-   that one `ci.sh` row cannot pass offline. Approving a one-time networked `cargo fetch` in that spike
-   workspace (DEC-012 pattern) restores `ci.sh → OVERALL: PASS`. No agent fetches it without approval.
-3. **DEC-019 stage 2 — restore-an-existing-session policy.** After UI-004 stage 1 the app still creates a
-   *new* session on each launch instead of restoring the previous one (a deviation from the only
-   behavioural reference evidence). Stage 2 needs `apps/linux/src/api/**` work plus a decision: persist
-   the last-used session id locally (Relayable-original) or keep always-creating.
-4. **Worktree cleanup authorization:** standing authorization for done+merged worktrees applies
-   (AGENTS.md); no per-removal confirmation is needed.
-
-## Open tasks, in order
-
-1. **UI-003** (in flight) — verify → integrate.
-2. **UI-004 stage 1** (DEC-019) — auto-session invariant + truthful empty/creating text, `app/**` only.
-3. **UI-005** — keymapping helper / discoverable shortcut overlay (after UI-004).
-4. **UI-006** — local token-driven theming (no gpui-kit, per DEC-014) — verify fidelity against
-   `docs/research/design-tokens.md`.
-5. **Offline-safe queue, can run any time:** **DOC-003** (repair the citations invalidated by the
-   refactor splits — `docs/adr/ADR-004-*` ×9–10, `docs/architecture/code-organization.md`,
-   `protocol/compatibility/core-001-method-set.md`; citation-only, no decision changed),
-   **DOCS-001** (`docs/README.md` index + consolidation, evidence preserved), **MEM-001** (memory
-   baseline, root workspace), **CI-HOST-001**, **QA-FLAKE-001** (`server_e2e`
-   `resume_shapes_and_writer_takeover` / `idle_timeout_reason_is_reported_to_a_subscriber`).
-6. **TERM-003** stays proposed pending the user's DEC-014 answer.
-7. Update `docs/agent-loop/**` after every meaningful iteration.
-8. **Cleanup:** remove the merged worktrees (`ref-008`, `ref-010`, `client-api-002`, `qa-harness-001`)
-   under the standing authorization; keep branches.
-
-## STORE-001 SQLite binding — decided: option A (2026-10-16)
-
-**User approved option A.** STORE-001 (ADR-004 Decision 2) now uses `rusqlite = "=0.40.2"` with the
-`bundled` feature (`libsqlite3-sys 0.38.2`, SQLite compiled from the amalgamation; no runtime system
-SQLite dependency). A one-time networked fetch populated the cargo cache (2026-10-16); **all subsequent
-builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) and no further deferral
-(option C).
+1. **TERM-003 stage B approvals (DEC-022) — blocking; stage A evidence is in
+   `docs/research/libghostty-adoption.md`.** The released tag **does** contain the engine (as a Zig module);
+   `mise` offers exactly the required Zig. Requested:
+   - **A1** — `mise install zig@0.16.0` (per-user, no `sudo`, no global package).
+   - **A2** — one-time networked provisioning of the pinned source artifact (+ `zig fetch` seed); a
+     checksummed per-commit artifact exists, but 3 of 6 URL probes 404'd, so a vendored tarball is safer.
+   - **A3** — confirm stage B may add a throwaway spike crate with its own workspace under `spikes/**`.
+   - Plus the **adoption shape**: replace `alacritty_terminal`+`vte` / additive (encoders only) / own thin
+     C ABI over tag `v1.3.1`. Note the swap is **not** contained to `term/**` — `apps/linux/src/api/osc.rs:1`
+     uses `vte::Perform` directly. No ADR-003 amendment is drafted; ADR-003's pins stay authoritative until
+     one lands, and "no engine change" remains a defensible outcome if the spike fails.
+2. **DEC-014 (gpui-kit part only)** — unchanged: research says Reject/Defer; UI-006 is a local token-driven
+   theme, not a component-layer adoption. The libghostty half of DEC-014 is superseded by DEC-021/022.
+3. **DEC-020** — recorded: the app creates a **new** session on open (no restore); `UI-004-STAGE2` (a) is
+   closed as declined. (If that misreads your intent, it is a one-line ledger change.)
+4. **Worktree cleanup** — standing authorization applies; `git worktree list` currently shows only the main
+   checkout.
 
 ## Review gates (do not skip)
 

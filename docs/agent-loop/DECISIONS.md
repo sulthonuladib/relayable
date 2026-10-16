@@ -471,6 +471,54 @@ DEC-014 stands (UI-006 remains a local token-driven theme).
 pinning unreleased `main`, or if a Zig pin is refused — in which case the recorded fallback is the current
 `alacritty_terminal` pin (ADR-003 accepted, spike-validated).
 
+## DEC-022 — TERM-003 stage A outcome: libghostty adoption path, blockers, approvals requested (2026-10-16)
+
+**Evidence:** `docs/research/libghostty-adoption.md` (864 lines, anchored to three local clones at
+`/home/sulthonuladib/work/vendor/` — nothing committed) plus a dated corrections block in
+`docs/research/libghostty.md`. Clones: ghostty `main 949149d5…`, tag `v1.3.1 22efb0be…` (2026-03-13),
+rolling tag `tip 877dda73…`; `libghostty-rs` `master d2036bae…` / `v0.2.2 a3a96769…`; `gpui-cn v0.7.2`.
+
+**What changed versus RESEARCH-002 (corrections, not preferences):**
+- **The engine IS in the released tag.** `git show v1.3.1:src/lib_vt.zig:59` →
+  `pub const Terminal = terminal.Terminal;` (plus `RenderState` :52, `Screen` :53, `Selection` :55). The tag
+  is utilities-only **at the C boundary**; the engine exists there as a Zig module. RESEARCH-002's
+  "no terminal API in the released version" was right about the C header and wrong about the engine.
+- **Zig is 0.16.0 for `main` and 0.15.2 for the tag** (`minimum_zig_version` hard-enforced at
+  `build.zig:12-14`); `mise ls-remote zig` offers exactly `0.16.0`.
+- **The build is small and can be made offline**: for `-Demit-lib-vt -Dapp-runtime=none` only **one**
+  non-lazy external Zig package (`uucode`); `pkg/simdutf` vendors its C++ in-tree; GTK/Wayland/fonts/
+  libxev/vaxis are all `.lazy = true`.
+
+**Three pin options:** (1) tag `v1.3.1` + our own thin C ABI (Zig 0.15.2); (2) `main` + upstream C ABI
+(Zig 0.16.0); (3) tag + upstream C ABI — **unusable** (no C header at the tag).
+
+**Blockers (precise, each needing a decision):** Zig is absent on this host; provisioning the source
+tarball + `zig fetch` seed needs network; there is no Android SDK/NDK here, so **Android stays
+`UNVERIFIED`** in stage B despite upstream's lib-vt Android support
+(`src/build/GhosttyLibVt.zig:273-278`); the leading Rust binding ships **no licence file** (severable —
+binding B bundles both, and the own-C-ABI path needs only ghostty's MIT); and **the swap is not contained
+to `term/**`** — `apps/linux/src/api/osc.rs:1` uses `vte::Perform` directly, which is a design decision
+(who owns OSC title/cwd), not a mechanical edit.
+
+**Approvals requested from the user (nothing proceeds without them):**
+- **A1:** `mise install zig@0.16.0` — per-user, no `sudo`, no global package (the DEC-012/018 pattern).
+- **A2:** one-time networked provisioning of the pinned source artifact (+ `zig fetch` seed). Note: a
+  checksummed per-commit artifact exists (`https://tip.files.ghostty.org/<commit>/libghostty-vt-source.tar.gz`;
+  the one downloaded has sha256 `a623aa0b…`, byte-identical to a third-party pin), but **3 of 6 probes
+  404'd**, including the current `tip` — so a re-hostable, vendored tarball is the safer pin.
+- **A3:** confirm stage B may add a **throwaway spike crate with its own workspace under `spikes/**`**
+  (the established pattern; the root workspace must not absorb it).
+
+**Adoption shape still to be chosen:** *replace* `alacritty_terminal` + `vte`; *additive* (input encoders
+only — same Zig cost); or *own thin C ABI over tag `v1.3.1`*. An ADR-003 amendment would touch decision
+items **1 and 2** (items 3 `portable-pty` and 4 `gpui`/`libc` are unaffected), item 5 (a fifth artefact),
+the §5.4 table, the "engine pins validated by TERM-002 / no engine change warranted" status sentence, and
+trigger #10 sub-condition 3. No amendment is drafted yet.
+
+**Honest fallback:** no evidence gathered here shows the current `alacritty_terminal` stack failing
+(TERM-002: 32 PASS / 1 UNSUPPORTED / 0 FAIL). If the user declines A1/A2/A3 or the stage-B spike fails,
+**ADR-003 stays unchanged** and that is a defensible outcome, not a failure.
+
 ## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
