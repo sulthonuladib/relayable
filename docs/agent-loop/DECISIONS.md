@@ -18,6 +18,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-011 | ADR-005 Decision 5 clarification: a **unique** session is not an ambiguous match, so the accepted CORE-001 CLI unique-session default is retained (flag → env → unique-default); zero/multiple sessions still fail with documented codes | **Accepted** — Manager reconciliation 2026-10-16 (addendum in ADR-005) | `docs/adr/ADR-005-environment-variable-namespace.md` |
 | DEC-012 | STORE-001 SQLite binding: use `rusqlite = "=0.40.2"` with the `bundled` SQLite (`libsqlite3-sys 0.38.2`); one-time user-approved networked fetch, then offline builds | **Accepted** — user approval 2026-10-16 (option A) | `docs/adr/ADR-004-process-ownership-and-persistence.md` (Decision 2 binding deferred here) |
 | DEC-013 | Relayable is an **independent project**; docs must not attribute it to Superlogical (the maker of the reference product REX). Superlogical appears only in research/compatibility evidence | **Accepted** — user direction 2026-10-16 | `full.md` §0.1; `AGENTS.md`; `README.md` |
+| DEC-014 | RESEARCH-001/002 outcome: **gpui-kit** = Reject (can't coexist with pinned `gpui =0.2.2`; no umbrella license file) / Defer; **libghostty-rs** = Defer/Partial (terminal API unreleased on `main`, Zig build blocker, leading binding unlicensed) | **Recommendation recorded — user decision pending**; ADR-003 pins unchanged | `docs/research/gpui-kit.md`, `docs/research/libghostty.md` |
 
 ## DEC-000 — Work state in-repository
 
@@ -206,6 +207,36 @@ the product "REX"/"REX Superlogical"/"Superlogical Terminal".
 remain, because they describe the reference product accurately. No code or behavior changes.
 
 **Reconsider if:** the user establishes an official company attribution for Relayable.
+
+## DEC-014 — GPUI-kit and libghostty research outcome (recommendation, user decision pending)
+
+**Context:** the user asked to plan adopting `gpui-kit` (https://gpui-kit.com/docs) and a
+libghostty/`libghostty-rs` terminal engine, plus a richer desktop UX. RESEARCH-001/002 (INT-021
+`96b4180`) produced `docs/research/gpui-kit.md` and `docs/research/libghostty.md` from live 2026-10-16
+fetch + local artifacts.
+
+**Findings (recommendations, not yet a Manager decision):**
+
+- **gpui-kit — Reject for the current pin / Defer any adoption.** It cannot be used alongside
+  `gpui = "=0.2.2"`: no version depends on package `gpui`; it exact-pins the `gpui-pre` facade and both
+  export extern crate `gpui`, so the GPUI types are incompatible. The umbrella `gpui-kit` crate ships no
+  license file at 0.7.3; adopting it pulls TLS/reqwest by default and a styled shadcn-flavoured layer that
+  risks the generic redesign `full.md` §0.2/§2.4 forbid; it provides no terminal widget. The unstyled
+  `gpui-base` is the only fidelity-safe slice.
+- **libghostty / libghostty-rs — Defer / Partial.** Upstream is MIT and headless by design, with valuable
+  input-side encoders; but the host's released libghostty (v1.3.1) has **no terminal/grid/scrollback API**
+  (that exists only on untagged, self-declared-unstable `main`), **Zig 0.16.x is a build blocker** under the
+  no-global-install rule, the leading Rust binding ships no license file, `alacritty_terminal 0.26.0` already
+  has committed spike evidence (32 PASS/1 UNSUPPORTED/0 FAIL), and Android is unverified. If ever pursued,
+  do it **additively** (input encoders) rather than as a replacement.
+
+**Disposition:** keep ADR-003 accepted and its pins unchanged; do not adopt either dependency in this phase.
+The desktop-UX goals (auto-session on open, keymap helper, theming) do **not** require gpui-kit and can be
+implemented inside `apps/linux` against the existing `gpui = "=0.2.2"` pin and the design tokens. This is a
+**Recommendation pending the user's explicit decision** (they may override with a new directive).
+
+**Reconsider if:** the user decides to re-open the GPUI artifact / fund a Zig toolchain pin (ADR-003
+reconsideration triggers), or libghostty ships its terminal API in a tagged, stable, licensed release.
 
 ## Open questions requiring evidence (not yet decidable)
 

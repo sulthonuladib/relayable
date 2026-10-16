@@ -35,9 +35,9 @@ the evidence is integrated.
 | REF-008 | Split `crates/relayable-server/src/**` + `crates/relayable-server/tests/**` (`session.rs` 1037, `server_e2e.rs` 1465) | REF-005, STORE-001 | TBD | READY — last hard-cap blockers before REF-010 |
 | REF-009 | Split `tests/**` integration suites (`tests/events/main.rs` 1058, `tests/fixtures/mod.rs` 592) | REF-005, CLIENT-API-001 | `refactor/ref-007-009-client-tests` (Herdr `w1N`) | DONE — integrated INT-019 `54fe220`; `events/main.rs` 1058→28 + 7 modules, `fixtures/mod.rs` 592→27 + 5 modules |
 | REF-010 | Wire `scripts/check-file-sizes.sh --strict` into `scripts/ci.sh` + `scripts/validate.sh`; verify clean | REF-006..REF-009 | TBD | BACKLOG |
-| RESEARCH-001 | gpui-kit evaluation (license, `gpui =0.2.2` compat, components, fidelity impact) → `docs/research/gpui-kit.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | IN_PROGRESS |
-| RESEARCH-002 | libghostty / `libghostty-rs` evaluation (license, build, API, Android, vs ADR-003 pins) → `docs/research/libghostty.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | IN_PROGRESS |
-| TERM-003 | libghostty-rs engine spike + ADR-003 amendment (reconsideration trigger #10); adopt/decline decision | RESEARCH-002 | TBD | PROPOSED |
+| RESEARCH-001 | gpui-kit evaluation (license, `gpui =0.2.2` compat, components, fidelity impact) → `docs/research/gpui-kit.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | DONE — integrated INT-021 `96b4180`; verdict **Reject (current pin) / Defer (any adoption)** |
+| RESEARCH-002 | libghostty / `libghostty-rs` evaluation (license, build, API, Android, vs ADR-003 pins) → `docs/research/libghostty.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | DONE — integrated INT-021 `96b4180`; verdict **Defer / Partial** |
+| TERM-003 | libghostty-rs engine spike + ADR-003 amendment (reconsideration trigger #10); adopt/decline decision | RESEARCH-002 | TBD | PROPOSED — research recommends DEFER (unreleased API, Zig build blocker); **user decision** |
 | UI-004 | Desktop: auto-create/attach a session on app open; explicit empty/loading/error/disconnected states | RESEARCH-001 | TBD | BACKLOG |
 | UI-005 | Keymapping helper: discoverable shortcut overlay + reference (Relayable-original Linux bindings) | UI-004 | TBD | BACKLOG |
 | UI-006 | Theming: token-driven theme through the chosen component layer; no fidelity divergence | RESEARCH-001 | TBD | BACKLOG |

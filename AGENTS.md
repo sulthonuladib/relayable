@@ -88,9 +88,11 @@ The Manager keeps the checkout set tidy. A task's worktree may be removed **only
 into `master` and pushed and the task is recorded `DONE`; the Git branch and Pi conversation are preserved.
 
 - Never remove a worktree whose task is in flight/unmerged, and never remove one with uncommitted changes.
-- Use the `remove_worktree` tool for Herdsman-project worktrees; use `git worktree remove` for
-  manually-created ones (the Manager may create throwaway worktrees for direct agents).
-- After removing, re-check `git worktree list`, keep `docs/agent-loop/NEXT.md`'s worktree list current, and
-  record the cleanup in `WORKLOG.md`.
-- Removal is authorized by this instruction for done+merged work only; anything else needs an explicit
-  user request (`remove_worktree` itself also requires human confirmation).
+- **Standing user authorization (2026-10-16):** for done+merged worktrees the Manager removes them
+  automatically with **no per-removal confirmation**. Use plain `git worktree remove <path>` (no prompt);
+  use `remove_worktree` only when you also want the Herdsman assignment retired. Both preserve the Git
+  branch. `scripts/cleanup-worktrees.sh <branch>...` (add `--apply` for real removal) does a checked,
+  non-interactive cleanup of explicitly named, merged, clean branches.
+- After removing, re-check `git worktree list`, keep `docs/agent-loop/NEXT.md` current, and record the
+  cleanup in `WORKLOG.md`.
+- Anything not done+merged still needs an explicit user request; never force-remove.
