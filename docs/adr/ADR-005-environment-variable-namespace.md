@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Proposed — Lead decision; pending Manager acceptance and DECISIONS.md index update (DEC-006 → ADR-005)** |
 | Date | 2026-10-15 |
-| Deciders | Lead (Relayable / Superlogical) |
+| Deciders | Lead (Relayable) |
 | Supersedes | — (new ADR; no prior environment-variable-namespace ADR) |
 | Related | DEC-006; `full.md` §0.1, §3, §5.2, §8.1; `docs/agent-loop/DECISIONS.md`; `docs/adr/ADR-002-protocol-schema-and-transport.md` D14; `docs/compatibility/reference-behavior-matrix.md` §7.3, §14 D-08; `docs/architecture/interface-contract.md` |
 

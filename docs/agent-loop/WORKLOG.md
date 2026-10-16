@@ -77,6 +77,25 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 34 — Remove Superlogical attribution from Relayable docs (DEC-013) (2026-10-16)
+
+**Trigger:** the user directed that no docs attribute Relayable to Superlogical (the maker of the reference
+product REX).
+
+**Changes (docs only):** `README.md` ("Relayable (by Superlogical)" → "Relayable"); `AGENTS.md` (naming
+rule); `full.md` §0.1 (removed `Company: Superlogical`; added an independent-project rule; neutral Android
+ID example `com.relayable.app`; §13.6 checklist item); `docs/adr/ADR-003/004/005` `Deciders` rows
+(`Lead (Relayable / Superlogical)` → `Lead (Relayable)`). Recorded as **DEC-013**.
+
+**Kept:** Superlogical appears only in reference/compatibility evidence (REX vendor, video titles,
+`superlogical.com` doc URLs) — accurate descriptions of the reference product, never of Relayable.
+
+**Verification:** `grep -rniI "by superlogical|company:|relayable / superlogical|from superlogical|com.superlogical.relayable"`
+over the repo returns only `docs/compatibility/reference-behavior-matrix.md`'s "Reference product: REX by
+Superlogical" (correct).
+
+---
+
 ## Checkpoint 33 — CLIENT-API-001 integrated: incremental terminal bytes (INT-017) (2026-10-16)
 
 **Objective:** integrate the `relayable-client` incremental terminal-bytes API so a live terminal view can

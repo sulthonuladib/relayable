@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Accepted — Manager acceptance 2026-10-15 (DEC-005).** |
 | Date | 2026-10-15 |
-| Deciders | Lead (Relayable / Superlogical) |
+| Deciders | Lead (Relayable) |
 | Supersedes | None |
 | Related | ADR-001, ADR-002, ADR-003, ADR-005; DEC-005; CORE-001; CORE-002 |
 

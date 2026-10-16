@@ -17,6 +17,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-010 | Android client deferred from current scope; keep the model/protocol Android-ready | **Accepted** — user direction 2026-10-15; consistent with `full.md` §1.4/§1.5 | — |
 | DEC-011 | ADR-005 Decision 5 clarification: a **unique** session is not an ambiguous match, so the accepted CORE-001 CLI unique-session default is retained (flag → env → unique-default); zero/multiple sessions still fail with documented codes | **Accepted** — Manager reconciliation 2026-10-16 (addendum in ADR-005) | `docs/adr/ADR-005-environment-variable-namespace.md` |
 | DEC-012 | STORE-001 SQLite binding: use `rusqlite = "=0.40.2"` with the `bundled` SQLite (`libsqlite3-sys 0.38.2`); one-time user-approved networked fetch, then offline builds | **Accepted** — user approval 2026-10-16 (option A) | `docs/adr/ADR-004-process-ownership-and-persistence.md` (Decision 2 binding deferred here) |
+| DEC-013 | Relayable is an **independent project**; docs must not attribute it to Superlogical (the maker of the reference product REX). Superlogical appears only in research/compatibility evidence | **Accepted** — user direction 2026-10-16 | `full.md` §0.1; `AGENTS.md`; `README.md` |
 
 ## DEC-000 — Work state in-repository
 
@@ -186,6 +187,25 @@ Relayable self-contained and avoids depending on a system SQLite version. No ter
 
 **Reconsider if:** the added dependency breaks offline reproducibility on a fresh machine (then vendor it),
 or ADR-004 reconsider-if (4) fires.
+
+## DEC-013 — Relayable is independent; no Superlogical attribution
+
+**Context:** the product spec (`full.md` §0.1) and several docs attributed Relayable to **Superlogical**
+("Company: Superlogical", "Relayable (by Superlogical)"). Superlogical is the maker of the **reference
+product** (REX, a terminal multiplexer) that informed the UI research; Relayable is a separate product and
+must not read as a copy or a Superlogical product.
+
+**Decision (user direction 2026-10-16):** remove every attribution of *Relayable* to Superlogical.
+`full.md` no longer declares a company; it states Relayable is an independent project and keeps
+Superlogical only as the reference product's vendor in research/compatibility evidence. `AGENTS.md`,
+`README.md`, and the ADR `Deciders` rows were updated the same way. The naming rule still forbids labeling
+the product "REX"/"REX Superlogical"/"Superlogical Terminal".
+
+**Consequences:** no user-facing Relayable surface names Superlogical. Reference-evidence mentions
+(`docs/research/**`, `docs/compatibility/**`, `apps/linux/README.md` video titles, `full.md` evidence URLs)
+remain, because they describe the reference product accurately. No code or behavior changes.
+
+**Reconsider if:** the user establishes an official company attribution for Relayable.
 
 ## Open questions requiring evidence (not yet decidable)
 

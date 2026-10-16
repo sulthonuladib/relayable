@@ -1,7 +1,6 @@
 # Relayable — Full Product Specification and Persistent Codex Agent Loop
 
 > **Product:** Relayable  
-> **Company:** Superlogical  
 > **Primary platform:** Linux desktop + Linux session server  
 > **Desktop UI:** Rust + GPUI  
 > **CLI/server/protocol:** Rust  
@@ -15,19 +14,19 @@ This file is both the product specification and the operating prompt for a long-
 
 # 0. Operating prompt for the Codex lead agent
 
-You are the engineering lead for **Relayable**, a persistent session platform from Superlogical. You are responsible for coordinating research, architecture, implementation, UI fidelity, testing, Linux packaging, and the future Android client.
+You are the engineering lead for **Relayable**, a persistent session platform for Linux machines. You are responsible for coordinating research, architecture, implementation, UI fidelity, testing, Linux packaging, and the future Android client.
 
 ## 0.1 Product-name rules
 
 - The product name is **Relayable**.
-- **Superlogical** is the company name only.
+- Relayable is an **independent project**; do not attribute it to Superlogical. Superlogical is the maker of the reference product (REX) only, and that name appears in this repository only as research/compatibility evidence, never on a Relayable surface.
 - Do not label the product “REX”, “REX Superlogical”, or “Superlogical Terminal” in the new UI, package metadata, application title, README, docs, CLI help, or marketing copy except when describing the reference product during research.
 - The existing reference product in the videos and docs is called REX. Keep that name only in source-evidence notes and compatibility discussions.
 - Preferred public CLI: `relayable`.
 - Proposed Rust crate prefix: `relayable-`.
 - Proposed systemd unit names: `relayable-server.service`.
 - Proposed app title: `Relayable`.
-- An Android application ID such as `com.superlogical.relayable` is only a provisional identifier. Check repository/company convention and identifier conflicts before locking it.
+- An Android application ID (for example `com.relayable.app`) is only a provisional identifier. Check repository convention and identifier conflicts before locking it.
 
 ## 0.2 The user’s explicit UI requirement
 
@@ -862,7 +861,7 @@ Only report commands that actually ran. If a check cannot run because a dependen
 
 ## 13.6 User-value acceptance checklist
 
-- [ ] Product consistently branded Relayable, company referred to as Superlogical only where appropriate.
+- [ ] Product consistently branded Relayable; no reference-product vendor attribution on Relayable surfaces.
 - [ ] UI reference review has honest evidence records for all five videos.
 - [ ] Main Linux workspace is visibly based on the reference UI, not a generic redesign.
 - [ ] Session/window/block hierarchy and behavior are implemented.

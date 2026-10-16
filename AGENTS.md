@@ -2,7 +2,7 @@
 
 Durable product specification **and** agent-loop instruction: **`full.md`** (read it completely before any architectural decision).
 
-- Product name: **Relayable**. Company: **Superlogical**. Never label the product "REX" outside research/compatibility evidence (`full.md` §0.1).
+- Product name: **Relayable**. Relayable is an independent project — do not attribute it to Superlogical (the maker of the reference product). Never label the product "REX" outside research/compatibility evidence (`full.md` §0.1).
 - Repository state: **Phase 0** — spec-only repo at start; see `docs/agent-loop/STATUS.md`.
 
 ## Non-negotiables

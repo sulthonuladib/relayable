@@ -1,6 +1,6 @@
 # Relayable
 
-**Relayable** (by Superlogical) is a terminal session manager: a local server owns
+**Relayable** is a terminal session manager: a local server owns
 PTY-backed sessions that survive client disconnects, and clients (a CLI and a Linux
 desktop app) connect over a user-owned Unix-domain socket.
 

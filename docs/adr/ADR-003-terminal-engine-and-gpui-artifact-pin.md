@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Proposed — PTY-level spike evidence available; engine-level spike pending** |
 | Date | 2026-10-15 |
-| Deciders | Lead (Relayable / Superlogical) |
+| Deciders | Lead (Relayable) |
 | Supersedes | — (new ADR; this file creates `docs/adr/`) |
 | Related | DEC-004 (Terminal engine selection, Pending, this ADR); DEC-002 / ADR-001; DEC-005 / ADR-004; `full.md` §5.2, §5.3, §5.4, §6.1, §6.4, §12, §13.5, §15.2; `docs/agent-loop/DECISIONS.md:96–97` |
 
