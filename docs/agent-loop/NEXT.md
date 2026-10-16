@@ -81,15 +81,18 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **Nothing is in flight.** `master` is at **INT-028** (UI-005), clean and pushed, fully green:
-  `scripts/validate.sh` exit 0 (step 4 = **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`,
-  `scripts/check-file-sizes.sh --strict` → exit 0, desktop `cargo test --locked` → **72 passed / 0 failed**,
-  live probe `PROBE_EXIT=0`, `scripts/ci.sh` → `OVERALL: PASS` (16/0/3).
-- **Closed this session:** REF-008, CLIENT-API-002, QA-HARNESS-001, REF-010, UI-004 stage 1, UI-003,
-  UI-005, DOC-003 (INT-022…INT-028 + `af72801`). **Five** of them were rejected or qualified by an
-  independent verifier first; each landed only after repair or with its nits recorded.
-- **Only the main checkout exists** apart from `ui-005` (merged, clean) — removable under the standing
-  cleanup authorization.
+- **TERM-003 stage B** — implementer on branch `spike/term-003-libghostty` (worktree
+  `/home/sulthonuladib/work/relayable-wt/term-003`), a throwaway crate with its own workspace at
+  `spikes/terminal-engine-phase3/`. It must link the **already-built** `libghostty-vt` and prove
+  byte-in → terminal-state-out from Rust (text + escape sequences, cells, cursor, resize/reflow, scrollback,
+  OSC title), with measured time/size/RSS and the API-instability warning carried into the verdict.
+  Zig is pinned in the repo's `mise.toml` (0.16.0) — it resolves **only inside this checkout**; elsewhere use
+  `~/.local/share/mise/installs/zig/0.16.0/zig`. Artifacts live in the vendor clone (never committed).
+- **Nothing else is in flight.** `master` is at INT-028 (`5abe262`; toolchain commit `5c735fb`), clean and
+  pushed, fully green: `validate.sh` 206/0, `smoke.sh` OK, `--strict` exit 0, desktop **72/0**, live probe
+  `PROBE_EXIT=0`, `ci.sh` **OVERALL: PASS (16/0/3)**.
+- **Only the main checkout exists** plus any in-flight spike worktree — removable under the standing cleanup
+  authorization once merged.
 
 ## Next queue (in order)
 

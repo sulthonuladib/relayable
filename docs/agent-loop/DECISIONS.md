@@ -546,3 +546,33 @@ A2 (networked provisioning of the pinned ghostty artifact) and A3 (a throwaway s
 `spikes/**`) remain **requested**; the stage-B build attempt from the existing local clone at
 `/home/sulthonuladib/work/vendor/ghostty` (main `949149d57`, `-Demit-lib-vt -Dapp-runtime=none`) is the
 evidence that will show whether A2 is needed at all, since the clone already contains the source.
+
+### DEC-022 amendment 2 (2026-10-17): A2 is not needed — the lib-vt build succeeded locally
+
+With Zig 0.16.0 pinned via the repo's `mise.toml`, the headless library was built **from the existing local
+clone** (`/home/sulthonuladib/work/vendor/ghostty`, main `949149d57`):
+
+```
+cd /home/sulthonuladib/work/vendor/ghostty
+~/.local/share/mise/installs/zig/0.16.0/zig build -Demit-lib-vt -Dapp-runtime=none   # exit 0
+```
+
+The log contains **zero fetch/download lines**, so no network provisioning was required and **A2 is
+withdrawn**. Artifacts produced: `zig-out/lib/libghostty-vt.a` (72 MB static),
+`zig-out/lib/libghostty-vt.so.0.1.0` (`soname .so.0`; note the researcher's `0.1.0` vs `0.1.0-dev`
+ABI caveat — the emitted version is `0.1.0`), and `zig-out/include/ghostty/vt.h` plus
+`zig-out/include/ghostty/vt/*.h` (30+ headers: `terminal.h`, `render.h`, `formatter.h`, `screen.h`,
+`snapshot.h`, `search.h`, `selection.h`, `grid_ref.h`, `osc.h`, `sgr.h`, `key.h`, `mouse/`, `paste.h`, …).
+
+**The API surface is real and broad:** `nm -D` reports **204 exported `ghostty_*` symbols**, including
+`ghostty_terminal_*`, `ghostty_cell_get`/`_multi`, `ghostty_grid_ref_cell`/`_row`/`_style`/`_hyperlink_uri`,
+`ghostty_formatter_format_alloc`/`_format_buf`/`_terminal_new`, `ghostty_key_encoder_encode`,
+`ghostty_focus_encode`, and search/selection/OSC/SGR/paste/unicode groups. The header itself warns the API
+is *"incomplete, work-in-progress … not yet stable and is definitely going to change"* — that instability is
+the main technical risk to record, not the feature coverage.
+
+**Stage B (Rust spike) launched:** branch `spike/term-003-libghostty`, throwaway crate with its own workspace
+at `spikes/terminal-engine-phase3/` (**A3 assumed** — the established `spikes/**` pattern, additive, root
+workspace untouched; it must link the real library and prove byte-in → terminal-state-out, and it must not
+commit `zig-out` artifacts or upstream source). Still to decide after that evidence: **replace**
+`alacritty_terminal`+`vte` / **additive** (encoders only) / **own thin C ABI over tag `v1.3.1`**.
