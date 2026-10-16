@@ -103,8 +103,25 @@ without rewriting historical evidence.
 | `opencode debug agents` | all five roles listed; modes and merged `permissions` rules as intended |
 | `git grep -n herdr\|pi scripts/*.sh` | no repository-side herdr/Pi dependency in scripts |
 | `bash scripts/check-file-sizes.sh` | exit 0, `mode=report`, over-hard-cap = 2 (`relayable-server/src/session.rs` 1037, `.../tests/server_e2e.rs` 1472) — unchanged by this checkpoint, still REF-008's target |
+| `bash -n scripts/agent-loop.sh` | syntax OK |
+| `python3 -c "json.load(open('opencode.json'))"` | valid JSON |
+| `LOOP_DRY_RUN=1 ./scripts/agent-loop.sh 1` | clean-tree guard passes; prints the `opencode run --agent orchestrator …` command; exit 0 |
+| `./scripts/agent-loop.sh 1` on a dirty tree | exits 1 and prints the offending paths (guard works) |
+| `bash scripts/validate.sh` | **FAILS, exit 101**, at `cargo clippy` — see the regression finding below |
 
 **Findings worth keeping:**
+
+- **Toolchain regression (pre-existing, not caused by this checkpoint):** `protoc` is absent —
+  `/usr/bin/protoc` does not exist and `protoc` is not on `PATH` (the ambient `PROTOC` is unset), so
+  `crates/relayable-protocol/build.rs` panics with "Could not find `protoc`" and `scripts/validate.sh`
+  fails at step 2. `AGENTS.md` recorded `/usr/bin/protoc` → `libprotoc 36.1` on 2026-10-15 (REVIEW-001),
+  so the host changed since. No Rust file was touched by this checkpoint (`git show --stat`: config,
+  agents, script, and docs only), but **no "suite is green" claim is valid on this host until it is
+  installed** — which needs explicit user approval. `AGENTS.md` and `STATUS.md` now say so.
+- **Driver bug found and fixed by running it:** the first `LOOP_DRY_RUN` invocation resolved the agent
+  as `1`, because the ambient environment exports a generic `AGENT=1` and the script read
+  `AGENT="${AGENT:-orchestrator}"`. The knobs are now `LOOP_AGENT` / `LOOP_DRY_RUN`. This is why the
+  script was exercised rather than only reviewed.
 
 - The published config schema defines the encoded agent form with `permissions`
   (`{action, resource, effect}` ruleset) and `additionalProperties: false`, so the deprecated
@@ -125,18 +142,24 @@ without rewriting historical evidence.
 
 **Risks / caveats:**
 
-- `scripts/agent-loop.sh` has not been run end-to-end (it would start a new orchestrator session and
-  spend tokens); only its guards and command construction were reviewed. Run it deliberately, once.
+- `scripts/agent-loop.sh` has not been run end-to-end against a live agent (only `LOOP_DRY_RUN` and the
+  dirty-tree guard were exercised); running it spends tokens and starts a real lead session.
 - Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
   delegated task.
+- `scripts/validate.sh` cannot pass on this host until `protoc` is restored (see above). Any claim of
+  a green suite made after this checkpoint must state that it was not re-run, or that `protoc` was
+  installed first.
 
 **Next tasks:**
 
-1. Finish the doc-vocabulary migration (`NEXT.md`, `NEXT-SESSION-PROMPT.md`, `STATUS.md`,
-   `BACKLOG.md`) and fix the stale `work/relayable` paths.
-2. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
+1. Restore `protoc` (needs user approval) and re-run `scripts/validate.sh` to re-establish a valid
+   green baseline. Until then treat the suite as unverified.
+2. Finish the doc-vocabulary migration (`NEXT.md`, `NEXT-SESSION-PROMPT.md`, `STATUS.md`,
+   `BACKLOG.md`) — **done in this checkpoint for the living docs**; remaining Pi/Herdr references are
+   intentional history in `DECISIONS.md`, `WORKLOG.md`, `TESTS.md`, and captured evidence logs.
+3. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
    (`--strict` CI gate). This is the last hard-cap blocker.
-3. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
+4. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
 
 ---
 

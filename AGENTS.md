@@ -35,7 +35,9 @@ conversation.
   `DECISIONS.md`, and Git state, then continues at the next incomplete acceptance criterion.
 - `scripts/agent-loop.sh` continues the loop as a sequence of **fresh** orchestrator sessions
   (deliberately no `--continue`), so context never accumulates across iterations. It refuses to
-  start on a dirty tree. `NEXT-SESSION-PROMPT.md` is the manual equivalent.
+  start on a dirty tree. `NEXT-SESSION-PROMPT.md` is the manual equivalent. Knobs are
+  `LOOP_AGENT` and `LOOP_DRY_RUN` (`LOOP_`-prefixed because the ambient environment already
+  exports a generic `AGENT`).
 
 ## Loop (summary of §15)
 
@@ -48,7 +50,7 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 | Tool | State |
 |---|---|
 | rustc / cargo | 1.98.1, `stable-x86_64-unknown-linux-gnu` (default) |
-| protoc | `/usr/bin/protoc` → `libprotoc 36.1` (required by `prost-build`; verified 2026-10-15 by REVIEW-001) |
+| protoc | **ABSENT (regression)** — 2026-10-16: `/usr/bin/protoc` does not exist and `protoc` is not on `PATH`. `cargo clippy`/`build` fails in `crates/relayable-protocol/build.rs` (exit 101, "Could not find `protoc`"), so `scripts/validate.sh` cannot pass. Recorded present 2026-10-15 (REVIEW-001); the host changed since. Installing it needs explicit user approval |
 | mise | `/usr/bin/mise` |
 | android CLI | `/home/sulthonuladib/.local/bin/android` |
 | adb | `/usr/bin/adb` |

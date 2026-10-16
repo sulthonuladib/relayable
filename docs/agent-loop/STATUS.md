@@ -69,6 +69,12 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
 
 ## Blockers / approval gates
 
+- **Toolchain regression — `protoc` is missing (2026-10-16):** `/usr/bin/protoc` no longer exists and
+  `protoc` is not on `PATH`, so `cargo clippy`/`build` fail in `crates/relayable-protocol/build.rs`
+  (exit 101) and **`scripts/validate.sh` cannot pass**. Found while validating the DEC-015 migration
+  (which touched no Rust file). `AGENTS.md` recorded `protoc` as present on 2026-10-15 (REVIEW-001);
+  the host changed since. **Installing it requires explicit user approval** (system package). Until
+  then, no "suite is green" claim is valid on this host.
 - **Agent runtime (DEC-015) — migrated 2026-10-16:** orchestration is OpenCode; `.pi/settings.json` was
   removed and no repository script depends on herdr. The historical herdr provisioning fault below is
   resolved and cannot recur.

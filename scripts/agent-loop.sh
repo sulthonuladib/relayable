@@ -10,13 +10,16 @@
 #   scripts/agent-loop.sh [iterations]      # default 1
 #
 # Environment:
-#   AGENT=orchestrator   agent to run each iteration
-#   DRY_RUN=1            print the command instead of running it
+#   LOOP_AGENT=orchestrator   agent to run each iteration
+#   LOOP_DRY_RUN=1            print the command instead of running it
+#
+# The knobs are LOOP_-prefixed deliberately: the ambient environment already exports a
+# generic `AGENT` variable, and a bare name would be silently picked up (observed).
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 iterations="${1:-1}"
-agent="${AGENT:-orchestrator}"
+agent="${LOOP_AGENT:-orchestrator}"
 
 prompt='Continue the Relayable project in this repository.
 
@@ -36,7 +39,7 @@ fi
 
 for ((i = 1; i <= iterations; i++)); do
   echo "agent-loop: iteration $i/$iterations (agent=$agent, fresh session)"
-  if [[ "${DRY_RUN:-0}" == "1" ]]; then
+  if [[ "${LOOP_DRY_RUN:-0}" == "1" ]]; then
     printf 'opencode run --agent %q %q\n' "$agent" "$prompt"
   else
     opencode run --agent "$agent" "$prompt"
