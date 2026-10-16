@@ -7,7 +7,8 @@ use super::helpers::{
 };
 use super::keys::terminal_bytes;
 use super::shortcuts::{
-    keys_for, route_key, shortcut_for, shortcuts, tab_index, KeyRoute, ShortcutId,
+    keys_for, route_key, shortcut_for, shortcuts, tab_index, KeyRoute, ShortcutId, OVERLAY_FOOTER,
+    OVERLAY_TITLE,
 };
 use super::state::{CreateIntent, CreateKind, Pane, SplitAxis, Tab};
 
@@ -467,11 +468,13 @@ fn the_keymap_table_has_no_duplicate_row() {
         ids.push(shortcut.id);
     }
     // The table is the documented surface: it must list the toggle that opens
-    // it.
+    // it, and the overlay must say it is Relayable-original.
     assert!(
         keys.contains(&"Ctrl+Shift+?"),
         "the reference must document how to open it"
     );
+    assert!(OVERLAY_TITLE.contains("Relayable-original"));
+    assert!(OVERLAY_FOOTER.contains("Esc"));
 }
 
 /// README §11 of the app documents the same chords, verbatim, as **table rows**.

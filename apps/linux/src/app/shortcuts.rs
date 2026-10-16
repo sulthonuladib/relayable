@@ -1,4 +1,5 @@
-//! The workspace keymap: **one** source of truth for the keys the app handles.
+//! The workspace keymap: **one** source of truth for the keys the app handles,
+//! for the discoverable shortcut overlay, and for `--help`.
 //!
 //! Before UI-005 the same rows existed three times — the `match` in
 //! `keys.rs::handle_key`, the literal table in `main.rs::print_help`, and
@@ -28,7 +29,10 @@
 //! open; in the workspace `Esc` still reaches the pane as `0x1b`
 //! (`keys.rs::terminal_bytes`).
 
-use gpui::Keystroke;
+use gpui::{div, prelude::*, px, rgb, Div, Keystroke, SharedString};
+
+use crate::geometry;
+use crate::theme;
 
 use super::WorkspaceView;
 
@@ -289,6 +293,14 @@ pub(super) fn route_key(
 
 // --- overlay ---------------------------------------------------------------
 
+/// Overlay title. **Relayable-original** and says so, because the reference
+/// videos contain no shortcut overlay (`docs/research/open-questions.md` Q4).
+pub(super) const OVERLAY_TITLE: &str = "Keyboard shortcuts — Relayable-original";
+
+/// Overlay footer: names the key that closes it (`Esc`; see
+/// [`OVERLAY_CLOSE_KEY`]).
+pub(super) const OVERLAY_FOOTER: &str = "Esc closes this reference";
+
 impl WorkspaceView {
     /// Open or close the shortcut reference, logging the edge once per change.
     ///
@@ -310,5 +322,67 @@ impl WorkspaceView {
             if open { "opened" } else { "closed" },
             keys_for(ShortcutId::ToggleShortcuts)
         );
+    }
+
+    /// The discoverable shortcut reference.
+    ///
+    /// Out of flow and above the workspace, like the session picker: `.absolute()`
+    /// with `.occlude()` so the mouse cannot reach the panes beneath the panel.
+    /// It borrows the picker's measured chrome *tokens* (surface, border, radius,
+    /// label size) and this file's own `*_ORIGINAL` spacing — no new colour, and
+    /// no geometry from the unimplemented command palette.
+    pub(super) fn render_shortcuts_overlay(&self) -> Div {
+        let mut rows = Vec::with_capacity(SHORTCUTS.len());
+        for shortcut in SHORTCUTS {
+            rows.push(
+                div()
+                    .flex()
+                    .flex_row()
+                    .items_center()
+                    .child(
+                        div()
+                            .w(px(geometry::invented::SHORTCUTS_KEYS_COLUMN_WIDTH_ORIGINAL))
+                            .flex_shrink_0()
+                            .text_color(rgb(theme::PRIMARY_TEXT))
+                            .child(SharedString::new_static(shortcut.keys)),
+                    )
+                    .child(
+                        div()
+                            .text_color(rgb(theme::SECONDARY_TEXT))
+                            .child(SharedString::new_static(shortcut.label)),
+                    ),
+            );
+        }
+
+        div()
+            .absolute()
+            .top(px(
+                geometry::v1::TOP_BAR_HEIGHT.value
+                    + geometry::v1::TOP_BAR_SEPARATOR_RENDER_PX.value
+                    + geometry::invented::SHORTCUTS_OFFSET_BELOW_SEPARATOR_ORIGINAL,
+            ))
+            .left(px(geometry::v1::TAB_LEADING_INSET.value))
+            .w(px(geometry::invented::SHORTCUTS_PANEL_WIDTH_ORIGINAL))
+            .flex()
+            .flex_col()
+            .gap(px(geometry::invented::SHORTCUTS_ROW_GAP_ORIGINAL))
+            .p(px(geometry::invented::SHORTCUTS_PADDING_ORIGINAL))
+            .bg(rgb(theme::SESSION_PICKER_BG))
+            .border_1()
+            .border_color(rgb(theme::SESSION_PICKER_BORDER))
+            .rounded(px(theme::SESSION_PICKER_RADIUS_ORIGINAL))
+            .occlude()
+            .text_size(px(theme::UI_LABEL_FONT_SIZE_PROPOSED))
+            .child(
+                div()
+                    .text_color(rgb(theme::PRIMARY_TEXT))
+                    .child(SharedString::new_static(OVERLAY_TITLE)),
+            )
+            .children(rows)
+            .child(
+                div()
+                    .text_color(rgb(theme::SECONDARY_TEXT))
+                    .child(SharedString::new_static(OVERLAY_FOOTER)),
+            )
     }
 }
