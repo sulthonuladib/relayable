@@ -17,9 +17,16 @@
   entry (GPUI app installed as `relayable-desktop` under `--with-desktop`, which builds in ~2m).
   Independently validated: sandbox install + live CLI round-trip against the installed binaries,
   socket dir 0700 / socket 0600, SIGTERM exits 0 and unlinks the socket.
-- **STORE-001 blocked** on a SQLite binding decision (see `NEXT.md`): no SQLite crate is in the offline
-  cargo cache; system `libsqlite3` 3.53.4 + headers are present.
-- Next: dependency-free backlog (CLIENT-API-001, MEM-001, REF-004).
+- **STORE-001 DONE** — integrated INT-018 `f4d59f8` under DEC-012 (`rusqlite =0.40.2`, `bundled`): the
+  `crates/relayable-store` crate, server start-up reconciliation, the `flock` single-instance guard, prune,
+  and the session/tombstone/audit write path (see `docs/operations/persistence.md`).
+- Next: **REF-008** (split `relayable-server/src/session.rs` + `tests/server_e2e.rs` — the last hard-cap
+  violations) and **UI-003** (migrate `apps/linux` onto `Client::next_output`); then **REF-010**
+  (`--strict` CI gate). Backlog: MEM-001, REF-004 remainder, QA/HARNESS items.
+- **Reconciliation + concurrency (2026-10-16, `WORKLOG.md` Checkpoint 39):** the STORE-001 rows above are
+  corrected to DONE (INT-018); a **second, concurrent lead session** (`ses_ebab9726a…`, "REF-008 onward")
+  was discovered mid-session. This session yielded REF-008 and UI-003 to it and moved its duplicate
+  implementer sessions out of the repository. Drive this checkout with **one** lead session at a time.
 
 ---
 

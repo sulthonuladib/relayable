@@ -74,15 +74,13 @@ violations exist.
 | R5 (`REF-009`) | `tests/**` (integration suites) | CLIENT-API-001 merged |
 | R6 (`REF-010`) | Flip `check-file-sizes.sh --strict` into `ci.sh`/`validate.sh` | R2–R5 complete |
 
-Known offenders (latest measurement 2026-10-16 after INT-019). **Above the hard cap → must split:**
-`apps/linux/src/app.rs` 1876, `apps/linux/src/tokens.rs` 1453, `apps/linux/src/api/mod.rs` 1448,
-`crates/relayable-server/tests/server_e2e.rs` 1465, `crates/relayable-server/src/session.rs` 1037,
-`apps/linux/src/term/mod.rs` 497, `crates/relayable-model/src/lib.rs` 563,
-`crates/relayable-pty/src/lib.rs` 338, `crates/relayable-cli/src/lib.rs` 367. **Over target but under cap
-(split when a seam is clear, not mandatory):** `crates/relayable-server/src/registry.rs` 718,
-`apps/linux/src/theme.rs` 579, `crates/relayable-server/src/connection.rs` 572,
-`apps/linux/src/geometry.rs` 550, `crates/relayable-server/src/dispatch.rs` 509,
-`apps/linux/src/ui/terminal.rs` 476, `crates/relayable-cli/src/json.rs` 420,
-`crates/relayable-protocol/src/codec.rs` 338. (Run `bash scripts/check-file-sizes.sh` for the live list;
-INT-019 already split `crates/relayable-client/src/lib.rs`, `tests/events/main.rs`, and
-`tests/fixtures/mod.rs`.)
+Known offenders (live list: `bash scripts/check-file-sizes.sh`; measured 2026-10-16 after the
+REF-006/REF-007/REF-009 integrations). **Above the hard cap → must split (REF-008):**
+`crates/relayable-server/src/session.rs` 1037 (production cap 1000) and
+`crates/relayable-server/tests/server_e2e.rs` 1472 (test cap 1200). **Over target but under cap (split
+when a seam is clear, not mandatory):** `crates/relayable-server/tests/store_wiring.rs` 921,
+`crates/relayable-server/src/registry.rs` 808, `crates/relayable-server/src/connection.rs` 572,
+`crates/relayable-store/src/store.rs` 566, `crates/relayable-server/src/dispatch.rs` 509. The earlier
+offender list here was stale: REF-006/REF-007/REF-009 already split `apps/linux/src/**`,
+`crates/relayable-{model,pty,cli}/src/lib.rs`, `crates/relayable-protocol/src/**`,
+`crates/relayable-client/src/**`, `tests/events/**` and `tests/fixtures/**`, and those offenders are gone.

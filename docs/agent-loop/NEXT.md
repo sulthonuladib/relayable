@@ -131,3 +131,13 @@ builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) a
 
 Follow DEC-008: finish a safe checkpoint, stop launching new work, record results and repo state,
 write a short handoff; do not compact to keep the session alive.
+
+## Concurrency
+
+- **One lead session per checkout.** On 2026-10-16 two lead sessions ran concurrently and both targeted
+  REF-008, so two implementers were pointed at one worktree; the duplicate was moved out of the repository
+  (`WORKLOG.md` Checkpoint 39). Before launching work, check `opencode session list` for another live lead
+  and `git worktree list` for worktrees whose ledger entry says another owner.
+- **Delegation is unverified under OpenCode.** A background `subagent(agent: "implementer")` spawn was
+  accepted but the child failed with `Agent not found: implementer` after `session_move`; verify the spawn
+  path (and its interaction with worktrees) before relying on delegated work (`WORKLOG.md` Checkpoint 39).

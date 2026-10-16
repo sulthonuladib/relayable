@@ -77,6 +77,64 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 39 — REF-008 slice selection; stale-status reconciliation; concurrent peer-lead discovery (2026-10-16)
+
+**Objective:** continue the loop at the next incomplete acceptance criterion (REF-008, the last
+file-size hard-cap violations), delegate bounded work with explicit path ownership, and reconcile
+stale `docs/agent-loop/**` facts.
+
+**Files changed:** `docs/agent-loop/{STATUS,TASKS,WORKLOG}.md` (this checkpoint). No source file was
+touched by this session.
+
+### Commands run and observed results
+
+| Command | Observed |
+|---|---|
+| `git status --short --branch`; `git log --oneline` | clean at `c249335`; a concurrent peer session then committed `6cad4cb` mid-session |
+| `git worktree list` | main checkout plus `ref-008` (`refactor/ref-008-server-split`), `ui-003` (`ui/ui-003-next-output`), later `qa-harness-001` (`qa/qa-harness-001-freshness-guard`) — all at `c249335` |
+| `bash scripts/check-file-sizes.sh` | `checked=134 files; over-hard-cap=2; over-target-but-under-cap=7` — the two hard-cap violations are exactly REF-008's scope: `crates/relayable-server/src/session.rs` 1037 (>1000) and `crates/relayable-server/tests/server_e2e.rs` 1472 (>1200) |
+| `opencode session list` | a **concurrent peer lead session** `ses_ebab9726a…` titled "Relayable lead - REF-008 onward (handoff: docs/agent-loop/NEXT.md)" (last activity 22:16:47) |
+| `git show 6cad4cb` | the peer recorded "REF-008, QA-HARNESS-001 in flight; UI-003 scoping" in `NEXT.md`/`TASKS.md` and created the `qa-harness-001` worktree |
+| `git -C …/relayable-wt/ref-008 status --short` | `M crates/relayable-server/src/session.rs` plus a new `src/session/` of 7 modules (`block/output/process/runtime/status/subscriber/threads.rs`, written 22:18:20–22:19:05) — the split was already well advanced |
+
+### Findings
+
+- The next incomplete acceptance criterion is **REF-008** (ledger `READY`; the last hard-cap blockers
+  before REF-010). Confirmed against the live `check-file-sizes.sh` report, not the stale doc list.
+- Stale facts corrected: `TASKS.md` showed STORE-001 `IN_PROGRESS` and `STATUS.md` showed STORE-001
+  *blocked*, although it was integrated as INT-018 `f4d59f8` (DEC-012). `docs/architecture/code-organization.md`'s
+  "Known offenders" list was also stale (it still listed `apps/linux` files that REF-006 had already split).
+- **Two lead sessions were running at once.** This session had already launched REF-008 and UI-003
+  implementers into the *same* prepared worktrees before the peer's `6cad4cb` record was discovered. To
+  restore "one writer per path", both implementer sessions were moved out of the repository
+  (`session_move` → `/tmp/opencode`) before either committed; the peer's implementers keep ownership.
+  A read-only snapshot of the in-progress `ref-008` tree was copied to `/tmp/opencode/ref008-snapshot/`.
+
+### Risks / notes
+
+- `check-file-sizes.sh` still reports 2 hard-cap violations; REF-008 owns them.
+- Concurrent lead sessions both read the same backlog and can double-write one path — one lead per checkout.
+- **Delegation mechanism is not yet proven under OpenCode.** `subagent(agent: "implementer", background: true)`
+  was accepted and reported "working in the background", but both child sessions then ended
+  `state="error", "Agent not found: implementer"` — after they had been re-homed with `session_move`
+  (once into the task worktree, then out to `/tmp/opencode`). Neither child produced any edit or commit, so
+  nothing is lost, but which move broke agent resolution was not isolated; a child session may resolve
+  project-local `.opencode/agents/` relative to its current directory. DEC-015 records the roles as
+  *registered*, not *exercised* — this is the first attempt and it failed on spawn, so the delegation path
+  must be verified (e.g. spawn the child with the parent already inside the target worktree) before
+  unattended work relies on it.
+
+### Next
+
+1. The peer lead session owns REF-008 (`refactor/ref-008-server-split`), QA-HARNESS-001
+   (`qa/qa-harness-001-freshness-guard`) and UI-003 scoping; integration belongs to the active lead.
+2. After REF-008 merges: **REF-010** (`--strict` gate into `ci.sh`/`validate.sh`), then the
+   `docs/architecture/next-phase-plan.md` sequence (TERM-003 gated on the user's DEC-014 answer;
+   UI-004/005/006; DOCS-001).
+3. Backlog: MEM-001, REF-004 remainder, CI-HOST-001, UI-003, QA-FLAKE-001.
+
+---
+
 ## Checkpoint 38 — Agent runtime migrated from herdr + Pi to OpenCode (DEC-015) (2026-10-16)
 
 **Objective:** replace the Pi + herdr orchestration stack with OpenCode, and record the migration
