@@ -321,6 +321,37 @@ variant explicitly if reasoning depth or cost must be fixed.
 
 **Reconsider if:** the user names a different model or variant, or one task should run on a cheaper model.
 
+## DEC-017 — UI-003 sequencing: close the `relayable-client` resize parity gap first
+
+**Context:** scoping UI-003 (move the `apps/linux` terminal data plane onto `relayable_client::Client`)
+found two places where `Client` cannot express what `apps/linux` does today, so a straight migration
+would be a silent functional regression:
+
+- `Client::resize` hardcodes `pixel_width: None, pixel_height: None`
+  (`crates/relayable-client/src/client/terminal.rs:142`), while the server applies pixel dimensions to
+  the PTY window size (`crates/relayable-server/src/dispatch.rs`, `TerminalSize { .., pixel_width,
+  pixel_height }`). The PTY's `ws_xpixel`/`ws_ypixel` would become 0.
+- `Client::resize` returns `()` and discards the server's `TerminalResizeAccepted`, so the app could no
+  longer report a server-confirmed resize (only a request echo), which the honesty rules (`full.md`
+  §0.3.7) make unacceptable to paper over.
+
+Two further parity gaps are accepted and do **not** need a client change: `ApiEvent::Output.stream_seq`
+has no consumer in the tree (drop it), and `attach_with_takeover` needs a `SessionId` the app can pass
+additively from `SessionCreated`.
+
+**Decision:** add **CLIENT-API-002** — an additive `resize_with_pixels(stream_id, cols, rows,
+Option<u16>, Option<u16>) -> Result<TerminalResizeAccepted, ClientError>` plus a `resize` that keeps its
+current signature and delegates with `None` pixels — and run it **before** UI-003. UI-003's dependency
+list therefore gains CLIENT-API-002.
+
+**Rejected alternatives:** (a) accept the two regressions and document them — rejected because both are
+avoidable for a small additive change and one of them would have required presenting request-derived
+dimensions as a server echo; (b) fold the client change into UI-003 — rejected because UI-003's owned
+paths are `apps/linux/**` and one writer per path must hold (`AGENTS.md`).
+
+**Reconsider if:** UI-003 is dropped, or `resize`'s response is shown to be unnecessary for a
+server-confirmed resize.
+
 ## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.

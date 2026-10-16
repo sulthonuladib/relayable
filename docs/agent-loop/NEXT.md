@@ -55,6 +55,27 @@ Neither in-flight branch may edit `docs/agent-loop/**` or `docs/adr/**`; the Man
 those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 `crates/relayable-server/src/registry.rs`.
 
+## Single-writer claims (lead session `ses_ebab9726a`, 2026-10-16)
+
+**Read this before launching any writer.** A second lead session ran concurrently on this checkout
+(`WORKLOG.md` Checkpoint 39); both read the same queue. To prevent two writers on one path, this
+session claims the **whole ordered queue**:
+
+`REF-008` (in flight, `dbee61d`), `QA-HARNESS-001` (in flight), `CLIENT-API-002` (new, in flight),
+`REF-010`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `DOCS-001`.
+
+Any other live session must **not** spawn writers on those paths. It may take a backlog item outside
+that set (`MEM-001`, `CI-HOST-001`, `REF-004` remainder, `QA-FLAKE-001`) after recording the claim
+here, or stop and report. `docs/agent-loop/**` + `docs/adr/**` + `docs/architecture/**` bookkeeping is
+also owned by this session; other sessions should append to `WORKLOG.md` only via a checkpoint of
+their own and never rewrite this file's queue without recording it.
+
+**Delegation lesson (supersedes the open question in Checkpoint 39):** OpenCode subagents *do* work
+when the child is spawned from the main checkout and simply told which worktree path to work in (this
+session's REF-008/QA-HARNESS-001/CLIENT-API-002 implementers and the UI-003 planner all ran).
+`session_move` on a *child* session is what produced `Agent not found: implementer` for the other
+session. Do not move a child session; name the worktree path in the brief.
+
 ## In flight (lead session, 2026-10-16)
 
 - **REF-008** — implementer, branch `refactor/ref-008-server-split`, worktree
