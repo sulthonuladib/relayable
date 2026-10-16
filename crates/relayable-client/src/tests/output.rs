@@ -41,7 +41,7 @@ fn next_output_returns_successive_target_frames_without_loss() {
 }
 
 /// CLIENT-API-001 rule 3: a normal timeout is `Ok(None)`, never
-/// [`ClientError::Timeout`].
+/// [`crate::ClientError::Timeout`].
 #[test]
 fn next_output_returns_none_on_timeout() {
     let target = 7u64;
