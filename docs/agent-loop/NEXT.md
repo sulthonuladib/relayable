@@ -55,6 +55,20 @@ Neither in-flight branch may edit `docs/agent-loop/**` or `docs/adr/**`; the Man
 those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 `crates/relayable-server/src/registry.rs`.
 
+## In flight (lead session, 2026-10-16)
+
+- **REF-008** — implementer, branch `refactor/ref-008-server-split`, worktree
+  `/home/sulthonuladib/work/relayable-wt/ref-008` (from `c249335`). Owns
+  `crates/relayable-server/src/session.rs` + `crates/relayable-server/tests/server_e2e.rs` and their
+  new submodule directories only. Pure move; must leave `check-file-sizes.sh --strict` clean.
+- **UI-003 scoping** — planner pass on the `apps/linux` data plane vs `relayable_client::Client`
+  (read-only; no writer yet). Branch `ui/ui-003-next-output` exists at
+  `/home/sulthonuladib/work/relayable-wt/ui-003` but is unowned until the brief lands.
+- **QA-HARNESS-001** — implementer, branch `qa/qa-harness-001-freshness-guard`, worktree
+  `/home/sulthonuladib/work/relayable-wt/qa-harness-001` (from `c249335`). Owns
+  `tests/fixtures/binary.rs` (+ an optional `tests/fixtures/binary/tests.rs`). Backlog item run in
+  idle capacity; disjoint from REF-008 and `apps/linux`.
+
 ## Open tasks, in order
 
 1. **Integrated & green:** CTX-001 (INT-015), INSTALL-001 (INT-016), CLIENT-API-001 (INT-017), STORE-001
