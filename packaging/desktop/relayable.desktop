@@ -7,6 +7,6 @@ Comment=Terminal session workspace backed by a local Relayable server
 # collide with the `relayable` CLI (see scripts/install-user.sh --with-desktop).
 Exec=relayable-desktop
 Terminal=false
-Categories=Development;System;TerminalEmulator;
+Categories=System;TerminalEmulator;
 Keywords=terminal;shell;session;workspace;
 StartupNotify=true

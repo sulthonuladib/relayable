@@ -4,9 +4,10 @@
 PTY-backed sessions that survive client disconnects, and clients (a CLI and a Linux
 desktop app) connect over a user-owned Unix-domain socket.
 
-This repository is at **Phase 0**: the local Linux path is implemented and tested —
+This repository is at **Phase 1–2**: the local Linux path is implemented and tested —
 `relayable-server` (foreground server), `relayable` (CLI), and a GPUI desktop app
-under `apps/linux`. Remote/Android transports are not implemented yet.
+under `apps/linux`. Remote transport and the Android client are not implemented yet
+(Android is deferred per DEC-010).
 
 > New to the project? This quickstart covers the local user install. The detailed
 > reference (paths, environment variables, systemd commands, uninstall,
