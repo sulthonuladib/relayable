@@ -2,7 +2,9 @@
 #
 # Relayable CORE-001 workspace validation.
 #
-# Runs the full offline check suite and exits non-zero on the first failure.
+# Runs the full offline check suite — the cargo checks plus the repository policy
+# checks (ADR-001 dependency direction, and the file-size hard caps of
+# docs/architecture/code-organization.md) — and exits non-zero on the first failure.
 # No `set -e` is used: every command's exit code is reported explicitly, then the
 # script stops on the first failure. No network access is performed.
 
@@ -43,7 +45,11 @@ run cargo test -p relayable-integration-tests --offline --test lifecycle -- --no
 # 6. ADR-001 dependency-direction assertion (`cargo tree`, no JSON parsing).
 run bash scripts/check-dependency-direction.sh || exit $?
 
-# 7. The phase-1 spike is a separate workspace root and must still build.
+# 7. File-size hard caps (docs/architecture/code-organization.md, REF-010): an
+#    over-cap file fails this script, not just the report.
+run bash scripts/check-file-sizes.sh --strict || exit $?
+
+# 8. The phase-1 spike is a separate workspace root and must still build.
 (
     cd spikes/terminal-engine || exit 1
     run cargo build --offline || exit $?

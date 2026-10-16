@@ -12,6 +12,7 @@
 #   — the existing CORE-001 scripts:
 #     * scripts/validate.sh                   (root workspace, stop-on-first-failure)
 #     * scripts/check-dependency-direction.sh (ADR-001 dependency direction)
+#     * scripts/check-file-sizes.sh --strict  (file-size hard caps, REF-010)
 #
 # MATRIX (`full.md` §13.5)
 #   1. cargo fmt --all --check
@@ -25,18 +26,21 @@
 #      -> build MUST precede test: tests/fixtures/mod.rs `bin()` enforces binary
 #         freshness and refuses stale binaries (docs/agent-loop/TESTS.md row 89).
 #   5. bash scripts/check-dependency-direction.sh   (ADR-001)
-#   6. Linux desktop build (`apps/linux`, its OWN Cargo workspace root, empty
+#   6. bash scripts/check-file-sizes.sh --strict    (REF-010): the
+#      docs/architecture/code-organization.md hard caps are a required check, not
+#      a report — a file above its cap fails the row and the overall result.
+#   7. Linux desktop build (`apps/linux`, its OWN Cargo workspace root, empty
 #      `[workspace]`): cargo fmt --check, cargo build --locked, cargo check
 #      --locked, cargo test --locked, cargo clippy --all-targets --locked, plus
 #      the TERM-002 `libc = 0.2.189` lockfile assertion. No `cargo update` is
 #      ever run: loosening `libc` past
 #      0.2.189 reintroduces `cargo check` exit 101 at `xattr 0.2.3`
 #      (`libc::ENOATTR` removed) — apps/linux/README.md §12.
-#   7. Standalone spike builds (each its own workspace root): spikes/terminal-engine
+#   8. Standalone spike builds (each its own workspace root): spikes/terminal-engine
 #      and spikes/terminal-engine-phase2 — `cargo build` in each.
-#   8. Protocol fixtures/tests: `-p relayable-protocol` and
+#   9. Protocol fixtures/tests: `-p relayable-protocol` and
 #      `-p relayable-integration-tests --test protocol`.
-#   9. Explicitly skipped rows: Android/Gradle (`./gradlew test`, DEC-010), Linux UI
+#  10. Explicitly skipped rows: Android/Gradle (`./gradlew test`, DEC-010), Linux UI
 #      smoke/screenshot (needs a live display backend), package build tests (not
 #      relevant yet).
 #
@@ -46,7 +50,9 @@
 #   CARGO_NET_OFFLINE=true so NO cargo invocation — including the separate
 #   apps/linux and spike workspaces — can silently reach the network. A command
 #   that genuinely needs an uncached crate fails visibly and is reported as a
-#   blocker instead of being allowed to fetch.
+#   blocker instead of being allowed to fetch. The `file-sizes` row runs no cargo
+#   command at all (a local `find`/`wc` scan), so it neither needs nor uses the
+#   network.
 #
 # DISPLAY
 #   A GUI run/screenshot needs a Wayland display and is NOT part of ci.sh. The
@@ -166,6 +172,7 @@ run clippy         . cargo clippy --workspace --all-targets --all-features --off
 run build          . cargo build --workspace --offline
 run test           . cargo test --workspace --offline
 run dependency-dir . bash scripts/check-dependency-direction.sh
+run file-sizes     . bash scripts/check-file-sizes.sh --strict
 
 # --- §13.5 Linux desktop (separate workspace root at apps/linux) -------------
 # Documented commands from apps/linux/README.md §13; `--locked` uses the committed
