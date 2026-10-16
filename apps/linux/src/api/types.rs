@@ -11,13 +11,16 @@ pub(super) const POLL_INTERVAL: Duration = Duration::from_millis(100);
 /// The read pumps the socket for this long (`Client::collect_events`) and the
 /// pump then acknowledges everything it pulled, for every attached stream. The
 /// window bounds a stream's unacknowledged volume to its production during one
-/// window, and the server closes the whole connection when a stream exhausts its
-/// credit window (`credit_window_bytes`, 256 KiB). Measured fan-out on this host
-/// is well inside that bound at 1 ms: the 400 KiB acceptance burst delivered in
-/// 40-294 ms across runs (1.3-9.4 MB/s of multi-KiB chunks;
-/// `evidence/ui-003-live-probe.log` records one run), so at most ~9 KiB of output
-/// is outstanding when a window closes. 1 ms also bounds the added latency of one
-/// output batch to one millisecond, far below a rendered frame.
+/// window, and the server closes the whole connection when a stream overruns its
+/// output bounds: the per-stream credit window (`credit_window_bytes`, 256 KiB)
+/// or the 8192-message outbound queue (`OUTBOUND_QUEUE_MESSAGES`). Measured
+/// fan-out on this host is well inside those bounds at 1 ms: the 400 KiB
+/// acceptance burst delivered 400290 bytes at `delivered_in_ms=40 rate_mb_s=9.4`
+/// — the only committed run of that measurement, `evidence/ui-003-live-probe.log`
+/// line 170 — so at most roughly 9 KiB of output is outstanding when a window
+/// closes (one window of production at that measured rate). 1 ms also bounds the
+/// added latency of one output batch to one millisecond, far below a rendered
+/// frame.
 ///
 /// Cost when idle: one `set_read_timeout` + `recv` per millisecond on the data
 /// thread, and no work at all for streams that are already drained. The window is
@@ -27,11 +30,15 @@ pub(super) const POLL_INTERVAL: Duration = Duration::from_millis(100);
 ///
 /// This window cannot repair the one flow-control case the measurement found:
 /// a child writing tiny pieces fast (line-buffered `yes` produced ~15-47 byte
-/// frames at a rate the client could not acknowledge) exhausts the window
-/// whatever the window is, because acknowledging a frame costs the client two
-/// `recv` calls plus a `FlowControl` write while the server produces a frame with
-/// one `read`. That is the per-chunk ack model of the protocol plus the 256 KiB
-/// window, not this module's loop; see `evidence/ui-003-flow-control.log`.
+/// frames at a rate the client could not acknowledge) out-runs the client's ack
+/// rate, because acknowledging a frame costs the client two `recv` calls plus a
+/// `FlowControl` write while the server produces a frame with one `read`; the
+/// connection then closes on the first output bound the stream crosses. In all
+/// four recorded runs the server logged `stream 2 outbound channel full` — the
+/// bounded outbound queue — while the credit window's `credit exhausted` line does
+/// not appear in them; both bounds live in the same `Subscriber::deliver`. That is
+/// the per-chunk ack model of the protocol, not this module's loop; see
+/// `evidence/ui-003-flow-control.log`.
 pub(super) const DATA_READ_WINDOW: Duration = Duration::from_millis(1);
 /// Bound applied to an attach-time recovery snapshot before it is surfaced.
 pub(super) const SNAPSHOT_TAIL_BYTES: usize = 32 * 1024;

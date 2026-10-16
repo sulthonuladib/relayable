@@ -274,8 +274,15 @@ read itself, `next_output` returns bytes only, and no consumer in this tree read
 
 **Measured limit (reported, not fixed; core crates are outside this task).** Acknowledging is
 one `next_output` call per chunk, so a child that writes *tiny* pieces very fast (line-buffered
-`yes x` produces ~15–50 byte frames) can out-run the client's ack rate, exhaust the 256 KiB window
-and get the connection closed by the server. Raw transcripts of four runs plus the exact
+`yes x` produces ~15–50 byte frames) can out-run the client's ack rate and get the
+**whole data-plane connection** closed by the server. In all four recorded runs the trigger the
+server logged is the stream's bounded outbound queue: `subscriber client … stream 2 outbound
+channel full` (`OUTBOUND_QUEUE_MESSAGES`, 8192 messages,
+`crates/relayable-server/src/connection.rs`). The per-stream **256 KiB credit window** is the other
+bound in the same `Subscriber::deliver` (`credit_window_bytes`,
+`crates/relayable-server/src/session/subscriber.rs`); its `credit exhausted` line does not appear
+in these transcripts, so this README does not claim it as the observed trigger. Raw transcripts of
+four runs plus the exact
 reproduction: [`evidence/ui-003-flow-control.log`](./evidence/ui-003-flow-control.log). The
 acceptance burst (multi-KiB writes, > window) is unaffected:
 [`evidence/ui-003-live-probe.log`](./evidence/ui-003-live-probe.log).
@@ -328,12 +335,16 @@ rgb(138,109,26).
   `block_id` is exposed by the frozen client API for arbitrary sessions).
 - **Tiny-write output floods** (UI-003 measurement) — the data plane acknowledges one
   `next_output` chunk per call, so a child that writes tiny pieces very fast (line-buffered
-  `yes x` on a tty produces ~15–50 byte frames) can out-run that ack rate; the server then
-  exhausts the stream's 256 KiB credit window and closes the **whole data-plane connection**
-  (`flow_control_overflow`), which the app renders as its Relayable-original reconnect banner.
+  `yes x` on a tty produces ~15–50 byte frames) can out-run that ack rate. In the four recorded
+  runs the server's logged trigger is the stream's bounded outbound queue
+  (`stream 2 outbound channel full`; 8192 messages, `OUTBOUND_QUEUE_MESSAGES`), which closes the
+  **whole data-plane connection** (`Subscriber::overflow`, rendered as `flow_control_overflow`) and
+  which the app renders as its Relayable-original reconnect banner. The 256 KiB per-stream credit
+  window is the other bound in the same `Subscriber::deliver`, and is where a fix could also start;
+  its `credit exhausted` line does not appear in the recorded transcripts.
   Raw transcripts: [`evidence/ui-003-flow-control.log`](./evidence/ui-003-flow-control.log).
-  Removing the limit needs a client/server change (batch or coalesce frame acknowledgements, or a
-  larger credit window); core crates are outside this slice.
+  Removing the limit needs a client/server change (batch or coalesce frame acknowledgements, a
+  larger outbound queue, or a larger credit window); core crates are outside this slice.
 - **~3 % desktop bleed** through the GPUI surface (see §5, deviation 6).
 
 ## 11. Keybindings (Relayable-original)

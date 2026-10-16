@@ -17,12 +17,31 @@ fills, and the server closes the whole connection (`Subscriber::overflow`,
 `flow_control_overflow` / "outbound channel full").
 
 Consequence: this is a property of the protocol's per-chunk ack model plus the
-credit-window size, not of the UI-003 migration. It reproduced with both data-plane
-pump structures that were tried (a stream-targeted `next_output` read and the
-committed bulk-pull `collect_events` read; the targeted variant died after ~31 KiB,
-the committed one after 47-297 KiB). It is **not** part of the acceptance gate: the
-gate burst writes in multi-KiB blocks (a real command's output granularity) and
-passes deterministically (`ui-003-live-probe.log`).
+server's output bounds, not of the UI-003 migration. The four transcripts below are
+the committed bulk-pull `collect_events` data plane (`apps/linux/src/api/data.rs`
+@ UI-003) and every one of them ends on the same server line, `stream 2 outbound
+channel full`: the stream's 8192-message bounded outbound queue
+(`OUTBOUND_QUEUE_MESSAGES`, `crates/relayable-server/src/connection.rs:38`) fills,
+`Subscriber::overflow` runs, and the connection closes; the four runs delivered
+296,833 / 64,573 / 86,598 / 47,041 bytes on the burst stream before that (≈290, 63,
+85, 46 KiB). The credit window (256 KiB) is the other bound in the same code
+(`credit exhausted` in `crates/relayable-server/src/session/subscriber.rs`); that
+line does not appear in these transcripts.
+
+The earlier stream-targeted `next_output` pump structure is **not** preserved, so it
+is not compared here and no parity claim is made. `/tmp/opencode/ui003-probe/data.rs.variantA`
+is byte-identical to `data.rs.orig` (same md5), that structure's code is deleted
+between `494917f` and `8d84a84`, and no transcript of it survives — the comparison
+cannot be re-run. What *is* supported is narrower: (a) the structural argument for the
+bulk-pull read (the pump drains every attached stream to empty before and after its one
+bounded read, so no chunk waits on another stream), and (b) the independent verifier's
+finding during review that raising `DATA_READ_WINDOW` from 1 ms to 100 ms makes the
+acceptance burst fail through the credit path (`credit exhausted`) — i.e. the read
+window is load-bearing, not incidental.
+
+It is **not** part of the acceptance gate: the gate burst writes in multi-KiB blocks
+(a real command's output granularity) and passes deterministically
+(`ui-003-live-probe.log`).
 
 Reproduce (`/tmp/opencode/ui003-probe/flow.sh`):
 
