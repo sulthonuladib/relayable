@@ -17,6 +17,21 @@
 //!   each call, so one `bin()` invocation reads them once per guarded binary.
 //!   The scan is confined to one small crate tree; it is informational only, not
 //!   a correctness boundary.
+//! * Only `lib.rs` and `main.rs` directly under a crate's `src` are recognised as
+//!   crate roots. Other crate roots — Cargo autobins such as `src/bin/tool.rs`
+//!   or `src/bin/tool/main.rs`, and a custom `[lib]`/`[[bin]] path` outside
+//!   `src/` — are treated as ordinary file modules, so a `#[cfg(test)]` child
+//!   they declare resolves to the wrong directory. No `src/bin` or custom path
+//!   target exists in this workspace, and the mismatch fails **strict** (the
+//!   declaration is dropped and the file keeps counting), so the guard flags a
+//!   stale binary more often than necessary, never less.
+//! * A `build.rs` at the crate root is counted as production, but the module
+//!   scan is rooted at `src/`, so a `#[cfg(test)]` module declared inside
+//!   `build.rs` is not pruned.
+//! * Pruning is path-based: an inline `#[cfg(test)] mod tests { .. }` block in a
+//!   production file still counts, and so does an undeclared stray file under a
+//!   test-only stem directory (e.g. `src/foo/tests/orphan.rs` with no
+//!   `mod orphan;`). Both keep the guard strict.
 
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
