@@ -881,7 +881,7 @@ schedule if trigger conditions are met.
 ## 18. Search trail (URLs, status codes, retrieval date)
 
 All fetches **2026-10-16 (UTC)**, read-only, User-Agent `relayable-research/0.1`. Full raw log:
-`/tmp/libghostty-evidence/FETCH_LOG.tsv` (111 entries). Selected entries (label → HTTP status):
+`/tmp/libghostty-evidence/FETCH_LOG.tsv` (120 entries). Selected entries (label → HTTP status):
 
 **Identity / search (GitHub API, `api.github.com`):**
 
@@ -904,7 +904,8 @@ All fetches **2026-10-16 (UTC)**, read-only, User-Agent `relayable-research/0.1`
 | `api.github.com/repos/ghostty-org/ghostty/contents/include/ghostty/vt?ref=main` | 200 |
 | `api.github.com/repos/ghostty-org/ghostty/contents/include/ghostty/vt?ref=v1.3.1` | 200 |
 | `api.github.com/repos/ghostty-org/ghostty/git/ref/tags/v1.{0.0,0.1,1.0,1.1,1.2,1.3,2.0,2.1,2.2,2.3,3.0,3.1}` | 200 (12) |
-| `api.github.com/rate_limit` | 200 (limit 60; later exhausted — see §19) |
+| `api.github.com/rate_limit` | 200 (`limit 60`, `remaining 0` — the unauthenticated pool was exhausted) |
+| `api.github.com/repos/ghostty-org/ghostty/commits?sha=v1.{2.2,2.3,3.0,3.1}&per_page=1` | **403 ×4** (rate-limited; bodies saved as `tag-commit-v1.*.json`) |
 
 **crates.io API:**
 
@@ -941,7 +942,7 @@ All fetches **2026-10-16 (UTC)**, read-only, User-Agent `relayable-research/0.1`
 
 | URL | Status |
 |---|---|
-| `github.com/ghostty-org/ghostty/commits/v1.{2.2,2.3,3.0,3.1}.atom` | 200 (tag dates) |
+| `github.com/ghostty-org/ghostty/commits/v1.{2.2,2.3,3.0,3.1}.atom` | 200 ×4 (tag dates; bodies saved as `commits-v1.*.atom`) |
 | `github.com/prabirshrestha/gpui-cn` (HTML) | 200 |
 | `codeload.github.com/behzade/gpui-libghostty/tar.gz/refs/heads/main` | 200 |
 | `ghostty.org/docs` | 200 |
@@ -949,10 +950,12 @@ All fetches **2026-10-16 (UTC)**, read-only, User-Agent `relayable-research/0.1`
 | `libghostty.tip.ghostty.org/` (Doxygen) | 200 |
 | `wget https://api.github.com/repos/ghostty-org/ghostty` (probe) | ok |
 
-**Could not fetch / negative:** GitHub API rate limit (60/hr) was exhausted during the tag-date pass
-(remaining 0); the remaining four tag dates came from the rate-free `commits/<tag>.atom` feed
-(marked medium). The `prabirshrestha/gpui-cn` star count came from the HTML page. No proxy, install,
-or config change was used.
+**Could not fetch / negative:** the unauthenticated GitHub API pool (60/hr) was exhausted
+(`rate_limit` → `remaining: 0`); the `commits?sha=<tag>` API calls for the four remaining tags return
+**403 ×4** and are logged. Those four tag dates were taken from the rate-free `commits/<tag>.atom`
+feeds (logged **200**, bodies saved) and are marked **medium**; the API-first tag dates are marked
+**high**. The `prabirshrestha/gpui-cn` star count came from the HTML page. No proxy, install, or
+config change was used.
 
 ---
 
