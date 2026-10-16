@@ -570,6 +570,92 @@ impl Client {
         result
     }
 
+    /// Read the next `TerminalOutput` frame for `stream_id` and return its
+    /// bytes, or `Ok(None)` when `timeout` elapses with no such frame.
+    ///
+    /// Each returned chunk is acknowledged exactly once through the same
+    /// `FlowControl` credit path as [`Client::wait_for_output`], so a caller
+    /// that keeps consuming keeps the server's credit window refilled. Unlike
+    /// [`Client::wait_for_output`], an expired deadline is **not** an error:
+    /// bytes are acknowledged only when they are returned in the same call, so
+    /// a timeout never acknowledges and then discards output. A zero `timeout`
+    /// serves any already-buffered target bytes without performing a socket
+    /// read. Frames for other streams, events, and other control frames are
+    /// retained in arrival order and never dropped; events stay reachable
+    /// through [`Client::drain_events`], [`Client::wait_for_event`], and
+    /// [`Client::collect_events`].
+    ///
+    /// # Errors
+    ///
+    /// [`ClientError::Disconnected`] if the peer closes the connection, and any
+    /// other [`ClientError`] from the transport or from acknowledging output.
+    pub fn next_output(
+        &mut self,
+        stream_id: u64,
+        timeout: Duration,
+    ) -> Result<Option<Vec<u8>>, ClientError> {
+        let heartbeat = self.heartbeat_interval();
+        let start = Instant::now();
+        let deadline = start.checked_add(timeout).unwrap_or(start);
+
+        // Serve anything already buffered before touching the socket, at any
+        // timeout. The scan is bounded by the queue length and leaves every
+        // frame it does not consume in its original arrival order (a bare
+        // rotation would move frames popped before a match behind frames that
+        // followed it), so repeated calls stay lossless and ordered for every
+        // stream.
+        let buffered = self.pending.len();
+        let mut deferred: VecDeque<Envelope> = VecDeque::new();
+        for _ in 0..buffered {
+            let Some(envelope) = self.pending.pop_front() else {
+                break;
+            };
+            match envelope.body {
+                Some(Body::TerminalData(output)) if output.stream_id == stream_id => {
+                    for env in deferred.into_iter().rev() {
+                        self.pending.push_front(env);
+                    }
+                    let len = output.bytes.len() as u64;
+                    self.send_flow_control(stream_id, len)?;
+                    return Ok(Some(output.bytes));
+                }
+                Some(Body::Event(event)) => self.enqueue_event(event),
+                _ => deferred.push_back(envelope),
+            }
+        }
+        for env in deferred.into_iter().rev() {
+            self.pending.push_front(env);
+        }
+
+        loop {
+            self.heartbeat_if_due(heartbeat)?;
+            if Instant::now() >= deadline {
+                return Ok(None);
+            }
+            let read_timeout = self.next_read_timeout(deadline, heartbeat);
+            if read_timeout.is_zero() {
+                continue;
+            }
+            self.conn
+                .set_read_timeout(Some(read_timeout))
+                .map_err(|err| ClientError::Transport(TransportError::Io(err)))?;
+            let envelope = match self.recv_network() {
+                Ok(envelope) => envelope,
+                Err(ClientError::Timeout) => continue,
+                Err(err) => return Err(err),
+            };
+            match envelope.body {
+                Some(Body::TerminalData(output)) if output.stream_id == stream_id => {
+                    let len = output.bytes.len() as u64;
+                    self.send_flow_control(stream_id, len)?;
+                    return Ok(Some(output.bytes));
+                }
+                Some(Body::Event(event)) => self.enqueue_event(event),
+                _ => self.pending.push_back(envelope),
+            }
+        }
+    }
+
     /// Return every `Event` frame already buffered inside the client, in
     /// arrival order, without reading the socket.
     ///
@@ -1012,7 +1098,9 @@ fn is_timeout(err: &io::Error) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use relayable_protocol::v1::{event, ClientConnectionStateChanged, SessionState};
+    use relayable_protocol::v1::{
+        event, ClientConnectionStateChanged, SessionState, TerminalOutput,
+    };
     use std::os::unix::net::{UnixListener, UnixStream};
     use std::sync::mpsc;
     use std::thread;
@@ -1253,6 +1341,78 @@ mod tests {
                 }),
             ))
             .unwrap();
+        });
+        (client, server, rx)
+    }
+
+    /// A server-to-client `TerminalOutput` frame exactly as the server builds it
+    /// (`crates/relayable-server/src/connection.rs::terminal_output_envelope`).
+    fn terminal_data(stream_id: u64, stream_seq: u64, bytes: &[u8]) -> Envelope {
+        Envelope {
+            protocol_version: PROTOCOL_VERSION.to_string(),
+            request_id: None,
+            stream_id,
+            body: Some(Body::TerminalData(TerminalOutput {
+                stream_id,
+                stream_seq,
+                bytes: bytes.to_vec(),
+            })),
+            ..Envelope::default()
+        }
+    }
+
+    /// A framed transport read timeout, as opposed to a real close/teardown.
+    fn is_transport_timeout(err: &TransportError) -> bool {
+        match err {
+            TransportError::Io(io) => is_timeout(io),
+            TransportError::Codec(CodecError::Io(io)) => is_timeout(io),
+            TransportError::Codec(_) => false,
+        }
+    }
+
+    /// Spawn a server that completes the handshake, answers exactly one
+    /// `block.attach` with [`block_attach_response`], sends `script` frames, and
+    /// then forwards every inbound envelope into an `mpsc` channel until the
+    /// client closes the connection or `drain` elapses (so a misbehaving test
+    /// cannot hang the suite).
+    fn spawn_output_server(
+        script: Vec<Envelope>,
+        drain: Duration,
+    ) -> (Client, thread::JoinHandle<()>, mpsc::Receiver<Envelope>) {
+        let (tx, rx) = mpsc::channel();
+        let (client, server) = spawn_scripted_server(move |conn| {
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
+            let request_id = request.request_id.unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::BlockAttach(block_attach_response()),
+            ))
+            .unwrap();
+            for envelope in &script {
+                if conn.send(envelope).is_err() {
+                    return;
+                }
+            }
+            let deadline = Instant::now() + drain;
+            while Instant::now() < deadline {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                if conn
+                    .set_read_timeout(Some(remaining.min(Duration::from_millis(50))))
+                    .is_err()
+                {
+                    break;
+                }
+                match conn.recv() {
+                    Ok(Some(envelope)) => {
+                        let _ = tx.send(envelope);
+                    }
+                    Ok(None) => break,
+                    Err(err) if is_transport_timeout(&err) => {}
+                    Err(_) => break,
+                }
+            }
         });
         (client, server, rx)
     }
@@ -1622,6 +1782,339 @@ mod tests {
         assert!(
             heartbeats <= 12,
             "heartbeats must not be sent faster than the cadence, got {heartbeats}"
+        );
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    /// CLIENT-API-001 rule 1: repeated `next_output` calls return the target
+    /// stream's frames exactly once each, in arrival order, with no byte loss.
+    #[test]
+    fn next_output_returns_successive_target_frames_without_loss() {
+        let target = 7u64;
+        let (mut client, server, rx) = spawn_output_server(
+            vec![
+                terminal_data(target, 1, b"first-"),
+                terminal_data(target, 2, b"second"),
+            ],
+            Duration::from_millis(500),
+        );
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        let first = client
+            .next_output(target, Duration::from_millis(500))
+            .unwrap()
+            .expect("first target frame");
+        let second = client
+            .next_output(target, Duration::from_millis(500))
+            .unwrap()
+            .expect("second target frame");
+        assert_eq!(first, b"first-");
+        assert_eq!(second, b"second");
+        let mut joined = first;
+        joined.extend_from_slice(&second);
+        assert_eq!(joined, b"first-second", "no byte may be lost between calls");
+
+        drop(client);
+        let _ = server.join();
+        drop(rx);
+    }
+
+    /// CLIENT-API-001 rule 3: a normal timeout is `Ok(None)`, never
+    /// [`ClientError::Timeout`].
+    #[test]
+    fn next_output_returns_none_on_timeout() {
+        let target = 7u64;
+        let (mut client, server, rx) = spawn_output_server(Vec::new(), Duration::from_millis(300));
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        let result = client
+            .next_output(target, Duration::from_millis(50))
+            .expect("a timeout is not an error");
+        assert!(result.is_none(), "expected Ok(None), got {result:?}");
+
+        drop(client);
+        let _ = server.join();
+        drop(rx);
+    }
+
+    /// CLIENT-API-001 rule 5: `Duration::ZERO` serves frames already buffered in
+    /// `pending` (deferred by an earlier call) and returns `Ok(None)` promptly
+    /// with an empty queue, never reading the socket.
+    #[test]
+    fn zero_timeout_serves_buffered_frames_without_blocking() {
+        let target = 7u64;
+        let (mut client, server, rx) = spawn_output_server(
+            vec![
+                terminal_data(target, 1, b"buffered-bytes"),
+                event_envelope(21),
+            ],
+            Duration::from_millis(500),
+        );
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        // `wait_for_event` reads the target data frame first (deferring it into
+        // `pending`) and then the event, so the bytes are only reachable through
+        // public API.
+        let event = client
+            .wait_for_event(Duration::from_millis(500))
+            .unwrap()
+            .expect("buffered event");
+        assert_eq!(event.sequence, 21);
+
+        let started = Instant::now();
+        let bytes = client
+            .next_output(target, Duration::ZERO)
+            .unwrap()
+            .expect("buffered target frame");
+        assert_eq!(bytes, b"buffered-bytes");
+        assert!(
+            started.elapsed() < Duration::from_millis(250),
+            "a zero-timeout drain must not block: {:?}",
+            started.elapsed()
+        );
+
+        // With an empty queue the same call returns promptly without a read.
+        let started = Instant::now();
+        let nothing = client.next_output(target, Duration::ZERO).unwrap();
+        assert!(nothing.is_none());
+        assert!(
+            started.elapsed() < Duration::from_millis(250),
+            "an empty zero-timeout call must not block: {:?}",
+            started.elapsed()
+        );
+
+        drop(client);
+        let _ = server.join();
+        drop(rx);
+    }
+
+    /// CLIENT-API-001 rule 2: every returned chunk is acknowledged exactly once
+    /// with `ack_bytes == chunk.len()`, and the totals agree.
+    #[test]
+    fn one_flow_control_ack_per_returned_chunk() {
+        let target = 7u64;
+        let chunks: &[&[u8]] = &[b"aaaa", b"bb", b"cccccc"];
+        let script = chunks
+            .iter()
+            .enumerate()
+            .map(|(index, bytes)| terminal_data(target, index as u64 + 1, bytes))
+            .collect();
+        let (mut client, server, rx) = spawn_output_server(script, Duration::from_millis(500));
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        let mut returned: Vec<Vec<u8>> = Vec::new();
+        for _ in 0..chunks.len() {
+            returned.push(
+                client
+                    .next_output(target, Duration::from_millis(500))
+                    .unwrap()
+                    .expect("scripted frame"),
+            );
+        }
+        drop(client);
+
+        let mut acks = Vec::new();
+        while let Ok(envelope) = rx.recv_timeout(Duration::from_millis(500)) {
+            if let Some(Body::FlowControl(flow)) = envelope.body {
+                acks.push(flow);
+            }
+        }
+        let _ = server.join();
+
+        assert_eq!(
+            acks.len(),
+            chunks.len(),
+            "exactly one ack per returned chunk"
+        );
+        for (chunk, ack) in returned.iter().zip(&acks) {
+            assert_eq!(ack.stream_id, target);
+            assert_eq!(ack.ack_bytes, chunk.len() as u64);
+        }
+        let returned_total: u64 = returned.iter().map(|chunk| chunk.len() as u64).sum();
+        let acked_total: u64 = acks.iter().map(|ack| ack.ack_bytes).sum();
+        assert_eq!(acked_total, returned_total);
+    }
+
+    /// CLIENT-API-001 rule 2 for a zero-length frame: the protocol layer does
+    /// not reject `ack_bytes == 0` (nothing validates a `FlowControl` body; the
+    /// server's `add_credit` is a no-op for zero), so the ack is still sent
+    /// exactly once and the "one ack per returned chunk" invariant holds.
+    #[test]
+    fn zero_length_chunk_is_acked_exactly_once() {
+        let target = 7u64;
+        let (mut client, server, rx) = spawn_output_server(
+            vec![terminal_data(target, 1, b"")],
+            Duration::from_millis(500),
+        );
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        let chunk = client
+            .next_output(target, Duration::from_millis(500))
+            .unwrap()
+            .expect("zero-length frame");
+        assert!(chunk.is_empty());
+        drop(client);
+
+        let mut acks = Vec::new();
+        while let Ok(envelope) = rx.recv_timeout(Duration::from_millis(500)) {
+            if let Some(Body::FlowControl(flow)) = envelope.body {
+                acks.push(flow);
+            }
+        }
+        let _ = server.join();
+        assert_eq!(acks.len(), 1, "exactly one ack for the empty chunk");
+        assert_eq!(acks[0].stream_id, target);
+        assert_eq!(acks[0].ack_bytes, 0);
+    }
+
+    /// CLIENT-API-001 rules 1 and 7: a non-target `TerminalData` frame is never
+    /// acked during a target read and is later returned intact; an `Event` frame
+    /// stays retrievable through the event API.
+    #[test]
+    fn non_target_frames_are_retained_and_not_acked() {
+        let target = 7u64;
+        let other = 9u64;
+        let (mut client, server, rx) = spawn_output_server(
+            vec![
+                terminal_data(target, 1, b"alpha"),
+                terminal_data(other, 1, b"beta"),
+                event_envelope(33),
+                terminal_data(target, 2, b"gamma"),
+            ],
+            Duration::from_millis(500),
+        );
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+
+        let first = client
+            .next_output(target, Duration::from_millis(500))
+            .unwrap()
+            .expect("target frame");
+        assert_eq!(first, b"alpha");
+
+        // Only the target stream may be acked so far.
+        let mut first_wave = Vec::new();
+        while let Ok(envelope) = rx.recv_timeout(Duration::from_millis(300)) {
+            if let Some(Body::FlowControl(flow)) = envelope.body {
+                first_wave.push(flow);
+            }
+        }
+        assert_eq!(first_wave.len(), 1, "exactly the target frame is acked");
+        assert_eq!(first_wave[0].stream_id, target);
+        assert_eq!(first_wave[0].ack_bytes, b"alpha".len() as u64);
+        assert!(
+            first_wave.iter().all(|ack| ack.stream_id != other),
+            "the other stream must not be acked during a target read"
+        );
+
+        let second = client
+            .next_output(target, Duration::from_millis(500))
+            .unwrap()
+            .expect("second target frame");
+        assert_eq!(second, b"gamma");
+        assert_eq!(
+            client
+                .drain_events()
+                .iter()
+                .map(|event| event.sequence)
+                .collect::<Vec<_>>(),
+            vec![33],
+            "the event frame stays retrievable"
+        );
+
+        let other_bytes = client
+            .next_output(other, Duration::from_millis(500))
+            .unwrap()
+            .expect("other stream frame");
+        assert_eq!(
+            other_bytes, b"beta",
+            "the other stream's bytes are complete"
+        );
+
+        drop(client);
+        let _ = server.join();
+    }
+
+    /// CLIENT-API-001 rule 8: while `next_output` waits for a delayed frame it
+    /// keeps the outbound heartbeat cadence.
+    #[test]
+    fn next_output_heartbeats_while_waiting_for_a_delayed_frame() {
+        const CADENCE_MS: u64 = 50;
+        let target = 7u64;
+        let limits = Limits {
+            max_frame_bytes: 4096,
+            heartbeat_interval_millis: CADENCE_MS as u32,
+            ..DEFAULT_LIMITS
+        };
+        let (hb_tx, hb_rx) = mpsc::channel();
+        let (mut client, server) = spawn_scripted_server_with_limits(limits, move |conn| {
+            let Some(request) = recv_or_finished(conn) else {
+                return;
+            };
+            let request_id = request.request_id.unwrap();
+            conn.send(&response_for(
+                request_id,
+                ResponseResult::BlockAttach(block_attach_response()),
+            ))
+            .unwrap();
+
+            // Count the heartbeats the client sends while it waits for a frame
+            // that is deliberately withheld, then release it.
+            let deadline = Instant::now() + Duration::from_millis(250);
+            let mut heartbeats = 0usize;
+            while Instant::now() < deadline {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                if conn
+                    .set_read_timeout(Some(remaining.min(Duration::from_millis(50))))
+                    .is_err()
+                {
+                    break;
+                }
+                match conn.recv() {
+                    Ok(Some(envelope)) => {
+                        if matches!(envelope.body, Some(Body::Heartbeat(_))) {
+                            heartbeats += 1;
+                        }
+                    }
+                    Ok(None) => break,
+                    Err(err) if is_transport_timeout(&err) => {}
+                    Err(_) => break,
+                }
+            }
+            hb_tx.send(heartbeats).unwrap();
+            let _ = conn.send(&terminal_data(target, 1, b"delayed"));
+            // Keep the connection open until the client is done, so the client's
+            // next heartbeat read/write does not race the server drop.
+            conn.set_read_timeout(Some(Duration::from_secs(2))).unwrap();
+            let _ = conn.recv();
+        });
+
+        client
+            .attach_block(&BlockId::new(), AttachMode::Writer)
+            .unwrap();
+        let bytes = client
+            .next_output(target, Duration::from_millis(600))
+            .unwrap()
+            .expect("delayed frame");
+        assert_eq!(bytes, b"delayed");
+
+        let heartbeats = hb_rx.recv().unwrap();
+        assert!(
+            heartbeats >= 1,
+            "waiting for a delayed frame must keep the heartbeat cadence, got {heartbeats}"
         );
 
         drop(client);

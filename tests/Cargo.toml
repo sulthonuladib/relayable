@@ -38,6 +38,10 @@ path = "flow-control/main.rs"
 name = "context-resolution"
 path = "context-resolution/main.rs"
 
+[[test]]
+name = "client-output"
+path = "client-output/main.rs"
+
 [dependencies]
 relayable-model = { workspace = true }
 relayable-protocol = { workspace = true, features = ["transport-unix"] }
