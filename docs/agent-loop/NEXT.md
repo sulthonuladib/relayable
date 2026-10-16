@@ -43,23 +43,23 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **CLIENT-API-001 — DONE**, integrated INT-017 `52433f7`: public `Client::next_output` incremental
-   terminal-bytes API + `tests/client-output` (524 KB across the credit window). Follow-up **UI-003**
-   migrates `apps/linux` onto it.
-2. **STORE-001 (in flight)** — `store/store-001-sqlite-metadata` (Herdr `w1J`): `crates/relayable-store`
-   (SQLite metadata/audit) + server start-up reconciliation, `flock`, prune, write path per ADR-004.
-   DEC-012: `rusqlite =0.40.2` bundled (one-time fetch done; builds stay offline).
-3. **REF-006 (in flight)** — `refactor/ref-006-free-crates` (Herdr `w1M`): split over-cap files on free
-   paths per `docs/architecture/code-organization.md`. After the feature tasks merge, run REF-007
-   (client), REF-008 (server), REF-009 (`tests/**`), then REF-010 (CI `--strict` gate).
-4. **Integrate each returning project** — review the diff, run independent validation
-   (`scripts/validate.sh`, `scripts/smoke.sh`, `cargo test --workspace --offline`), merge (INT-017+).
-5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`, `UI-003`.
-6. **REF-007** (client) and **REF-009** (`tests/**`) are now unblocked; **REF-008** (server) waits on
-   STORE-001; **REF-010** last.
-7. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
-   build spike (ADR-003 reconsideration trigger #10).
-8. Update `docs/agent-loop/**` after every meaningful iteration.
+1. **Integrated & green:** CTX-001 (INT-015), INSTALL-001 (INT-016), CLIENT-API-001 (INT-017), STORE-001
+   (INT-018 `f4d59f8`).
+2. **In flight / to integrate:** **REF-006** (`refactor/ref-006-free-crates`, Herdr `w1M`),
+   **REF-007/009** (`refactor/ref-007-009-client-tests`, Herdr `w1N`), and **RESEARCH-001/002**
+   (`research/gpui-kit-libghostty`, Herdr `w1P`). Review + validate + merge each as it returns.
+3. **Next-phase plan:** `docs/architecture/next-phase-plan.md`. After the refactors merge: **TERM-003**
+   (libghostty-rs spike + ADR-003 amendment, after RESEARCH-002), then **UI-004/005/006** (auto-session on
+   open, keymap helper, theming, after RESEARCH-001), then **DOCS-001** (central docs index), then
+   **REF-010** (file-size CI gate) and **REF-008** (server split).
+4. **Cleanup:** remove merged refactor worktrees (AGENTS.md "Worktree lifecycle / cleanup") and centralize
+   docs once the gpui-kit / libghostty decisions are recorded.
+5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`, `UI-003`, `QA-FLAKE-001`
+   (pre-existing `server_e2e` flake).
+6. **TERM-003 (proposed; user decision pending)** — user prefers **libghostty / `libghostty-rs`**
+   (ADR-003 reconsideration trigger #10); adopting it needs the RESEARCH-002 evidence + an ADR-003
+   amendment.
+7. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## STORE-001 SQLite binding — decided: option A (2026-10-16)
 

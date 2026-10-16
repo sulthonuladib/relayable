@@ -84,7 +84,10 @@ log "step 2/9: temp dir $WORK_DIR, socket $SOCKET (no root, no system service)"
 
 # --- 3. launch foreground test server ------------------------------------
 log "step 3/9: launching foreground server ($SERVER_BIN run)"
+# Persistence (STORE-001/ADR-004) is isolated to this run's temp dir so the smoke
+test never touches the real $HOME/.local/state/relayable or contends on its lock.
 RELAYABLE_SERVER="$SOCKET" \
+RELAYABLE_STATE_DIR="$WORK_DIR/state" \
 RELAYABLE_IDLE_TIMEOUT_MILLIS=20000 \
 RELAYABLE_HEARTBEAT_INTERVAL_MILLIS=5000 \
 SHELL=/bin/sh TERM=xterm-256color \

@@ -129,7 +129,7 @@ the complete error-code set unknown.
 - **Events**: no event is emitted. `Event`/`ClientConnectionStateChanged`/`SessionStateChanged`
   exist only to complete the `Envelope` shape.
 - **Authn/authz**: no mechanism; `principal` is left unset.
-- **Persistence**: none; no tombstones, no retention/pruning, no metadata store.
+- **Persistence**: none at CORE-001 (no tombstones, no retention/pruning, no metadata store). A durable SQLite store landed later in STORE-001 (INT-018 `f4d59f8`); see ADR-004 Decision 2.
 - **Remote TLS transport**: not implemented.
 - **Snapshot sections**: `layout`, `status`, and `automation_scripts` are not in
   `SessionSnapshotResponse`.

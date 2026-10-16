@@ -67,6 +67,15 @@ re-exports, so a split never changes a public path or behavior. `scripts/check-f
 offenders; `--strict` becomes a CI gate after the refactor queue (`REF-005`…`REF-010`) is done. Never
 refactor a path while another task owns it (`docs/architecture/code-organization.md` sequencing table).
 
+## Agent coordination (no polling)
+
+- **Never poll peers.** Do not sleep-wait, status-check, or `list_agents`/`list_staff` another agent to see
+  whether it finished. Agents are pinged immediately when a dependency settles (event-driven).
+- While waiting on a dependency, do independent bounded work on your owned paths, or stop and let the
+  completion notification resume you. Do not invent work merely to stay active.
+- Use ownership/status reads only for a real control or recovery decision, never as a progress poll.
+- Report once at a natural boundary; the Manager integrates returning work.
+
 ## Path ownership
 
 The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration. A lead-owned path may be delegated to a bounded worker only by naming it explicitly in that worker's assignment (the lead still integrates).

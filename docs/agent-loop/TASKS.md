@@ -35,6 +35,14 @@ the evidence is integrated.
 | REF-008 | Split `crates/relayable-server/src/**` + `crates/relayable-server/tests/**` (`session.rs` 1037, `registry.rs` 718, `server_e2e.rs` 1465) | REF-005, STORE-001 | TBD | BACKLOG (blocked by STORE-001) |
 | REF-009 | Split `tests/**` integration suites (`tests/events/main.rs` 1058, `tests/fixtures/mod.rs` 592) | REF-005, CLIENT-API-001 | `refactor/ref-007-009-client-tests` (Herdr `w1N`) | IN_PROGRESS |
 | REF-010 | Wire `scripts/check-file-sizes.sh --strict` into `scripts/ci.sh` + `scripts/validate.sh`; verify clean | REF-006..REF-009 | TBD | BACKLOG |
+| RESEARCH-001 | gpui-kit evaluation (license, `gpui =0.2.2` compat, components, fidelity impact) → `docs/research/gpui-kit.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | IN_PROGRESS |
+| RESEARCH-002 | libghostty / `libghostty-rs` evaluation (license, build, API, Android, vs ADR-003 pins) → `docs/research/libghostty.md` | — | `research/gpui-kit-libghostty` (Herdr `w1P`) | IN_PROGRESS |
+| TERM-003 | libghostty-rs engine spike + ADR-003 amendment (reconsideration trigger #10); adopt/decline decision | RESEARCH-002 | TBD | PROPOSED |
+| UI-004 | Desktop: auto-create/attach a session on app open; explicit empty/loading/error/disconnected states | RESEARCH-001 | TBD | BACKLOG |
+| UI-005 | Keymapping helper: discoverable shortcut overlay + reference (Relayable-original Linux bindings) | UI-004 | TBD | BACKLOG |
+| UI-006 | Theming: token-driven theme through the chosen component layer; no fidelity divergence | RESEARCH-001 | TBD | BACKLOG |
+| DOCS-001 | Centralize docs behind `docs/README.md`; consolidate duplicate/stale docs (evidence preserved) | RESEARCH-001/002 decisions | TBD | BACKLOG |
+| QA-FLAKE-001 | Pre-existing `server_e2e` flake (~1% under heavy parallel load: `resume_shapes_and_writer_takeover`, `idle_timeout_reason_is_reported_to_a_subscriber`); reproduced on `master` pre-STORE. Root cause is test-side readiness/record-removal ordering | — | TBD | BACKLOG |
 | DOC-001 | Verify official CLI/API/Lua/events/status docs → behavior matrix | BOOT-001 | research/protocol-compat | DONE (integrated 49795a0) |
 | DOC-002 | Fix DOC-001 citation defects and re-check the 7 source URLs for live drift | DOC-001 | `docs/doc-002-matrix-repair` | DONE — integrated `16c8bc9` (INT-005); 193 MATCH kept, 115 SHIFT renumbered, 78 NOT_FOUND → heading anchors, 0 drift; labels unchanged |
 | ENV-001 | Rust/GPUI/systemd/Android CLI/SDK/emulator/JDK audit; no installs | BOOT-001 | research/env-audit | DONE (integrated b24133c) |

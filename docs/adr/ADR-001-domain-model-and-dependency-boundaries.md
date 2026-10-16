@@ -358,9 +358,10 @@ is an independent Gradle project and must not make default `cargo test` require 
 |---|---|---|
 | `relayable-protocol` | `relayable-model` | Protocol maps model operations to messages (`full.md` §5.2:406) |
 | `relayable-client` | `relayable-model`, `relayable-protocol` | Client consumes model + wire types |
-| `relayable-server` | `relayable-model`, `relayable-protocol`, `relayable-pty` | "Server composes persistence, authz, PTY, model, protocol, and event dispatch." (`full.md` §5.2:408) |
+| `relayable-server` | `relayable-model`, `relayable-protocol`, `relayable-pty`, `relayable-store` | "Server composes persistence, authz, PTY, model, protocol, and event dispatch." (`full.md` §5.2:408); `relayable-store` is the persistence leaf (ADR-004 D2.2) |
 | `relayable-cli` | `relayable-model`, `relayable-protocol`, `relayable-client` | "GPUI/Android/CLI are independent clients of the API." (`full.md` §5.2:410) |
 | `relayable-pty` | (nothing in the domain) | Opaque handles only; it is an OS boundary (`full.md` §5.2:407) |
+| `relayable-store` | (nothing in the workspace) | Durable SQLite metadata/audit leaf (`ADR-004` D2.2; implemented STORE-001) |
 | later `relayable-terminal` / `relayable-status` | `relayable-model` at most | Boundary depends on ADR-003 |
 | later `relayable-automation` | `relayable-model`, `relayable-client` only | "Lua must call the typed API and obey the same authorization/invariants; no hidden bypass." (`full.md` §5.2:411) |
 

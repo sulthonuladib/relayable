@@ -422,7 +422,7 @@ supervisor options are evaluated against Android in the Options table.
 | SIGKILL / host power-loss orphan behaviour | **Untested / unclaimed** | D1.7; no SIGKILL or orphan test exists |
 | Multi-user isolation, authn, and authz | **NOT implemented** | `full.md` §11:766; `core-001-method-set.md:127-140`; `core-002-method-set.md:195-205` |
 | systemd unit | **Not present** | `crates/relayable-server/src/main.rs:3`; `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` |
-| SQLite persistence store | **Designed here; not implemented** | This ADR, Decision 2; verified: no storage crate in any manifest |
+| SQLite persistence store | **Implemented — first slice (STORE-001, INT-018 `f4d59f8`)**; see "Implementation status" below | This ADR, Decision 2; `crates/relayable-store/**` |
 | Unbounded terminal output retained in the metadata DB | **Never** — no terminal bytes are persisted | `full.md` §6.4:490, §12:804; `ADR-001:239,286-291` |
 
 ---
@@ -470,29 +470,55 @@ supervisor options are evaluated against Android in the Options table.
 7. **A persisted event log becomes required** for replay/resume across server restart — this is ADR-001's
    own trigger (`ADR-001:417`) and would change the guarantee set.
 
-## Implied future work (not done)
+## Implementation status (2026-10-16)
 
-Each item below is **NOT DONE** and is recorded only so it is not presented as implemented.
+STORE-001 (integrated INT-018 `f4d59f8`) implements the **first persistence slice** of Decision 2:
 
-- [ ] **NOT DONE** — Create `crates/relayable-store` behind which the engine is replaceable.
-- [ ] **NOT DONE** — Add the store dependency to the workspace graph (`Cargo.toml`, Lead-owned,
-      `ADR-001:383-384`).
-- [ ] **NOT DONE** — Server startup reconciliation (mark stale `active` rows `interrupted`) and the
+- `crates/relayable-store` exists (SQLite via `rusqlite = "=0.40.2"` with the `bundled` feature; DEC-012).
+  Schema is versioned in `schema_migrations`; `PRAGMA journal_mode=WAL`, `synchronous=NORMAL`, a
+  `busy_timeout`, and a single `Mutex<Connection>` writer. **D2.5 wording amended:** the "single store
+  task" is realized as one connection behind a mutex (one transaction per operation), not a separate
+  thread/task; `File::try_lock` (`flock(2)`) guards the state directory for the store's lifetime, and a
+  second server refuses to start (`StateDirLocked`).
+- **D2.3 table-set amendment (first release):** only `schema_migrations`, `sessions`, `tombstones`, and
+  `audit_events` are implemented. `identities`, `preferences`, and `session_layout` are deferred because no
+  such data exists yet; they remain part of the design. No terminal bytes are stored.
+- Server startup opens the store (state dir `RELAYABLE_STATE_DIR` → `$XDG_STATE_HOME/relayable` →
+  `$HOME/.local/state/relayable`), runs reconciliation (`active` → `interrupted`) and a prune, writes
+  session create/close + tombstone + audit, prunes on close, and on shutdown checkpoints the WAL and
+  releases the lock. When no state dir resolves (or a non-lock open error occurs), the server runs with
+  in-memory metadata only and logs a warning; a **second server on the same state dir is refused**.
+  Retention defaults (audit 10k/30d, tombstones 10k/90d, sessions 10k/90d) are overridable via
+  `RELAYABLE_STORE_*` names (implementation-chosen under ADR-005).
+- Docs: `docs/operations/persistence.md`. Tests: `crates/relayable-store/tests/store.rs` (11) and
+  `crates/relayable-server/tests/store_wiring.rs` (8); workspace `cargo test` = 186 passed / 0 failed
+  (INT-018 validation, `docs/agent-loop/TESTS.md`).
+
+## Implied future work
+
+Items are marked **DONE (STORE-001)** / **DONE (INSTALL-001)**, **PARTIAL**, or still **NOT DONE**;
+nothing is presented as implemented unless marked.
+
+- [x] **DONE (STORE-001)** — Create `crates/relayable-store` behind which the engine is replaceable.
+- [x] **DONE (STORE-001)** — Add the store dependency to the workspace graph (`Cargo.toml`, Lead-owned,
+      `ADR-001:383-384`); `scripts/check-dependency-direction.sh` now asserts `server → store` and the leaf
+      `store` crate.
+- [x] **DONE (STORE-001)** — Server startup reconciliation (mark stale `active` rows `interrupted`) and the
       single-instance `flock` guard.
-- [ ] **NOT DONE** — Write path for sessions, layout, identities, preferences, tombstones, and audit in
-      `crates/relayable-server`.
-- [ ] **NOT DONE** — Prune task for `audit_events`/`tombstones`/closed sessions by age and row count.
-- [ ] **NOT DONE** — Startup/shutdown ordering against the existing `crates/relayable-server/src/signals.rs`
-      shutdown path.
-- [ ] **NOT DONE** — `README`/docs for the state directory (`full.md` §7.1) and backup/export procedure.
+- [~] **PARTIAL (STORE-001)** — Write path for **sessions, tombstones, and audit** is implemented in
+      `crates/relayable-server`; **layout/identities/preferences** remain NOT DONE (D2.3 amendment).
+- [x] **DONE (STORE-001)** — Prune task for `audit_events`/`tombstones`/closed sessions by age and row count.
+- [x] **DONE (STORE-001)** — Startup/shutdown ordering against the existing server shutdown path.
+- [~] **PARTIAL (STORE-001)** — `docs/operations/persistence.md` documents the state directory, schema,
+      retention, and non-guarantees; **backup/export tooling** remains NOT DONE.
 - [ ] **NOT DONE** — Product-level "restart session" surface (protocol + UI), which must present a restart,
       not a resurrected process (D2.7).
-- [ ] **NOT DONE** — Optional, gated systemd user unit; must inspect real CLI options first
-      (`full.md` §7.2:539) and is gated on user approval (`full.md` §7.2:537, §11:775).
+- [x] **DONE (INSTALL-001)** — Optional, gated systemd user unit (installed by `scripts/install-user.sh`;
+      never enabled/started automatically).
 - [ ] **NOT DONE** — Any supervisor option from D1.4, if reconsider-if (1) fires.
 - [ ] **NOT DONE** — `SO_PEERCRED` and an authz mechanism for any multi-user mode.
-- [ ] **NOT DONE** — Exact environment-variable names for store/retention settings, fixed at
-      implementation under ADR-005 (this ADR fixes none).
+- [x] **DONE (STORE-001)** — Environment-variable names for store/retention settings
+      (`RELAYABLE_STATE_DIR`, `RELAYABLE_STORE_*`).
 
 ## Evidence
 

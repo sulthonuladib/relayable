@@ -252,7 +252,8 @@ deadline and be cancelled by the client; cancellation is idempotent and must not
 | `relayable-model` | entities, IDs, revisions, snapshots | pure domain: no transport, no async runtime, no serialization-framework derives |
 | `relayable-protocol` | schema, wire messages, codec, version negotiation | owns conversions to/from model |
 | `relayable-client` | connection lifecycle, RPC, resync, event sequencing | no server internals |
-| `relayable-server` | API, authorization, lifecycle, persistence, event dispatch | composes model, protocol, pty |
+| `relayable-server` | API, authorization, lifecycle, persistence, event dispatch | composes model, protocol, pty, store |
+| `relayable-store` | Durable SQLite metadata/audit (ADR-004 D2) | metadata/audit only; never terminal bytes; no relayable-* dependency (leaf) |
 | `relayable-pty` | OS boundary | opaque handles only |
 | `relayable-cli` | the `relayable` binary | independent API client |
 
@@ -267,7 +268,7 @@ modules) and `relayable-automation` (after the typed API stabilizes). Directory 
 | --- | --- |
 | `protocol → model` | yes |
 | `client → {model, protocol}` | yes |
-| `server → {model, protocol, pty}` | yes |
+| `server → {model, protocol, pty, store}` | yes |
 | `cli → {model, protocol, client}` | yes |
 | `pty →` nothing in the domain | yes (empty) |
 | later `terminal` / `status` → `model` | yes, at most |

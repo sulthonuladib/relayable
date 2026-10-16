@@ -77,6 +77,48 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 35 — STORE-001 integrated (INT-018); next-phase plan + no-polling rule (2026-10-16)
+
+**Objective:** integrate STORE-001, then record the user's next-phase directives (gpui-kit, libghostty,
+ desktop UX, docs centralization, refactor cleanup, no peer polling).
+
+**Review (Manager, §14.5):** branch `store/store-001-sqlite-metadata` HEAD `220eea1`;
+`git diff master...HEAD` = new `crates/relayable-store/**`, root `Cargo.toml`/`Cargo.lock` (rusqlite
+`=0.40.2` bundled + `relayable-store`), `crates/relayable-server/**` wiring + tests,
+`docs/operations/persistence.md`; no secret-pattern matches; no off-limits paths.
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 120 | `git diff --name-only master...HEAD` + secret scan | authorized paths only; clean | 0 |
+| 121 | `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --all-features --offline -- -D warnings`; `cargo build --workspace --offline` | clean | 0 |
+| 122 | `cargo test --workspace --offline` | **186 passed / 0 failed** | 0 |
+| 123 | `cargo test -p relayable-store` / `-p relayable-server --test store_wiring` | 11 / 8 passed | 0 |
+| 124 | live persistence (temp `RELAYABLE_STATE_DIR`): server run + `new` + `close` | `sessions` active→closed + tombstone; tables `schema_migrations/sessions/tombstones/audit_events`; state dir `0700`; shutdown exit 0 | 0 |
+| 125 | post-merge `bash scripts/validate.sh`; `bash scripts/smoke.sh`; `bash scripts/ci.sh` | all green (`SMOKE OK`; CI `OVERALL: PASS`, 15 PASS/3 SKIP) | 0 |
+
+**Integration:** merge `f4d59f8` (INT-018).
+
+**Manager follow-ups applied:** `scripts/smoke.sh` now isolates `RELAYABLE_STATE_DIR` to its temp dir
+(so it never touches the real `~/.local/state/relayable`); `scripts/check-dependency-direction.sh` asserts
+`server → store` and the leaf `store` crate; ADR-001 allowed-edge table updated; ADR-004 gained an
+**Implementation status** section (D2.3 table-set amendment, D2.5 `Mutex<Connection>` wording, non-guarantees
+row, implied-future-work marks); DEC-005/interface-contract/method-set notes refreshed.
+
+**Cleanup:** killed a leftover temp-state test server (pid 1141736, from the STORE-001 verification); removed
+the real `~/.local/state/relayable` that earlier pre-isolation test runs had polluted with 3 test sessions
+(`m3`/`e2e`/`lease`) — metadata only, no user data.
+
+**Recorded risk:** pre-existing `server_e2e` flake (~1% under heavy parallel load) reproduced on `master`
+before STORE-001 → tracked as `QA-FLAKE-001`.
+
+**User directives recorded:** `docs/architecture/next-phase-plan.md` (gpui-kit evaluation, libghostty-rs
+engine + ADR-003 amendment, desktop UX: auto-session on open / keymap helper / theming, docs
+centralization, refactor cleanup); new tasks RESEARCH-001/002, TERM-003, UI-004/005/006, DOCS-001,
+QA-FLAKE-001. Added the **no peer polling** orchestration rule to `AGENTS.md` and messaged the two active
+Leads.
+
+---
+
 ## Checkpoint 34 — Remove Superlogical attribution from Relayable docs (DEC-013) (2026-10-16)
 
 **Trigger:** the user directed that no docs attribute Relayable to Superlogical (the maker of the reference

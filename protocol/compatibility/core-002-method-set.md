@@ -196,7 +196,7 @@ Values are **parameters, not invented constants**.
 
 - No server-crash or host-reboot session survival.
 - Terminal output is **not** byte-exact replayable.
-- No persistence / SQLite.
+- No persistence / SQLite at CORE-002. A durable SQLite store landed later in STORE-001 (INT-018 `f4d59f8`).
 - No authn / authz. Consequently `block.attach` and `session.resume` are **not** session-scoped:
   any handshaken client on the local IPC socket may act, and the writer lease is the only exclusivity
   mechanism.

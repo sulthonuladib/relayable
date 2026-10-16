@@ -346,3 +346,22 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch
 **Decisions recorded:** `relayable-client` now exposes a lossless incremental API; the payload test proves
 FlowControl acks keep the server from overflowing a consumer reading continuously. `UI-003` tracks
 migrating the desktop app onto it.
+
+## 2026-10-16 — STORE-001 integrated: durable SQLite metadata/audit store (INT-018)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch `store/store-001-sqlite-metadata`
+(HEAD `220eea1`) and integrated it as `f4d59f8` (INT-018).
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 120 | `git diff --name-only master...HEAD` + secret scan | new `crates/relayable-store/**`, root `Cargo.toml`/`Cargo.lock`, server wiring + tests, `docs/operations/persistence.md`; no secret-like matches | 0 |
+| 121 | `cargo fmt --all --check` / `cargo clippy --workspace --all-targets --all-features --offline -- -D warnings` / `cargo build --workspace --offline` | clean | 0 |
+| 122 | `cargo test --workspace --offline` | 186 passed / 0 failed | 0 |
+| 123 | `cargo test -p relayable-store --offline` / `cargo test -p relayable-server --offline --test store_wiring` | 11 / 8 passed | 0 |
+| 124 | live persistence with temp `RELAYABLE_STATE_DIR`: `relayable-server run` + `new` + `session close` | `sessions` row `active`→`closed` + `tombstones` row; tables `schema_migrations/sessions/tombstones/audit_events`; state dir `0700`; `relayable-server` SIGTERM exit 0 | 0 |
+| 125 | post-merge `bash scripts/validate.sh`; `bash scripts/smoke.sh`; `bash scripts/ci.sh` | `All CORE-001 validation checks passed.`; `SMOKE OK`; CI `OVERALL: PASS` (15 PASS / 3 SKIP) | 0 |
+
+**Decisions recorded:** ADR-004 Decision 2 is now implemented (first slice) — `schema_migrations`,
+`sessions`, `tombstones`, `audit_events`; `identities`/`preferences`/`session_layout` deferred (D2.3
+amendment); `Mutex<Connection>` single writer + `flock` guard (D2.5 wording amended). No terminal bytes are
+persisted (verified by probe). `scripts/smoke.sh` was updated to isolate `RELAYABLE_STATE_DIR`.

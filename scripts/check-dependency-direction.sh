@@ -16,9 +16,10 @@
 #   model    -> (nothing in the workspace)         pure domain
 #   protocol -> model                              wire mapping
 #   client   -> model, protocol                    API consumer
-#   server   -> model, protocol, pty               composes the stack
+#   server   -> model, protocol, pty, store        composes the stack
 #   cli      -> model, protocol, client            API consumer / binary
 #   pty      -> (nothing in the workspace)         OS boundary, opaque handles
+#   store    -> (nothing in the workspace)         durable metadata/audit (ADR-004)
 #
 # The direction checks below match exact package names ("NAME vX.Y.Z"), so
 # `prost` never matches transitive `prost-types`/`prost-derive` and `serde`
@@ -142,12 +143,12 @@ assert_present relayable-client "$CLIENT" relayable-model relayable-protocol
 assert_absent relayable-client "$CLIENT" relayable-server relayable-pty relayable-cli
 echo "  OK: relayable-model + relayable-protocol present; no forbidden dependency"
 
-# 4. relayable-server: composes model + protocol + pty.
-echo "[4] relayable-server: requires relayable-model + relayable-protocol + relayable-pty; no client/cli"
+# 4. relayable-server: composes model + protocol + pty + store.
+echo "[4] relayable-server: requires relayable-model + relayable-protocol + relayable-pty + relayable-store; no client/cli"
 SERVER="$(tree_for relayable-server)" || fail "cargo tree -p relayable-server failed"
-assert_present relayable-server "$SERVER" relayable-model relayable-protocol relayable-pty
+assert_present relayable-server "$SERVER" relayable-model relayable-protocol relayable-pty relayable-store
 assert_absent relayable-server "$SERVER" relayable-client relayable-cli
-echo "  OK: relayable-model + relayable-protocol + relayable-pty present; no forbidden dependency"
+echo "  OK: relayable-model + relayable-protocol + relayable-pty + relayable-store present; no forbidden dependency"
 
 # 5. relayable-cli: model + protocol + client only.
 echo "[5] relayable-cli: requires relayable-model + relayable-protocol + relayable-client; no pty/server"
@@ -162,6 +163,13 @@ PTY="$(tree_for relayable-pty)" || fail "cargo tree -p relayable-pty failed"
 assert_absent relayable-pty "$PTY" \
     relayable-model relayable-protocol relayable-client relayable-server relayable-cli
 echo "  OK: no relayable-* crate in the relayable-pty tree"
+
+# 6b. relayable-store: durable metadata/audit leaf; no relayable-* crate at all.
+echo "[6b] relayable-store: no relayable-* crate at all"
+STORE="$(tree_for relayable-store)" || fail "cargo tree -p relayable-store failed"
+assert_absent relayable-store "$STORE" \
+    relayable-model relayable-protocol relayable-client relayable-server relayable-cli relayable-pty
+echo "  OK: no relayable-* crate in the relayable-store tree"
 
 # 7. Cycle check (see header comment for the reasoning).
 echo "[7] cycle check: cargo metadata accepts the resolved graph (Cargo rejects cycles)"
