@@ -119,7 +119,7 @@ path.
 
 Sessions and all metadata are **in memory only**. There is no database, no state directory, and no
 serde-persisted state: grep over all `Cargo.toml` manifests finds no `rusqlite`, `sqlx`, `sled`, or
-`redb` (verified — none present); `crates/relayable-server/Cargo.toml:13-23` lists only `relayable-model`,
+`redb` (verified — none present); `crates/relayable-server/Cargo.toml:14-23` lists only `relayable-model`,
 `relayable-protocol`, `relayable-pty`, `anyhow`, and `libc = "=0.2.190"` ("# Signal handling only.").
 `std::fs` appears in production server code only for `/proc` reads and socket unlink. No systemd unit
 exists (`scripts/ci.sh:197` skips "package build tests (deb/rpm/systemd packaging)" because no recipe
@@ -228,7 +228,7 @@ and verified locations):
 
 **D1.3 (guaranteed, implemented and tested).** Only `session.close` and graceful server shutdown
 terminate children. Shutdown installs SIGINT/SIGTERM handlers
-(`crates/relayable-server/src/signals.rs:20-44`) and the accept loop exits at
+(`crates/relayable-server/src/signals.rs:19-42`) and the accept loop exits at
 `crates/relayable-server/src/lib.rs:123-135`, which closes every live block and reaps the children. Test:
 `graceful_shutdown_kills_live_children` (`crates/relayable-server/tests/server_e2e.rs:869`).
 
@@ -533,7 +533,7 @@ was performed because no code changed.
 | `crates/relayable-pty/src/lib.rs:121,148,169-176,236,270,292` | Opaque `PtyHandle`; spawn/setsid; try_wait/kill/shutdown | Code |
 | `crates/relayable-server/src/main.rs:3` | Foreground binary; no systemd unit, no forking | Code |
 | `apps/linux/src/term/mod.rs:31,164` | Scrollback is client-engine-owned today | Code |
-| `Cargo.toml:29-44`; `crates/relayable-server/Cargo.toml:13-23` | `tempfile` workspace dep; server deps; no storage crate | Code/command |
+| `Cargo.toml:29-44`; `crates/relayable-server/Cargo.toml:14-23` | `tempfile` workspace dep; server deps; no storage crate | Code/command |
 | `server_e2e.rs:508,869,1319,1392`; `tests/reconnect/main.rs:42,188,308`; `tests/lifecycle/main.rs:102,451`; `tests/multi-client/main.rs:227`; `tests/flow-control/main.rs:131,467`; `tests/events/main.rs:260` | Tests proving client-close/network-loss survival, shutdown reaping, flow-control survival | Tests |
 | `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` | No systemd/packaging recipe; service/persistence model undecided (gap G5) | Spec/audit |
 | `docs/agent-loop/DECISIONS.md:12,17,125` | DEC-005 index row; DEC-010 Android deferral | Spec |
