@@ -34,6 +34,10 @@ path = "events/main.rs"
 name = "flow-control"
 path = "flow-control/main.rs"
 
+[[test]]
+name = "context-resolution"
+path = "context-resolution/main.rs"
+
 [dependencies]
 relayable-model = { workspace = true }
 relayable-protocol = { workspace = true, features = ["transport-unix"] }
