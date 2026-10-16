@@ -54,7 +54,9 @@
 
 mod control;
 mod data;
+mod data_thread;
 mod mock;
+mod osc;
 mod types;
 
 pub use control::ApiHandle;

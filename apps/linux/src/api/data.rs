@@ -1,6 +1,5 @@
 use std::collections::{BTreeSet, HashMap};
-use std::path::PathBuf;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::Sender;
 use std::time::Instant;
 
 use relayable_protocol::codec::CodecError;
@@ -12,13 +11,15 @@ use relayable_protocol::v1::{
     TerminalInput, TerminalOutput, TerminalResize,
 };
 use relayable_protocol::{CONTROL_STREAM_ID, PROTOCOL_VERSION};
-use vte::{Parser, Perform};
+use vte::Parser;
 
 use super::control::{emit, translate_wire_event};
-use super::types::{
-    ApiCommand, ApiEvent, POLL_INTERVAL, RECONNECT_BACKOFF, RECONNECT_MAX_ATTEMPTS,
-    REQUEST_TIMEOUT, SNAPSHOT_TAIL_BYTES,
-};
+use super::types::{ApiEvent, POLL_INTERVAL, REQUEST_TIMEOUT, SNAPSHOT_TAIL_BYTES};
+
+pub(super) use super::data_thread::data_thread;
+#[cfg(test)]
+pub(super) use super::osc::strip_file_uri;
+pub(super) use super::osc::{OscPerformer, TitleTracker};
 
 // --- data plane ------------------------------------------------------------
 
@@ -33,7 +34,7 @@ enum FrameOutcome {
 }
 
 /// The private data-plane connection.
-struct DataPlane {
+pub(super) struct DataPlane {
     conn: FrameConnection,
     events: Sender<ApiEvent>,
     next_request_id: u64,
@@ -53,7 +54,10 @@ struct StreamTitle {
 }
 
 impl DataPlane {
-    fn connect(path: &std::path::Path, events: Sender<ApiEvent>) -> Result<Self, String> {
+    pub(super) fn connect(
+        path: &std::path::Path,
+        events: Sender<ApiEvent>,
+    ) -> Result<Self, String> {
         let conn = FrameConnection::connect(path)
             .map_err(|error| format!("could not connect to {}: {error}", path.display()))?;
         conn.set_read_timeout(Some(POLL_INTERVAL))
@@ -104,7 +108,7 @@ impl DataPlane {
         }
     }
 
-    fn attach(&mut self, block_id: &str, takeover: bool) -> Result<(), String> {
+    pub(super) fn attach(&mut self, block_id: &str, takeover: bool) -> Result<(), String> {
         let request_id = self.next_request_id;
         self.next_request_id += 1;
         let envelope = self.request_envelope(
@@ -147,7 +151,7 @@ impl DataPlane {
         }
     }
 
-    fn detach(&mut self, stream_id: u64) -> Result<(), String> {
+    pub(super) fn detach(&mut self, stream_id: u64) -> Result<(), String> {
         let request_id = self.next_request_id;
         self.next_request_id += 1;
         let envelope = self.request_envelope(
@@ -169,7 +173,7 @@ impl DataPlane {
         }
     }
 
-    fn send_input(&mut self, stream_id: u64, bytes: Vec<u8>) -> Result<(), String> {
+    pub(super) fn send_input(&mut self, stream_id: u64, bytes: Vec<u8>) -> Result<(), String> {
         let request_id = self.next_request_id;
         self.next_request_id += 1;
         let envelope = self.request_envelope(
@@ -204,7 +208,7 @@ impl DataPlane {
         }
     }
 
-    fn send_resize(
+    pub(super) fn send_resize(
         &mut self,
         stream_id: u64,
         cols: u16,
@@ -299,7 +303,7 @@ impl DataPlane {
     }
 
     /// One output pump; a read timeout is not an error.
-    fn pump(&mut self) -> Result<(), String> {
+    pub(super) fn pump(&mut self) -> Result<(), String> {
         match self.recv_frame()? {
             FrameOutcome::Frame(envelope) => {
                 match envelope.body {
@@ -377,184 +381,6 @@ impl DataPlane {
             let cwd = entry.tracker.cwd.clone();
             emit(&self.events, ApiEvent::PaneTitleChanged { program, cwd });
         }
-    }
-}
-
-/// Connect the data plane and, on success, tell the UI it is usable again.
-///
-/// The signal is a [`ApiEvent::ServerEvent`] (not a new [`ApiEvent`] variant,
-/// which is frozen) so the UI can re-attach panes whose streams were invalidated
-/// by a data-plane-only disconnect.
-fn connect_data_plane(
-    path: &std::path::Path,
-    events: &Sender<ApiEvent>,
-) -> Result<DataPlane, String> {
-    let plane = DataPlane::connect(path, events.clone())?;
-    emit(
-        events,
-        ApiEvent::ServerEvent {
-            kind: "data_plane_connected".to_string(),
-            detail: path.display().to_string(),
-        },
-    );
-    Ok(plane)
-}
-
-pub(super) fn data_thread(path: PathBuf, commands: Receiver<ApiCommand>, events: Sender<ApiEvent>) {
-    let mut plane = match connect_data_plane(&path, &events) {
-        Ok(plane) => Some(plane),
-        Err(error) => {
-            emit(&events, ApiEvent::Error { message: error });
-            None
-        }
-    };
-    let mut attempts = 0u32;
-
-    loop {
-        if plane.is_none() {
-            if attempts >= RECONNECT_MAX_ATTEMPTS {
-                std::thread::sleep(POLL_INTERVAL);
-                // Still drain commands so `Shutdown` is honoured.
-                while let Ok(command) = commands.try_recv() {
-                    if matches!(command, ApiCommand::Shutdown) {
-                        return;
-                    }
-                }
-                continue;
-            }
-            attempts += 1;
-            match connect_data_plane(&path, &events) {
-                Ok(connected) => {
-                    attempts = 0;
-                    plane = Some(connected);
-                }
-                Err(error) => {
-                    emit(
-                        &events,
-                        ApiEvent::Error {
-                            message: format!(
-                                "data-plane connect attempt {attempts} failed: {error}"
-                            ),
-                        },
-                    );
-                    std::thread::sleep(RECONNECT_BACKOFF);
-                    continue;
-                }
-            }
-        }
-
-        let mut shutdown = false;
-        while let Ok(command) = commands.try_recv() {
-            match command {
-                ApiCommand::Shutdown => {
-                    shutdown = true;
-                    break;
-                }
-                ApiCommand::AttachBlock { block_id, takeover } => {
-                    if let Some(plane) = plane.as_mut() {
-                        if let Err(error) = plane.attach(&block_id, takeover) {
-                            emit(&events, ApiEvent::Error { message: error });
-                        }
-                    }
-                }
-                ApiCommand::Detach { stream_id } => {
-                    if let Some(plane) = plane.as_mut() {
-                        if let Err(error) = plane.detach(stream_id) {
-                            emit(&events, ApiEvent::Error { message: error });
-                        }
-                    }
-                }
-                ApiCommand::Input { stream_id, bytes } => {
-                    if let Some(plane) = plane.as_mut() {
-                        if let Err(error) = plane.send_input(stream_id, bytes) {
-                            emit(&events, ApiEvent::Error { message: error });
-                        }
-                    }
-                }
-                ApiCommand::Resize {
-                    stream_id,
-                    cols,
-                    rows,
-                    pixel_width,
-                    pixel_height,
-                } => {
-                    if let Some(plane) = plane.as_mut() {
-                        if let Err(error) =
-                            plane.send_resize(stream_id, cols, rows, pixel_width, pixel_height)
-                        {
-                            emit(&events, ApiEvent::Error { message: error });
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-        if shutdown {
-            return;
-        }
-
-        if let Some(active_plane) = plane.as_mut() {
-            if let Err(error) = active_plane.pump() {
-                emit(
-                    &events,
-                    ApiEvent::Disconnected {
-                        reason: format!("data connection lost: {error}"),
-                    },
-                );
-                plane = None;
-            }
-        }
-    }
-}
-
-// --- OSC title/cwd tracking ------------------------------------------------
-
-/// The latest OSC 0/2 title and OSC 7 cwd seen on the output stream.
-#[derive(Debug, Default, Clone)]
-pub(super) struct TitleTracker {
-    pub(super) title: Option<String>,
-    pub(super) cwd: Option<String>,
-}
-
-/// A `vte` performer that only records OSC 0/2 (title) and OSC 7 (cwd).
-pub(super) struct OscPerformer<'a> {
-    pub(super) tracker: &'a mut TitleTracker,
-    pub(super) changed: bool,
-}
-
-impl Perform for OscPerformer<'_> {
-    fn osc_dispatch(&mut self, params: &[&[u8]], _bell_terminated: bool) {
-        if params.len() < 2 {
-            return;
-        }
-        match params[0] {
-            b"0" | b"2" => {
-                let title = params[1..]
-                    .iter()
-                    .map(|part| String::from_utf8_lossy(part))
-                    .collect::<Vec<_>>()
-                    .join(";");
-                self.tracker.title = Some(title.trim().to_string());
-                self.changed = true;
-            }
-            b"7" => {
-                let raw = String::from_utf8_lossy(params[1]).to_string();
-                self.tracker.cwd = Some(strip_file_uri(&raw));
-                self.changed = true;
-            }
-            _ => {}
-        }
-    }
-}
-
-/// Turn `file://host/path` into `/path`; leave anything else untouched.
-pub(super) fn strip_file_uri(raw: &str) -> String {
-    let Some(rest) = raw.strip_prefix("file://") else {
-        return raw.to_string();
-    };
-    match rest.find('/') {
-        Some(index) => rest[index..].to_string(),
-        None => rest.to_string(),
     }
 }
 
