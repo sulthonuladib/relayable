@@ -65,6 +65,7 @@ impl WorkspaceView {
             picker_open: false,
             picker_query: String::new(),
             picker_selected: 0,
+            shortcuts_open: false,
             zoomed: false,
             logged_geometry: false,
         };

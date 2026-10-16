@@ -1,62 +1,69 @@
 use crate::api::ApiCommand;
 use gpui::{KeyDownEvent, Keystroke, Window};
 
+use super::shortcuts::{route_key, tab_index, KeyRoute, ShortcutId};
 use super::state::SplitAxis;
 use super::WorkspaceView;
 
 impl WorkspaceView {
     // --- keyboard ----------------------------------------------------------
 
+    /// Route a keystroke and run the action it selects.
+    ///
+    /// The decision itself lives in `shortcuts.rs` ([`route_key`]), which owns
+    /// the keymap, the overlay gates and the `Esc` contract; this function only
+    /// maps an action id onto a method. Dispatch is by [`ShortcutId`], never by
+    /// re-matching key strings, so the keymap has exactly one definition and a
+    /// new binding cannot be handled in one place and documented in another.
     pub(super) fn handle_key(&mut self, event: &KeyDownEvent, _window: &mut Window) {
         let keystroke = &event.keystroke;
-        if self.picker_open {
-            self.handle_picker_key(keystroke);
-            return;
+        match route_key(self.picker_open, self.shortcuts_open, keystroke) {
+            KeyRoute::Picker => self.handle_picker_key(keystroke),
+            KeyRoute::CloseShortcuts => self.set_shortcuts_open(false),
+            // The overlay is modal: an unhandled key goes nowhere, exactly like
+            // an unhandled key in the session picker.
+            KeyRoute::SwallowShortcuts => {}
+            KeyRoute::Shortcut(id) => self.handle_shortcut(id, keystroke),
+            KeyRoute::Terminal => {
+                if let Some(bytes) = terminal_bytes(keystroke) {
+                    if let Some(stream_id) = self.focused_stream() {
+                        self.api.send(ApiCommand::Input { stream_id, bytes });
+                    }
+                }
+            }
         }
+    }
 
-        let control = keystroke.modifiers.control;
-        let shift = keystroke.modifiers.shift;
-        if control && shift {
-            match keystroke.key.as_str() {
-                "e" => return self.split_focused(SplitAxis::Horizontal),
-                "o" => return self.split_focused(SplitAxis::Vertical),
-                "w" => return self.close_focused(),
-                "z" => {
-                    self.zoomed = !self.zoomed;
-                    return;
-                }
-                "s" => {
-                    self.picker_open = true;
-                    self.picker_query.clear();
-                    self.picker_selected = 0;
-                    self.refresh_sessions();
-                    return;
-                }
-                "n" => return self.request_new_tab(),
-                "right" => return self.focus_next_pane(),
-                "left" => return self.focus_prev_pane(),
-                "t" => return self.next_tab(),
-                _ => {}
+    /// Run the action a [`ShortcutId`] names.
+    ///
+    /// Exhaustive by construction: the compiler rejects a new [`ShortcutId`]
+    /// that is not handled here, which is the one guarantee a display-free test
+    /// cannot make about this table.
+    fn handle_shortcut(&mut self, id: ShortcutId, keystroke: &Keystroke) {
+        match id {
+            ShortcutId::SplitRight => self.split_focused(SplitAxis::Horizontal),
+            ShortcutId::SplitDown => self.split_focused(SplitAxis::Vertical),
+            ShortcutId::ClosePane => self.close_focused(),
+            ShortcutId::ToggleZoom => self.zoomed = !self.zoomed,
+            ShortcutId::NewSession => self.request_new_tab(),
+            ShortcutId::SessionPicker => {
+                self.picker_open = true;
+                self.picker_query.clear();
+                self.picker_selected = 0;
+                self.refresh_sessions();
             }
-        }
-        if control && !shift {
-            match keystroke.key.as_str() {
-                "pagedown" => return self.next_tab(),
-                "pageup" => return self.prev_tab(),
-                _ => {}
-            }
-            if let Some(digit) = keystroke.key.chars().next().and_then(|c| c.to_digit(10)) {
-                if digit >= 1 {
-                    self.select_tab(digit as usize - 1);
-                    return;
+            ShortcutId::NextTab => self.next_tab(),
+            ShortcutId::PrevTab => self.prev_tab(),
+            ShortcutId::SelectTab => {
+                // The digit rule is `shortcuts::tab_index`, shared with the
+                // predicate that matched this key.
+                if let Some(index) = tab_index(keystroke) {
+                    self.select_tab(index);
                 }
             }
-        }
-
-        if let Some(bytes) = terminal_bytes(keystroke) {
-            if let Some(stream_id) = self.focused_stream() {
-                self.api.send(ApiCommand::Input { stream_id, bytes });
-            }
+            ShortcutId::FocusNextPane => self.focus_next_pane(),
+            ShortcutId::FocusPrevPane => self.focus_prev_pane(),
+            ShortcutId::ToggleShortcuts => self.set_shortcuts_open(true),
         }
     }
 
