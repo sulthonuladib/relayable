@@ -107,13 +107,16 @@ implementation threads (UI-003 data plane, UI-004 stage 1) and route both throug
   standard and `protocol/compatibility/core-001-method-set.md`; no decision sentence changed. Residuals
   (the "verbatim" quote's one-token drift, ADR-004's pre-STORE Context claims, and non-split-induced drift
   the worker proved) are recorded as **DOC-004**.
-- **UI-003 is a behaviour migration, not a move**: `ApiEvent::Output.stream_seq` is gone (unused),
-  `AttachBlock` gained `session_id`, `REQUEST_TIMEOUT` → `DATA_READ_WINDOW = 1 ms`, and the pump is
-  `drain_attached → one bounded collect_events → drain_attached → drain_events` (the second drain is what
-  refunds credit for every stream). The implementer **measured a structural limit** and reported it rather
-  than hiding it: a tiny-write flood out-runs the one-chunk-per-call ack rate and the server closes the
-  data-plane connection; the pre-migration plane failed the same way at ~67 KB delivered, so this is
-  recorded as **CLIENT-API-003**, not as a regression.
+- **Verification of UI-003 (2026-10-16) added and corrected evidence:** the verifier re-ran the live probe
+  itself (`PROBE_EXIT=0`, 400 384 bytes past the 256 KiB window, two attached streams) and independently
+  showed the 1 ms window is **load-bearing** — mutating `DATA_READ_WINDOW = 100ms` makes the burst fail with
+  `credit exhausted`/connection closed. It also corrected two of this checkpoint's figures: the observed
+  flood trigger in all four recorded runs is `outbound channel full` (the bounded 8192-message queue), not
+  the credit window; and the pre-migration comparison (`~31 KiB`/`~67 KB`) has **no transcript and cannot be
+  re-run** because the old code is deleted — those figures are withdrawn, so no parity claim is made
+  (`CLIENT-API-003`). The verifier further flags that the ack invariant is guarded only by the manually-run
+  live probe (`QA-DESKTOP-001`) and that `scripts/smoke.sh:88` emits `test: too many arguments` on every run
+  (`TOOL-002`).
 - **UI-004 stage 1** turned the one-shot auto-create into an invariant (`needs_session`) re-checked at four
   sites and clears the wedged `pending_create` on `Error` **and** `Disconnected`; M1–M5 mutations are
   caught by the headless suite, while deleting the `close_focused` call site is **not** (recorded gap).
