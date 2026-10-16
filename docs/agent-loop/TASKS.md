@@ -38,7 +38,7 @@ the evidence is integrated.
 | ADR-001 | Domain model and dependency boundaries | DOC-001 | research/adr-001-002 | DONE — integrated `31bed30`, **Accepted** after REVIEW-001/ADR-FIX-001 |
 | ADR-002 | Protocol schema + transport alternatives | DOC-001, ADR-001 | research/adr-001-002 | DONE — integrated `31bed30`, **Accepted** after REVIEW-001/ADR-FIX-001 |
 | ADR-003 | Terminal engine selection (spike-backed) | ENV-001, TERM-001 | research/term-001-adr-003 | DONE (Proposed) — integrated `78b83f2`; engine-level phase 2 pending as TERM-002 |
-| ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | Lead | BACKLOG |
+| ADR-004 | Local/remote process ownership; persistence guarantees | ADR-001 | `adr/adr-004-ownership-persistence` | IN_PROGRESS (2026-10-15) — new file `docs/adr/ADR-004-process-ownership-and-persistence.md` |
 | ADR-005 | Environment-variable namespace (`RELAYABLE_*` vs `REX_*` aliases vs both) | ADR-002 D14 | `adr/adr-005-env-namespace` | DONE — integrated `74e7e20` (INT-006); `RELAYABLE_*`-only; DEC-006 Accepted |
 | UI-002 | Main reference workspace UI (GPUI) against the catalogue + tokens, using the live API | UI-001, CORE-002 | `ui/ui-002-reference-workspace` | DONE — integrated `d46c66c` (INT-012); 6 catalogue screens; 58 app tests; live probe + committed own screenshots; `relayable-client` gap → `CLIENT-API-001` |
 | UI-001 | GPUI minimal Linux window build/run proof + `gpui` remedy | ENV-001, ADR-003, TERM-002 | `ui/ui-001-gpui-window` | DONE — integrated `09928db` (INT-010); `gpui =0.2.2` builds+runs via `libc 0.2.189` lockfile hold; real Wayland window `class=relayable`; 9 token tests; screenshot committed |
