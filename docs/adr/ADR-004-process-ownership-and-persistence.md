@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **Proposed — Lead decision; pending Manager acceptance and DECISIONS.md index update (DEC-005 → ADR-004)** |
+| Status | **Accepted — Manager acceptance 2026-10-15 (DEC-005).** |
 | Date | 2026-10-15 |
 | Deciders | Lead (Relayable / Superlogical) |
 | Supersedes | None |

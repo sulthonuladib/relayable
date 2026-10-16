@@ -43,7 +43,7 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 3. **QA-001** — DONE, integrated `4a258c2` (INT-013): `scripts/smoke.sh` + `scripts/ci.sh` + `tests/flow-control` (`QA-FLOW-001`). Contract `flow_control_overflow` wording and the `events.proto` state-casing comment reconciled.
 4. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
    add the ADR-005 §8.1 context-resolution test (currently not implemented).
-5. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
+5. **ADR-004** (DEC-005 ownership/persistence) — DONE, integrated `9a3fb27` (INT-014); **Accepted**. Implied future work is tracked as `STORE-001`.
 6. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build evidence spike (ADR-003 reconsideration trigger #10).
 7. Update `docs/agent-loop/**` after every meaningful iteration.

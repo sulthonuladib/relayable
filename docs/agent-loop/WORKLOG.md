@@ -77,6 +77,33 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 25 — ADR-004 integrated; DEC-005 Accepted (2026-10-15)
+
+**Objective:** decide process ownership and persistence guarantees.
+
+**Deliverable:** ADR-004 (`e296a3d`, 557 lines) merged as INT-014 `9a3fb27` (only the new ADR file).
+
+**Decisions (Manager-accepted):**
+1. **Ownership** — the foreground server owns each PTY/child tree **in-process, per session, not per
+   connection**; client close/network loss/idle timeout/flow-control overflow never signals the child
+   (implemented + tested). The three `full.md` §6.3 supervision mechanisms are analysed and deliberately
+   **deferred**; **server-crash and host-reboot survival is NOT implemented and must not be claimed**;
+   upgrade/restart ends children (documented gap).
+2. **Persistence** — in-process single-writer **SQLite** metadata/audit store behind a future
+   `crates/relayable-store` (sessions, layout, tombstones, identities, preferences, audit_events; WAL,
+   migrations, prune, `flock`, start-up reconciliation); never terminal bytes as rows. **Designed here,
+   not implemented.**
+3. **Multi-user** — one user per server for the first release; system-service/multi-user mode gated on
+   an unimplemented per-user worker + `SO_PEERCRED` + authz model.
+
+**Accepted:** ADR-004 status → Accepted; `DECISIONS.md` DEC-005 → Accepted. Implied store work tracked
+as `STORE-001`.
+
+**Next:** CTX-001 (ADR-005 context env vars + test), then `STORE-001`; backlog: `MEM-001`, `CI-HOST-001`,
+`CLIENT-API-001`, `REF-004` remainder. **TERM-003 (libghostty)** still awaits user decision.
+
+---
+
 ## Checkpoint 24 — QA-001 integrated: smoke test, CI matrix, flow-control test (2026-10-15)
 
 **Objective:** add the §13.4 smoke test, the §13.5 build matrix, and the untested slow-client path.

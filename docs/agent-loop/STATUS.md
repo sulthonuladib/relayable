@@ -1,7 +1,7 @@
 # STATUS — Relayable
 
 **Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 2 — **core + reference workspace + QA tooling integrated; CTX-001 and ADR-004 remain.**
+**Milestone:** Phase 2 — **all five ADRs Accepted; core + reference workspace + QA tooling integrated. Remaining: CTX-001, STORE-001, and tracked backlog.**
 **Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
 
 ## Objective (current)

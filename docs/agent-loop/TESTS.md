@@ -278,3 +278,13 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Ru
 **Reconciliation:** interface contract flow-control wording corrected to the implemented behavior (buffer ≤ credit
 window, then detach with `flow_control_overflow`); `protocol/schema/events.proto` comment `"disconnected"` →
 `"Disconnected"`. Follow-ups: `MEM-001`, `CI-HOST-001`.
+
+## 2026-10-15 — ADR-004 acceptance (docs-only) (`9a3fb27`)
+
+| # | Check | Observed result | Exit |
+|---|---|---|---|
+| 97 | `git diff --name-only a44f471..e296a3d` (branch scope) | the new ADR file only; no code/docs-agent-loop/other-ADR changes | 0 |
+| 98 | read Decision 1 + the non-guarantees table + consequences | explicit "survival across server crash or host reboot — **NOT implemented, NOT claimed**" citing `full.md` §1.3:120/§6.3/§6.4; store "designed here, not implemented" | 0 |
+
+**Decision:** ADR-004 **Accepted** (DEC-005). No code or test accompanies it; the SQLite store is implied
+future work (`STORE-001`).
