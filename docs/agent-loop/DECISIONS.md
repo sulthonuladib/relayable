@@ -394,14 +394,21 @@ block id nor `created_at`, so a restore policy cannot be derived from `session.l
 
 **Decision:** split UI-004.
 
-- **Stage 1 (approved, bounded):** fix the three defects inside `apps/linux/src/app/**` only — make
-  "zero tabs ∧ connected ∧ no create in flight ⇒ create" an invariant re-checked on the `Connected`
-  edge, after the last tab closes, and after a failed create; derive the empty/creating text from
-  `pending_create`. Owned paths: `app/{events,tabs,panes,helpers,tests}.rs` + `apps/linux/evidence/
-  ui-004-*`. `apps/linux/src/api/**` is **not** touched, so it does not collide with UI-003.
+- **Stage 1 (delivered, integrated INT-026 `385f46f` — see the amendment below):** fix the auto-session
+  defects inside `apps/linux/src/app/**` only.
 - **Stage 2 (deferred, needs the user):** attaching to an existing session requires `api/**` changes
   (surface `session.view` / a new command) *and* a policy for which session to restore (last-used id
-  persisted locally is Relayable-original, not reference-derived).
+  persisted locally is Relayable-original, not reference-derived). Tracked as `UI-004-STAGE2` (a)
+  together with two technical items that also need `api/**`: (b) a retryable connect failure is still
+  painted as a terminal `ConnectionState::Error`, and (c) an unrelated `ApiEvent::Error` clears an
+  in-flight create intent, downgrading a split/labelled create to a new tab (verifier nit N1).
+
+**Amendment (2026-10-16, after delivery):** stage 1 as delivered (INT-026 `385f46f`) fixed defects 1 and 2
+**plus** a second wedge the implementer found (a create in flight when the transport dies was also void,
+because commands are not replayed across a reconnect) — it does **not** fix defect 3, which needs the
+error-cause classification that lives in `api/**`; an `app/**`-only version would have required forbidden
+string matching. Stage 1's owned paths as delivered: `app/{events,tabs,panes,helpers,tests}.rs` +
+`apps/linux/evidence/ui-004-*`; `api/**` was not touched, so it did not collide with UI-003.
 
 **Consequence to state honestly:** after stage 1 the app still creates a *new* session on every launch
 instead of restoring the previous one — a deviation from the only behavioural evidence (V1 0:52–1:30,

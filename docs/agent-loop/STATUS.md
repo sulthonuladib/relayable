@@ -2,6 +2,8 @@
 
 **Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
 **Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install
+integrated; refactor wave complete (`check-file-sizes.sh --strict` enforced in `validate.sh` + `ci.sh`);
+desktop auto-session delivered (UI-004 stage 1). **In flight:** UI-003 (in verification, `8d84a84`).
 integrated; **refactor wave complete** (every `REF-*` DONE; `check-file-sizes.sh --strict` enforced in
 `validate.sh` + `ci.sh`). In flight: UI-003.
 **Updated:** lead session `ses_ebab9726a` 2026-10-16 — REF-008 integrated (INT-022 `afcc631`,
@@ -9,18 +11,23 @@ integrated; **refactor wave complete** (every `REF-*` DONE; `check-file-sizes.sh
 
 ## Current execution (lead session `ses_ebab9726a`, 2026-10-16)
 
-- `master` is at **INT-025** (clean, pushed). Post-merge: `scripts/validate.sh` exits 0 (8 steps —
-  the file-size gate is now step 7 — with **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`,
-  `scripts/check-file-sizes.sh --strict` → exit 0 (`over-hard-cap=0`).
+- `master` is at **INT-026** (clean, pushed). Post-merge: `scripts/validate.sh` exits 0 (8 steps; step 4
+  = **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`, `scripts/check-file-sizes.sh --strict` →
+  exit 0 (`over-hard-cap=0`), desktop `cargo test --locked` → **65 passed / 0 failed**.
 - **Integrated this session:** REF-008 (INT-022 `afcc631`), CLIENT-API-002 (INT-023 `494917f`),
-  QA-HARNESS-001 (INT-024 `7c8f5a2` + `1a54cc4`), REF-010 (INT-025 `4a4cb16`). Two of these were
-  **rejected or qualified by an independent verifier first** and only integrated after repair.
+  QA-HARNESS-001 (INT-024 `7c8f5a2` + `1a54cc4`), REF-010 (INT-025 `4a4cb16`), UI-004 stage 1
+  (INT-026 `385f46f`), plus DOC-003 (`af72801`, citation repair). Three of these were **rejected or
+  qualified by an independent verifier first**; one was repaired before landing, one after a nit, and
+  UI-004 stage 1 landed with its nits recorded as `UI-004-STAGE2`.
 - **Refactor wave complete** — every `REF-*` task is DONE and the hard-cap gate is enforced in
   `validate.sh` + `ci.sh`.
-- **UI-003 in flight** (`ui/ui-003-next-output`): the `apps/linux` terminal data plane moves off its
-  private `relayable-protocol` frame client onto `relayable_client::Client` (`next_output`,
-  `resize_with_pixels`), preserving the two-plane split, the app-facing event contract and the
-  reference geometry.
+- **UI-003 in verification** (`ui/ui-003-next-output`, commit `8d84a84`): the `apps/linux` data plane now
+  runs on `relayable_client::Client` (`next_output` + `resize_with_pixels`), the raw
+  `FrameConnection`/`should_ack` path is deleted, `AttachBlock` carries a `session_id`,
+  `Output.stream_seq` is gone, resize reports the server-accepted geometry, and README §7/§10 are
+  rewritten. A measured ack-rate limit (**CLIENT-API-003**) means a tiny-write flood can still drop the
+  data-plane connection; the pre-migration plane failed the same way, so it is a backlog item, not a
+  regression.
 - **Environment drift (DEC-018):** `rustc`/`cargo` are now **1.99.1** (no `rust-toolchain.toml` pin);
   the `apps/linux` dependency set was missing from the offline cache and is cached again
   (`CARGO_NET_OFFLINE=true cargo build --locked` → exit 0); `spikes/terminal-engine-phase2` (`avt`) is

@@ -427,3 +427,18 @@ DEC-018 (offline cache drift / toolchain bump; no further agent-initiated networ
 (UI-004 staging + the deferred restore-session policy). The verifier **rejected** QA-HARNESS-001 at
 `084554b` and the repaired `0f4762c` passed with nits; CLIENT-API-002 passed with one nit, repaired in
 `5a6a56b` and mutation-checked by the lead.
+
+## 2026-10-16 — UI-004 stage 1 integrated: auto-session invariant (INT-026)
+
+Environment: Linux `falcon` x86_64, `cargo`/`rustc` 1.99.1 (`CARGO_NET_OFFLINE=true` for desktop).
+Reviewed branch `ui/ui-004-stage1-auto-session` (HEAD `ff1e8fc`) and integrated it as `385f46f` (INT-026).
+Independent verifier verdict: **accept-with-nits**.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 145 | verifier: `git diff 277bc23..ff1e8fc --name-status` | exactly the 5 owned `app/*.rs` + 2 owned evidence files; nothing under `api/**`, `streams.rs`, `live-probe.rs`, `README.md`, `Cargo.*` | 0 |
+| 146 | verifier: desktop `fmt` / `clippy -D warnings` / `test --locked` / `check --locked` | clean; `65 passed / 0 failed` (58 + 7 new `#[test]`, no test removed — 2 deleted lines in the hunk are `use` lines) | 0 |
+| 147 | verifier mutations M1 (`needs_session` ignores `create_in_flight`) / M4 (`abandon_create` no-op) | `62 passed; 3 failed` / `63 passed; 2 failed` — the intended tests fail | 101 (intended) |
+| 148 | verifier mutation M6 (delete `ensure_session()` in `close_focused`) | `65 passed; 0 failed` — **not caught**, the acknowledged call-site gap | 0 |
+| 149 | verifier: live `--mock --canvas 1099 706` on `wayland-1`, window focused, `Ctrl+Shift+W` | the 16 app-output lines are byte-identical to `ui-004-run.log:297-314`, including a second `…requesting one` + `session.created` | 0 |
+| 150 | post-merge on `master`: `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206 passed / 0 failed) / `SMOKE OK` / exit 0 / `65 passed / 0 failed` | 0 |
