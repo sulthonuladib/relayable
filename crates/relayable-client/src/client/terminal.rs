@@ -8,7 +8,7 @@ use relayable_protocol::transport::TransportError;
 use relayable_protocol::v1::{
     envelope::Body, request::Operation, response::Result as ResponseResult, AttachMode,
     BlockAttachRequest, BlockAttachResponse, BlockDetachRequest, Envelope, TerminalInput,
-    TerminalResize,
+    TerminalResize, TerminalResizeAccepted,
 };
 
 use crate::client::Client;
@@ -134,26 +134,63 @@ impl Client {
         }
     }
 
-    /// Resize a terminal stream (`terminal.resize`).
+    /// Resize a terminal stream (`terminal.resize`), reporting the pane's pixel
+    /// dimensions alongside its column/row count, and return the geometry the
+    /// server accepted.
+    ///
+    /// `pixel_width`/`pixel_height` are the pane's pixel dimensions (for
+    /// example the 1920x1080 a GUI pane measured). Both are optional on the wire
+    /// (`protocol/schema/terminal.proto`: `optional uint32 pixel_width = 4;
+    /// optional uint32 pixel_height = 5;`); `None` omits the field, and the
+    /// server then substitutes `0`
+    /// (`crates/relayable-server/src/dispatch.rs`:
+    /// `request.pixel_width.unwrap_or(0)`). The server applies the whole
+    /// geometry (columns, rows, and both pixel dimensions) to the block's PTY
+    /// window size, so the returned [`TerminalResizeAccepted`] carries the
+    /// dimensions the **server** accepted, not the values sent.
+    ///
+    /// [`Client::resize`] is this same call with no pixel dimensions.
     ///
     /// # Errors
     ///
-    /// See [`ClientError`].
-    pub fn resize(&mut self, stream_id: u64, cols: u16, rows: u16) -> Result<(), ClientError> {
+    /// [`ClientError::Server`] when the server rejects the resize (for example
+    /// when this client does not hold the writer lease), and any other
+    /// [`ClientError`] from the transport.
+    pub fn resize_with_pixels(
+        &mut self,
+        stream_id: u64,
+        cols: u16,
+        rows: u16,
+        pixel_width: Option<u16>,
+        pixel_height: Option<u16>,
+    ) -> Result<TerminalResizeAccepted, ClientError> {
         let result = self.request_operation(
             methods::TERMINAL_RESIZE,
             Operation::TerminalResize(TerminalResize {
                 stream_id,
                 cols: u32::from(cols),
                 rows: u32::from(rows),
-                pixel_width: None,
-                pixel_height: None,
+                pixel_width: pixel_width.map(u32::from),
+                pixel_height: pixel_height.map(u32::from),
             }),
         )?;
         match result {
-            ResponseResult::TerminalResize(_) => Ok(()),
+            ResponseResult::TerminalResize(accepted) => Ok(accepted),
             _ => Err(unexpected("terminal.resize", &result)),
         }
+    }
+
+    /// Resize a terminal stream (`terminal.resize`) with columns and rows only.
+    ///
+    /// This is [`Client::resize_with_pixels`] with no pixel dimensions, and it
+    /// discards the server's accepted geometry.
+    ///
+    /// # Errors
+    ///
+    /// See [`ClientError`].
+    pub fn resize(&mut self, stream_id: u64, cols: u16, rows: u16) -> Result<(), ClientError> {
+        self.resize_with_pixels(stream_id, cols, rows, None, None)?;
+        Ok(())
     }
 
     /// Read `TerminalOutput` frames for `stream_id` until `needle` appears in

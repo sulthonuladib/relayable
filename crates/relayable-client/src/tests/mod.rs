@@ -4,3 +4,4 @@ mod events;
 mod harness;
 mod output;
 mod rpc;
+mod terminal;

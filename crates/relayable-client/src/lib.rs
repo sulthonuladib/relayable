@@ -38,7 +38,8 @@
 //! ```
 //! use relayable_client::{
 //!     AttachMode, Error, ErrorCode, Limits, ServerHello, SessionRecord,
-//!     SessionSnapshotResponse, SessionSummary, TerminalSnapshot, TransportError,
+//!     SessionSnapshotResponse, SessionSummary, TerminalResizeAccepted, TerminalSnapshot,
+//!     TransportError,
 //! };
 //! let _ = AttachMode::Writer;
 //! let _ = ErrorCode::Internal;
@@ -46,6 +47,7 @@
 //! let _ = SessionRecord::default();
 //! let _ = SessionSnapshotResponse::default();
 //! let _ = SessionSummary::default();
+//! let _ = TerminalResizeAccepted::default();
 //! let _ = TerminalSnapshot::default();
 //! let _ = Limits::default();
 //! let _: Option<Error> = None;
@@ -71,7 +73,8 @@ pub use outcome::{AttachOutcome, CreatedSession};
 pub use relayable_protocol::transport::TransportError;
 pub use relayable_protocol::v1::{
     AttachMode, BlockAttachResponse, Error, ErrorCode, Event, Limits, ServerHello, SessionRecord,
-    SessionResumeResponse, SessionSnapshotResponse, SessionSummary, TerminalSnapshot,
+    SessionResumeResponse, SessionSnapshotResponse, SessionSummary, TerminalResizeAccepted,
+    TerminalSnapshot,
 };
 
 #[cfg(test)]
