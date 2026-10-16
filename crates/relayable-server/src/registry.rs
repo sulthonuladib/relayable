@@ -2,7 +2,8 @@
 //! control-event log. This is the single authority for server-owned state.
 
 use std::collections::BTreeMap;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
+use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
@@ -90,10 +91,12 @@ impl ServerShared {
         let pty_process_id = PtyProcessId::new();
         let initial_size = self.config.initial_size;
 
-        let mut environment: Vec<(OsString, OsString)> = Vec::new();
-        if std::env::var_os("TERM").is_none() {
-            environment.push((OsString::from("TERM"), OsString::from("xterm-256color")));
-        }
+        let environment = managed_terminal_environment(
+            std::env::var_os("TERM").as_deref(),
+            &session_id,
+            &block_id,
+            &self.config.socket_path,
+        );
 
         let pty = relayable_pty::PtyHandle::spawn(
             self.config.shell.as_os_str(),
@@ -401,6 +404,39 @@ impl ServerShared {
     }
 }
 
+/// The environment Relayable adds to every managed terminal it launches.
+///
+/// `TERM` keeps the existing default-only behavior: it is set only when the
+/// base environment does not already provide it. The three `RELAYABLE_*`
+/// context variables always carry the full `<kind>:<uuid>` session and block
+/// ids and the server's bound socket path (ADR-005 Decision 2). This function
+/// is pure so the environment contract can be unit-tested without spawning a
+/// child.
+fn managed_terminal_environment(
+    base_term: Option<&OsStr>,
+    session_id: &SessionId,
+    block_id: &BlockId,
+    server_address: &Path,
+) -> Vec<(OsString, OsString)> {
+    let mut environment: Vec<(OsString, OsString)> = Vec::new();
+    if base_term.is_none() {
+        environment.push((OsString::from("TERM"), OsString::from("xterm-256color")));
+    }
+    environment.push((
+        OsString::from("RELAYABLE_SESSION"),
+        OsString::from(session_id.to_string()),
+    ));
+    environment.push((
+        OsString::from("RELAYABLE_BLOCK"),
+        OsString::from(block_id.to_string()),
+    ));
+    environment.push((
+        OsString::from("RELAYABLE_SERVER"),
+        server_address.as_os_str().to_os_string(),
+    ));
+    environment
+}
+
 /// Current Unix-epoch time in milliseconds; informational only.
 pub(crate) fn now_millis() -> u64 {
     SystemTime::now()
@@ -422,6 +458,73 @@ mod tests {
             output_tail_bytes: 32_768,
             event_retention_events: 4096,
         }
+    }
+
+    fn env_value(environment: &[(OsString, OsString)], key: &str) -> Option<String> {
+        environment
+            .iter()
+            .find(|(name, _)| name == key)
+            .map(|(_, value)| value.to_string_lossy().into_owned())
+    }
+
+    #[test]
+    fn managed_terminal_environment_defaults_term_when_unset() {
+        let session_id = SessionId::new();
+        let block_id = BlockId::new();
+        let server_address = Path::new("/tmp/relayable-registry-test.sock");
+        let environment =
+            managed_terminal_environment(None, &session_id, &block_id, server_address);
+
+        let expected_session = session_id.to_string();
+        let expected_block = block_id.to_string();
+        assert_eq!(
+            env_value(&environment, "TERM").as_deref(),
+            Some("xterm-256color")
+        );
+        assert_eq!(
+            env_value(&environment, "RELAYABLE_SESSION").as_deref(),
+            Some(expected_session.as_str())
+        );
+        assert_eq!(
+            env_value(&environment, "RELAYABLE_BLOCK").as_deref(),
+            Some(expected_block.as_str())
+        );
+        assert_eq!(
+            env_value(&environment, "RELAYABLE_SERVER").as_deref(),
+            Some(server_address.to_str().expect("utf-8 test path"))
+        );
+        assert_eq!(
+            environment.len(),
+            4,
+            "exactly TERM plus the three context variables"
+        );
+    }
+
+    #[test]
+    fn managed_terminal_environment_preserves_preexisting_term() {
+        let session_id = SessionId::new();
+        let block_id = BlockId::new();
+        let server_address = Path::new("/tmp/relayable-registry-test.sock");
+        let environment = managed_terminal_environment(
+            Some(OsStr::new("screen-256color")),
+            &session_id,
+            &block_id,
+            server_address,
+        );
+
+        assert_eq!(
+            environment.len(),
+            3,
+            "exactly the three context variables when TERM already exists"
+        );
+        assert!(
+            environment.iter().all(|(name, _)| name != "TERM"),
+            "a pre-existing TERM must not be overridden"
+        );
+        assert_eq!(
+            env_value(&environment, "RELAYABLE_SERVER").as_deref(),
+            Some(server_address.to_str().expect("utf-8 test path"))
+        );
     }
 
     #[test]
