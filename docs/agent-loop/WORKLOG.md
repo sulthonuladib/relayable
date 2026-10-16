@@ -107,17 +107,24 @@ without rewriting historical evidence.
 | `python3 -c "json.load(open('opencode.json'))"` | valid JSON |
 | `LOOP_DRY_RUN=1 ./scripts/agent-loop.sh 1` | clean-tree guard passes; prints the `opencode run --agent orchestrator …` command; exit 0 |
 | `./scripts/agent-loop.sh 1` on a dirty tree | exits 1 and prints the offending paths (guard works) |
-| `bash scripts/validate.sh` | **FAILS, exit 101**, at `cargo clippy` — see the regression finding below |
+| `bash scripts/validate.sh` | **steps 1–6 pass, step 7 fails.** fmt, clippy, `cargo build --workspace`, `cargo test --workspace`, the lifecycle acceptance test, and `check-dependency-direction.sh` all exit 0 (the script stops at the first failure, so reaching step 7 proves the earlier steps passed). Step 7 (spike build) fails: `cfg_aliases v0.2.2` is not in the offline cache |
+| `bash scripts/smoke.sh` | `SMOKE OK`, exit 0 — build, server launch, session create, I/O round-trip, client disconnect, process survival, reconnect, session inspect, session close, SIGTERM shutdown, socket unlink |
 
 **Findings worth keeping:**
 
-- **Toolchain regression (pre-existing, not caused by this checkpoint):** `protoc` is absent —
-  `/usr/bin/protoc` does not exist and `protoc` is not on `PATH` (the ambient `PROTOC` is unset), so
-  `crates/relayable-protocol/build.rs` panics with "Could not find `protoc`" and `scripts/validate.sh`
-  fails at step 2. `AGENTS.md` recorded `/usr/bin/protoc` → `libprotoc 36.1` on 2026-10-15 (REVIEW-001),
-  so the host changed since. No Rust file was touched by this checkpoint (`git show --stat`: config,
-  agents, script, and docs only), but **no "suite is green" claim is valid on this host until it is
-  installed** — which needs explicit user approval. `AGENTS.md` and `STATUS.md` now say so.
+- **`protoc` was missing, then restored.** The first validation run failed at clippy with
+  `failed to compile protocol schemas … Could not find 'protoc'` (exit 101). `AGENTS.md` recorded
+  `/usr/bin/protoc` → `libprotoc 36.1` on 2026-10-15, and a leftover
+  `/usr/share/bash-completion/completions-core/protoc.bash` indicated the package had been removed
+  since. The user reinstalled it the same day; `/usr/bin/protoc` → `libprotoc 36.1` is verified again
+  and steps 1–6 pass. Recorded as an environment change, not a code regression — no Rust file was
+  touched by this checkpoint (`git show --stat`).
+- **Offline cache gap at step 7 (pre-existing, still open):** the spike has a **committed**
+  `spikes/terminal-engine/Cargo.lock` pinning `cfg_aliases 0.2.2`, but the cargo cache holds only
+  `cfg_aliases-0.1.1`. Reproduced directly: `cd spikes/terminal-engine && cargo build --offline` →
+  `failed to download cfg_aliases v0.2.2 … attempting to make an HTTP request`. So the recorded claim
+  "`scripts/{validate,smoke,ci}.sh` all pass" holds only for a host whose cache predates the lockfile
+  bump, or with network available. One `cargo fetch` fixes it (user approval; DEC-012 precedent).
 - **Driver bug found and fixed by running it:** the first `LOOP_DRY_RUN` invocation resolved the agent
   as `1`, because the ambient environment exports a generic `AGENT=1` and the script read
   `AGENT="${AGENT:-orchestrator}"`. The knobs are now `LOOP_AGENT` / `LOOP_DRY_RUN`. This is why the
@@ -146,20 +153,21 @@ without rewriting historical evidence.
   dirty-tree guard were exercised); running it spends tokens and starts a real lead session.
 - Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
   delegated task.
-- `scripts/validate.sh` cannot pass on this host until `protoc` is restored (see above). Any claim of
-  a green suite made after this checkpoint must state that it was not re-run, or that `protoc` was
-  installed first.
+- `scripts/validate.sh` cannot complete on this host until the spike's `cfg_aliases 0.2.2` is fetched
+  (step 7, offline cache). Steps 1–6 do pass. Any "suite is green" claim must state which scripts were
+  actually run and that step 7 was excluded.
+- `scripts/agent-loop.sh` has not been run end-to-end against a live agent (only `LOOP_DRY_RUN` and the
+  dirty-tree guard were exercised); running it spends tokens and starts a real lead session.
+- Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
+  delegated task.
 
 **Next tasks:**
 
-1. Restore `protoc` (needs user approval) and re-run `scripts/validate.sh` to re-establish a valid
-   green baseline. Until then treat the suite as unverified.
-2. Finish the doc-vocabulary migration (`NEXT.md`, `NEXT-SESSION-PROMPT.md`, `STATUS.md`,
-   `BACKLOG.md`) — **done in this checkpoint for the living docs**; remaining Pi/Herdr references are
-   intentional history in `DECISIONS.md`, `WORKLOG.md`, `TESTS.md`, and captured evidence logs.
-3. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
+1. One-time `cargo fetch` for the spike workspace (user approval) so `scripts/validate.sh` step 7
+   passes; then re-run `validate.sh` and `ci.sh` end to end to re-establish the green baseline.
+2. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
    (`--strict` CI gate). This is the last hard-cap blocker.
-4. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
+3. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
 
 ---
 

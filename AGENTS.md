@@ -50,7 +50,8 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 | Tool | State |
 |---|---|
 | rustc / cargo | 1.98.1, `stable-x86_64-unknown-linux-gnu` (default) |
-| protoc | **ABSENT (regression)** — 2026-10-16: `/usr/bin/protoc` does not exist and `protoc` is not on `PATH`. `cargo clippy`/`build` fails in `crates/relayable-protocol/build.rs` (exit 101, "Could not find `protoc`"), so `scripts/validate.sh` cannot pass. Recorded present 2026-10-15 (REVIEW-001); the host changed since. Installing it needs explicit user approval |
+| protoc | `/usr/bin/protoc` → `libprotoc 36.1` (required by `prost-build`; verified 2026-10-15, found absent 2026-10-16, restored by the user the same day) |
+| offline cargo cache | **incomplete for the spike:** `spikes/terminal-engine/Cargo.lock` pins `cfg_aliases 0.2.2` but only `0.1.1` is cached, so the spike's `cargo build --offline` fails and `scripts/validate.sh` stops at step 7. The main workspace builds and tests fine |
 | mise | `/usr/bin/mise` |
 | android CLI | `/home/sulthonuladib/.local/bin/android` |
 | adb | `/usr/bin/adb` |
