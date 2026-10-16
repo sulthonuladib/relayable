@@ -401,3 +401,27 @@ citations only — tracked as DOC-003).
 **Decisions recorded:** REF-008 used no behaviour change (pure move); the `#[cfg(test)] mod tests` block
 was distributed next to the code it tests per `code-organization.md` rule 5. Integration of
 `QA-HARNESS-001` was **refused** pending repair (see `WORKLOG.md` Checkpoint 40).
+
+## 2026-10-16 — CLIENT-API-002, QA-HARNESS-001, REF-010 integrated (INT-023 … INT-025)
+
+Environment: Linux `falcon` x86_64, `cargo`/`rustc` **1.99.1** (see DEC-018 — the tree was documented at
+1.98.1 and has no `rust-toolchain.toml` pin). Integrated branches: `client/client-api-002-resize-parity`
+(`5a6a56b` → INT-023 `494917f`), `qa/qa-harness-001-freshness-guard` (`0f4762c` → INT-024 `7c8f5a2`,
+plus the lead's doc-accuracy commit `1a54cc4`), `refactor/ref-010-strict-gate` (`cabe58a` → INT-025
+`4a4cb16`).
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 136 | lead mutation check on `5a6a56b`: echo-the-request mutation of `resize_with_pixels` | `101`; exactly `tests::terminal::resize_with_pixels_sends_pixels_and_returns_the_accepted_geometry` failed (`left: 9, right: 12`) | 101 (intended) |
+| 137 | post-INT-023 `bash scripts/validate.sh` | 7 steps green; step 4 = 198 passed / 0 failed | 0 |
+| 138 | post-INT-023 `bash scripts/smoke.sh` + `check-file-sizes.sh --strict` | `SMOKE OK`; `--strict` exit 0 | 0 |
+| 139 | post-INT-024/025 `bash scripts/validate.sh` | 8 steps green; step 4 = **206 passed / 0 failed**; new step 7 `check-file-sizes.sh --strict` exit 0 | 0 |
+| 140 | post-INT-024/025 `bash scripts/smoke.sh` | `SMOKE OK` | 0 |
+| 141 | `cd apps/linux && CARGO_NET_OFFLINE=true cargo build --locked` | exit 0 (~60 s) — desktop dependency set cached again | 0 |
+| 142 | `cd spikes/terminal-engine-phase2 && CARGO_NET_OFFLINE=true cargo build` | `no matching package named 'avt' found` — cache gap, pre-existing, unrelated to REF-010 | 101 |
+
+**Decisions recorded:** DEC-017 (client resize parity before UI-003) — implemented and integrated;
+DEC-018 (offline cache drift / toolchain bump; no further agent-initiated network fetch); DEC-019
+(UI-004 staging + the deferred restore-session policy). The verifier **rejected** QA-HARNESS-001 at
+`084554b` and the repaired `0f4762c` passed with nits; CLIENT-API-002 passed with one nit, repaired in
+`5a6a56b` and mutation-checked by the lead.

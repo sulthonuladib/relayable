@@ -352,6 +352,63 @@ paths are `apps/linux/**` and one writer per path must hold (`AGENTS.md`).
 **Reconsider if:** UI-003 is dropped, or `resize`'s response is shown to be unnecessary for a
 server-confirmed resize.
 
+## DEC-018 — Offline cargo cache drift and toolchain bump on this host (2026-10-16)
+
+**Context:** mid-session, `bash scripts/ci.sh` could not reach `OVERALL: PASS` on this host: the
+`apps/linux` workspace (725 packages, incl. `gpui 0.2.2`, `alacritty_terminal 0.26.0`) and
+`spikes/terminal-engine-phase2` (`avt`, …) were missing from `~/.cargo/registry`, so `cargo build
+--locked` failed with `no matching package named 'alacritty_terminal' found` — offline, with no tree
+change responsible (a pristine export of `afcc631` failed identically). `rustc`/`cargo` also report
+**1.99.1**, while `AGENTS.md`/`STATUS.md` documented 1.98.1; there is no `rust-toolchain.toml` pin.
+
+**What happened:** the desktop dependency set was repopulated by an implementer's first
+`cargo build --locked` inside the `ui-003` worktree at ~22:49 (registry cache entries written 22:49;
+`apps/linux/Cargo.lock` unchanged, verified with `git status`). `CARGO_NET_OFFLINE=true cargo build
+--locked` in `apps/linux` now succeeds (exit 0, ~60 s). The `spikes/terminal-engine-phase2` set is
+still absent, so that one `ci.sh` row cannot pass offline.
+
+**Decision (this session):** do **not** run a further networked fetch at agent initiative. `apps/linux`
+builds offline again, so UI-003/UI-004 are unblocked; the phase-2 spike row is recorded as a known
+environment gap and stays red until the user either approves a one-time networked `cargo fetch` for
+that spike workspace (the DEC-012 pattern) or accepts the documented red row. The `file-sizes` row added
+by REF-010 is PASS and its failure path was demonstrated independently of this gap.
+
+**Verified facts:** `apps/linux` offline build exit 0; `spikes/terminal-engine-phase2` offline build
+exit 101 (`no matching package named 'avt' found`); committed lockfiles unchanged; `validate.sh` and
+`smoke.sh` green on the root workspace both before and after (root cache was never incomplete).
+
+**Reconsider if:** the user approves the fetch (then re-verify `ci.sh` → `OVERALL: PASS`), or the
+phase-2 spike is retired as superseded TERM-002 evidence.
+
+## DEC-019 — UI-004 staging and the "which session to restore" policy (2026-10-16)
+
+**Context:** `apps/linux` already auto-creates a session on the `Connecting → Connected` edge, but
+three defects make "no manual `new`" untrue: closing the last tab never re-creates a session; a failed
+`session.create` leaves `pending_create` set forever (auto-create *and* `Ctrl+Shift+N` dead); and a
+retryable connect failure is painted as a terminal `ConnectionState::Error`. Separately, attaching to an
+*existing* session is impossible with today's app-side API: the wire `SessionSummary` carries neither a
+block id nor `created_at`, so a restore policy cannot be derived from `session.list`.
+
+**Decision:** split UI-004.
+
+- **Stage 1 (approved, bounded):** fix the three defects inside `apps/linux/src/app/**` only — make
+  "zero tabs ∧ connected ∧ no create in flight ⇒ create" an invariant re-checked on the `Connected`
+  edge, after the last tab closes, and after a failed create; derive the empty/creating text from
+  `pending_create`. Owned paths: `app/{events,tabs,panes,helpers,tests}.rs` + `apps/linux/evidence/
+  ui-004-*`. `apps/linux/src/api/**` is **not** touched, so it does not collide with UI-003.
+- **Stage 2 (deferred, needs the user):** attaching to an existing session requires `api/**` changes
+  (surface `session.view` / a new command) *and* a policy for which session to restore (last-used id
+  persisted locally is Relayable-original, not reference-derived).
+
+**Consequence to state honestly:** after stage 1 the app still creates a *new* session on every launch
+instead of restoring the previous one — a deviation from the only behavioural evidence (V1 0:52–1:30,
+V4 4:11) that stage 2 closes. All four empty/loading/error/disconnected surfaces are
+**Relayable-original**: the catalogue records them as `not observed` in all five videos, so they must be
+labelled as such and must not be presented as reference-derived.
+
+**Reconsider if:** the user wants restore-last-session in this phase (then stage 2 becomes the priority
+and needs a local persistence decision), or the picker/attach work is dropped entirely.
+
 ## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.

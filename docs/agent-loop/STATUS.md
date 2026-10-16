@@ -2,16 +2,34 @@
 
 **Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
 **Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install
-integrated; **refactor wave complete** (`check-file-sizes.sh --strict` green). **In flight:** REF-010,
-CLIENT-API-002, QA-HARNESS-001 repair (see below).
+integrated; **refactor wave complete** (every `REF-*` DONE; `check-file-sizes.sh --strict` enforced in
+`validate.sh` + `ci.sh`). In flight: UI-003.
 **Updated:** lead session `ses_ebab9726a` 2026-10-16 — REF-008 integrated (INT-022 `afcc631`,
 `WORKLOG.md` Checkpoint 40); earlier work in Checkpoints 26–39.
 
 ## Current execution (lead session `ses_ebab9726a`, 2026-10-16)
 
-- `master` is at `afcc631` (**INT-022**: REF-008), clean and pushed. Post-merge on `master`:
-  `scripts/validate.sh` exits 0 (7/7 steps, step 4 = **194 passed / 0 failed**), `scripts/smoke.sh` →
-  `SMOKE OK`, `scripts/check-file-sizes.sh --strict` → **exit 0** (`checked=149; over-hard-cap=0`).
+- `master` is at **INT-025** (clean, pushed). Post-merge: `scripts/validate.sh` exits 0 (8 steps —
+  the file-size gate is now step 7 — with **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`,
+  `scripts/check-file-sizes.sh --strict` → exit 0 (`over-hard-cap=0`).
+- **Integrated this session:** REF-008 (INT-022 `afcc631`), CLIENT-API-002 (INT-023 `494917f`),
+  QA-HARNESS-001 (INT-024 `7c8f5a2` + `1a54cc4`), REF-010 (INT-025 `4a4cb16`). Two of these were
+  **rejected or qualified by an independent verifier first** and only integrated after repair.
+- **Refactor wave complete** — every `REF-*` task is DONE and the hard-cap gate is enforced in
+  `validate.sh` + `ci.sh`.
+- **UI-003 in flight** (`ui/ui-003-next-output`): the `apps/linux` terminal data plane moves off its
+  private `relayable-protocol` frame client onto `relayable_client::Client` (`next_output`,
+  `resize_with_pixels`), preserving the two-plane split, the app-facing event contract and the
+  reference geometry.
+- **Environment drift (DEC-018):** `rustc`/`cargo` are now **1.99.1** (no `rust-toolchain.toml` pin);
+  the `apps/linux` dependency set was missing from the offline cache and is cached again
+  (`CARGO_NET_OFFLINE=true cargo build --locked` → exit 0); `spikes/terminal-engine-phase2` (`avt`) is
+  still absent, so that single `ci.sh` row cannot pass offline — **user decision pending**.
+- **UI-004 staged (DEC-019):** stage 1 fixes auto-session/`pending_create`/retryable-error inside
+  `apps/linux/src/app/**`; stage 2 (attach an existing session) needs `api/**` plus a restore policy and
+  is deferred to the user.
+- Next: verify/integrate UI-003 → UI-004 stage 1 → UI-005 → UI-006; in parallel (offline-safe) DOC-003
+  (citation repair), DOCS-001 (docs index), MEM-001, CI-HOST-001, QA-FLAKE-001.
 - **REF-008 DONE** — INT-022 `afcc631`: `crates/relayable-server/src/session.rs` 1037 → 28 lines + 7
   `src/session/*` modules; `tests/server_e2e.rs` 1472 → `tests/server_e2e/**` (9 files, one binary).
   Independent verifier: **accept-with-nits** — pure move (0 tokens/items/tests lost, no new bare `pub`,

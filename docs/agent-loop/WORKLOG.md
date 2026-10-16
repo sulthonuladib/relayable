@@ -77,6 +77,69 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 41 — INT-023/INT-024/INT-025 integrated; verifier reject→repair cycle; environment drift recorded (2026-10-16)
+
+**Objective:** continue the ordered queue; integrate only independently verified work; record the
+environment changes that affect what can be proven offline.
+
+**Files changed:** `docs/agent-loop/**`; merged `crates/relayable-client/**` (INT-023),
+`tests/fixtures/binary.rs` (INT-024 + `1a54cc4`), `scripts/{ci,validate}.sh` +
+`docs/architecture/code-organization.md` (INT-025).
+
+### Commands run and observed results (post-merge `master`)
+
+| Command | Observed |
+|---|---|
+| `git merge --no-ff client/client-api-002-resize-parity` | INT-023 `494917f`; additive `resize_with_pixels`, `resize` byte-identical |
+| lead-run mutation check on the repaired test | echo-the-request mutation → `EXIT 101`, exactly `resize_with_pixels_sends_pixels_and_returns_the_accepted_geometry` failed |
+| `bash scripts/validate.sh` after INT-023 | exit 0; step 4 = **198 passed / 0 failed** |
+| `git merge --no-ff qa/qa-harness-001-freshness-guard` | INT-024 `7c8f5a2` (+ lead doc-accuracy commit `1a54cc4`) |
+| `git merge --no-ff refactor/ref-010-strict-gate` | INT-025 `4a4cb16` |
+| `bash scripts/validate.sh` after INT-024/025 | exit 0; step 4 = **206 passed / 0 failed**; step 7 `check-file-sizes.sh --strict` exit 0 |
+| `bash scripts/smoke.sh` | `SMOKE OK` |
+| `cd apps/linux && CARGO_NET_OFFLINE=true cargo build --locked` | exit 0 (60 s) — the desktop dependency set is cached again |
+| `cd spikes/terminal-engine-phase2 && CARGO_NET_OFFLINE=true cargo build` | **exit 101** — `no matching package named 'avt' found` (cache gap, pre-existing) |
+| `rustc --version` / `cargo --version` | **1.99.1** (was documented as 1.98.1; no `rust-toolchain.toml` pin exists) |
+
+### Findings
+
+- **Two verifications rejected/qualified work before integration**, which is the loop working: the first
+  QA-HARNESS-001 attempt was rejected (nested `mod tests;` resolution; vacuous checkout test) and
+  repaired in `0f4762c`; CLIENT-API-002 was accepted with a nit that its headline test could not fail,
+  repaired in `5a6a56b` and re-checked by the lead with a mutation.
+- **Offline cache drift.** The desktop dependency set (~725 packages, incl. `gpui 0.2.2` /
+  `alacritty_terminal 0.26.0`) was missing and is cached again after a build in the `ui-003` worktree at
+  ~22:49 (registry cache writes dated 22:49; `apps/linux/Cargo.lock` unchanged). The
+  `spikes/terminal-engine-phase2` set (`avt`, …) is still absent, so `ci.sh`'s
+  `spike-terminal-engine-phase2` row cannot pass offline. Toolchain also moved 1.98.1 → 1.99.1. Recorded
+  as DEC-018; the phase-2 row needs a user decision (one-time networked fetch, or accept a documented
+  red row).
+- **UI-003 launched** once CLIENT-API-002 landed (`ui/ui-003-next-output`, fast-forwarded to `494917f`).
+- **UI-004 scoped by a planner** into a bounded stage 1 (`apps/linux/src/app/**` only: make
+  "no session ⇒ create one" an invariant, clear `pending_create` on failure, stop painting retryable
+  connect failures as terminal errors, truthful empty/creating text) and a stage 2 that needs
+  `apps/linux/src/api/**` **plus a lead/user policy decision** (which session to restore — the wire
+  `SessionSummary` has no block id and no `created_at`). Recorded as DEC-019. The planner also verified
+  that **all four** empty/loading/error/disconnected surfaces are Relayable-original: no reference video
+  shows them, so they must stay labelled as such.
+
+### Risks / notes
+
+- `ci.sh` overall PASS is not currently reproducible on this host (phase-2 spike row) — the new
+  `file-sizes` row itself is PASS, and its failure path was demonstrated.
+- `stat`-level toolchain drift (1.99.1) is host-level; the workspace, `validate.sh` and the desktop
+  workspace all build and test green on it.
+
+### Next
+
+1. UI-003 (in flight) → verify → integrate; then UI-004 stage 1; UI-005; UI-006.
+2. Offline-safe queue while UI work proceeds: DOC-003 (citation repair), DOCS-001 (docs index),
+   MEM-001 (memory baseline), CI-HOST-001, QA-FLAKE-001.
+3. User decisions pending: DEC-014 (gpui-kit/libghostty), DEC-018 (phase-2 spike cache / network
+   fetch), DEC-019 stage 2 (which session to restore).
+
+---
+
 ## Checkpoint 40 — REF-008 integrated (INT-022); verifier reject/repair cycle; REF-010 launched (2026-10-16)
 
 **Objective:** work the ordered queue from `NEXT.md` (REF-008 → REF-010 → UI-003..UI-006 → DOCS-001 →

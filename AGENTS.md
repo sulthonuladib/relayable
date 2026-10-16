@@ -49,9 +49,9 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 
 | Tool | State |
 |---|---|
-| rustc / cargo | 1.98.1, `stable-x86_64-unknown-linux-gnu` (default) |
+| rustc / cargo | 1.99.1, `stable-x86_64-unknown-linux-gnu` (default); no `rust-toolchain.toml` pin. The tree was documented at 1.98.1 until 2026-10-16 (DEC-018: host-level bump; workspace, desktop workspace, `validate.sh` and `smoke.sh` all green on 1.99.1) |
 | protoc | `/usr/bin/protoc` → `libprotoc 36.1` (required by `prost-build`; verified 2026-10-15, found absent 2026-10-16, restored by the user the same day) |
-| offline cargo cache | complete — `cfg_aliases 0.2.2` + `nix 0.31.3` fetched once on 2026-10-16 (DEC-012 pattern); `scripts/validate.sh` now passes end to end **offline** |
+| offline cargo cache | **partial — see DEC-018 (2026-10-16).** The root workspace builds/tests offline (`scripts/validate.sh` all 8 steps, `scripts/smoke.sh` OK) and the `apps/linux` set is cached again (`CARGO_NET_OFFLINE=true cargo build --locked` → exit 0), but `spikes/terminal-engine-phase2` (`avt`, …) is **not** cached, so that one `ci.sh` row cannot pass offline. Do **not** run a networked `cargo fetch` at agent initiative; the DEC-012 pattern requires user approval. Always prefer `--offline` / `CARGO_NET_OFFLINE=true` |
 | mise | `/usr/bin/mise` |
 | android CLI | `/home/sulthonuladib/.local/bin/android` |
 | adb | `/usr/bin/adb` |

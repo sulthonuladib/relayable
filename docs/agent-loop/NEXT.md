@@ -26,14 +26,17 @@ git worktree list && git branch -a
 ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-audit docs/reviews
 ```
 
-## Current state (lead session, 2026-10-16)
+## Current state (lead session `ses_ebab9726a`, 2026-10-16)
 
-`master` is clean and pushed to `origin/master`. Baseline **verified green offline**: `scripts/validate.sh`
-passes all 7 steps (194 tests pass / 0 fail) and `scripts/smoke.sh` → `SMOKE OK`. `protoc` is present
-(`libprotoc 36.1`) and the offline cargo cache is complete. All Wave 1/2 research, the review/fix cycle,
-the core slices, the GPUI reference workspace, the QA tooling, and **all five ADRs** are integrated.
-**DEC-011** clarifies ADR-005 Decision 5; **DEC-015** migrated the agent runtime to OpenCode; **DEC-016**
-pins the loop's model to `opencode-go/deepseek-v4.1-flash`.
+`master` is clean and pushed; **the whole refactor wave is integrated** — REF-008 (INT-022 `afcc631`),
+CLIENT-API-002 (INT-023 `494917f`), QA-HARNESS-001 (INT-024 `7c8f5a2` + `1a54cc4`), REF-010 (INT-025
+`4a4cb16`). Baseline **verified green**: `scripts/validate.sh` exits 0 (8 steps, **206 passed /
+0 failed**), `scripts/smoke.sh` → `SMOKE OK`, `scripts/check-file-sizes.sh --strict` → exit 0
+(`over-hard-cap=0`). `protoc` is present. `ci.sh`'s new `file-sizes` row is PASS; one pre-existing row
+(`spike-terminal-engine-phase2`) cannot pass offline — see DEC-018.
+
+**Read next:** `STATUS.md` "Current execution", `WORKLOG.md` Checkpoints 40–41, `DECISIONS.md`
+DEC-017–019, and the "Pending user decisions" section below.
 
 > **A stopped loop session ran with the wrong model (2026-10-16):** the first unattended run used the
 > session default, which resolved to a free model (`ll-alpha-free`), because no model was pinned. It was
@@ -78,40 +81,49 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **REF-010** — implementer, branch `refactor/ref-010-strict-gate`, worktree
-  `/home/sulthonuladib/work/relayable-wt/ref-010` (from `afcc631`). Owns `scripts/ci.sh`,
-  `scripts/validate.sh`, `docs/architecture/code-organization.md`. Must demonstrate the gate can fail
-  (artificial over-cap file) and that `ci.sh` reports `OVERALL: FAIL` on a violation.
-- **CLIENT-API-002** — implementer, branch `client/client-api-002-resize-parity`, worktree
-  `/home/sulthonuladib/work/relayable-wt/client-api-002` (commit `fe11f40`). Owns
-  `crates/relayable-client/src/client/terminal.rs`, `src/lib.rs` (re-export), `src/tests/**`.
-  Verification in flight. **UI-003 is gated on this landing.**
-- **QA-HARNESS-001** — repair implementer on `qa/qa-harness-001-freshness-guard` (worktree
-  `/home/sulthonuladib/work/relayable-wt/qa-harness-001`). Owns `tests/fixtures/binary.rs` only.
-  `084554b` was rejected by the verifier and **must not be integrated**; the repair must fix nested
-  `mod <name>;` resolution and make the checkout-level test fail against the old classifier.
-- **UI-003** — READY, branch `ui/ui-003-next-output` fast-forwarded to `afcc631`, no writer yet
-  (blocked on CLIENT-API-002). Planned change: rewrite `apps/linux/src/api/data*.rs` onto a second
-  `relayable_client::Client` (keep the two-plane split), plus the `apps/linux/README.md` §7/§10 fixes.
+- **UI-003** — implementer, branch `ui/ui-003-next-output`, worktree
+  `/home/sulthonuladib/work/relayable-wt/ui-003` (fast-forwarded to `494917f`; it may be ahead now).
+  Owns `apps/linux/src/api/{data,data_thread,mod,types,mock,tests}.rs`, `apps/linux/src/app/streams.rs`,
+  `apps/linux/src/bin/live-probe.rs`, `apps/linux/README.md`, `apps/linux/evidence/ui-003-*.log`.
+  Moves the terminal data plane onto `relayable_client::Client` (`next_output` +
+  `resize_with_pixels`), keeping the two-plane split and the reference geometry; **must drain every
+  attached stream each `pump()`** (credit-window acking) and must not touch `crates/**`,
+  `apps/linux/Cargo.lock`, `src/{main,ui,term,geometry*,theme*,tokens}**`.
+- Nothing else is in flight. INT-022/023/024/025 are merged and pushed, so the `ref-008`, `ref-010`,
+  `client-api-002`, `qa-harness-001` worktrees are eligible for the standing cleanup (branch preserved).
+
+## Pending user decisions (the loop continues without them)
+
+1. **DEC-014 — gpui-kit / libghostty.** Unchanged: research recommends Reject/Defer, ADR-003's pins
+   stay. UI-006 (theming) is therefore scoped as a **local token-driven theme** inside `apps/linux`,
+   not as adopting a component layer.
+2. **DEC-018 — `spikes/terminal-engine-phase2` offline cache gap.** `avt` is not in the cargo cache, so
+   that one `ci.sh` row cannot pass offline. Approving a one-time networked `cargo fetch` in that spike
+   workspace (DEC-012 pattern) restores `ci.sh → OVERALL: PASS`. No agent fetches it without approval.
+3. **DEC-019 stage 2 — restore-an-existing-session policy.** After UI-004 stage 1 the app still creates a
+   *new* session on each launch instead of restoring the previous one (a deviation from the only
+   behavioural reference evidence). Stage 2 needs `apps/linux/src/api/**` work plus a decision: persist
+   the last-used session id locally (Relayable-original) or keep always-creating.
+4. **Worktree cleanup authorization:** standing authorization for done+merged worktrees applies
+   (AGENTS.md); no per-removal confirmation is needed.
 
 ## Open tasks, in order
 
-1. **Integrated & green:** CTX-001 (INT-015), INSTALL-001 (INT-016), CLIENT-API-001 (INT-017), STORE-001
-   (INT-018 `f4d59f8`).
-2. **Integrated:** RESEARCH-001/002 (INT-021 `96b4180`); REF-006 (INT-020 `ba92c51`), REF-007/009
-   (INT-019 `54fe220`). The gpui-kit / libghostty adoption decision (DEC-014) is still with the user.
-3. **Next-phase plan:** `docs/architecture/next-phase-plan.md`. **REF-008** (server split) is the last
-   file-size blocker before **REF-010** (`--strict` CI gate). After RESEARCH-001/002: **TERM-003**
-   (libghostty-rs spike + ADR-003 amendment), then **UI-004/005/006** (auto-session on open, keymap helper,
-   theming), then **DOCS-001** (central docs index).
-4. **Cleanup:** remove merged refactor worktrees (AGENTS.md "Worktree lifecycle / cleanup") and centralize
-   docs once the gpui-kit / libghostty decisions are recorded.
-5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`, `UI-003`, `QA-FLAKE-001`
-   (pre-existing `server_e2e` flake).
-6. **TERM-003 (proposed; user decision pending)** — user prefers **libghostty / `libghostty-rs`**
-   (ADR-003 reconsideration trigger #10); adopting it needs the RESEARCH-002 evidence + an ADR-003
-   amendment.
+1. **UI-003** (in flight) — verify → integrate.
+2. **UI-004 stage 1** (DEC-019) — auto-session invariant + truthful empty/creating text, `app/**` only.
+3. **UI-005** — keymapping helper / discoverable shortcut overlay (after UI-004).
+4. **UI-006** — local token-driven theming (no gpui-kit, per DEC-014) — verify fidelity against
+   `docs/research/design-tokens.md`.
+5. **Offline-safe queue, can run any time:** **DOC-003** (repair the citations invalidated by the
+   refactor splits — `docs/adr/ADR-004-*` ×9–10, `docs/architecture/code-organization.md`,
+   `protocol/compatibility/core-001-method-set.md`; citation-only, no decision changed),
+   **DOCS-001** (`docs/README.md` index + consolidation, evidence preserved), **MEM-001** (memory
+   baseline, root workspace), **CI-HOST-001**, **QA-FLAKE-001** (`server_e2e`
+   `resume_shapes_and_writer_takeover` / `idle_timeout_reason_is_reported_to_a_subscriber`).
+6. **TERM-003** stays proposed pending the user's DEC-014 answer.
 7. Update `docs/agent-loop/**` after every meaningful iteration.
+8. **Cleanup:** remove the merged worktrees (`ref-008`, `ref-010`, `client-api-002`, `qa-harness-001`)
+   under the standing authorization; keep branches.
 
 ## STORE-001 SQLite binding — decided: option A (2026-10-16)
 
@@ -133,12 +145,21 @@ builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) a
 
 ## Approval gates
 
-- **None active.** Android SDK/emulator + JDK pin are deferred (DEC-010); Android is not in scope.
+- **None active** for the current queue. Android SDK/emulator + JDK pin are deferred (DEC-010).
+- **Networked cargo fetch (DEC-018):** needs explicit user approval before any agent runs it; the
+  `spikes/terminal-engine-phase2` `ci.sh` row stays red until then. Recorded above under "Pending user
+  decisions".
 
 ## Environment / cleanup
 
+- **Toolchain/cache state (DEC-018, 2026-10-16):** `rustc`/`cargo` **1.99.1**; root workspace and
+  `apps/linux` build offline, `spikes/terminal-engine-phase2` does not (`avt` uncached). Prefer
+  `--offline` / `CARGO_NET_OFFLINE=true` in every cargo invocation you write; never `cargo update` in
+  `apps/linux` (the lockfile holds the TERM-002 `libc 0.2.189` remedy).
 - Delegation uses fresh bounded agents; one writer per branch/path. Agent roles and their write
-  permissions are defined in `.opencode/agents/` (see `AGENTS.md` "Agent roles (OpenCode)").
+  permissions are defined in `.opencode/agents/` (see `AGENTS.md` "Agent roles (OpenCode)"). **Spawn a
+  child from the main checkout and name the worktree path in the brief; never `session_move` a child**
+  (that produced `Agent not found: implementer` for another session).
 - **Orchestration is OpenCode (DEC-015).** The herdr + Pi stack is no longer used by this repository:
   `.pi/settings.json` was removed and no script depends on herdr. DEC-009's `agent_pane_busy` fault and
   its `/tmp/relayable-wake-daemon.py` fallback are historical and must not be restarted — the
