@@ -15,9 +15,13 @@ path = "src/main.rs"
 relayable-model = { workspace = true }
 relayable-protocol = { workspace = true, features = ["transport-unix"] }
 relayable-pty = { workspace = true }
+relayable-store = { workspace = true }
 anyhow = { workspace = true }
 # Signal handling only. The single documented `unsafe` block lives in
 # `src/signals.rs` and calls `libc::signal` with an async-signal-safe handler
 # that only sets an `AtomicBool`. Declared here (not in the root manifest);
 # `=0.2.190` matches the version already resolved in `Cargo.lock`.
 libc = "=0.2.190"
+
+[dev-dependencies]
+tempfile = { workspace = true }

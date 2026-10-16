@@ -96,10 +96,17 @@ impl ServerGuard {
         let dir = unique_dir();
         std::fs::create_dir_all(&dir).expect("create temp dir");
         let socket = dir.join("relayable.sock");
+        // Hermetic persistence: each spawned server owns its own state dir. With
+        // the store wired in (STORE-001 slice B), the machine-global default
+        // ($HOME/.local/state/relayable) is guarded by a single-writer lock, so
+        // parallel tests inheriting $HOME would otherwise contend and refuse to
+        // start. A per-test state dir keeps every existing assertion intact.
+        let state_dir = dir.join("state");
         let mut command = Command::new(env!("CARGO_BIN_EXE_relayable-server"));
         command
             .arg("run")
             .env("RELAYABLE_SERVER", &socket)
+            .env("RELAYABLE_STATE_DIR", &state_dir)
             .env("SHELL", "/bin/sh");
         for (key, value) in extra {
             command.env(key, value);

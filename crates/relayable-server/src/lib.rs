@@ -30,6 +30,7 @@ use std::time::Duration;
 
 use anyhow::Context;
 use relayable_protocol::transport::bind_listener;
+use relayable_store::{Store, StoreError};
 
 use crate::events::DisconnectReason;
 use crate::registry::ServerShared;
@@ -54,14 +55,20 @@ impl Server {
     /// `bind_listener` creates the parent directory `0700`, removes only a stale
     /// socket, binds, and sets the socket file `0600`.
     ///
+    /// Persistence is opened first (see [`open_store`]): when it fails because a
+    /// peer already owns the state directory, startup is refused; any other
+    /// store error degrades to in-memory-only operation with a warning.
+    ///
     /// # Errors
     ///
-    /// Returns an error if the socket directory or socket cannot be created, or
-    /// if a live listener already owns the path.
+    /// Returns an error if the socket directory or socket cannot be created, if
+    /// a live listener already owns the path, or if another server already owns
+    /// the state directory.
     pub fn bind(config: ServerConfig) -> anyhow::Result<Server> {
+        let store = open_store(&config)?;
         let listener = bind_listener(&config.socket_path)
             .with_context(|| format!("failed to bind {}", config.socket_path.display()))?;
-        let shared = Arc::new(ServerShared::new(config.clone()));
+        let shared = Arc::new(ServerShared::new(config.clone(), store));
         Ok(Server {
             config,
             shared,
@@ -131,7 +138,83 @@ impl Server {
         for handle in threads {
             let _ = handle.join();
         }
+        // Persistence shutdown ordering (ADR-004 D2): after every session is
+        // closed and every connection thread is joined, best-effort checkpoint
+        // the WAL and then drop the store, which closes the database cleanly and
+        // releases the single-writer lock before the process exits. The socket
+        // is unlinked last, preserving the existing shutdown ordering.
+        if let Some(store) = shared.take_store() {
+            if let Err(error) = store.checkpoint() {
+                eprintln!("relayable-server: persistence shutdown checkpoint failed: {error}");
+            }
+            drop(store);
+        }
         let _ = std::fs::remove_file(&config.socket_path);
         Ok(())
     }
+}
+
+/// Open the durable store for this run, applying startup reconciliation and
+/// pruning when it opens.
+///
+/// Returns `Ok(None)` when persistence is unavailable for a legitimate reason
+/// (no resolvable state directory, or a non-lock open/migrate/reconcile error)
+/// after logging a warning; the server then runs with in-memory metadata only.
+/// The one error that refuses startup is [`StoreError::StateDirLocked`]: a
+/// second server must never become a second writer (ADR-004 D2.5).
+fn open_store(config: &ServerConfig) -> anyhow::Result<Option<Arc<Store>>> {
+    let Some(state_dir) = config.state_dir.as_deref() else {
+        eprintln!(
+            "relayable-server: persistence disabled: no state directory resolved \
+             (set RELAYABLE_STATE_DIR, or XDG_STATE_HOME, or HOME); running with \
+             in-memory metadata only"
+        );
+        return Ok(None);
+    };
+
+    let store = match Store::open(state_dir) {
+        Ok(store) => store,
+        Err(StoreError::StateDirLocked(path)) => {
+            anyhow::bail!(
+                "another relayable-server already owns the state directory {}; refusing to \
+                 start as a second writer",
+                path.display()
+            );
+        }
+        Err(error) => {
+            eprintln!(
+                "relayable-server: persistence disabled: failed to open {} ({error}); running \
+                 with in-memory metadata only",
+                state_dir.display()
+            );
+            return Ok(None);
+        }
+    };
+
+    // A row left `active` belongs to a process that is gone: mark it
+    // `interrupted` so it is never reported live (ADR-004 D2.5).
+    match store.reconcile_on_startup() {
+        Ok(report) if report.interrupted > 0 => {
+            eprintln!(
+                "relayable-server: reconciled {} stale session(s) to interrupted",
+                report.interrupted
+            );
+        }
+        Ok(_) => {}
+        Err(error) => {
+            eprintln!(
+                "relayable-server: persistence disabled: startup reconciliation failed ({error}); \
+                 running with in-memory metadata only"
+            );
+            return Ok(None);
+        }
+    }
+
+    // Pruning runs on startup and on close (ADR-004 D2.4); a prune failure is
+    // not fatal because the store itself opened and reconciled.
+    if let Err(error) = store.prune_with_defaults() {
+        eprintln!("relayable-server: persistence startup prune failed: {error}");
+    }
+
+    Ok(Some(Arc::new(store)))
 }

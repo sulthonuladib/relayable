@@ -17,6 +17,7 @@ use relayable_protocol::v1::{
     self, ClientRecord, Envelope, ErrorCode, Handshake, SessionRecord, SessionResumeResponse,
     SessionState, SessionSummary,
 };
+use relayable_store::{SessionClose, SessionCreate, Store};
 
 use crate::config::ServerConfig;
 use crate::connection::ConnectionShared;
@@ -59,10 +60,14 @@ pub(crate) struct ServerShared {
     pub(crate) connections: Mutex<Vec<Arc<ConnectionShared>>>,
     pub(crate) connection_threads: Mutex<Vec<JoinHandle<()>>>,
     pub(crate) shutdown: AtomicBool,
+    /// Durable metadata/audit store; `None` when persistence is disabled for
+    /// this run (no resolvable state directory, or the store could not be
+    /// opened/migrated). Live state always remains authoritative in memory.
+    pub(crate) store: Mutex<Option<Arc<Store>>>,
 }
 
 impl ServerShared {
-    pub(crate) fn new(config: ServerConfig) -> Self {
+    pub(crate) fn new(config: ServerConfig, store: Option<Arc<Store>>) -> Self {
         let events = Arc::new(EventBus::new(config.event_retention_events));
         Self {
             config,
@@ -74,7 +79,20 @@ impl ServerShared {
             connections: Mutex::new(Vec::new()),
             connection_threads: Mutex::new(Vec::new()),
             shutdown: AtomicBool::new(false),
+            store: Mutex::new(store),
         }
+    }
+
+    /// The durable store, when persistence is enabled for this run.
+    pub(crate) fn store(&self) -> Option<Arc<Store>> {
+        lock(&self.store).clone()
+    }
+
+    /// Remove and return the durable store so shutdown can checkpoint it and
+    /// release the single-writer lock deterministically before the process
+    /// exits.
+    pub(crate) fn take_store(&self) -> Option<Arc<Store>> {
+        lock(&self.store).take()
     }
 
     /// The log head sequence; the same total order used by snapshots and events.
@@ -134,10 +152,11 @@ impl ServerShared {
         }
 
         let program_pid = block.program_pid;
+        let created_at_millis = now_millis();
         let session = Arc::new(SessionRuntime::new(
             session_id,
-            label,
-            now_millis(),
+            label.clone(),
+            created_at_millis,
             window_id,
             block,
         ));
@@ -150,6 +169,23 @@ impl ServerShared {
             record.revision,
             SessionState::Active,
         ));
+
+        // Persist the session definition after every entity lock is released.
+        // A store write must never fail the protocol operation (ADR-004 D2).
+        if let Some(store) = self.store() {
+            let create = SessionCreate {
+                session_id: session_id.to_string(),
+                label,
+                created_at_millis: to_i64(created_at_millis),
+                revision: to_i64(record.revision),
+            };
+            if let Err(error) = store.record_session_created(&create) {
+                eprintln!(
+                    "relayable-server: persistence record_session_created failed for session \
+                     {session_id}: {error}"
+                );
+            }
+        }
 
         Ok(SessionCreateData {
             session: record,
@@ -224,7 +260,31 @@ impl ServerShared {
             session.revision(),
             SessionState::Closed,
         ));
-        CloseSessionOutcome::Closed(snapshot::session_record(&session))
+
+        let record = snapshot::session_record(&session);
+        // Persist the closed row, its tombstone, and the audit event in one
+        // store transaction, then prune. This runs after every entity lock is
+        // released and only on the reaped `Closed` path; a store failure never
+        // fails the protocol operation (ADR-004 D2.4/D2.5).
+        if let Some(store) = self.store() {
+            let close = SessionClose {
+                session_id: session.id.to_string(),
+                closed_at_millis: to_i64(now_millis()),
+                revision: to_i64(record.revision),
+            };
+            if let Err(error) = store.record_session_closed(&close) {
+                eprintln!(
+                    "relayable-server: persistence record_session_closed failed for session \
+                     {session_id}: {error}"
+                );
+            }
+            if let Err(error) = store.prune_with_defaults() {
+                eprintln!(
+                    "relayable-server: persistence prune failed for session {session_id}: {error}"
+                );
+            }
+        }
+        CloseSessionOutcome::Closed(record)
     }
 
     /// Look up a block in a live (non-closed) session only.
@@ -444,6 +504,12 @@ pub(crate) fn now_millis() -> u64 {
         .map_or(0, |duration| duration.as_millis() as u64)
 }
 
+/// Lossless-for-practical-purposes conversion of a clock/revision value into
+/// the store's signed 64-bit columns (`i64::MAX` on overflow).
+fn to_i64(value: u64) -> i64 {
+    i64::try_from(value).unwrap_or(i64::MAX)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -457,6 +523,7 @@ mod tests {
             limits: relayable_protocol::limits::DEFAULT_LIMITS,
             output_tail_bytes: 32_768,
             event_retention_events: 4096,
+            state_dir: None,
         }
     }
 
@@ -529,7 +596,7 @@ mod tests {
 
     #[test]
     fn create_list_view_close_round_trip() {
-        let shared = ServerShared::new(test_config());
+        let shared = ServerShared::new(test_config(), None);
         let created = shared
             .create_session(Some("demo".to_string()))
             .expect("create");
@@ -587,7 +654,7 @@ mod tests {
 
     #[test]
     fn close_session_is_not_confirmed_when_child_survives() {
-        let shared = ServerShared::new(test_config());
+        let shared = ServerShared::new(test_config(), None);
         let created = shared.create_session(None).expect("create");
         let parsed = created.session.session_id.parse().expect("session id");
         let block = shared.find_block(created.block_id).expect("block");
@@ -618,7 +685,7 @@ mod tests {
 
     #[test]
     fn disconnected_client_records_are_removed() {
-        let shared = ServerShared::new(test_config());
+        let shared = ServerShared::new(test_config(), None);
         let client_id = ClientId::new();
         shared.insert_client(Client {
             id: client_id,
@@ -640,7 +707,7 @@ mod tests {
 
     #[test]
     fn disconnect_emits_two_ordered_events() {
-        let shared = ServerShared::new(test_config());
+        let shared = ServerShared::new(test_config(), None);
         let client_id = ClientId::new();
         shared.insert_client(Client {
             id: client_id,
@@ -683,7 +750,7 @@ mod tests {
 
     #[test]
     fn session_lifecycle_emits_state_change_events() {
-        let shared = ServerShared::new(test_config());
+        let shared = ServerShared::new(test_config(), None);
         let created = shared
             .create_session(Some("events".to_string()))
             .expect("create");

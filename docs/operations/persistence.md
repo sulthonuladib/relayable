@@ -7,9 +7,10 @@ guarantee.
 - **Task:** STORE-001 (slice A) — `crates/relayable-store` + `docs/operations/persistence.md`.
 - **Branch / worktree:** `store/store-001-sqlite-metadata` @ `/home/sulthonuladib/.herdr/worktrees/relayable/store-store-001-sqlite-metadata`.
 - **Date:** 2026-10-16.
-- **Scope:** the store crate's on-disk contract and operational behavior. Server
-  integration (startup reconciliation wiring, prune scheduling) is slice B and
-  is **not** covered here.
+- **Scope:** the store crate's on-disk contract and operational behavior, plus
+  the server integration (startup resolution/reconciliation, the write path,
+  the failure policy, and shutdown ordering) in section 10. Server-side
+  "restart session" product surface is still future work.
 - Related: [`../../full.md`](../../full.md) §6.4 (state and persistence),
   §7.1 (filesystem convention), §12 (memory/resource rules),
   [`../adr/ADR-004-process-ownership-and-persistence.md`](../adr/ADR-004-process-ownership-and-persistence.md)
@@ -214,3 +215,93 @@ no-op returning `interrupted == 0`.
 | Terminal bytes, scrollback, env values, or full argv in the DB | **Never** — no such column exists | `full.md` §6.4:490, §12:804; `ADR-001:239,286-291` |
 | Multi-user isolation / authn / authz | **NOT implemented** (one user per server) | `full.md` §11:766; `ADR-004` D3 |
 | Silent reattach of a restored session | **Never** — restart only | `interface-contract.md:93-95` |
+
+## 10. Server integration (slice B)
+
+How `crates/relayable-server` wires the store into its lifecycle. This is the
+"slice B" of STORE-001; the on-disk/store contract above is slice A.
+
+### 10.1 Startup resolution
+
+`ServerConfig::from_env()` resolves the state directory once, at startup, via
+`relayable_store::resolve_state_dir()` (section 1 order) and stores it as
+`ServerConfig::state_dir: Option<PathBuf>`. `ServerConfig::from_parts` takes the
+state dir as an explicit parameter so the hermetic config unit tests can pass
+`None`.
+
+`Server::bind` opens persistence **before** binding the socket, so a refusal
+leaves no socket artifact. When a directory resolves:
+
+1. `Store::open(dir)` creates the directory `0700`, takes the `flock`
+   single-writer lock, sets pragmas, and applies migrations.
+2. `Store::reconcile_on_startup()` marks every row left `active` by a previous
+   run as `interrupted` (one `session_interrupted` audit event per row). A
+   non-zero count is logged; the stale rows are **never** reported live.
+3. `Store::prune_with_defaults()` applies the retention policy (section 6).
+
+The store is held in `ServerShared` and is reachable from `create_session` and
+`close_session`. Memory stays authoritative for live state: the server **never**
+creates in-memory sessions from DB rows. `store-local` state `interrupted` has
+no model/proto representation, so a stale (interrupted/closed) session id gets
+the normal unknown-entity behaviour and is not resurrected.
+
+### 10.2 Failure and degradation policy
+
+| Startup condition | Behaviour |
+|---|---|
+| No usable state dir (`RELAYABLE_STATE_DIR`, `XDG_STATE_HOME`, `HOME` all unset/empty/relative) | `eprintln!` warning naming those variables; run with in-memory metadata only (no DB, no lock). **Not** a startup error. |
+| `Store::open` fails with `StoreError::StateDirLocked(path)` | **Refuse to start**: `anyhow::bail!` naming the path; `main.rs` exits `1`. A second server must never become a second writer. |
+| Any other `Store::open`/migrate error | Loud `eprintln!` warning; continue **without** persistence (never a false-live claim, never a panic). |
+| `reconcile_on_startup()` fails | Loud warning; drop the store and continue without persistence. |
+| `prune_with_defaults()` on startup fails | Warning only; the store stays open (it opened and reconciled). |
+
+All diagnostics use `eprintln!` on stderr; the repository has no logging
+framework and none was added.
+
+### 10.3 Write path
+
+Writes are issued from `registry.rs` **outside every entity lock**, matching the
+existing event-append discipline (a store call must never hold the `sessions` or
+`block` mutex):
+
+- `create_session` success -> `record_session_created` with the new
+  `session_id`, label, `created_at_millis`, and the initial revision. This
+  writes the `active` row and its `session_created` audit event in one
+  transaction.
+- `close_session`, only on the reaped `CloseSessionOutcome::Closed` path (not
+  `NotConfirmed`, not `Unknown`) -> `record_session_closed` writes the `closed`
+  row, the tombstone, and the `session_closed` audit event in **one**
+  transaction, then `prune_with_defaults()` runs (retention runs on startup and
+  on close, `ADR-004` D2.4). The idempotent re-close path and the shutdown-time
+  close do not write again.
+
+Only those fields are passed. No pids, file descriptors, hostnames, env values,
+argv, or terminal bytes ever reach the store.
+
+**Failure policy.** A store write/prune error must **never** fail the protocol
+operation and must **never** panic. It is logged as
+`relayable-server: persistence <operation> failed for session <id>: <err>` and
+the session create/close response still succeeds.
+
+### 10.4 Shutdown ordering
+
+On the `Server::run` shutdown path (SIGINT/SIGTERM, or a programmatic
+`shutdown()`):
+
+1. The accept loop exits and live sessions are closed; the child trees are
+   reaped.
+2. Connection threads are joined.
+3. Best-effort `Store::checkpoint()` (`PRAGMA wal_checkpoint(TRUNCATE)`) runs,
+   then the store is dropped, closing the database cleanly and releasing the
+   `flock` single-writer lock. A checkpoint/close error is logged, never fatal.
+4. The socket file is unlinked last, preserving the existing ordering.
+
+A server that ended without an explicit `session.close` leaves its session rows
+`active`; the next startup's reconciliation marks them `interrupted` (never
+live).
+
+### 10.5 Audit sequence reminder
+
+`audit_events.sequence` written by the server integration is the **store's local
+audit order**, not the protocol/server `sequence`. The server `sequence` is
+per-run and non-durable (`ADR-004` D2.6); the two are never conflated.

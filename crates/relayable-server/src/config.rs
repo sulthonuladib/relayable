@@ -2,8 +2,9 @@
 //!
 //! Environment inputs are `RELAYABLE_SERVER` (socket path override),
 //! `RELAYABLE_EVENT_RETENTION_EVENTS`, `RELAYABLE_IDLE_TIMEOUT_MILLIS`,
-//! `RELAYABLE_HEARTBEAT_INTERVAL_MILLIS`, `SHELL` (shell override), and
-//! `XDG_RUNTIME_DIR` (via
+//! `RELAYABLE_HEARTBEAT_INTERVAL_MILLIS`, `SHELL` (shell override),
+//! `RELAYABLE_STATE_DIR` / `XDG_STATE_HOME` / `HOME` (durable state directory,
+//! via [`relayable_store::resolve_state_dir`]), and `XDG_RUNTIME_DIR` (via
 //! [`relayable_protocol::transport::default_socket_path`]). `REX_*` names are
 //! reference evidence only and are never read (ADR-002 D14; DEC-006).
 //!
@@ -41,6 +42,10 @@ pub struct ServerConfig {
     pub output_tail_bytes: usize,
     /// Maximum number of retained control events (`RELAYABLE_EVENT_RETENTION_EVENTS`).
     pub event_retention_events: usize,
+    /// Resolved durable state directory for the SQLite metadata/audit store, or
+    /// `None` when the environment has no usable source (`ADR-004` D2.8).
+    /// `None` is a legitimate "run without persistence" mode.
+    pub state_dir: Option<PathBuf>,
 }
 
 impl ServerConfig {
@@ -48,9 +53,15 @@ impl ServerConfig {
     ///
     /// The socket path is `$RELAYABLE_SERVER` when set and non-empty, else
     /// [`relayable_protocol::transport::default_socket_path`]. The shell is
-    /// `$SHELL` when set and non-empty, else `/bin/sh`. The event-retention
-    /// bound, idle timeout, and heartbeat interval take their documented
-    /// defaults when unset.
+    /// `$SHELL` when set and non-empty, else `/bin/sh`. The state directory is
+    /// resolved by [`relayable_store::resolve_state_dir`]
+    /// (`RELAYABLE_STATE_DIR` -> `$XDG_STATE_HOME/relayable` ->
+    /// `$HOME/.local/state/relayable` -> `None`). The event-retention bound,
+    /// idle timeout, and heartbeat interval take their documented defaults when
+    /// unset.
+    ///
+    /// An unresolvable state directory is **not** an error: the server then runs
+    /// with in-memory metadata only and logs a warning at startup.
     ///
     /// # Errors
     ///
@@ -71,12 +82,14 @@ impl ServerConfig {
         let retention = std::env::var("RELAYABLE_EVENT_RETENTION_EVENTS").ok();
         let idle = std::env::var("RELAYABLE_IDLE_TIMEOUT_MILLIS").ok();
         let heartbeat = std::env::var("RELAYABLE_HEARTBEAT_INTERVAL_MILLIS").ok();
+        let state_dir = relayable_store::resolve_state_dir().map(|(path, _source)| path);
         Self::from_parts(
             socket_path,
             shell,
             retention.as_deref(),
             idle.as_deref(),
             heartbeat.as_deref(),
+            state_dir,
         )
     }
 
@@ -88,6 +101,7 @@ impl ServerConfig {
         retention: Option<&str>,
         idle: Option<&str>,
         heartbeat: Option<&str>,
+        state_dir: Option<PathBuf>,
     ) -> anyhow::Result<Self> {
         let event_retention_events = usize::try_from(parse_positive(
             "RELAYABLE_EVENT_RETENTION_EVENTS",
@@ -125,6 +139,7 @@ impl ServerConfig {
             limits,
             output_tail_bytes: 32_768,
             event_retention_events,
+            state_dir,
         })
     }
 }
@@ -159,6 +174,7 @@ mod tests {
             retention,
             idle,
             heartbeat,
+            None,
         )
     }
 

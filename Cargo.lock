@@ -535,6 +535,8 @@ dependencies = [
  "relayable-model",
  "relayable-protocol",
  "relayable-pty",
+ "relayable-store",
+ "tempfile",
 ]
 
 [[package]]
