@@ -23,18 +23,10 @@
 //!
 //! ## Relayable-original keybindings (Linux; the reference showed macOS only)
 //!
-//! | Keys | Action |
-//! | --- | --- |
-//! | `Ctrl+Shift+E` | split pane right |
-//! | `Ctrl+Shift+O` | split pane down |
-//! | `Ctrl+Shift+W` | close focused pane |
-//! | `Ctrl+Shift+Z` | zoom/unzoom focused pane |
-//! | `Ctrl+Shift+N` | new session (new tab) |
-//! | `Ctrl+Shift+S` | session picker |
-//! | `Ctrl+Shift+T` / `Ctrl+PageDown` | next tab |
-//! | `Ctrl+PageUp` | previous tab |
-//! | `Ctrl+1..9` | select tab |
-//! | `Ctrl+Shift+Right` / `Ctrl+Shift+Left` | focus next/previous pane |
+//! The keymap has **one** definition: `relayable_linux::app::shortcuts`
+//! (`shortcuts()`). `--help` prints it, the in-app `Ctrl+Shift+?` reference
+//! renders it, and README §11 mirrors the same `keys` strings. This file
+//! deliberately holds no second table.
 
 use std::path::PathBuf;
 
@@ -111,20 +103,16 @@ fn print_help() {
          \x20 --mock            use clearly-labelled synthetic data instead of a live server\n\
          \x20 --live            force live mode (default)\n\
          \x20 --socket PATH     server socket (default: $RELAYABLE_SERVER or the protocol default)\n\
-         \x20 --canvas W H      initial window size (default: {}x{}; or RELAYABLE_CANVAS=WxH)\n\n\
-         KEYBINDINGS (Relayable-original; the reference showed macOS only):\n\
-         \x20 Ctrl+Shift+E                    split pane right\n\
-         \x20 Ctrl+Shift+O                    split pane down\n\
-         \x20 Ctrl+Shift+W                    close focused pane\n\
-         \x20 Ctrl+Shift+Z                    zoom/unzoom focused pane\n\
-         \x20 Ctrl+Shift+N                    new session (new tab)\n\
-         \x20 Ctrl+Shift+S                    session picker\n\
-         \x20 Ctrl+Shift+T / Ctrl+PageDown    next tab\n\
-         \x20 Ctrl+PageUp                     previous tab\n\
-         \x20 Ctrl+1..9                       select tab\n\
-         \x20 Ctrl+Shift+Right / Left         focus next/previous pane\n",
+         \x20 --canvas W H      initial window size (default: {}x{}; or RELAYABLE_CANVAS=WxH)",
         geometry::BASELINE_CANVAS_OUTER.0, geometry::BASELINE_CANVAS_OUTER.1
     );
+    // One definition only: the rows come from `app::shortcuts`, the same table
+    // the in-app `Ctrl+Shift+?` reference renders and README §11 mirrors, so
+    // `--help` cannot drift from the handler.
+    println!("\nKEYBINDINGS (Relayable-original; the reference showed macOS only):");
+    for shortcut in relayable_linux::app::shortcuts::shortcuts() {
+        println!("  {:<32} {}", shortcut.keys, shortcut.label);
+    }
 }
 
 fn main() {

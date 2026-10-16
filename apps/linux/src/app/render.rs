@@ -65,6 +65,12 @@ impl Render for WorkspaceView {
         if self.picker_open {
             root = root.child(self.render_picker(cx));
         }
+        // Mounted after the picker: the two overlays are mutually exclusive
+        // (`shortcuts.rs::route_key`), and the shortcut reference renders on top
+        // when both would be present.
+        if self.shortcuts_open {
+            root = root.child(self.render_shortcuts_overlay());
+        }
         root
     }
 }

@@ -41,6 +41,32 @@ pub const PICKER_ROW_RADIUS_ORIGINAL: f32 = 4.0;
 pub const PICKER_SEARCH_PADDING_X_ORIGINAL: f32 = 6.0;
 /// Corner radius of the picker search field, in logical px.
 pub const PICKER_SEARCH_RADIUS_ORIGINAL: f32 = 4.0;
+/// Width of the shortcut reference panel, in logical px.
+///
+/// **Relayable-original** (no shortcut overlay was observed in the reference;
+/// `docs/research/open-questions.md` Q4). Wide enough for the longest row
+/// (`Ctrl+Shift+T / Ctrl+PageDown` plus `next tab`) at
+/// [`crate::theme::UI_LABEL_FONT_SIZE_PROPOSED`]; re-checked against the
+/// UI-005 overlay capture.
+pub const SHORTCUTS_PANEL_WIDTH_ORIGINAL: f32 = 460.0;
+/// Width of the key-chord column in the shortcut reference, in logical px.
+///
+/// **Relayable-original.** Must fit `Ctrl+Shift+T / Ctrl+PageDown` (29 chars)
+/// at the 12 px label size, so keys and labels stay in two aligned columns.
+pub const SHORTCUTS_KEYS_COLUMN_WIDTH_ORIGINAL: f32 = 232.0;
+/// Vertical gap between rows of the shortcut reference, in logical px.
+///
+/// **Relayable-original.**
+pub const SHORTCUTS_ROW_GAP_ORIGINAL: f32 = 6.0;
+/// Padding inside the shortcut reference panel, in logical px.
+///
+/// **Relayable-original.**
+pub const SHORTCUTS_PADDING_ORIGINAL: f32 = 12.0;
+/// Offset of the shortcut reference below the top-bar separator, in logical px.
+///
+/// **Relayable-original**; matches the picker's offset so the two overlays hang
+/// from the same edge.
+pub const SHORTCUTS_OFFSET_BELOW_SEPARATOR_ORIGINAL: f32 = 4.0;
 /// Side length of the split-right/split-down icon glyph, in logical px.
 pub const ICON_GLYPH_SPLIT_SIZE_ORIGINAL: f32 = 12.0;
 /// Thickness of the divider inside the split icon glyph, in logical px.

@@ -91,6 +91,12 @@ being quit, V4 3:59, and restored, V4 4:11). UI-002 renders them as a full-width
 (and an empty-state panel) explicitly documented as Relayable-original; they are **not** reproduced
 from a reference and must not be presented as such.
 
+UI-005 adds a third such state: the `Ctrl+Shift+?` **shortcut reference** overlay. No reference
+video shows a shortcut overlay or Linux bindings at all (`open-questions.md` Q4; `ui-catalog.md` has
+no entry for one), so it carries its own Relayable-original label in its title and asserts nothing
+about the reference. It is deliberately **not** the V4 command palette — that surface is
+unimplemented and has its own measured geometry, none of which is reused.
+
 ## 3. Component mapping
 
 | Screen / state | Source files |
@@ -218,7 +224,7 @@ bash evidence/run-ui-002.sh                   # 2-8. launch, drive, capture, ver
 
 `evidence/run-ui-002.sh` (a live harness; every line is a real command) does: pins the window,
 launches `./target/debug/relayable` with the session env, reads the geometry back, drives the UI
-with `wtype` (Ctrl+Shift+N splits, Ctrl+2/1/3 tabs, Ctrl+Shift+S picker, Ctrl+Shift+W close,
+with `wtype` (Ctrl+Shift+N new tab, Ctrl+2/1/3 tabs, Ctrl+Shift+S picker, Ctrl+Shift+W close,
 Ctrl+Shift+Left focus), captures each state window-only via `grim -g` plus a full-screen companion,
 verifies every PNG with `identify`, then tears down (disable the runtime rule, stop the server if a
 `server.pid` was recorded, remove the scratch socket/dir). Teardown asserts `ps -ef` and
@@ -323,7 +329,13 @@ rgb(138,109,26).
 
 - **Vertical tabs** — `v1-t0222` does not show a vertical-tab layout, so its geometry is
   unmeasurable; implementing it would require invented geometry (forbidden).
-- **Command palette** — V4-observed (442×667 px, 37.5 px rows) but not implemented.
+- **Command palette** — V4-observed (442×667 px, 37.5 px rows) but not implemented. The UI-005
+  shortcut reference is a **different** surface: it is Relayable-original, uses none of the command
+  palette's geometry, and does not stand in for it.
+- **Shortcut reference geometry** — no reference video shows a shortcut overlay
+  (`open-questions.md` Q4), so the UI-005 panel's width, key column, paddings and offsets are
+  `geometry::invented::*_ORIGINAL` app decisions, not measurements; only its colours and label size
+  come from the measured token set.
 - **Remote host** — V4-observed; out of scope for this slice (no remote transport).
 - **Session pill** — remote-host chrome; not implemented.
 - **Wire-model limitation** — core-002 has **no `block.create`**, so a new split pane comes from a
@@ -350,7 +362,11 @@ rgb(138,109,26).
 ## 11. Keybindings (Relayable-original)
 
 Linux bindings were never observed in the reference (macOS only; `open-questions.md` Q4); these are
-a documented Relayable-original deviation. `relayable --help` prints the same table.
+a documented Relayable-original deviation, and the shortcut reference the app renders for them is
+Relayable-original too. The table has **one** definition — `src/app/shortcuts.rs`
+(`app::shortcuts::shortcuts()`, UI-005) — which `relayable --help` prints and the in-app reference
+(`Ctrl+Shift+?`) renders. This section mirrors its `keys` strings; `app/tests.rs`
+(`readme_lists_every_shortcut_verbatim`) fails if they drift.
 
 | Keys | Action |
 |---|---|
@@ -360,10 +376,16 @@ a documented Relayable-original deviation. `relayable --help` prints the same ta
 | `Ctrl+Shift+Z` | zoom / unzoom focused pane |
 | `Ctrl+Shift+N` | new session (new tab) |
 | `Ctrl+Shift+S` | session picker |
-| `Ctrl+Shift+T` / `Ctrl+PageDown` | next tab |
+| `Ctrl+Shift+T / Ctrl+PageDown` | next tab |
 | `Ctrl+PageUp` | previous tab |
 | `Ctrl+1..9` | select tab |
-| `Ctrl+Shift+Right` / `Ctrl+Shift+Left` | focus next / previous pane |
+| `Ctrl+Shift+Right` | focus next pane |
+| `Ctrl+Shift+Left` | focus previous pane |
+| `Ctrl+Shift+?` | toggle this shortcut reference |
+
+While the shortcut reference is open it is modal: only its toggle and `Esc` are handled, every other
+key is swallowed, and it never opens together with the session picker (`Ctrl+Shift+S`). `Esc` keeps
+sending `0x1b` to the pane whenever the reference is **not** open.
 
 ## 12. `gpui = "=0.2.2"` pin and the TERM-002 remedy
 

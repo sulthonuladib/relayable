@@ -1,0 +1,769 @@
++ FAILURES=0
+++ date -u +%FT%TZ
++ echo date_utc=2026-10-16T17:26:05Z
+date_utc=2026-10-16T17:26:05Z
++ echo socket=/tmp/relayable-ui005-ui/relayable.sock
+socket=/tmp/relayable-ui005-ui/relayable.sock
+++ printf 'WAYLAND_DISPLAY=%s DISPLAY=%s' wayland-1 :0
++ echo 'display=WAYLAND_DISPLAY=wayland-1 DISPLAY=:0'
+display=WAYLAND_DISPLAY=wayland-1 DISPLAY=:0
+++ realpath ./target/debug/relayable
+++ realpath ../../target/debug/relayable-server
++ echo 'app=/home/sulthonuladib/work/relayable-wt/ui-005/apps/linux/target/debug/relayable server=/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/relayable-server'
+app=/home/sulthonuladib/work/relayable-wt/ui-005/apps/linux/target/debug/relayable server=/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/relayable-server
++ launch_app mock-open mock 1099 706
++ local tag=mock-open mode=mock w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' mock = mock ']'
++ args+=(--mock)
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI005_RULE then RELAYABLE_UI005_RULE:set_enabled(false) end; RELAYABLE_UI005_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=701458
++ echo 'app_pid=701458 tag=mock-open mode=mock'
+app_pid=701458 tag=mock-open mode=mock
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui005-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706 --mock
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
+++ geometry_for
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
+++ hyprctl clients -j
++ GEOM_BEFORE='10,40 1099x706'
++ echo 'geometry_before=10,40 1099x706'
+geometry_before=10,40 1099x706
++ capture mock-before 1099 706
++ local tag=mock-before geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-before geometry=10,40 1099x706'
+capture tag=mock-before geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-before.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-before.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-before.png size=1099x706'
+png=evidence/ui-005-mock-before.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-before size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-before size = 1099x706'
+CHECK PASS: png mock-before size = 1099x706
++ grim evidence/ui-005-mock-before-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-before-fullscreen.png
+evidence/ui-005-mock-before-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 184155B 0.000u 0:00.000
++ wtype -M ctrl -M shift -k question
++ echo wtype_toggle_open_exit=0
+wtype_toggle_open_exit=0
++ sleep 1
++ capture mock-overlay 1099 706
++ local tag=mock-overlay geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-overlay geometry=10,40 1099x706'
+capture tag=mock-overlay geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-overlay.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-overlay.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-overlay.png size=1099x706'
+png=evidence/ui-005-mock-overlay.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-overlay size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-overlay size = 1099x706'
+CHECK PASS: png mock-overlay size = 1099x706
++ grim evidence/ui-005-mock-overlay-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-overlay-fullscreen.png
+evidence/ui-005-mock-overlay-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 224353B 0.000u 0:00.000
+++ edge_count mock-open opened
+++ grep -c 'shortcut reference opened' /tmp/relayable-ui005-ui/mock-open.log
++ check 'toggle opened the overlay (log)' 1 1
++ '[' 1 = 1 ']'
++ echo 'CHECK PASS: toggle opened the overlay (log) = 1'
+CHECK PASS: toggle opened the overlay (log) = 1
++ wtype -k Escape
++ echo wtype_overlay_escape_exit=0
+wtype_overlay_escape_exit=0
++ sleep 1
++ capture mock-escape-closed 1099 706
++ local tag=mock-escape-closed geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-escape-closed geometry=10,40 1099x706'
+capture tag=mock-escape-closed geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-escape-closed.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-escape-closed.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-escape-closed.png size=1099x706'
+png=evidence/ui-005-mock-escape-closed.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-escape-closed size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-escape-closed size = 1099x706'
+CHECK PASS: png mock-escape-closed size = 1099x706
++ grim evidence/ui-005-mock-escape-closed-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-escape-closed-fullscreen.png
+evidence/ui-005-mock-escape-closed-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 184155B 0.000u 0:00.000
+++ edge_count mock-open closed
+++ grep -c 'shortcut reference closed' /tmp/relayable-ui005-ui/mock-open.log
++ check 'Esc closed the overlay (log)' 1 1
++ '[' 1 = 1 ']'
++ echo 'CHECK PASS: Esc closed the overlay (log) = 1'
+CHECK PASS: Esc closed the overlay (log) = 1
++ wtype -M ctrl -M shift -k question
++ echo wtype_toggle2_open_exit=0
+wtype_toggle2_open_exit=0
++ sleep 0.6
++ capture mock-overlay-2 1099 706
++ local tag=mock-overlay-2 geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-overlay-2 geometry=10,40 1099x706'
+capture tag=mock-overlay-2 geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-overlay-2.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-overlay-2.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-overlay-2.png size=1099x706'
+png=evidence/ui-005-mock-overlay-2.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-overlay-2 size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-overlay-2 size = 1099x706'
+CHECK PASS: png mock-overlay-2 size = 1099x706
++ grim evidence/ui-005-mock-overlay-2-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-overlay-2-fullscreen.png
+evidence/ui-005-mock-overlay-2-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 224353B 0.000u 0:00.000
++ wtype -M ctrl -M shift -k question
++ echo wtype_toggle2_close_exit=0
+wtype_toggle2_close_exit=0
++ sleep 0.6
++ capture mock-toggle-closed 1099 706
++ local tag=mock-toggle-closed geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-toggle-closed geometry=10,40 1099x706'
+capture tag=mock-toggle-closed geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-toggle-closed.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-toggle-closed.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-toggle-closed.png size=1099x706'
+png=evidence/ui-005-mock-toggle-closed.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-toggle-closed size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-toggle-closed size = 1099x706'
+CHECK PASS: png mock-toggle-closed size = 1099x706
++ grim evidence/ui-005-mock-toggle-closed-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-toggle-closed-fullscreen.png
+evidence/ui-005-mock-toggle-closed-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 184155B 0.000u 0:00.000
+++ edge_count mock-open opened
+++ grep -c 'shortcut reference opened' /tmp/relayable-ui005-ui/mock-open.log
++ check 'toggle opened twice (log)' 2 2
++ '[' 2 = 2 ']'
++ echo 'CHECK PASS: toggle opened twice (log) = 2'
+CHECK PASS: toggle opened twice (log) = 2
+++ edge_count mock-open closed
+++ grep -c 'shortcut reference closed' /tmp/relayable-ui005-ui/mock-open.log
++ check 'toggle closed it (log)' 2 2
++ '[' 2 = 2 ']'
++ echo 'CHECK PASS: toggle closed it (log) = 2'
+CHECK PASS: toggle closed it (log) = 2
++ wtype -k question
++ echo wtype_bare_question_exit=0
+wtype_bare_question_exit=0
++ sleep 1
++ capture mock-question-pane 1099 706
++ local tag=mock-question-pane geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-question-pane geometry=10,40 1099x706'
+capture tag=mock-question-pane geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-question-pane.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-question-pane.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-question-pane.png size=1099x706'
+png=evidence/ui-005-mock-question-pane.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-question-pane size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-question-pane size = 1099x706'
+CHECK PASS: png mock-question-pane size = 1099x706
++ grim evidence/ui-005-mock-question-pane-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-question-pane-fullscreen.png
+evidence/ui-005-mock-question-pane-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 184329B 0.000u 0:00.000
++ wtype -M ctrl -k slash
++ echo wtype_ctrl_slash_exit=0
+wtype_ctrl_slash_exit=0
++ sleep 0.6
++ capture mock-ctrl-slash 1099 706
++ local tag=mock-ctrl-slash geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-ctrl-slash geometry=10,40 1099x706'
+capture tag=mock-ctrl-slash geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-ctrl-slash.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-ctrl-slash.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-ctrl-slash.png size=1099x706'
+png=evidence/ui-005-mock-ctrl-slash.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-ctrl-slash size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-ctrl-slash size = 1099x706'
+CHECK PASS: png mock-ctrl-slash size = 1099x706
++ grim evidence/ui-005-mock-ctrl-slash-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-ctrl-slash-fullscreen.png
+evidence/ui-005-mock-ctrl-slash-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 184329B 0.000u 0:00.000
+++ edge_count mock-open opened
+++ grep -c 'shortcut reference opened' /tmp/relayable-ui005-ui/mock-open.log
++ check 'Ctrl+/ did not open the overlay (log)' 2 2
++ '[' 2 = 2 ']'
++ echo 'CHECK PASS: Ctrl+/ did not open the overlay (log) = 2'
+CHECK PASS: Ctrl+/ did not open the overlay (log) = 2
++ same_frame 'Ctrl+/ changed nothing on screen' mock-question-pane mock-ctrl-slash yes
++ local actual=no
++ cmp -s evidence/ui-005-mock-question-pane.png evidence/ui-005-mock-ctrl-slash.png
++ actual=yes
++ echo 'cmp evidence/ui-005-mock-question-pane.png evidence/ui-005-mock-ctrl-slash.png -> yes'
+cmp evidence/ui-005-mock-question-pane.png evidence/ui-005-mock-ctrl-slash.png -> yes
++ check 'Ctrl+/ changed nothing on screen' yes yes
++ '[' yes = yes ']'
++ echo 'CHECK PASS: Ctrl+/ changed nothing on screen = yes'
+CHECK PASS: Ctrl+/ changed nothing on screen = yes
++ same_frame 'closing the overlay leaves no trace' mock-before mock-escape-closed yes
++ local actual=no
++ cmp -s evidence/ui-005-mock-before.png evidence/ui-005-mock-escape-closed.png
++ actual=yes
++ echo 'cmp evidence/ui-005-mock-before.png evidence/ui-005-mock-escape-closed.png -> yes'
+cmp evidence/ui-005-mock-before.png evidence/ui-005-mock-escape-closed.png -> yes
++ check 'closing the overlay leaves no trace' yes yes
++ '[' yes = yes ']'
++ echo 'CHECK PASS: closing the overlay leaves no trace = yes'
+CHECK PASS: closing the overlay leaves no trace = yes
++ same_frame 'the overlay is deterministic' mock-overlay mock-overlay-2 yes
++ local actual=no
++ cmp -s evidence/ui-005-mock-overlay.png evidence/ui-005-mock-overlay-2.png
++ actual=yes
++ echo 'cmp evidence/ui-005-mock-overlay.png evidence/ui-005-mock-overlay-2.png -> yes'
+cmp evidence/ui-005-mock-overlay.png evidence/ui-005-mock-overlay-2.png -> yes
++ check 'the overlay is deterministic' yes yes
++ '[' yes = yes ']'
++ echo 'CHECK PASS: the overlay is deterministic = yes'
+CHECK PASS: the overlay is deterministic = yes
++ wtype -M ctrl -M shift -k e
++ echo wtype_split_exit=0
+wtype_split_exit=0
++ sleep 3
++ capture mock-split 1099 706
++ local tag=mock-split geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-split geometry=10,40 1099x706'
+capture tag=mock-split geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-split.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-split.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-split.png size=1099x706'
+png=evidence/ui-005-mock-split.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-split size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-split size = 1099x706'
+CHECK PASS: png mock-split size = 1099x706
++ grim evidence/ui-005-mock-split-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-split-fullscreen.png
+evidence/ui-005-mock-split-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 188810B 0.000u 0:00.000
++ wtype -M ctrl -M shift -k z
++ echo wtype_zoom_exit=0
+wtype_zoom_exit=0
++ sleep 1
++ capture mock-zoom 1099 706
++ local tag=mock-zoom geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=mock-zoom geometry=10,40 1099x706'
+capture tag=mock-zoom geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-mock-zoom.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-mock-zoom.png
++ size=1099x706
++ echo 'png=evidence/ui-005-mock-zoom.png size=1099x706'
+png=evidence/ui-005-mock-zoom.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png mock-zoom size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png mock-zoom size = 1099x706'
+CHECK PASS: png mock-zoom size = 1099x706
++ grim evidence/ui-005-mock-zoom-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-mock-zoom-fullscreen.png
+evidence/ui-005-mock-zoom-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 182967B 0.000u 0:00.000
++ wtype -M ctrl -M shift -k z
++ echo wtype_unzoom_exit=0
+wtype_unzoom_exit=0
++ sleep 1
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ GEOM_AFTER='10,40 1099x706'
++ echo 'geometry_after=10,40 1099x706'
+geometry_after=10,40 1099x706
++ check 'window geometry unchanged by the overlay' '10,40 1099x706' '10,40 1099x706'
++ '[' '10,40 1099x706' = '10,40 1099x706' ']'
++ echo 'CHECK PASS: window geometry unchanged by the overlay = 10,40 1099x706'
+CHECK PASS: window geometry unchanged by the overlay = 10,40 1099x706
++ dump_app_log mock-open
++ echo '--- app log /tmp/relayable-ui005-ui/mock-open.log ---'
+--- app log /tmp/relayable-ui005-ui/mock-open.log ---
++ cat /tmp/relayable-ui005-ui/mock-open.log
+relayable: MOCK mode — synthetic in-process data, no live server
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-ui: connection state = Connected
+relayable-ui: no session and no create in flight; requesting one
+relayable-ui: session.created session=session:mock block=block:mock
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=6
+relayable-ui: output stream_id=1 bytes=13 total=13
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=35 pane_px=1099x604
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=35
+relayable: shortcut reference opened (Ctrl+Shift+?)
+relayable: shortcut reference closed (Ctrl+Shift+?)
+relayable: shortcut reference opened (Ctrl+Shift+?)
+relayable: shortcut reference closed (Ctrl+Shift+?)
+relayable-ui: output stream_id=1 bytes=1 total=14
+relayable-ui: session.created session=session:mock block=block:mock
+relayable-ui: sending terminal.resize stream_id=1 cols=69 rows=34 pane_px=539x599
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=6
+relayable-ui: output stream_id=1 bytes=13 total=27
+relayable-ui: terminal.resize accepted stream_id=1 cols=69 rows=34
+relayable-ui: sending terminal.resize stream_id=1 cols=69 rows=34 pane_px=539x599
+relayable-ui: terminal.resize accepted stream_id=1 cols=69 rows=34
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=35 pane_px=1099x604
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=35
+relayable-ui: sending terminal.resize stream_id=1 cols=69 rows=34 pane_px=539x599
+relayable-ui: terminal.resize accepted stream_id=1 cols=69 rows=34
++ echo '--- end app log ---'
+--- end app log ---
++ stop_app
++ kill -0 701458
++ kill -TERM 701458
++ echo kill_exit=0
+kill_exit=0
++ wait 701458
++ echo wait_exit=143
+wait_exit=143
++ SERVER_PID=702033
++ echo 702033
++ echo server_pid=702033
+server_pid=702033
++ ready=0
++ attempt=0
++ '[' 0 -lt 100 ']'
++ '[' -S /tmp/relayable-ui005-ui/relayable.sock ']'
++ attempt=1
++ sleep 0.1
++ RELAYABLE_SERVER=/tmp/relayable-ui005-ui/relayable.sock
++ RELAYABLE_STATE_DIR=/tmp/relayable-ui005-ui/state
++ SHELL=/bin/sh
++ TERM=xterm-256color
++ ../../target/debug/relayable-server run
++ '[' 1 -lt 100 ']'
++ '[' -S /tmp/relayable-ui005-ui/relayable.sock ']'
++ RELAYABLE_SERVER=/tmp/relayable-ui005-ui/relayable.sock
++ ../../target/debug/relayable ls --json
++ ready=1
++ break
++ check 'live server ready' 1 1
++ '[' 1 = 1 ']'
++ echo 'CHECK PASS: live server ready = 1'
+CHECK PASS: live server ready = 1
++ launch_app live live 1099 706
++ local tag=live mode=live w=1099 h=706
++ args=('--canvas' '1099' '706')
++ local args
++ '[' live = mock ']'
++ apply_rule 1099 706
++ local w=1099 h=706
++ hyprctl eval 'if RELAYABLE_UI005_RULE then RELAYABLE_UI005_RULE:set_enabled(false) end; RELAYABLE_UI005_RULE = hl.window_rule({ match = { class = "^relayable$" }, float = true, size = { 1099, 706 }, move = { 10, 40 } })'
+ok
++ echo window_rule_exit=0
+window_rule_exit=0
++ sleep 0.4
++ APP_PID=702040
++ echo 'app_pid=702040 tag=live mode=live'
+app_pid=702040 tag=live mode=live
++ sleep 5
++ RELAYABLE_SERVER=/tmp/relayable-ui005-ui/relayable.sock
++ ./target/debug/relayable --canvas 1099 706
++ focus_app
++ hyprctl eval 'hl.dispatch(hl.dsp.focus({ window = "class:^(relayable)$" }))'
+ok
++ echo focus_exit=0
+focus_exit=0
++ sleep 0.4
++ capture live-baseline 1099 706
++ local tag=live-baseline geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-baseline geometry=10,40 1099x706'
+capture tag=live-baseline geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-baseline.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-baseline.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-baseline.png size=1099x706'
+png=evidence/ui-005-live-baseline.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-baseline size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-baseline size = 1099x706'
+CHECK PASS: png live-baseline size = 1099x706
++ grim evidence/ui-005-live-baseline-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-baseline-fullscreen.png
+evidence/ui-005-live-baseline-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 179201B 0.000u 0:00.000
++ wtype 'cat -v'
++ echo wtype_catv_exit=0
+wtype_catv_exit=0
++ wtype -k Return
++ echo wtype_catv_enter_exit=0
+wtype_catv_enter_exit=0
++ sleep 1
++ capture live-catv 1099 706
++ local tag=live-catv geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-catv geometry=10,40 1099x706'
+capture tag=live-catv geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-catv.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-catv.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-catv.png size=1099x706'
+png=evidence/ui-005-live-catv.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-catv size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-catv size = 1099x706'
+CHECK PASS: png live-catv size = 1099x706
++ grim evidence/ui-005-live-catv-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-catv-fullscreen.png
+evidence/ui-005-live-catv-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 179793B 0.000u 0:00.000
++ wtype -k question
++ echo wtype_live_question_exit=0
+wtype_live_question_exit=0
++ sleep 1
++ capture live-question 1099 706
++ local tag=live-question geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-question geometry=10,40 1099x706'
+capture tag=live-question geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-question.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-question.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-question.png size=1099x706'
+png=evidence/ui-005-live-question.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-question size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-question size = 1099x706'
+CHECK PASS: png live-question size = 1099x706
++ grim evidence/ui-005-live-question-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-question-fullscreen.png
+evidence/ui-005-live-question-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 179963B 0.000u 0:00.000
++ wtype -k Escape
++ echo wtype_live_escape_exit=0
+wtype_live_escape_exit=0
++ sleep 1
++ capture live-escape 1099 706
++ local tag=live-escape geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-escape geometry=10,40 1099x706'
+capture tag=live-escape geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-escape.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-escape.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-escape.png size=1099x706'
+png=evidence/ui-005-live-escape.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-escape size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-escape size = 1099x706'
+CHECK PASS: png live-escape size = 1099x706
++ grim evidence/ui-005-live-escape-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-escape-fullscreen.png
+evidence/ui-005-live-escape-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 180216B 0.000u 0:00.000
++ wtype -M ctrl -M shift -k question
++ echo wtype_live_toggle_exit=0
+wtype_live_toggle_exit=0
++ sleep 1
++ capture live-overlay 1099 706
++ local tag=live-overlay geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-overlay geometry=10,40 1099x706'
+capture tag=live-overlay geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-overlay.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-overlay.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-overlay.png size=1099x706'
+png=evidence/ui-005-live-overlay.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-overlay size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-overlay size = 1099x706'
+CHECK PASS: png live-overlay size = 1099x706
++ grim evidence/ui-005-live-overlay-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-overlay-fullscreen.png
+evidence/ui-005-live-overlay-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 220420B 0.000u 0:00.000
+++ edge_count live opened
+++ grep -c 'shortcut reference opened' /tmp/relayable-ui005-ui/live.log
++ check 'live toggle opened the overlay (log)' 1 1
++ '[' 1 = 1 ']'
++ echo 'CHECK PASS: live toggle opened the overlay (log) = 1'
+CHECK PASS: live toggle opened the overlay (log) = 1
++ same_frame 'the live overlay covers the pane' live-escape live-overlay no
++ local actual=no
++ cmp -s evidence/ui-005-live-escape.png evidence/ui-005-live-overlay.png
++ echo 'cmp evidence/ui-005-live-escape.png evidence/ui-005-live-overlay.png -> no'
+cmp evidence/ui-005-live-escape.png evidence/ui-005-live-overlay.png -> no
++ check 'the live overlay covers the pane' no no
++ '[' no = no ']'
++ echo 'CHECK PASS: the live overlay covers the pane = no'
+CHECK PASS: the live overlay covers the pane = no
++ wtype -k Escape
++ echo wtype_live_close_exit=0
+wtype_live_close_exit=0
++ sleep 1
++ capture live-closed 1099 706
++ local tag=live-closed geom size
+++ geometry_for
+++ hyprctl clients -j
+++ python3 -c $'\nimport json, sys\ntry:\n    clients = json.load(sys.stdin)\nexcept Exception as exc:  # noqa: BLE001 - report, never fake\n    print("PARSE_ERROR %s" % exc, file=sys.stderr)\n    raise SystemExit(0)\nfor c in clients:\n    if c.get("class") == "relayable":\n        x, y = c["at"]; w, h = c["size"]\n        print("%d,%d %dx%d" % (x, y, w, h), end="")\n        break\n'
++ geom='10,40 1099x706'
++ echo 'capture tag=live-closed geometry=10,40 1099x706'
+capture tag=live-closed geometry=10,40 1099x706
++ '[' -n '10,40 1099x706' ']'
++ grim -g '10,40 1099x706' evidence/ui-005-live-closed.png
++ echo grim_window_exit=0
+grim_window_exit=0
+++ identify -format %wx%h evidence/ui-005-live-closed.png
++ size=1099x706
++ echo 'png=evidence/ui-005-live-closed.png size=1099x706'
+png=evidence/ui-005-live-closed.png size=1099x706
++ '[' 3 -eq 3 ']'
++ check 'png live-closed size' 1099x706 1099x706
++ '[' 1099x706 = 1099x706 ']'
++ echo 'CHECK PASS: png live-closed size = 1099x706'
+CHECK PASS: png live-closed size = 1099x706
++ grim evidence/ui-005-live-closed-fullscreen.png
++ echo grim_fullscreen_exit=0
+grim_fullscreen_exit=0
++ identify evidence/ui-005-live-closed-fullscreen.png
+evidence/ui-005-live-closed-fullscreen.png PNG 1920x1080 1920x1080+0+0 8-bit sRGB 180216B 0.000u 0:00.000
+++ edge_count live closed
+++ grep -c 'shortcut reference closed' /tmp/relayable-ui005-ui/live.log
++ check 'live Esc closed the overlay (log)' 1 1
++ '[' 1 = 1 ']'
++ echo 'CHECK PASS: live Esc closed the overlay (log) = 1'
+CHECK PASS: live Esc closed the overlay (log) = 1
++ same_frame 'the live pane received the keys' live-catv live-escape no
++ local actual=no
++ cmp -s evidence/ui-005-live-catv.png evidence/ui-005-live-escape.png
++ echo 'cmp evidence/ui-005-live-catv.png evidence/ui-005-live-escape.png -> no'
+cmp evidence/ui-005-live-catv.png evidence/ui-005-live-escape.png -> no
++ check 'the live pane received the keys' no no
++ '[' no = no ']'
++ echo 'CHECK PASS: the live pane received the keys = no'
+CHECK PASS: the live pane received the keys = no
++ same_frame 'closing the live overlay restores the pane frame' live-escape live-closed yes
++ local actual=no
++ cmp -s evidence/ui-005-live-escape.png evidence/ui-005-live-closed.png
++ actual=yes
++ echo 'cmp evidence/ui-005-live-escape.png evidence/ui-005-live-closed.png -> yes'
+cmp evidence/ui-005-live-escape.png evidence/ui-005-live-closed.png -> yes
++ check 'closing the live overlay restores the pane frame' yes yes
++ '[' yes = yes ']'
++ echo 'CHECK PASS: closing the live overlay restores the pane frame = yes'
+CHECK PASS: closing the live overlay restores the pane frame = yes
++ wtype -M ctrl -k c
++ echo wtype_ctrl_c_exit=0
+wtype_ctrl_c_exit=0
++ sleep 0.5
++ dump_app_log live
++ echo '--- app log /tmp/relayable-ui005-ui/live.log ---'
+--- app log /tmp/relayable-ui005-ui/live.log ---
++ cat /tmp/relayable-ui005-ui/live.log
+relayable: live mode — socket = /tmp/relayable-ui005-ui/relayable.sock
+relayable: font chosen="JetBrainsMono Nerd Font" (of 273 installed families) cell_width=7.800 row_pitch=17.25 font_size=13
+relayable: window bounds 1099x706 at (0, 0) scale_factor=1
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+relayable-ui: connection state = Connected
+relayable-ui: no session and no create in flight; requesting one
+relayable-ui: session.created session=session:01a145c0-257b-76e2-be90-bf03e8a2dc05 block=block:01a145c0-257b-76e2-be90-bf05fce9e2f3
+relayable-ui: block.attached stream_id=1 cols=80 rows=24 snapshot_bytes=0
+relayable-ui: output stream_id=1 bytes=16 total=16
+relayable-ui: sending terminal.resize stream_id=1 cols=140 rows=36 pane_px=1099x624
+relayable-ui: terminal.resize accepted stream_id=1 cols=140 rows=36
+relayable-ui: output stream_id=1 bytes=13 total=29
+relayable-ui: output stream_id=1 bytes=1 total=30
+relayable-ui: output stream_id=1 bytes=1 total=31
+relayable-ui: output stream_id=1 bytes=1 total=32
+relayable-ui: output stream_id=1 bytes=1 total=33
+relayable-ui: output stream_id=1 bytes=1 total=34
+relayable-ui: output stream_id=1 bytes=1 total=35
+relayable-ui: output stream_id=1 bytes=11 total=46
+relayable-ui: output stream_id=1 bytes=1 total=47
+relayable-ui: output stream_id=1 bytes=2 total=49
+relayable: shortcut reference opened (Ctrl+Shift+?)
+relayable: shortcut reference closed (Ctrl+Shift+?)
++ echo '--- end app log ---'
+--- end app log ---
++ stop_app
++ kill -0 702040
++ kill -TERM 702040
++ echo kill_exit=0
+kill_exit=0
++ wait 702040
++ echo wait_exit=143
+wait_exit=143
++ hyprctl eval 'if RELAYABLE_UI005_RULE then RELAYABLE_UI005_RULE:set_enabled(false) end'
+ok
++ echo rule_disable_exit=0
+rule_disable_exit=0
++ '[' -f /tmp/relayable-ui005-ui/server.pid ']'
+++ sed 's/[^0-9]//g' /tmp/relayable-ui005-ui/server.pid
++ server_pid=702033
++ '[' -n 702033 ']'
++ kill -0 702033
++ kill -TERM 702033
++ echo server_kill_exit=0
+server_kill_exit=0
++ wait 702033
++ echo server_wait_exit=0
+server_wait_exit=0
++ rm -f /tmp/relayable-ui005-ui/relayable.sock
+++ '[' -e /tmp/relayable-ui005-ui/relayable.sock ']'
+++ echo yes
++ echo socket_removed=yes
+socket_removed=yes
++ '[' -f /tmp/relayable-ui005-ui/server.log ']'
++ echo '--- server log ---'
+--- server log ---
++ cat /tmp/relayable-ui005-ui/server.log
+relayable-server: reconciled 1 stale session(s) to interrupted
+relayable-server: listening on /tmp/relayable-ui005-ui/relayable.sock (protocol 1.0)
++ echo '--- end server log ---'
+--- end server log ---
++ echo check_failures=0
+check_failures=0
+++ date -u +%FT%TZ
++ echo date_utc_end=2026-10-16T17:26:36Z
+date_utc_end=2026-10-16T17:26:36Z
++ '[' 0 -eq 0 ']'
++ echo 'UI-005 CAPTURE OK'
+UI-005 CAPTURE OK

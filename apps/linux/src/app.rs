@@ -44,6 +44,12 @@ mod panes;
 mod picker;
 mod render;
 mod resize;
+/// The workspace keymap, shared by the handler, the overlay and `--help`.
+///
+/// `pub` because the `relayable` binary is a separate crate and prints
+/// [`shortcuts::shortcuts`] in `--help`; every predicate it holds stays
+/// internal to this module.
+pub mod shortcuts;
 mod state;
 mod streams;
 mod tabs;
@@ -86,6 +92,9 @@ pub struct WorkspaceView {
     picker_open: bool,
     picker_query: String,
     picker_selected: usize,
+    /// Shortcut reference overlay (`Ctrl+Shift+?`). Mutually exclusive with the
+    /// picker; see `shortcuts.rs`.
+    shortcuts_open: bool,
     /// Zoomed pane (tab-local) renders alone.
     zoomed: bool,
     /// Whether the real window geometry has been logged once.
