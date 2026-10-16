@@ -264,3 +264,17 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Ru
 **Fidelity:** measured 1:1 against the regenerated V1 crop at 1099×706 — top bar 40 px, pill 205×30,
 ramp ±1–5/channel, row pitch 17.25 vs ≈17.1; pixel-perfect not claimed. One actionable item: active-pill
 1 px top/bottom edge highlight not rendered. Reference frames/composites stayed local-only per decision.
+
+## 2026-10-15 — QA-001 smoke/CI/flow-control: independent Manager validation (`4a258c2`)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1, live Wayland session. Run from the repo root.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 94 | `bash scripts/smoke.sh` | `SMOKE OK` — build → foreground server → `relayable new` → I/O round-trip → abrupt disconnect → reconnect same shell (`SMOKE_VAR` persisted) → `session inspect` same pid/active → `session close` 0 → SIGTERM 0 → socket unlinked → temp dir removed | 0 |
+| 95 | `bash scripts/ci.sh` | `OVERALL: PASS` — **15 PASS / 3 SKIP** (android-gradle DEC-010; linux-ui-smoke by scope; package-build n/a); includes `desktop-libc-pin` asserting every `libc` entry in `apps/linux/Cargo.lock` is `0.2.189` | 0 |
+| 96 | `cargo test --workspace --offline` (via ci.sh) | **150 passed / 0 failed** (was 148); `tests/flow-control` 2 passed | 0 |
+
+**Reconciliation:** interface contract flow-control wording corrected to the implemented behavior (buffer ≤ credit
+window, then detach with `flow_control_overflow`); `protocol/schema/events.proto` comment `"disconnected"` →
+`"Disconnected"`. Follow-ups: `MEM-001`, `CI-HOST-001`.

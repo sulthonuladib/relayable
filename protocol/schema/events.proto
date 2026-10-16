@@ -61,7 +61,7 @@ message SessionStateChanged {
 }
 
 // On disconnect, this immediately follows the
-// `client_connection_state_changed{connection_state: "disconnected"}` event:
+// `client_connection_state_changed{connection_state: "Disconnected"}` event:
 // two sequences, same cause, ordered. `reason` is one of `idle_timeout`,
 // `peer_closed`, `transport_error`, `flow_control_overflow`, `server_shutdown`.
 message ClientDisconnected {

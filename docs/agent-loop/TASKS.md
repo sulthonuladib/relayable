@@ -50,8 +50,10 @@ the evidence is integrated.
 | CORE-001 | Model + server + CLI vertical slice (server-owned PTY) | ADR-001, ADR-002 | `core/core-001-vertical-slice` | DONE — integrated `d3e0286` (INT-008); 53 files/+12010; `cargo test --workspace` 104 pass; 5 acceptance properties verified independently |
 | CTX-001 | Context-resolution test + set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005 Decision 2 + the §8.1 test) | ADR-005, CORE-001 | TBD | BACKLOG |
 | CORE-002 | Client disconnect leaves session alive; reattach snapshot + event stream/resume | CORE-001 | `core/core-002-reconnect-events` | DONE — integrated `91662af` (INT-011); 148 tests; events/disconnect/resume-cursor/reattach/multi-client proven; no model/contract change |
-| QA-001 | Smoke/CI scripts and build matrix | CORE-001 | `qa/qa-001-smoke-ci` | IN_PROGRESS (2026-10-15) — owns `scripts/**` + `tests/**`; `smoke.sh` + `ci.sh` + `QA-FLOW-001` |
-| QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | `qa/qa-001-smoke-ci` | IN_PROGRESS (2026-10-15) — folded into QA-001 |
+| QA-001 | Smoke/CI scripts and build matrix | CORE-001 | `qa/qa-001-smoke-ci` | DONE — integrated `4a258c2` (INT-013); `scripts/smoke.sh` (SMOKE OK), `scripts/ci.sh` (15 PASS/3 SKIP), flow-control test |
+| QA-FLOW-001 | Automated slow-client output-overflow / backpressure test (CORE-001 implemented the path but left it untested) | CORE-001 | `qa/qa-001-smoke-ci` | DONE — integrated `4a258c2` (INT-013); bounded ≤ window + one frame flush then `flow_control_overflow` |
+| MEM-001 | Measured idle/active memory baseline + regression thresholds (`full.md` §12) | QA-001 | TBD | BACKLOG |
+| CI-HOST-001 | Decide whether to host CI (`.github/workflows`) given a hosted runner cannot build this tree without network/vendoring | QA-001 | TBD | BACKLOG |
 | CLIENT-API-001 | `relayable-client` raw terminal byte streaming: `wait_for_output` returns `Err(Timeout)` and drops already-acked bytes, so it cannot drive a live terminal (UI-002 worked around it with a wire client on `relayable-protocol`) | CORE-001 | TBD | BACKLOG |
 
 Wave 2 ordering: `ENV-001` evidence → `TERM-001` spike + `ADR-003` and `ADR-001`/`ADR-002`

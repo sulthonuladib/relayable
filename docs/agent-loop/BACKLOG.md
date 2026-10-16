@@ -26,10 +26,11 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 1 | TERM-002 — engine-level spike validates ADR-003's provisional pin | `spike/term-002-engine-validation` | TERM-001 | DONE — `60d4395`; engine pins accept; gpui pin blocked |
 | 2 | CORE-002 — reconnect/events + reattach-snapshot hardening | `core/core-002-reconnect-events` | CORE-001 | DONE — `91662af` (148 tests) |
 | 3 | UI-002 — reference workspace (DONE `d46c66c`); UI-001 DONE `09928db` | `ui/ui-002-reference-workspace` | UI evidence + ADR-003 | DONE |
-| 4 | QA-001 — smoke/CI scripts and build matrix | TBD | CORE-001 | READY |
+| 4 | QA-001 — smoke/CI scripts + `QA-FLOW-001` (`SMOKE OK`, ci 15 PASS/3 SKIP) | `qa/qa-001-smoke-ci` | CORE-001 | DONE — `4a258c2` |
 | 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | TBD | ADR-005, CORE-001 | READY |
-| 6 | ADR-004 (DEC-005 ownership/persistence) | TBD | CORE-002 | waiting |
-| 7 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
+| 6 | ADR-004 (DEC-005 ownership/persistence) | TBD | CORE-002 | READY |
+| 7 | MEM-001 / CI-HOST-001 / CLIENT-API-001 / REF-004 remainder | TBD | QA-001 | BACKLOG |
+| 8 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
 
 ## Operating rules
 

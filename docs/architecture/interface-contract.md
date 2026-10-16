@@ -195,9 +195,11 @@ Message names below are **Relayable-defined (no REX evidence)**; the required ca
 "Terminal resize, dimensions, relevant capabilities, and client reconnect behavior." and is verified by `stty size` (`full.md`
 §13:824 "resize and verify `stty size` or equivalent;"). Reattach returns `TerminalSnapshot`: a screen plus bounded scrollback
 recovery, distinct from output replay; retained is bounded scrollback, lost is output evicted from the bounded queue
-(`full.md` §6.4:500). Flow control is credit-based per stream in bytes: the client grants credits, and when credits are
-exhausted the server pauses reads and buffers within a bounded budget, then escalates to detach-with-reason instead of
-unbounded growth (`full.md` §6.1:451 "Terminal input/output with bounded flow control and backpressure."; `full.md` §11:769
+(`full.md` §6.4:500). Flow control is credit-based per stream in bytes: the client grants credits, the server buffers at
+most the credit window, and if the client still does not grant credits the server detaches that client with the
+`flow_control_overflow` reason rather than growing unboundedly (QA-001 `tests/flow-control` pins the implemented
+behavior: delivery stays within the credit window plus one frame flush, then an ordered
+`client_connection_state_changed{Disconnected}` → `client_disconnected{reason:"flow_control_overflow"}`) (`full.md` §6.1:451 "Terminal input/output with bounded flow control and backpressure."; `full.md` §11:769
 "IPC: enforce message and queue size limits; protect against slow-client memory growth."; `full.md` §12:799 "bounded
 scrollback and queues;").
 

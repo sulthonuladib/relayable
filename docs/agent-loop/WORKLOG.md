@@ -77,6 +77,32 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 24 — QA-001 integrated: smoke test, CI matrix, flow-control test (2026-10-15)
+
+**Objective:** add the §13.4 smoke test, the §13.5 build matrix, and the untested slow-client path.
+
+**Deliverable:** QA-001 (`82c8d75`, 5 files, +1252) merged as INT-013 `4a258c2` — `scripts/**` +
+`tests/**` only; `crates/**` unchanged.
+
+**Independent validation:** `scripts/smoke.sh` → `SMOKE OK` (build → foreground server → CLI session →
+I/O → abrupt disconnect → reconnect same shell → session close → SIGTERM → cleanup). `scripts/ci.sh` →
+**15 PASS / 3 explicit SKIP / OVERALL PASS** (Android DEC-010; UI smoke by scope; packaging n/a).
+`cargo test --workspace` **150 passed** (was 148). Flow-control test green: a never-reading client is
+bounded to ≤ credit window + one frame flush and then detached with the ordered pair
+`client_connection_state_changed{Disconnected}` → `client_disconnected{reason:"flow_control_overflow"}`;
+the session/child survive.
+
+**Contract reconciliation (QA-001 finding):** the interface contract's flow-control wording now matches
+the implemented+tested behavior (buffer ≤ window, then detach with `flow_control_overflow`), and
+`protocol/schema/events.proto`'s state-casing comment was corrected `"disconnected"` → `"Disconnected"`.
+
+**Follow-ups tracked:** `MEM-001` (measured memory baseline for §12), `CI-HOST-001` (hosted-CI
+feasibility without vendoring).
+
+**Next:** CTX-001, then ADR-004.
+
+---
+
 ## Checkpoint 23 — UI-002 integrated: reference workspace (2026-10-15)
 
 **Objective:** land the main reference workspace UI and verify it.

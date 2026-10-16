@@ -40,7 +40,7 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 
 1. **CORE-002** — DONE, integrated `91662af` (INT-011).
 2. **UI-002** — DONE, integrated `d46c66c` (INT-012): the main reference workspace (6 catalogue screens, live wire client + `relayable-client` control plane, headless `alacritty_terminal`/`vte` render, committed own screenshots). Reference imagery stays local-only; durable evidence is the catalogue + tokens. Client gap → `CLIENT-API-001`.
-3. **QA-001** — smoke/CI scripts and build matrix (extend `scripts/validate.sh`).
+3. **QA-001** — DONE, integrated `4a258c2` (INT-013): `scripts/smoke.sh` + `scripts/ci.sh` + `tests/flow-control` (`QA-FLOW-001`). Contract `flow_control_overflow` wording and the `events.proto` state-casing comment reconciled.
 4. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
    add the ADR-005 §8.1 context-resolution test (currently not implemented).
 5. **ADR-004** (DEC-005 ownership/persistence) — after CORE-002.
