@@ -8,15 +8,18 @@
 
 - `master` clean at `416fa51`; baseline re-verified green: `cargo build --workspace --offline` and
   `cargo test --workspace --offline` both exit 0 with 0 failures.
-- **CTX-001** in progress on `ctx/ctx-001-context-env` (implementer `ctx001`): set
-  `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals + the ADR-005 §8.1
-  context-resolution integration test (`tests/context-resolution/**`).
+- **CTX-001** DONE — integrated INT-015 `dd1b986`: `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
+  are set in every managed terminal (`crates/relayable-server/src/registry.rs`), and
+  `tests/context-resolution/**` (4 integration tests) plus 2 unit tests prove env resolution,
+  `-s`-over-env precedence, and no-context failure (exit 3 ambiguous / exit 2 missing).
 - **INSTALL-001** in progress on `install/install-001-user-install` (implementer `install001`):
   `scripts/install-user.sh`, `packaging/systemd/user/relayable-server.service`, `packaging/desktop/relayable.desktop`,
   root `README.md`, `docs/operations/user-install.md` — the primary user goal (locally installable app).
 - **DEC-011** (2026-10-16): ADR-005 Decision 5 clarification — the accepted CORE-001 unique-session CLI
   default is retained; no-context fails only for zero/ambiguous matches.
-- Next: integrate CTX-001/INSTALL-001, then STORE-001.
+- **STORE-001 blocked** on a SQLite binding decision (see `NEXT.md`): no SQLite crate is in the offline
+  cargo cache; system `libsqlite3` 3.53.4 + headers are present.
+- Next: integrate INSTALL-001, then dependency-free backlog (CLIENT-API-001, MEM-001, REF-004).
 
 ---
 

@@ -43,16 +43,40 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **Integrate CTX-001 and INSTALL-001** — review each diff, run independent validation
-   (`bash scripts/validate.sh`, `bash scripts/smoke.sh`, `bash scripts/ci.sh`), merge to `master`,
-   update `docs/agent-loop/**`.
+1. **Integrate INSTALL-001** — review its diff, run independent validation (`bash scripts/validate.sh`,
+   `bash scripts/smoke.sh`, `bash scripts/ci.sh`), merge to `master` (INT-016), update `docs/agent-loop/**`.
+   (CTX-001 is already integrated as INT-015 `dd1b986`.)
 2. **STORE-001** — `crates/relayable-store` (SQLite metadata/audit) + server start-up reconciliation,
    `flock`, prune, write path per ADR-004 (designed, not implemented). Start only after CTX-001 lands.
-3. Backlog: `CLIENT-API-001` (client raw-byte streaming), `MEM-001` (memory baseline),
-   `CI-HOST-001` (hosted CI), `REF-004` remainder (design-token calibration).
+   **Blocked on a dependency decision (see below).**
+4. Backlog (dependency-free): `CLIENT-API-001` (client raw-byte streaming), `MEM-001` (memory
+   baseline), `CI-HOST-001` (hosted CI), `REF-004` remainder (design-token calibration).
 4. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build spike (ADR-003 reconsideration trigger #10).
 5. Update `docs/agent-loop/**` after every meaningful iteration.
+
+## Decision needed by the user — STORE-001 SQLite binding (2026-10-16)
+
+STORE-001 (ADR-004 Decision 2) requires an SQLite binding in `crates/relayable-store`. The root
+workspace builds `--offline` and pins exact versions; **no SQLite Rust crate is present in the local
+cargo registry cache** (verified: `rusqlite`, `libsqlite3-sys`, `sqlx`, `sled`, `redb` all absent). The
+host does have `/usr/lib/libsqlite3.so.3.53.4`, `/usr/include/sqlite3.h`, and the `sqlite3` CLI.
+
+Options (the Manager will not change the offline posture without approval):
+
+- **A — one-time network fetch (needs approval).** `cargo add rusqlite` (+ lockfile), then a networked
+  `cargo fetch`; subsequent builds stay offline. Lowest risk, standard binding (`libsqlite3-sys` with the
+  `bundled` feature, or system-linked). Cost: the repo's "no network dependency" posture changes once,
+  and the lockfile/graph grows.
+- **B — hand-written minimal FFI to the system `libsqlite3` (offline, no new crates).** A small
+  `unsafe`-reviewed wrapper for open/prepare/step/bind/finalize + WAL/busy_timeout pragmas. No network,
+  but it introduces hand-written unsafe FFI into a project that currently denies `unsafe_code` in the
+  PTY crate and uses it only for signals in the server; it needs an independent review.
+- **C — defer STORE-001.** ADR-004 remains `Accepted` (design), the store stays unimplemented, and the
+  project continues with dependency-free work (CLIENT-API-001, MEM-001, REF-004). Persistence is not on
+  the primary "locally installable app" path.
+
+Awaiting the user's choice before any SQLite work starts. No network access is used until then.
 
 ## Review gates (do not skip)
 

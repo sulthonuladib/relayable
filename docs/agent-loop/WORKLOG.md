@@ -77,6 +77,40 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 27 — CTX-001 integrated: managed-terminal context + §8.1 test (INT-015) (2026-10-16)
+
+**Objective:** review and integrate the CTX-001 project (ADR-005 Decision 2 + the `full.md` §8.1
+context-resolution test).
+
+**Review (Manager, §14.5):** branch `ctx/ctx-001-context-env` tip `92119dc`; `git diff master...HEAD`
+touched exactly `crates/relayable-server/src/registry.rs`, `tests/Cargo.toml`, and the new
+`tests/context-resolution/main.rs` (owned paths only); no secret-pattern matches; no docs/ADR edits.
+The diff adds a pure `managed_terminal_environment(base_term, session_id, block_id, server_address)`
+helper, seeds it with the live ids and `self.config.socket_path`, and leaves the existing "TERM only if
+unset" behavior intact.
+
+**Independent validation (Manager, in the CTX-001 worktree):**
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 1 | `cargo fmt --all --check` | clean | 0 |
+| 2 | `cargo clippy --workspace --all-targets --offline -- -D warnings` | clean | 0 |
+| 3 | `cargo build --workspace --offline` | finished | 0 |
+| 4 | `cargo test --workspace --offline` | all suites `ok`, 0 failed | 0 |
+| 5 | `cargo test -p relayable-integration-tests --offline --test context-resolution -- --nocapture` | `4 passed; 0 failed`; evidence `ctx-001-managed-env: pid=528165 RELAYABLE_SESSION=… RELAYABLE_BLOCK=… RELAYABLE_SERVER=/tmp/relayable-it-…/relayable.sock` | 0 |
+
+**Integration:** `git merge --no-ff ctx/ctx-001-context-env` → `dd1b986` (INT-015). Post-merge on
+`master`: `bash scripts/validate.sh` → `All CORE-001 validation checks passed.` (exit 0) and
+`bash scripts/smoke.sh` → `SMOKE OK` (exit 0).
+
+**Decision:** the ADR-005 Decision 5 addendum + DEC-011 (recorded at the session checkpoint `cdf795f`)
+remain accurate: the CTX-001 test uses zero/two sessions for the no-context failure, and
+`resolve_session` was not changed.
+
+**Next:** integrate INSTALL-001; STORE-001 awaits the SQLite binding decision (`NEXT.md`).
+
+---
+
 ## Checkpoint 26 — Manager session restart: baseline green; CTX-001 + INSTALL-001 launched (2026-10-16)
 
 **Objective:** resume the Relayable loop from repository state alone (DEC-008), confirm the baseline is

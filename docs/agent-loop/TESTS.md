@@ -288,3 +288,22 @@ window, then detach with `flow_control_overflow`); `protocol/schema/events.proto
 
 **Decision:** ADR-004 **Accepted** (DEC-005). No code or test accompanies it; the SQLite store is implied
 future work (`STORE-001`).
+
+## 2026-10-16 — CTX-001 integrated: managed-terminal context + §8.1 test (INT-015)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed the CTX-001 branch
+`ctx/ctx-001-context-env` (tip `92119dc`) and integrated it as `dd1b986` (INT-015).
+
+| # | Command (worktree `relayable-wt/ctx-001`) | Observed result | Exit |
+|---|---|---|---|
+| 99 | `git diff master...HEAD` scope + secret scan | exactly `crates/relayable-server/src/registry.rs`, `tests/Cargo.toml`, `tests/context-resolution/main.rs`; no secret-like matches | 0 |
+| 100 | `cargo fmt --all --check` | clean | 0 |
+| 101 | `cargo clippy --workspace --all-targets --offline -- -D warnings` | clean | 0 |
+| 102 | `cargo build --workspace --offline` | finished | 0 |
+| 103 | `cargo test --workspace --offline` | all suites `ok`, 0 failed | 0 |
+| 104 | `cargo test -p relayable-integration-tests --offline --test context-resolution -- --nocapture` | `4 passed; 0 failed`; `ctx-001-managed-env` line shows the exact session/block id + socket path in `/proc/<pid>/environ` | 0 |
+| 105 | post-merge `bash scripts/validate.sh` | `All CORE-001 validation checks passed.` | 0 |
+| 106 | post-merge `bash scripts/smoke.sh` | `SMOKE OK` (session survives client disconnect/reconnect; SIGTERM exit 0) | 0 |
+
+**Decisions recorded:** CTX-001 satisfies ADR-005 Decision 2 and the §8.1 test. `resolve_session` was
+not changed (DEC-011 clarification); the no-context tests use zero and two sessions.
