@@ -292,7 +292,36 @@ features; the capability that has no direct equivalent is a human-facing multi-p
 workflow need (add the host-level herdr integration), or OpenCode makes nesting depth >1 non-deprecated
 and a genuine three-tier org chart is required.
 
+## DEC-016 — Loop model pinned to `opencode-go/deepseek-v4.1-flash` (user directive)
 
+**Context:** the first unattended `scripts/agent-loop.sh` run created fresh sessions with no model
+configured anywhere, so they fell back to the ambient default, which resolved to a **free** model
+(`ll-alpha-free`). The user requires every loop session to use the paid DeepSeek V4.1 Flash served by
+the `opencode-go` provider. Two providers serve an identically named model, so the provider is part of
+the decision, not an implementation detail.
+
+**Decision:** pin the model once, at project level — `opencode.json` → `"model":
+"opencode-go/deepseek-v4.1-flash"`. Subagents inherit the session model when they configure no `model`
+of their own (none do), so one field covers the orchestrator and all four roles.
+
+**Verified facts (2026-10-16):**
+
+- `opencode models` offers three same-named DeepSeek V4.1 Flash candidates:
+  `opencode-go/deepseek-v4.1-flash` ($0.15/$0.60 per Mtok — the user's choice),
+  `opencode/deepseek-v4.1-flash` ($0.30/$1.20), and the free `agentrouter/deepseek-v4-flash` ($0/$0).
+  The display label (`deepseek-v4.1-flash`) does not identify the provider, so verification must read
+  session data rather than the label.
+- A probe session created with `--agent orchestrator` printed `orchestrator · deepseek-v4.1-flash`, and
+  its export reports `"providerID": "opencode-go"` — the intended provider, not the same-named
+  alternative.
+
+**Consequences:** unattended work bills at the `opencode-go` rate. Changing models is a one-field edit.
+The model exposes `low`/`high`/`max` variants; none is pinned, so the provider default applies — pin a
+variant explicitly if reasoning depth or cost must be fixed.
+
+**Reconsider if:** the user names a different model or variant, or one task should run on a cheaper model.
+
+## Open questions requiring evidence (not yet decidable)
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).

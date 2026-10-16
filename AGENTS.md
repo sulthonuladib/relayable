@@ -101,6 +101,10 @@ Subagents inherit their own configured permissions, not the parent's. A role tha
 lead-owned path may write it **only** when the brief names that path explicitly; the orchestrator
 still integrates. Peer sessions (a second lead) are started by the user, not by an agent.
 
+**Model:** every role runs on the pinned model `opencode-go/deepseek-v4.1-flash` (`opencode.json` →
+`model`, DEC-016). Subagents inherit the session model, so there is one place to change it. Do not
+leave a session on an unpinned default: the ambient default is a free model, not the paid one.
+
 ## Path ownership
 
 The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration. A lead-owned path may be delegated to a bounded worker only by naming it explicitly in that worker's assignment (the lead still integrates).

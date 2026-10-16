@@ -28,10 +28,17 @@ ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-
 
 ## Current state (lead session, 2026-10-16)
 
-`master` is clean at `416fa51`. Baseline re-verified: `cargo build --workspace --offline` and
-`cargo test --workspace --offline` both exit 0 with 0 failures. All Wave 1/2 research, the review/fix
-cycle, the core slices, the GPUI reference workspace, the QA tooling, and **all five ADRs** are
-integrated. **DEC-011** (2026-10-16) clarifies ADR-005 Decision 5.
+`master` is clean and pushed to `origin/master`. Baseline **verified green offline**: `scripts/validate.sh`
+passes all 7 steps (194 tests pass / 0 fail) and `scripts/smoke.sh` → `SMOKE OK`. `protoc` is present
+(`libprotoc 36.1`) and the offline cargo cache is complete. All Wave 1/2 research, the review/fix cycle,
+the core slices, the GPUI reference workspace, the QA tooling, and **all five ADRs** are integrated.
+**DEC-011** clarifies ADR-005 Decision 5; **DEC-015** migrated the agent runtime to OpenCode; **DEC-016**
+pins the loop's model to `opencode-go/deepseek-v4.1-flash`.
+
+> **A stopped loop session ran with the wrong model (2026-10-16):** the first unattended run used the
+> session default, which resolved to a free model (`ll-alpha-free`), because no model was pinned. It was
+> stopped before making changes; the tree was clean. `opencode.json` now pins the model, and it is
+> verified (the session export reports `providerID: opencode-go`).
 
 **Historical — superseded (both projects below are integrated; kept for path-ownership history):**
 
