@@ -1,0 +1,47 @@
+# Relayable per-user server unit (full.md §7.2 "Workstation default").
+#
+# Installed by scripts/install-user.sh to
+#   ${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/relayable-server.service
+#
+# This is a *user* unit: it runs as the logged-in user, with that user's normal
+# permissions, and owns only that user's sessions. There is deliberately no
+# `User=`/`Group=` key, no system-wide install, and no socket activation.
+#
+# `%h` is the systemd user-manager specifier for the invoking user's home
+# directory (resolved by systemd, not by the shell). It assumes the default
+# install location `~/.local/bin`. If you installed with XDG_BIN_HOME pointing
+# elsewhere, edit ExecStart to the absolute path of the installed binary.
+#
+# The only implemented foreground mode is `relayable-server run`
+# (crates/relayable-server/src/main.rs). Do not add flags the binary does not
+# accept.
+[Unit]
+Description=Relayable session server (per-user)
+Documentation=man:systemd.service(5)
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/relayable-server run
+
+# Restart only on crashes/signals, never on a clean exit (ExitCode 0). The 2s
+# delay is the backoff floor; systemd still applies its default start-limit
+# burst guard, so a crash loop is rate-limited rather than tight.
+Restart=on-failure
+RestartSec=2s
+
+# On SIGTERM the server closes sessions, unlinks its socket, and exits 0
+# (scripts/smoke.sh step 8). 15s is a deliberate bound: comfortably above the
+# observed sub-second shutdown, but short enough that a wedged server cannot
+# hold `systemctl --user stop` forever.
+TimeoutStopSec=15s
+
+# Optional tuning (environment inputs read at startup):
+#   Environment=RELAYABLE_EVENT_RETENTION_EVENTS=4096
+#   Environment=RELAYABLE_IDLE_TIMEOUT_MILLIS=30000
+#   Environment=RELAYABLE_HEARTBEAT_INTERVAL_MILLIS=5000
+# The default Unix socket lives in $XDG_RUNTIME_DIR/relayable/relayable.sock
+# (dir 0700, socket 0600); set RELAYABLE_SERVER to override the path.
+
+[Install]
+WantedBy=default.target
