@@ -13,6 +13,43 @@ This pass had working read-only HTTP egress, unlike the prior session quoted in 
 That changes the answer materially: the upstream repository, its license and cadence, the real Rust
 bindings, and both bindings' `build.rs` are now **verified from fetched source**, not inferred.
 
+> ### Corrections added 2026-10-16 by TERM-003 stage A (`docs/research/libghostty-adoption.md`)
+>
+> Stage A of `TERM-003` (DEC-021) cloned upstream and read the real repository across its tag history.
+> Everything below is **left as written**; four findings in it are wrong, stale, or incomplete and are
+> corrected here rather than silently rewritten. Full evidence (refs, file:line, commands) is in the
+> adoption document §1.2.
+>
+> 1. **§5.1 — "Upstream ships tags, not GitHub releases (the only release object is the 2022 `tip`
+>    nightly)."** *Stale.* The `tip` **release object is live and rolling**: it is re-created on every push
+>    to `main` (`release-tip.yml`: `name: 'Ghostty Tip ("Nightly")'`, `prerelease: true`,
+>    `target_commitish: ${{ github.sha }}`) and carries real assets, including a
+>    `libghostty-vt-source.tar.gz` per-commit source tarball. `git rev-parse tip` → `877dda7…`,
+>    dated **2026-10-15**, not 2022.
+> 2. **§5.3/§13 — "The release the host runs (v1.3.1) has no terminal/grid/scrollback/selection/mouse
+>    API."** *Correct at the C boundary, incomplete overall.* The same tag ships the engine as a **Zig
+>    module**: `git show v1.3.1:src/lib_vt.zig` exports `Terminal` (:59), `RenderState` (:52),
+>    `Screen`/`ScreenSet` (:53–54), `Selection` (:55), `Parser` (:49), `search` (:34), `formatter` (:28),
+>    `kitty` (:30). Only the flat C header is missing. `v1.2.3` has **no** `src/lib_vt.zig`. This does not
+>    change the *decision* (the tagged **C ABI** is still unusable for us) but it changes the *options*.
+> 3. **§6.1 — Zig version.** *Split by ref:* `v1.3.1` requires **`0.15.2`** (`build.zig.zon:6` at that
+>    tag); `0.16.0` is a **`main`-only** requirement, hard-enforced at `build.zig:12-14`. §6.1's
+>    statement is right for `main` and wrong for the tag.
+> 4. **§5.3/§8.2 — the `Version: 0.1.0` in the installed `.pc`.** *Mechanism added, and it matters for
+>    ABI.* `v1.3.1` **hardcodes** the library version to `0.1.0` (`src/build/GhosttyLibVt.zig:30`, `:57`,
+>    `:110`); `main` uses a separate `const lib_version = "0.1.0-dev";` (`build.zig:11`). So the
+>    full-terminal API is versioned **`0.1.0-dev`** — major `0`, the same major as the utilities-only
+>    release. The `libghostty-vt.so.0` soname therefore does **not** distinguish the two ABIs.
+>
+> Two further clarifications, not corrections: **§6.4's Zig blocker stands** (`zig` absent on this host;
+> the `pkg-config` path is unusable because the installed library is the utilities-only release), and
+> `mise` **does** list exactly `0.16.0` (`mise ls-remote zig`), so a per-user Zig pin is feasible — subject
+> to the user's approval, which stage A did not seek and did not act on.
+>
+> One upstream documentation defect found while checking §6.1: `PACKAGING.md` tells maintainers to read a
+> `required_zig` constant from `build.zig`; **that constant does not exist** on `main`. The real pin is
+> `build.zig.zon.minimum_zig_version`.
+
 ## Evidence basis and conventions
 
 Three evidence classes are kept separate and never blurred:
