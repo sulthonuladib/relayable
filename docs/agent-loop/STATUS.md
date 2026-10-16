@@ -1,25 +1,25 @@
 # STATUS — Relayable
 
-**Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; packaging/user-install in progress)
-**Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling integrated. **In flight:** CTX-001 (context env vars + §8.1 test) and INSTALL-001 (user install path).
-**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoint 26.
+**Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
+**Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install integrated. **In flight:** none.
+**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoints 26–28.
 
 ## Current execution (Manager session, 2026-10-16)
 
-- `master` clean at `416fa51`; baseline re-verified green: `cargo build --workspace --offline` and
-  `cargo test --workspace --offline` both exit 0 with 0 failures.
+- `master` is clean; CTX-001 (`dd1b986`) and INSTALL-001 (`39e5d49` + `a3ff5c0`) are integrated and the
+  canonical suite is green (`scripts/validate.sh`, `scripts/smoke.sh` both exit 0).
 - **CTX-001** DONE — integrated INT-015 `dd1b986`: `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
   are set in every managed terminal (`crates/relayable-server/src/registry.rs`), and
   `tests/context-resolution/**` (4 integration tests) plus 2 unit tests prove env resolution,
   `-s`-over-env precedence, and no-context failure (exit 3 ambiguous / exit 2 missing).
-- **INSTALL-001** in progress on `install/install-001-user-install` (implementer `install001`):
-  `scripts/install-user.sh`, `packaging/systemd/user/relayable-server.service`, `packaging/desktop/relayable.desktop`,
-  root `README.md`, `docs/operations/user-install.md` — the primary user goal (locally installable app).
-- **DEC-011** (2026-10-16): ADR-005 Decision 5 clarification — the accepted CORE-001 unique-session CLI
-  default is retained; no-context fails only for zero/ambiguous matches.
+- **INSTALL-001 DONE** — integrated INT-016 `39e5d49` (+ `a3ff5c0`): `scripts/install-user.sh` installs
+  release `relayable`/`relayable-server` into XDG user dirs with a `systemd --user` unit and a desktop
+  entry (GPUI app installed as `relayable-desktop` under `--with-desktop`, which builds in ~2m).
+  Independently validated: sandbox install + live CLI round-trip against the installed binaries,
+  socket dir 0700 / socket 0600, SIGTERM exits 0 and unlinks the socket.
 - **STORE-001 blocked** on a SQLite binding decision (see `NEXT.md`): no SQLite crate is in the offline
   cargo cache; system `libsqlite3` 3.53.4 + headers are present.
-- Next: integrate INSTALL-001, then dependency-free backlog (CLIENT-API-001, MEM-001, REF-004).
+- Next: dependency-free backlog (CLIENT-API-001, MEM-001, REF-004).
 
 ---
 

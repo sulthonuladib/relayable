@@ -43,9 +43,9 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 ## Open tasks, in order
 
-1. **Integrate INSTALL-001** — review its diff, run independent validation (`bash scripts/validate.sh`,
-   `bash scripts/smoke.sh`, `bash scripts/ci.sh`), merge to `master` (INT-016), update `docs/agent-loop/**`.
-   (CTX-001 is already integrated as INT-015 `dd1b986`.)
+1. **Backlog (dependency-free):** `CLIENT-API-001` (client incremental raw-byte streaming — needed to
+   drive a live terminal in the GPUI view), `MEM-001` (memory baseline), `REF-004` remainder,
+   `CI-HOST-001`. (CTX-001 = INT-015 `dd1b986` and INSTALL-001 = INT-016 `39e5d49` are integrated.)
 2. **STORE-001** — `crates/relayable-store` (SQLite metadata/audit) + server start-up reconciliation,
    `flock`, prune, write path per ADR-004 (designed, not implemented). Start only after CTX-001 lands.
    **Blocked on a dependency decision (see below).**

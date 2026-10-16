@@ -77,6 +77,44 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 28 — INSTALL-001 integrated: user install path delivered (INT-016) (2026-10-16)
+
+**Objective:** review and integrate INSTALL-001 — the primary user goal (a locally installable/testable
+Linux app: `systemd --user`-runnable server + GPUI client + user install path).
+
+**Review (Manager, §14.5):** branch `install/install-001-user-install` tip `b4bd6d5`; `git diff
+master...HEAD` created exactly `README.md`, `docs/operations/user-install.md`, `packaging/README.md`,
+`packaging/desktop/relayable.desktop`, `packaging/systemd/user/relayable-server.service`,
+`scripts/install-user.sh` (owned paths only); no secret-pattern matches. The installer uses only the
+implemented foreground mode `relayable-server run`, honours XDG overrides, never uses sudo, and never
+enables/starts the service. The GPUI app (bin `relayable`) is installed as `relayable-desktop` to avoid
+colliding with the CLI.
+
+**Independent validation (Manager, on `master` after the merge):**
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 1 | `bash -n scripts/install-user.sh` | clean | 0 |
+| 2 | `desktop-file-validate packaging/desktop/relayable.desktop` | clean (after the one-main-category fix) | 0 |
+| 3 | `systemd-analyze --user verify` (ExecStart → `/bin/true`) | clean | 0 |
+| 4 | sandbox install to temp `XDG_*` dirs (`--skip-daemon-reload`) | `relayable` 0755, `relayable-server` 0755, unit 0644, `.desktop` 0644 | 0 |
+| 5 | installed-binary live round-trip: server `run` + `ls`/`new`/`inspect`/`close` | session created/inspected/closed; socket dir `drwx------` 0700, socket `srw-------` 0600; SIGTERM exit 0, socket unlinked | 0 |
+| 6 | `--with-desktop` desktop release build (delegated report; `apps/linux`, `--locked --offline`) | `relayable-desktop` (26 MB) built in 2m02s and installed | 0 |
+| 7 | post-merge `bash scripts/validate.sh` + `bash scripts/smoke.sh` | all checks passed; `SMOKE OK` | 0 |
+
+**Integration fixes applied by the Manager (small):** `packaging/desktop/relayable.desktop`
+`Categories` reduced to one main category (`System;TerminalEmulator;`); `README.md` phase line corrected
+from "Phase 0" to Phase 1–2. Commit `a3ff5c0`. Merge commit `39e5d49` (INT-016).
+
+**Outcome:** the primary user goal is reached — a personal Linux install path now exists and is verified
+end to end. The desktop app can be installed alongside the CLI; the user service is installed but never
+auto-enabled.
+
+**Next:** dependency-free backlog (CLIENT-API-001, MEM-001, REF-004); STORE-001 awaits the SQLite
+binding decision (`NEXT.md`).
+
+---
+
 ## Checkpoint 27 — CTX-001 integrated: managed-terminal context + §8.1 test (INT-015) (2026-10-16)
 
 **Objective:** review and integrate the CTX-001 project (ADR-005 Decision 2 + the `full.md` §8.1

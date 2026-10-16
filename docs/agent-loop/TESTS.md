@@ -307,3 +307,25 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed the CTX-001 bra
 
 **Decisions recorded:** CTX-001 satisfies ADR-005 Decision 2 and the §8.1 test. `resolve_session` was
 not changed (DEC-011 clarification); the no-context tests use zero and two sessions.
+
+## 2026-10-16 — INSTALL-001 integrated: user install path (INT-016)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed the INSTALL-001 branch
+`install/install-001-user-install` (tip `b4bd6d5`) and integrated it as `39e5d49` (INT-016) plus the
+Manager fix commit `a3ff5c0`.
+
+| # | Command (on `master`) | Observed result | Exit |
+|---|---|---|---|
+| 107 | `git diff master...HEAD` scope + secret scan | exactly the 6 new owned files; no secret-like matches | 0 |
+| 108 | `bash -n scripts/install-user.sh` | clean | 0 |
+| 109 | `desktop-file-validate packaging/desktop/relayable.desktop` | clean after the `Categories` fix | 0 |
+| 110 | `systemd-analyze --user verify` (ExecStart → `/bin/true`) | clean | 0 |
+| 111 | sandbox install (`XDG_BIN_HOME`/`XDG_CONFIG_HOME`/`XDG_DATA_HOME` → temp, `--skip-daemon-reload`) | `bin/relayable` 0755, `bin/relayable-server` 0755, unit 0644, `.desktop` 0644; both `--version` OK | 0 |
+| 112 | installed-binary live round-trip: server `run` + `ls`/`new`/`RELAYABLE_SESSION inspect`/`close` | all exit 0; socket dir `drwx------` 0700, socket `srw-------` 0600; SIGTERM exit 0 and socket unlinked | 0 |
+| 113 | post-merge `bash scripts/validate.sh` + `bash scripts/smoke.sh` | `All CORE-001 validation checks passed.`; `SMOKE OK` | 0 |
+| 114 | `--with-desktop` (reported by the implementer) `cargo build --release --locked --offline` in `apps/linux` | `relayable-desktop` built (2m02s) and installed; CLI `relayable` unchanged | 0 |
+
+**Decisions recorded:** the primary user goal (locally installable/testable Linux app) is met. The
+installer never enables/starts services or uses root; the GPUI binary is installed as `relayable-desktop`.
+A minor sandbox note: overriding `HOME` alone breaks the rustup `cargo` shim, so sandbox tests override
+only the XDG dirs — this is a test-harness concern, not an installer defect.
