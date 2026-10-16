@@ -370,11 +370,12 @@ decision; no `cargo update` was ever run and `apps/linux/Cargo.lock` is unchange
 `spikes/terminal-engine-phase2` set (`avt`, …) is still absent, so that one `ci.sh` row cannot pass
 offline.
 
-**Decision (this session):** do **not** run a further networked fetch at agent initiative. `apps/linux`
-builds offline again, so UI-003/UI-004 are unblocked; the phase-2 spike row is recorded as a known
-environment gap and stays red until the user either approves a one-time networked `cargo fetch` for
-that spike workspace (the DEC-012 pattern) or accepts the documented red row. The `file-sizes` row added
-by REF-010 is PASS and its failure path was demonstrated independently of this gap.
+**Decision (this session, resolved by the user 2026-10-16):** the user **approved** a one-time networked
+`cargo fetch` for that spike workspace (the DEC-012 pattern). It was run
+(`cd spikes/terminal-engine-phase2 && cargo fetch` → exit 0, pulled `avt v0.18.0`, `termwiz v0.23.3`,
+`deltae v0.3.2`), after which `CARGO_NET_OFFLINE=true cargo build` in that workspace exits 0 and
+**`bash scripts/ci.sh` → `OVERALL: PASS` (16 PASS / 0 FAIL / 3 SKIP)** — the offline cache gap is closed and
+the whole §13.5 matrix is green on this host again. No `cargo update` was ever run; all lockfiles unchanged.
 
 **Verified facts:** `apps/linux` offline build exit 0; `spikes/terminal-engine-phase2` offline build
 exit 101 (`no matching package named 'avt' found`); committed lockfiles unchanged; `validate.sh` and
@@ -418,6 +419,57 @@ labelled as such and must not be presented as reference-derived.
 
 **Reconsider if:** the user wants restore-last-session in this phase (then stage 2 becomes the priority
 and needs a local persistence decision), or the picker/attach work is dropped entirely.
+
+## DEC-020 — Desktop session policy: create a new session on open (user directive, 2026-10-16)
+
+**Context:** DEC-019 stage 2 left one policy question open — on app launch, should Relayable restore the
+previous session or always create a new one? The wire `SessionSummary` carries neither a block id nor
+`created_at`, so restoring would require `apps/linux/src/api/**` work plus a local persistence policy
+(persisted last-used session id), which would be Relayable-original behaviour, not reference-derived.
+
+**Decision (user, 2026-10-16):** on app open, **create a new session** — do not restore the previous one.
+`UI-004-STAGE2` item (a) (attach/restore an existing session) is therefore **declined**; the picker's
+existing-session dead end stays as-is. Items (b) (a retryable connect failure is painted as a terminal
+`ConnectionState::Error`) and (c) (an unrelated `ApiEvent::Error` clears an in-flight create intent,
+downgrading a split/labelled create to a new tab) are technical defects and remain in the backlog.
+
+**Consequence, stated plainly:** the app still creates a *new* session on every launch (the DEC-019 stage-1
+behaviour). The observed reference behaviour — a session surviving a client quit/relaunch (V1 0:52–1:30;
+V4 4:11) — is therefore **not** reproduced, and any future claim about session restore must say so.
+This is a deliberate, recorded deviation, not an omission.
+
+**Reconsider if:** the user wants restore-on-launch later, or the reference videos' session-survival
+behaviour becomes part of the acceptance criteria for a release.
+
+## DEC-021 — Terminal engine: adopt libghostty (user directive); TERM-003 opened with clone permission
+
+**Context:** RESEARCH-002 (`docs/research/libghostty.md`, INT-021) evaluated ghostty's terminal core and
+recommended **Defer / Partial**: upstream is MIT and headless by design, but the *released* libghostty
+(v1.3.1) exposes no terminal/grid/scrollback API (that lived on untagged, self-declared-unstable `main`),
+**Zig 0.16.x** is a build requirement under the no-global-install rule, the leading Rust binding ships no
+license file, and `alacritty_terminal 0.26.0` already had committed spike evidence (32 PASS/1 UNSUPPORTED/
+0 FAIL).
+
+**Decision (user, 2026-10-16):** pursue adopting an existing terminal engine — specifically **libghostty** —
+and treat it as *good enough to use*; the user explicitly **authorises cloning the upstream repository for
+research** ("you can clone it as vendored repo if needed so you can have better research"). DEC-014's
+"do not adopt either dependency in this phase" is superseded **for libghostty only**; the gpui-kit part of
+DEC-014 stands (UI-006 remains a local token-driven theme).
+
+**How this is executed (bounds):**
+- `TERM-003` moves from PROPOSED to **ACTIVE**, stage A = evidence spike: clone upstream (and the Rust
+  binding) **outside the tracked tree** (e.g. `/home/sulthonuladib/work/vendor/`), never commit upstream
+  source into Relayable, and record licence/attribution requirements. Cloning is permitted; **no global
+  installs and no `sudo`** — a Zig toolchain pin (e.g. via `mise`) needs the user's approval before it is
+  used to build anything.
+- Stage B (a real build/link spike and any engine switch) requires the stage-A evidence plus an **ADR-003
+  amendment** (lead-owned) — ADR-003's pins stay authoritative until that lands.
+- `full.md` §2.6 clean-room rules still apply to GoRex; upstream ghostty is MIT, so licence compliance is
+  attribution, not clean-room.
+
+**Reconsider if:** the stage-A evidence shows the released API still cannot emulate a terminal without
+pinning unreleased `main`, or if a Zig pin is refused — in which case the recorded fallback is the current
+`alacritty_terminal` pin (ADR-003 accepted, spike-validated).
 
 ## Open questions requiring evidence (not yet decidable)
 
