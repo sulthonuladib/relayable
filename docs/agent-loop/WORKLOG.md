@@ -77,6 +77,40 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 30 — Code-organization ruling + file-size checker; REF-006 launched (2026-10-16)
+
+**Trigger:** the user dislikes oversized single source files and asked for a better ruling plus a plan that
+won't collide with the in-flight projects.
+
+**Measured** (2026-10-16, hand-written `.rs`, excluding `target/`): 51 files / ~31.6k lines; the largest are
+`spikes/terminal-engine-phase2/src/checks.rs` 3666 (spike, exempt), `apps/linux/src/app.rs` 1876,
+`crates/relayable-client/src/lib.rs` 1630, `crates/relayable-server/tests/server_e2e.rs` 1465,
+`apps/linux/src/tokens.rs` 1453, `apps/linux/src/api/mod.rs` 1448, `tests/events/main.rs` 1058,
+`crates/relayable-server/src/session.rs` 1037.
+
+**Ruling (`docs/architecture/code-organization.md`, binding):** calibrated to common Rust practice
+(≈500–1000 lines/file). Production source target ≤ 500 / hard cap **1000**; tests ≤ 800 / **1200**;
+`lib.rs`/`main.rs`/`mod.rs` ≤ 150 / **300**. Generated code and `spikes/**` exempt. Splits are pure moves
+with `pub use` re-exports (no public-path or behavior change). `scripts/check-file-sizes.sh` reports
+offenders (`--strict` exits 1) and becomes a CI gate only after the queue is done (REF-010). Added to
+`AGENTS.md` ("Code organization").
+
+| Command | Observed | Exit |
+|---|---|---|
+| `bash scripts/check-file-sizes.sh` | 51 files checked; 10 over hard cap; report mode | 0 |
+| `bash scripts/check-file-sizes.sh --strict` | exits 1 while violations remain (expected) | 1 |
+
+**Non-collision plan:** REF-007 (client) is blocked until CLIENT-API-001 merges; REF-008 (server + server
+integration tests) until STORE-001 merges; REF-009 (`tests/**`) until CLIENT-API-001 merges; REF-010 flips
+the strict gate last.
+
+**REF-006 launched** (`refactor/ref-006-free-crates`, Herdr `w1M`) for the paths no in-flight task owns:
+`apps/linux/src/**`, `crates/relayable-{model,pty,cli}/src/**`, `crates/relayable-protocol/src/**`.
+
+**Next:** integrate CLIENT-API-001, STORE-001, REF-006 as they return; then REF-007/008/009/010.
+
+---
+
 ## Checkpoint 29 — Worktree cleanup policy recorded; 13 done+merged worktrees removed (2026-10-16)
 
 **Trigger:** the user authorized cleanup of unused worktrees for tasks that are done and merged, and asked

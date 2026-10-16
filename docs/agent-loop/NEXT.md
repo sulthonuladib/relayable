@@ -49,12 +49,15 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 2. **STORE-001 (in flight)** — `store/store-001-sqlite-metadata` (Herdr `w1J`): `crates/relayable-store`
    (SQLite metadata/audit) + server start-up reconciliation, `flock`, prune, write path per ADR-004.
    DEC-012: `rusqlite =0.40.2` bundled (one-time fetch done; builds stay offline).
-3. **Integrate each returning project** — review the diff, run independent validation
+3. **REF-006 (in flight)** — `refactor/ref-006-free-crates` (Herdr `w1M`): split over-cap files on free
+   paths per `docs/architecture/code-organization.md`. After the feature tasks merge, run REF-007
+   (client), REF-008 (server), REF-009 (`tests/**`), then REF-010 (CI `--strict` gate).
+4. **Integrate each returning project** — review the diff, run independent validation
    (`scripts/validate.sh`, `scripts/smoke.sh`, `cargo test --workspace --offline`), merge (INT-017+).
-4. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`.
-5. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
+5. Backlog: `MEM-001` (memory baseline), `REF-004` remainder, `CI-HOST-001`.
+6. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
    build spike (ADR-003 reconsideration trigger #10).
-6. Update `docs/agent-loop/**` after every meaningful iteration.
+7. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## STORE-001 SQLite binding — decided: option A (2026-10-16)
 

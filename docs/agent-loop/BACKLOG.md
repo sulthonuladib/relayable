@@ -23,8 +23,12 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **Failing tests:** none.
 - **Primary user goal reached:** a locally installable/testable Linux app (server + CLI + GPUI client +
   user install path) is delivered and verified (`scripts/install-user.sh`, `systemd --user` unit).
-- **Two projects in flight:** CLIENT-API-001 (`client/...`, Herdr `w1H`) and STORE-001 (`store/...`, Herdr `w1J`).
+- **Three projects in flight:** CLIENT-API-001 (`client/...`, `w1H`), STORE-001 (`store/...`, `w1J`),
+  and REF-006 (`refactor/ref-006-free-crates`, `w1M`, code-organization splits on free paths).
   Disjoint owned paths; Manager integrates.
+- **Code organization:** `docs/architecture/code-organization.md` + `scripts/check-file-sizes.sh`
+  (REF-005 DONE). Queue: REF-006 (free paths, in flight), REF-007 (client, after CLIENT-API-001),
+  REF-008 (server, after STORE-001), REF-009 (`tests/**`, after CLIENT-API-001), REF-010 (wire --strict).
 
 ## Priority order (next first)
 
@@ -40,6 +44,9 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 8 | STORE-001 — `crates/relayable-store` (SQLite metadata/audit) + reconcile/flock/prune/write path per ADR-004 | `store/store-001-sqlite-metadata` | ADR-004 | IN_PROGRESS (Herdr `w1J`); DEC-012 `rusqlite =0.40.2` bundled |
 | 9 | CLIENT-API-001 (in flight) / MEM-001 / CI-HOST-001 / REF-004 remainder | TBD | — | IN_PROGRESS / BACKLOG |
 | 10 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
+| 11 | REF-006 — split over-cap files on free paths (apps/linux, model, pty, cli) | `refactor/ref-006-free-crates` | REF-005 | IN_PROGRESS (Herdr `w1M`) |
+| 12 | REF-007/008/009 — split client / server / tests after their feature tasks merge | TBD | REF-006 + feature merges | BACKLOG |
+| 13 | REF-010 — wire `check-file-sizes.sh --strict` into CI | TBD | REF-006..009 | BACKLOG |
 
 ## Operating rules
 
