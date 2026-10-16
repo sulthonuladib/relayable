@@ -242,7 +242,7 @@ Dispatch interpretations (the spec fixed the outcome but not always the mapping)
   a documented non-guarantee here: `graceful_shutdown_kills_live_children` proves the foreground
   server dies on `SIGTERM` and the recorded child pid disappears.
 
-Evidence: `crates/relayable-server/tests/server_e2e.rs` (`cargo test -p relayable-server --offline`)
+Evidence: `crates/relayable-server/tests/server_e2e/**` (`cargo test -p relayable-server --offline`)
 spawns a real `relayable-server` subprocess and drives raw frames to prove handshake (`1.0` +
 limits), `session:<uuidv7>` identity, PTY I/O (`/dev/pts/`), `stty size` before and after a resize,
 disconnect survival of the same shell process, reattach, `session.close` child termination, the

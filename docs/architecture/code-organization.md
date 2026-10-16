@@ -80,7 +80,9 @@ and a regression is caught immediately.
 Known offenders (live list: `bash scripts/check-file-sizes.sh`; measured 2026-10-16 after the
 REF-008 integration, which closed the queue). **Above the hard cap: none** — `over-hard-cap=0` across
 149 checked files; REF-008 split the last two, `crates/relayable-server/src/session.rs` (1037,
-production cap 1000) and `crates/relayable-server/tests/server_e2e.rs` (1472, test cap 1200). **Over
+production cap 1000; now `crates/relayable-server/src/session/**`) and
+`crates/relayable-server/tests/server_e2e.rs` (1472, test cap 1200; now
+`crates/relayable-server/tests/server_e2e/**`). **Over
 target but under cap (split when a seam is clear, not mandatory):**
 `crates/relayable-server/tests/store_wiring.rs` 921, `crates/relayable-server/src/registry.rs` 808,
 `crates/relayable-server/src/session/block.rs` 613, `crates/relayable-server/src/connection.rs` 572,

@@ -86,24 +86,24 @@ server crate; `full.md` §5.2:412 forbids crate cycles.
 The current server is a single foreground binary — `crates/relayable-server/src/main.rs:3`: "Usage:
 `relayable-server run` (foreground, no systemd unit, no forking)." It owns every child **in-process**:
 
-- `crates/relayable-server/src/session.rs:1-7` (module doc, verbatim): "A [`BlockRuntime`] owns the
+- `crates/relayable-server/src/session.rs:1-8` (module doc, verbatim): "A [`BlockRuntime`] owns the
   server-side PTY child for the lifetime of the session, independently of any client connection: it holds
   the [`PtyHandle`], a dedicated PTY-writer thread, the bounded output tail, the per-stream output
   sequence, and the fan-out to attached streams. Dropping a client never signals, reaps, or stops the
   child; only [`BlockRuntime::close`] does."
-- `session.rs:292` defines `pub(crate) struct BlockRuntime`; it holds `output: Mutex<OutputState>`
-  (`:301`), `writer_lease: Mutex<Option<WriterLease>>` (`:304`), and `pty: Mutex<PtyHandle>` (`:305`),
+- `session/block.rs:69` defines `pub(crate) struct BlockRuntime`; it holds `output: Mutex<OutputState>`
+  (`:78`), `writer_lease: Mutex<Option<WriterLease>>` (`:81`), and `pty: Mutex<PtyHandle>` (`:82`),
   plus reader/reaper/input thread join handles.
 - `crates/relayable-server/src/registry.rs:56` holds `sessions: Mutex<BTreeMap<SessionId,
   Arc<SessionRuntime>>>` in `ServerShared`; `create_session` (`:86`) spawns the child at `:98` via
   `relayable_pty::PtyHandle::spawn(...)`, with the doc at `:84-85`: "The child is owned by the registry,
   never by a client."
-- `session.rs:903` defines `SessionRuntime` (`label: Option<String>` at `:905`, `created_at_millis` at
-  `:906`), and `:902` notes: "Closed sessions are retained as tombstones (ADR-001)."
-- The OS handle type is opaque: `crates/relayable-pty/src/lib.rs:121` `pub struct PtyHandle { master:
-  Box<dyn MasterPty + Send>, child: Box<dyn Child + Send + Sync>, … }`; spawn is `lib.rs:148`; the child
-  becomes a session leader because `portable-pty` calls `setsid()`/`TIOCSCTTY` (`lib.rs:169-176`);
-  termination is `try_wait` (`lib.rs:236`), `kill` (`lib.rs:270`), `shutdown(grace)` (`lib.rs:292`).
+- `session/runtime.rs:12` defines `SessionRuntime` (`label: Option<String>` at `:14`, `created_at_millis` at
+  `:15`), and `:11` notes: "Closed sessions are retained as tombstones (ADR-001)."
+- The OS handle type is opaque: `crates/relayable-pty/src/handle.rs:39` `pub struct PtyHandle { master:
+  Box<dyn MasterPty + Send>, child: Box<dyn Child + Send + Sync>, … }`; spawn is `handle.rs:66`; the child
+  becomes a session leader because `portable-pty` calls `setsid()`/`TIOCSCTTY` (`handle.rs:86-89`);
+  termination is `try_wait` (`handle.rs:154`), `kill` (`handle.rs:188`), `shutdown(grace)` (`handle.rs:210`).
 
 Client teardown never touches the child. `crates/relayable-server/src/lib.rs:1-6`: "A dropped client
 never signals, reaps, or stops a child; only `session.close` (or graceful server shutdown) does."
@@ -170,7 +170,7 @@ first-release constraint that the implementation is a single foreground server
 
 | Option | What it would require | Cost / risk | Android-readiness (DEC-010) | First-release verdict |
 |---|---|---|---|---|
-| **Status quo: in-process ownership** (adopted) | Nothing beyond what exists: `Arc<BlockRuntime>` holds the `PtyHandle` and child, per session, independent of connections (`session.rs:1-7,292-305`; `registry.rs:56,84-85`). | None today; a server restart/Host reboot ends children (documented). | Host-independent; no POSIX supervisor assumed. | **Chosen.** Satisfies §6.3:475–478; makes no §6.3:480 promise. |
+| **Status quo: in-process ownership** (adopted) | Nothing beyond what exists: `Arc<BlockRuntime>` holds the `PtyHandle` and child, per session, independent of connections (`session.rs:1-8`; `session/block.rs:69-82`; `registry.rs:56,84-85`). | None today; a server restart/Host reboot ends children (documented). | Host-independent; no POSIX supervisor assumed. | **Chosen.** Satisfies §6.3:475–478; makes no §6.3:480 promise. |
 | **(A) Separate supervisor process owns PTYs and reattaches after a server restart** (`full.md:482`) | A second privileged-adjacent process; PTY master fds must outlive the server and be handed to a restarted server — fd passing over a `SCM_RIGHTS` Unix socket; a versioned lifecycle/handshake protocol between server and supervisor; separate packaging, systemd unit, and supervision; failure-mode design (supervisor crash kills sessions); security review of the supervisor's trust boundary (`full.md` §11:760). | High: an entirely new OS-level component with its own protocol, tests, and security surface — comparable in effort to the server itself. `full.md` §6.3:480 makes it optional; no spike exists. | Adds a process/socket model Android may not be able to host; must not leak into the model/protocol (model must stay host-independent, `full.md` §5.2:405). | **Deferred.** No implemented, tested spike; meets none of the first-release acceptance criteria without new evidence. |
 | **(B) Per-session supervisor services/processes preserve PTY descriptors** (`full.md:483`) | One process/service per live session; transient systemd units or an equivalent launcher; descriptor custody and reattachment; lifecycle protocol; per-unit state/permissions; packaging (`TimeoutStopSec`, `Restart`, ownership) and security review; unbounded per-session process growth risk. | Highest operational complexity; a unit per session is a large surface with many failure modes; `full.md` §12:800 ("avoid one unbounded task per client/event") counsels against unbounded per-session machinery without measurement. | Worst Android fit: assumes a systemd-like per-user/per-session supervisor that does not exist on Android. | **Deferred.** |
 | **(C) Another proven OS-level arrangement** (`full.md:484`) | Any other tested OS mechanism (e.g., a broker); must be "proven" per §6.3:480 and tested. | Undefined until a specific mechanism is proposed with evidence. | Unknown. | **Deferred** — no candidate with tested evidence exists. |
@@ -202,9 +202,10 @@ a dependency (verified: no `rusqlite`/`sqlx`/`sled`/`redb` in any manifest).
 
 **D1.1 (ownership boundary).** The foreground server process owns every PTY/child tree. Ownership is
 **per session, not per connection**, and is held in-process by `Arc<BlockRuntime>` inside
-`ServerShared.sessions` (`crates/relayable-server/src/session.rs:1-7,292-305`;
+`ServerShared.sessions` (`crates/relayable-server/src/session.rs:1-8`;
+`crates/relayable-server/src/session/block.rs:69-82`;
 `crates/relayable-server/src/registry.rs:56,84-85,98`). The PTY handle is opaque and non-`Clone`
-(`crates/relayable-pty/src/lib.rs:121,148,169-176,236,270,292`). No out-of-process supervisor exists.
+(`crates/relayable-pty/src/handle.rs:39,66,86-89,154,188,210`). No out-of-process supervisor exists.
 
 **D1.2 (guaranteed, implemented and tested).** Closing a client window, losing the network, an idle
 timeout, a mid-request drop, or a flow-control overflow removes only the client record, its streams, and
@@ -213,9 +214,9 @@ its writer lease. It never signals, reaps, or stops the child
 `pty_process_id`/`program_pid` and the same child. This is exercised by the test suites (function names
 and verified locations):
 
-- `server_end_to_end` (`crates/relayable-server/tests/server_e2e.rs:508`),
-- `disconnected_client_record_is_removed` (`server_e2e.rs:1319`),
-- `idle_timeout_reason_is_reported_to_a_subscriber` (`server_e2e.rs:1392`),
+- `server_end_to_end` (`crates/relayable-server/tests/server_e2e/end_to_end.rs:22`),
+- `disconnected_client_record_is_removed` (`server_e2e/lifecycle.rs:121`),
+- `idle_timeout_reason_is_reported_to_a_subscriber` (`server_e2e/heartbeat.rs:31`),
 - `reconnect_preserves_identity_and_advances_the_stream` (`tests/reconnect/main.rs:42`),
 - `snapshot_at_s_plus_events_has_no_gap_no_duplicate_and_the_child_pid_survives`
   (`tests/reconnect/main.rs:188`),
@@ -230,7 +231,7 @@ and verified locations):
 terminate children. Shutdown installs SIGINT/SIGTERM handlers
 (`crates/relayable-server/src/signals.rs:19-42`) and the accept loop exits at
 `crates/relayable-server/src/lib.rs:123-135`, which closes every live block and reaps the children. Test:
-`graceful_shutdown_kills_live_children` (`crates/relayable-server/tests/server_e2e.rs:869`).
+`graceful_shutdown_kills_live_children` (`crates/relayable-server/tests/server_e2e/lifecycle.rs:13`).
 
 **D1.4 (supervision options deferred).** All three mechanisms named at `full.md` §6.3:480–484 — "(A) a
 separate supervisor owns PTYs and allows server restarts to reattach" (`:482`), "(B) per-session
@@ -262,7 +263,7 @@ and no orphan/adoption policy is documented. No systemd unit exists (`crates/rel
 **D1.8 (upgrade continuity, stated honestly).** `full.md` §11:771 requires that "package upgrades must
 not silently kill sessions." **Today they do end live children**, because a restart or upgrade terminates
 the foreground server and graceful shutdown reaps every live child (`crates/relayable-server/src/lib.rs:123-135`;
-test `graceful_shutdown_kills_live_children`, `server_e2e.rs:869`). This is a documented known gap, not a
+test `graceful_shutdown_kills_live_children`, `server_e2e/lifecycle.rs:13`). This is a documented known gap, not a
 hidden one. The drain story for the first release is: a graceful shutdown ends children deliberately;
 clients observe the state change through the event stream (`terminal_child_exited` and session/connection
 state events, `protocol/compatibility/core-002-method-set.md` §D) and through `session.view`/`session.list`,
@@ -311,8 +312,8 @@ for `full.md` §6.4:500, §12:799–805):
 
 | Bound | Value | Anchor |
 |---|---|---|
-| Input queue messages per block | `INPUT_QUEUE_MESSAGES = 1024` | `crates/relayable-server/src/session.rs:29` |
-| Input queue bytes per block | `INPUT_QUEUE_BYTES = 4 * 1024 * 1024` | `session.rs:31` |
+| Input queue messages per block | `INPUT_QUEUE_MESSAGES = 1024` | `crates/relayable-server/src/session/threads.rs:11` |
+| Input queue bytes per block | `INPUT_QUEUE_BYTES = 4 * 1024 * 1024` | `session/threads.rs:13` |
 | Retained output tail per block (`output_tail_bytes`) | default `32_768` | `crates/relayable-server/src/config.rs:41,126` |
 | Outbound queue messages per connection | `OUTBOUND_QUEUE_MESSAGES = 8192` | `crates/relayable-server/src/connection.rs:38` |
 | Duplicate-request dedup window | 64 | `connection.rs:281` (`RequestWindow::new(64)`) |
@@ -321,15 +322,16 @@ for `full.md` §6.4:500, §12:799–805):
 
 Only `output_tail_bytes` and `event_retention_events` are `ServerConfig` parameters (the latter
 overridable via `RELAYABLE_EVENT_RETENTION_EVENTS`); the remaining bounds are hard-coded `const`s —
-`INPUT_QUEUE_MESSAGES`/`INPUT_QUEUE_BYTES` (`session.rs:29,31`), `OUTBOUND_QUEUE_MESSAGES`
+`INPUT_QUEUE_MESSAGES`/`INPUT_QUEUE_BYTES` (`session/threads.rs:11,13`), `OUTBOUND_QUEUE_MESSAGES`
 (`connection.rs:38`), the 64-entry dedup window (`connection.rs:281`), `THREAD_JOIN_TIMEOUT`
-(`session.rs:33`), and `credit_window_bytes` from the protocol `DEFAULT_LIMITS` (`limits.rs:14-20`).
+(`session/threads.rs:15`), and `credit_window_bytes` from the protocol `DEFAULT_LIMITS` (`limits.rs:14-20`).
 These may be promoted to configuration later (`ADR-001:230-236`); any new name
 lives in the ADR-005 `RELAYABLE_*` namespace, and the exact new name is fixed at implementation under
 ADR-005 (this ADR does not invent one). Server-side scrollback is **NOT PRESENT** today:
-`crates/relayable-server/src/session.rs:470` sets `scrollback_bytes: Vec::new()` in `attach_stream`
+`crates/relayable-server/src/session/block.rs:247` sets `scrollback_bytes: Vec::new()` in `attach_stream`
 (consistent with `core-001-method-set.md:136-137`). Today's scrollback is client-engine-owned
-(`apps/linux/src/term/mod.rs:31,164`). The persisted metadata has its own bounds: `audit_events`,
+(`apps/linux/src/term/mod.rs:31`; `apps/linux/src/term/model.rs:44`). The persisted metadata has its own
+bounds: `audit_events`,
 `tombstones`, and closed sessions are pruned by **age and row count** on startup and on close, so DB
 growth is bounded by construction (`full.md` §6.4:494 "Retention and pruning"). The concrete age/row
 defaults are **Relayable-defined (no REX evidence)** configuration, to be measured (`full.md` §12:796)
@@ -414,11 +416,11 @@ supervisor options are evaluated against Android in the Options table.
 
 | Property | Status | Authority |
 |---|---|---|
-| Session/PTY survival across client close or network loss | **Guaranteed — implemented and tested** | `full.md` §6.3:475–477; `crates/relayable-server/src/lib.rs:1-6`; tests `server_e2e.rs:508,1319,1392`, `tests/reconnect/main.rs:42,188,308`, `tests/lifecycle/main.rs:102`, `tests/multi-client/main.rs:227`, `tests/flow-control/main.rs:131,467` |
+| Session/PTY survival across client close or network loss | **Guaranteed — implemented and tested** | `full.md` §6.3:475–477; `crates/relayable-server/src/lib.rs:1-6`; tests `server_e2e/end_to_end.rs:22`, `server_e2e/lifecycle.rs:121`, `server_e2e/heartbeat.rs:31`, `tests/reconnect/main.rs:42,188,308`, `tests/lifecycle/main.rs:102`, `tests/multi-client/main.rs:227`, `tests/flow-control/main.rs:131,467` |
 | Survival across server crash or host reboot | **NOT implemented, NOT claimed** | `full.md` §1.3:120, §6.3:480, §6.3:486, §6.4:497; `core-001-method-set.md:219`; `core-002-method-set.md:197`; `interface-contract.md:93-95` |
 | Byte-exact terminal stream recovery | **Not claimed** | `full.md` §6.1:460; `ADR-001:239`; `interface-contract.md:88-92` |
 | Event-sequence continuity across a restart | **Not claimed** (new per-run epoch) | D2.6; `interface-contract.md:63-92` |
-| Upgrade/restart continuity (children preserved) | **NOT implemented** — children end on restart | `full.md` §11:771; `crates/relayable-server/src/lib.rs:123-135`; test `server_e2e.rs:869` |
+| Upgrade/restart continuity (children preserved) | **NOT implemented** — children end on restart | `full.md` §11:771; `crates/relayable-server/src/lib.rs:123-135`; test `server_e2e/lifecycle.rs:13` |
 | SIGKILL / host power-loss orphan behaviour | **Untested / unclaimed** | D1.7; no SIGKILL or orphan test exists |
 | Multi-user isolation, authn, and authz | **NOT implemented** | `full.md` §11:766; `core-001-method-set.md:127-140`; `core-002-method-set.md:195-205` |
 | systemd unit | **Not present** | `crates/relayable-server/src/main.rs:3`; `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` |
@@ -523,10 +525,10 @@ nothing is presented as implemented unless marked.
 ## Evidence
 
 Evidence classes used: **spec anchors**; **code read** (`crates/relayable-server/**`,
-`crates/relayable-pty/src/lib.rs`, `crates/relayable-protocol/src/limits.rs`, `apps/linux/src/term/mod.rs`,
+`crates/relayable-pty/src/handle.rs`, `crates/relayable-protocol/src/limits.rs`, `apps/linux/src/term/mod.rs`,
 `Cargo.toml`); **tests read** (function names and line anchors in
-`crates/relayable-server/tests/server_e2e.rs`, `tests/reconnect/main.rs`, `tests/lifecycle/main.rs`,
-`tests/multi-client/main.rs`, `tests/flow-control/main.rs`, `tests/events/main.rs`); and **commands
+`crates/relayable-server/tests/server_e2e/**`, `tests/reconnect/main.rs`, `tests/lifecycle/main.rs`,
+`tests/multi-client/main.rs`, `tests/flow-control/main.rs`, `tests/events/**`); and **commands
 actually run** (git state, `grep` over manifests for storage crates, line-anchor reads). No cargo test run
 was performed because no code changed.
 
@@ -548,7 +550,7 @@ was performed because no code changed.
 | `docs/architecture/interface-contract.md:150-180` | Connection state model; transport drop never destroys the session | Spec |
 | `protocol/compatibility/core-001-method-set.md:127-140,210-219` | Persistence none, authn none, `SO_PEERCRED` deferred; disconnect removes only client records; crash/reboot not claimed | Spec |
 | `protocol/compatibility/core-002-method-set.md:195-205` | No crash/reboot survival; no byte-exact replay; no persistence/SQLite; no authn/authz | Spec |
-| `crates/relayable-server/src/session.rs:1-7,29,31,33,292,301,304,305,470,903-906` | In-process `BlockRuntime`/PTY ownership; bounds; empty server scrollback; `SessionRuntime`; tombstones | Code |
+| `crates/relayable-server/src/session.rs:1-8`; `session/threads.rs:11,13,15`; `session/block.rs:69,78,81,82,247`; `session/runtime.rs:11-15` | In-process `BlockRuntime`/PTY ownership; bounds; empty server scrollback; `SessionRuntime`; tombstones | Code |
 | `crates/relayable-server/src/registry.rs:56,84-85,98,182` | `ServerShared.sessions`; child owned by registry; tombstone on close | Code |
 | `crates/relayable-server/src/lib.rs:1-6,123-135` | Dropped client never stops child; graceful shutdown reaps children; socket unlink | Code |
 | `crates/relayable-server/src/connection.rs:38,79-80,281,312` | Outbound bound; `close_now` leaves session/child untouched; dedup window; transport-only teardown | Code |
@@ -556,11 +558,11 @@ was performed because no code changed.
 | `crates/relayable-server/src/config.rs:23,41,43,126` | `output_tail_bytes` default; `event_retention_events` default | Code |
 | `crates/relayable-server/src/events.rs:141-153,201` | Bounded retained event log (drop-oldest) | Code |
 | `crates/relayable-protocol/src/limits.rs:14-20` | Provisional credit window and limits | Code |
-| `crates/relayable-pty/src/lib.rs:121,148,169-176,236,270,292` | Opaque `PtyHandle`; spawn/setsid; try_wait/kill/shutdown | Code |
+| `crates/relayable-pty/src/handle.rs:39,66,86-89,154,188,210` | Opaque `PtyHandle`; spawn/setsid; try_wait/kill/shutdown | Code |
 | `crates/relayable-server/src/main.rs:3` | Foreground binary; no systemd unit, no forking | Code |
-| `apps/linux/src/term/mod.rs:31,164` | Scrollback is client-engine-owned today | Code |
+| `apps/linux/src/term/mod.rs:31`; `apps/linux/src/term/model.rs:44` | Scrollback is client-engine-owned today | Code |
 | `Cargo.toml:29-44`; `crates/relayable-server/Cargo.toml:14-23` | `tempfile` workspace dep; server deps; no storage crate | Code/command |
-| `server_e2e.rs:508,869,1319,1392`; `tests/reconnect/main.rs:42,188,308`; `tests/lifecycle/main.rs:102,451`; `tests/multi-client/main.rs:227`; `tests/flow-control/main.rs:131,467`; `tests/events/main.rs:260` | Tests proving client-close/network-loss survival, shutdown reaping, flow-control survival | Tests |
+| `server_e2e/end_to_end.rs:22`; `server_e2e/lifecycle.rs:13,121`; `server_e2e/heartbeat.rs:31`; `tests/reconnect/main.rs:42,188,308`; `tests/lifecycle/main.rs:102,451`; `tests/multi-client/main.rs:227`; `tests/flow-control/main.rs:131,467`; `tests/events/stream.rs:19` | Tests proving client-close/network-loss survival, shutdown reaping, flow-control survival | Tests |
 | `scripts/ci.sh:197`; `docs/operations/toolchain-audit.md:747` | No systemd/packaging recipe; service/persistence model undecided (gap G5) | Spec/audit |
 | `docs/agent-loop/DECISIONS.md:12,17,125` | DEC-005 index row; DEC-010 Android deferral | Spec |
 
