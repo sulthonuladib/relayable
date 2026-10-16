@@ -62,3 +62,16 @@ Android Studio is **not** required and must not be a build dependency (§10).
 The lead owns shared/cross-cutting files: `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `crates/relayable-model/**`, `docs/adr/**`, `docs/agent-loop/**`, and integration. A lead-owned path may be delegated to a bounded worker only by naming it explicitly in that worker's assignment (the lead still integrates).
 
 Workers own only the paths named in their assignment.
+
+## Worktree lifecycle / cleanup
+
+The Manager keeps the checkout set tidy. A task's worktree may be removed **only** when its work is merged
+into `master` and pushed and the task is recorded `DONE`; the Git branch and Pi conversation are preserved.
+
+- Never remove a worktree whose task is in flight/unmerged, and never remove one with uncommitted changes.
+- Use the `remove_worktree` tool for Herdsman-project worktrees; use `git worktree remove` for
+  manually-created ones (the Manager may create throwaway worktrees for direct agents).
+- After removing, re-check `git worktree list`, keep `docs/agent-loop/NEXT.md`'s worktree list current, and
+  record the cleanup in `WORKLOG.md`.
+- Removal is authorized by this instruction for done+merged work only; anything else needs an explicit
+  user request (`remove_worktree` itself also requires human confirmation).

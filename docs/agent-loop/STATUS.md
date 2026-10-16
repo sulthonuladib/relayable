@@ -2,7 +2,7 @@
 
 **Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
 **Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install integrated. **In flight:** none.
-**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoints 26–28.
+**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoints 26–29.
 
 ## Current execution (Manager session, 2026-10-16)
 

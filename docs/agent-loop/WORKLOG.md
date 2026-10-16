@@ -77,6 +77,36 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 29 — Worktree cleanup policy recorded; 13 done+merged worktrees removed (2026-10-16)
+
+**Trigger:** the user authorized cleanup of unused worktrees for tasks that are done and merged, and asked
+for the policy to be added to the agent-loop manager instructions.
+
+**Policy added:** `AGENTS.md` → new `## Worktree lifecycle / cleanup` section: a task's worktree may be
+removed only once its work is merged into `master` and pushed and the task is `DONE`; branches and Pi
+conversations are preserved; never remove in-flight/unmerged or dirty worktrees; use `remove_worktree` for
+Herdsman projects and `git worktree remove` for manually-created ones; re-check `git worktree list` and
+record the cleanup. `docs/agent-loop/NEXT.md` `## Environment / cleanup` now points at it.
+
+**Cleanup performed:** verified every local branch is merged into `master` and every candidate worktree
+was clean (except UI-002's stale `.pi-herdsman/stage-a-plan.md`, moved to
+`/tmp/relayable-cleanup-preserved/`). Removed 13 worktrees:
+
+- manual (Manager-created): `relayable-wt/ctx-001` (`ctx/ctx-001-context-env`), `relayable-wt/install-001`
+  (`install/install-001-user-install`);
+- Herdsman (`remove_worktree`, assignment retired, branch preserved): `adr/adr-004-ownership-persistence`,
+  `adr/adr-005-env-namespace`, `adr/review-001-fixes`, `core/core-001-vertical-slice`,
+  `core/core-002-reconnect-events`, `docs/doc-002-matrix-repair`, `qa/qa-001-smoke-ci`,
+  `review/review-001-adr-pass`, `spike/term-002-engine-validation`, `ui/ui-001-gpui-window`,
+  `ui/ui-002-reference-workspace`.
+
+**Kept:** the primary checkout and the two in-flight project worktrees
+(`client/client-api-001-incremental-output`, `store/store-001-sqlite-metadata`). All branches remain (22).
+
+**Next:** await and integrate CLIENT-API-001 / STORE-001.
+
+---
+
 ## Checkpoint 28 — INSTALL-001 integrated: user install path delivered (INT-016) (2026-10-16)
 
 **Objective:** review and integrate INSTALL-001 — the primary user goal (a locally installable/testable

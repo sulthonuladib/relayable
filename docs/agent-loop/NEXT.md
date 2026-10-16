@@ -87,7 +87,9 @@ builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) a
   residual dirs at `/tmp/herdr-automatic-rename-removed/`). If delegation fails with `agent_pane_busy`,
   restart the fallback daemon:
   `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <ids…>`.
-- All project Leads stopped; branches and worktrees preserved (one per completed task).
+- Worktree cleanup (AGENTS.md "Worktree lifecycle / cleanup"): done+merged task worktrees may be removed
+  by the Manager, preserving branches. In-flight worktrees (`client/...`, `store/...`) are kept. Check
+  `git worktree list` after any cleanup and record it in `WORKLOG.md`.
 
 ## If context pressure hits
 
