@@ -3,7 +3,7 @@
 //!
 //! This module is the UI's screen model. It owns no renderer and no PTY: bytes
 //! arrive from the server (already framed and credit-acked by [`crate::api`])
-//! and are fed to a headless [`Term`] through a [`vte::ansi::Processor`]. The UI
+//! and are fed to a headless [`alacritty_terminal::term::Term`] through a [`vte::ansi::Processor`]. The UI
 //! reads a [`ScreenSnapshot`] and paints it; nothing here depends on GPUI.
 //!
 //! # Verified upstream API (file:line in the local registry source)

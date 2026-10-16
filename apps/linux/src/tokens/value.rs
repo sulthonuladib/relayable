@@ -39,7 +39,7 @@ impl fmt::Display for Confidence {
 /// approximate point via [`Approx::point`]).
 ///
 /// All values are **raw video pixels of the cited frame** — see the warning on
-/// [`geometry`]. No unit conversion is applied.
+/// [`super::geometry`]. No unit conversion is applied.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Approx {
     /// Lower end of the reported range (inclusive).
@@ -153,7 +153,7 @@ pub struct Measured<T> {
 
 impl<T> Measured<T> {
     /// Assemble a measured token. `source` and `caveat` must be non-empty;
-    /// `src/tokens.rs`'s unit tests enforce that for every token in this module.
+    /// `src/tokens/tests.rs`'s unit tests enforce that for every token in this module.
     pub const fn new(
         value: T,
         source: &'static str,

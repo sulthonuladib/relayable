@@ -384,7 +384,7 @@ impl DataPlane {
     }
 }
 
-// --- shared helpers --------------------------------------------------------
+// --- data-plane helpers ----------------------------------------------------
 
 fn is_timeout(error: &std::io::Error) -> bool {
     matches!(
