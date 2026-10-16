@@ -533,3 +533,16 @@ trigger #10 sub-condition 3. No amendment is drafted yet.
 - **DEC-009 — RESOLVED 2026-10-15:** hook sourcing disabled **and** the `herdr-automatic-rename`
   plugin uninstalled (residual dirs cleared); delegation verified working. Details above and in
   `WORKLOG.md` Checkpoints 7 and 10.
+
+### DEC-022 amendment (2026-10-16, same evening): A1 satisfied by the user
+
+The user **installed Zig 0.16.0** and pinned it in the repository itself — a new root `mise.toml`
+(`[tools] zig = "0.16.0"`, user-provided, now committed) — so **A1 is satisfied** without any global
+install: `mise ls zig` resolves the pin from this checkout. Consequence for agents: `zig` resolves through
+the mise shim **only inside this repo**; a tool run from another directory (e.g. a vendor clone) must use
+the absolute path `~/.local/share/mise/installs/zig/0.16.0/zig`.
+
+A2 (networked provisioning of the pinned ghostty artifact) and A3 (a throwaway spike crate under
+`spikes/**`) remain **requested**; the stage-B build attempt from the existing local clone at
+`/home/sulthonuladib/work/vendor/ghostty` (main `949149d57`, `-Demit-lib-vt -Dapp-runtime=none`) is the
+evidence that will show whether A2 is needed at all, since the clone already contains the source.
