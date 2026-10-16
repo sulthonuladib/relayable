@@ -1,14 +1,30 @@
 # STATUS — Relayable
 
 **Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
-**Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install integrated. **In flight:** none.
-**Updated:** lead session 2026-10-16 — OpenCode migration (DEC-015, `WORKLOG.md` Checkpoint 38); earlier work in Checkpoints 26–37.
+**Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install
+integrated; **refactor wave complete** (`check-file-sizes.sh --strict` green). **In flight:** REF-010,
+CLIENT-API-002, QA-HARNESS-001 repair (see below).
+**Updated:** lead session `ses_ebab9726a` 2026-10-16 — REF-008 integrated (INT-022 `afcc631`,
+`WORKLOG.md` Checkpoint 40); earlier work in Checkpoints 26–39.
 
-## Current execution (lead session, 2026-10-16)
+## Current execution (lead session `ses_ebab9726a`, 2026-10-16)
 
-- `master` is clean; CTX-001 (`dd1b986`) and INSTALL-001 (`39e5d49` + `a3ff5c0`) are integrated and the
-  canonical suite is green (`scripts/validate.sh`, `scripts/smoke.sh` both exit 0).
-- **CTX-001** DONE — integrated INT-015 `dd1b986`: `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
+- `master` is at `afcc631` (**INT-022**: REF-008), clean and pushed. Post-merge on `master`:
+  `scripts/validate.sh` exits 0 (7/7 steps, step 4 = **194 passed / 0 failed**), `scripts/smoke.sh` →
+  `SMOKE OK`, `scripts/check-file-sizes.sh --strict` → **exit 0** (`checked=149; over-hard-cap=0`).
+- **REF-008 DONE** — INT-022 `afcc631`: `crates/relayable-server/src/session.rs` 1037 → 28 lines + 7
+  `src/session/*` modules; `tests/server_e2e.rs` 1472 → `tests/server_e2e/**` (9 files, one binary).
+  Independent verifier: **accept-with-nits** — pure move (0 tokens/items/tests lost, no new bare `pub`,
+  9 + 4 test names preserved); the nits are stale doc citations → **DOC-003**.
+- **REF-010 in flight** — `refactor/ref-010-strict-gate` wires `--strict` into `scripts/ci.sh`,
+  `scripts/validate.sh`, and the standard's Enforcement section.
+- **CLIENT-API-002 in flight** (`fe11f40`, DEC-017) — additive `Client::resize_with_pixels` returning
+  `TerminalResizeAccepted`; `resize` unchanged. Verification in flight; UI-003 is gated on it.
+- **QA-HARNESS-001 NOT integrated** — the first attempt (`084554b`) was **rejected** by the independent
+  verifier: nested `#[cfg(test)] mod <name>;` resolution was wrong, so
+  `relayable-protocol/src/codec/tests.rs` and `relayable-cli/src/json/tests.rs` still produced the
+  exit-101 symptom, and the checkout-level test could not catch it. A bounded repair is in flight.
+- **CTX-001 DONE** — integrated INT-015 `dd1b986`: `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER`
   are set in every managed terminal (`crates/relayable-server/src/registry.rs`), and
   `tests/context-resolution/**` (4 integration tests) plus 2 unit tests prove env resolution,
   `-s`-over-env precedence, and no-context failure (exit 3 ambiguous / exit 2 missing).
@@ -20,13 +36,13 @@
 - **STORE-001 DONE** — integrated INT-018 `f4d59f8` under DEC-012 (`rusqlite =0.40.2`, `bundled`): the
   `crates/relayable-store` crate, server start-up reconciliation, the `flock` single-instance guard, prune,
   and the session/tombstone/audit write path (see `docs/operations/persistence.md`).
-- Next: **REF-008** (split `relayable-server/src/session.rs` + `tests/server_e2e.rs` — the last hard-cap
-  violations) and **UI-003** (migrate `apps/linux` onto `Client::next_output`); then **REF-010**
-  (`--strict` CI gate). Backlog: MEM-001, REF-004 remainder, QA/HARNESS items.
-- **Reconciliation + concurrency (2026-10-16, `WORKLOG.md` Checkpoint 39):** the STORE-001 rows above are
-  corrected to DONE (INT-018); a **second, concurrent lead session** (`ses_ebab9726a…`, "REF-008 onward")
-  was discovered mid-session. This session yielded REF-008 and UI-003 to it and moved its duplicate
-  implementer sessions out of the repository. Drive this checkout with **one** lead session at a time.
+- Next: verify + integrate REF-010 and CLIENT-API-002 → UI-003 → UI-004 → UI-005 → UI-006 → DOCS-001 →
+  DOC-003 → backlog (`MEM-001`, `CI-HOST-001`, `REF-004` remainder, `QA-FLAKE-001`).
+- **Reconciliation + concurrency (2026-10-16, `WORKLOG.md` Checkpoints 39–40):** the STORE-001 rows above
+  are corrected to DONE (INT-018). Two lead sessions ran on this checkout at once; this session
+  (`ses_ebab9726a…`, "REF-008 onward") owns the whole ordered queue (see `NEXT.md` "Single-writer
+  claims"), and the other session yielded REF-008/UI-003 and moved its duplicate implementers out.
+  Drive this checkout with **one** lead session at a time.
 
 ---
 

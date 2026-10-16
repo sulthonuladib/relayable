@@ -77,6 +77,72 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 40 — REF-008 integrated (INT-022); verifier reject/repair cycle; REF-010 launched (2026-10-16)
+
+**Objective:** work the ordered queue from `NEXT.md` (REF-008 → REF-010 → UI-003..UI-006 → DOCS-001 →
+backlog), delegate bounded work with explicit path ownership, verify independently before integrating,
+and reconcile stale state from Git rather than chat.
+
+**Files changed:** `docs/agent-loop/**` (this checkpoint, the queue claim, `DEC-017`); the INT-022 merge
+brought `crates/relayable-server/src/session.rs` + `src/session/**` and
+`crates/relayable-server/tests/server_e2e/**` (from `refactor/ref-008-server-split`) onto `master`.
+
+### Commands run and observed results
+
+| Command | Observed |
+|---|---|
+| `git status --short --branch`; `git log --oneline`; `git worktree list` | clean at `c249335`; only the main worktree existed |
+| `bash scripts/check-file-sizes.sh` | `checked=134; over-hard-cap=2` — exactly REF-008's two files (`session.rs` 1037, `tests/server_e2e.rs` 1472) |
+| `git merge --no-ff refactor/ref-008-server-split` | INT-022 `afcc631` (branch HEAD `00ee344`) |
+| `bash scripts/check-file-sizes.sh --strict` | `checked=149; over-hard-cap=0`; **exit 0** — the REF-010 gate is green |
+| `bash scripts/validate.sh` (post-merge, `master`) | exit 0, 7/7 steps; step 4 = **194 passed / 0 failed** |
+| `bash scripts/smoke.sh` (post-merge) | `SMOKE OK` |
+| `git push origin master` | `afcc631` pushed |
+
+### Findings
+
+- **Two lead sessions ran concurrently.** The other session (Checkpoint 39) had spawned implementers
+  into worktrees this session created. Their children were moved out (`session_move`) and ended
+  `Agent not found: implementer`; nothing was lost. This session then recorded explicit single-writer
+  claims for the whole ordered queue in `NEXT.md`, and the delegation lesson: **spawn a subagent from
+  the main checkout and name the worktree path in the brief; never `session_move` a child** (this
+  session's four children all ran).
+- **REF-008 is a pure move, independently verified** — verifier verdict *accept-with-nits*: token /
+  named-item / attribute / string / numeric multisets identical, 0 items and 0 tests lost (9
+  `server_e2e` + 4 unit tests, identical leaf names), visibility changes are `pub(super)`/`pub(crate)`
+  only (no new bare `pub`), 194/0 reproduced, `check-file-sizes.sh --strict` exit 0, `validate.sh`
+  exit 0. Nits are stale documentation citations in lead-owned paths (see DOC-003) — no code defect.
+- **QA-HARNESS-001 was rejected before integration.** The verifier found that the new classifier
+  resolves `#[cfg(test)] mod <name>;` relative to the declaring file's own directory, which is wrong
+  for any non-root file, so `crates/relayable-protocol/src/codec/tests.rs` and
+  `crates/relayable-cli/src/json/tests.rs` stayed classified as production and still reproduced the
+  exact exit-101 symptom; and the checkout-level regression test iterated only the discovered set, so
+  it could not catch that. A bounded repair was launched on the same branch. **Nothing from that
+  branch was integrated.**
+- **CLIENT-API-002 (DEC-017) implemented** (`fe11f40`): additive
+  `Client::resize_with_pixels(.., Option<u16>, Option<u16>) -> Result<TerminalResizeAccepted, _>`,
+  `resize` byte-identical, 4 new tests; verification in flight.
+- **REF-010 launched** (`refactor/ref-010-strict-gate`, from `afcc631`) once REF-008 merged, because
+  the `--strict` gate is only meaningful on a clean tree.
+
+### Risks / notes
+
+- The `tests/fixtures/binary.rs` freshness guard fails whenever a test-only file under `crates/*` is
+  newer than the binary; REF-008's author and CLIENT-API-002's author both hit it and worked around it
+  with a real relink. QA-HARNESS-001 is the fix; it is **not** integrated yet.
+- `docs/adr/ADR-004-*` and `protocol/compatibility/core-001-method-set.md` still cite the pre-split
+  `tests/server_e2e.rs` (and `tests/events/main.rs`) line numbers; tracked as DOC-003.
+- QA-FLAKE-001 did not reproduce in this session's runs.
+
+### Next
+
+1. REF-010 → verify → integrate; then UI-003 (gated on CLIENT-API-002), UI-004, UI-005, UI-006.
+2. Integrate CLIENT-API-002 and the repaired QA-HARNESS-001 after their verifiers accept.
+3. DOCS-001, then DOC-003 (citation repair), then the remaining backlog (`MEM-001`, `CI-HOST-001`,
+   `REF-004` remainder, `QA-FLAKE-001`).
+
+---
+
 ## Checkpoint 39 — REF-008 slice selection; stale-status reconciliation; concurrent peer-lead discovery (2026-10-16)
 
 **Objective:** continue the loop at the next incomplete acceptance criterion (REF-008, the last

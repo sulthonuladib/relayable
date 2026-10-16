@@ -78,17 +78,21 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **REF-008** — implementer, branch `refactor/ref-008-server-split`, worktree
-  `/home/sulthonuladib/work/relayable-wt/ref-008` (from `c249335`). Owns
-  `crates/relayable-server/src/session.rs` + `crates/relayable-server/tests/server_e2e.rs` and their
-  new submodule directories only. Pure move; must leave `check-file-sizes.sh --strict` clean.
-- **UI-003 scoping** — planner pass on the `apps/linux` data plane vs `relayable_client::Client`
-  (read-only; no writer yet). Branch `ui/ui-003-next-output` exists at
-  `/home/sulthonuladib/work/relayable-wt/ui-003` but is unowned until the brief lands.
-- **QA-HARNESS-001** — implementer, branch `qa/qa-harness-001-freshness-guard`, worktree
-  `/home/sulthonuladib/work/relayable-wt/qa-harness-001` (from `c249335`). Owns
-  `tests/fixtures/binary.rs` (+ an optional `tests/fixtures/binary/tests.rs`). Backlog item run in
-  idle capacity; disjoint from REF-008 and `apps/linux`.
+- **REF-010** — implementer, branch `refactor/ref-010-strict-gate`, worktree
+  `/home/sulthonuladib/work/relayable-wt/ref-010` (from `afcc631`). Owns `scripts/ci.sh`,
+  `scripts/validate.sh`, `docs/architecture/code-organization.md`. Must demonstrate the gate can fail
+  (artificial over-cap file) and that `ci.sh` reports `OVERALL: FAIL` on a violation.
+- **CLIENT-API-002** — implementer, branch `client/client-api-002-resize-parity`, worktree
+  `/home/sulthonuladib/work/relayable-wt/client-api-002` (commit `fe11f40`). Owns
+  `crates/relayable-client/src/client/terminal.rs`, `src/lib.rs` (re-export), `src/tests/**`.
+  Verification in flight. **UI-003 is gated on this landing.**
+- **QA-HARNESS-001** — repair implementer on `qa/qa-harness-001-freshness-guard` (worktree
+  `/home/sulthonuladib/work/relayable-wt/qa-harness-001`). Owns `tests/fixtures/binary.rs` only.
+  `084554b` was rejected by the verifier and **must not be integrated**; the repair must fix nested
+  `mod <name>;` resolution and make the checkout-level test fail against the old classifier.
+- **UI-003** — READY, branch `ui/ui-003-next-output` fast-forwarded to `afcc631`, no writer yet
+  (blocked on CLIENT-API-002). Planned change: rewrite `apps/linux/src/api/data*.rs` onto a second
+  `relayable_client::Client` (keep the two-plane split), plus the `apps/linux/README.md` §7/§10 fixes.
 
 ## Open tasks, in order
 

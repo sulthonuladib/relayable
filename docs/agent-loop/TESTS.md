@@ -382,3 +382,22 @@ Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch
 **Decisions recorded:** the code-org standard's test-classification was reconciled with the checker
 (path-first: `tests/**` → test limits). Public API of `relayable-client` unchanged (same `pub` items and
 signatures). `QA-HARNESS-001` tracks the test-harness freshness-guard heuristic.
+
+## 2026-10-16 — REF-008 integrated: `relayable-server` file splits (INT-022)
+
+Environment: Linux `falcon` x86_64, cargo/rustc 1.98.1. Reviewed branch
+`refactor/ref-008-server-split` (HEAD `00ee344`, commits `dbee61d` + `00ee344`) and integrated it as
+`afcc631` (INT-022). Independent verifier verdict: **accept-with-nits** (nits are stale documentation
+citations only — tracked as DOC-003).
+
+| # | Command (branch worktree) | Observed result | Exit |
+|---|---|---|---|
+| 131 | verifier: token / named-item / attribute / string / numeric multiset diff, pre-split vs split | 0 tokens and 0 items lost; `fn server_end_to_end` body token-identical; `#[ignore]` 0→0 | 0 |
+| 132 | verifier: `#[test]` census (lib + `server_e2e`) and per-file visibility audit | 4→4 unit; 9→9 `server_e2e` with identical leaf names; `private→pub(super)` ×10 and `private→pub(crate)` ×19; 0 new bare `pub` | 0 |
+| 133 | `cargo test --workspace --offline` (cold `CARGO_TARGET_DIR`) plus `--lib -- --nocapture` | 194 passed / 0 failed / 0 ignored; all 4 `session::*::tests::*` execute | 0 |
+| 134 | `bash scripts/check-file-sizes.sh` and `--strict` | `checked=149; over-hard-cap` 2→0; `--strict` exit 0 | 0 |
+| 135 | post-merge on `master`: `bash scripts/validate.sh` + `bash scripts/smoke.sh` | 7/7 steps green, step 4 = 194 passed / 0 failed; `SMOKE OK` | 0 |
+
+**Decisions recorded:** REF-008 used no behaviour change (pure move); the `#[cfg(test)] mod tests` block
+was distributed next to the code it tests per `code-organization.md` rule 5. Integration of
+`QA-HARNESS-001` was **refused** pending repair (see `WORKLOG.md` Checkpoint 40).

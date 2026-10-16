@@ -26,9 +26,14 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **Integrated:** CLIENT-API-001 (INT-017), STORE-001 (INT-018), REF-007/009 (INT-019), REF-006 (INT-020).
 - **In flight:** none. **RESEARCH-001/002** (`research/gpui-kit-libghostty`) integrated (INT-021 `96b4180`);
   the gpui-kit / libghostty decision remains with the user (DEC-014).
-- **Refactor queue:** REF-005/006/007/009 DONE; **REF-008** (server) is the last hard-cap blocker before
-  **REF-010** (`--strict` CI gate); over-hard-cap now 2 (`relayable-server/src/session.rs`, `.../tests/server_e2e.rs`).
-- **Merged worktrees removed** (branches preserved).
+- **Refactor queue:** REF-005/006/007/008/009 **DONE** — `check-file-sizes.sh --strict` now exits 0 on
+  `master` (`over-hard-cap=0`; 8 files over target but under cap). **REF-010** (wire `--strict` into
+  `scripts/ci.sh` + `scripts/validate.sh`) is in flight on `refactor/ref-010-strict-gate`.
+- **In flight (lead session `ses_ebab9726a`):** REF-010 (implementer), CLIENT-API-002 (`fe11f40`,
+  verification in flight), QA-HARNESS-001 repair (`084554b` was **rejected** by the verifier and must
+  not be integrated until repaired), UI-003 (READY, blocked on CLIENT-API-002).
+- **Merged worktrees removed** (branches preserved) — except the in-flight set:
+  `ref-008`, `ref-010`, `qa-harness-001`, `client-api-002`, `ui-003`.
 - **Next-phase plan:** `docs/architecture/next-phase-plan.md` — gpui-kit adoption, libghostty engine
   (ADR-003 reconsideration), desktop UX (auto-session on open, keymap helper, theming), docs
   centralization, and refactor cleanup. New tasks: RESEARCH-001/002, TERM-003, UI-004/005/006, DOCS-001.
