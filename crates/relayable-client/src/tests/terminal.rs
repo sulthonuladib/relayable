@@ -45,19 +45,23 @@ fn terminal_resize_of(envelope: Envelope) -> TerminalResize {
 
 #[test]
 fn resize_with_pixels_sends_pixels_and_returns_the_accepted_geometry() {
+    // The stub answers with geometry that deliberately differs from the
+    // request (stream 12 not 9, 80x24 not 120x40), so an implementation that
+    // echoed its own arguments would fail these assertions instead of passing
+    // them. The request asserted below is the one actually transmitted.
     let (mut client, server, rx) =
         resize_server(ResponseResult::TerminalResize(TerminalResizeAccepted {
-            stream_id: 9,
-            cols: 120,
-            rows: 40,
+            stream_id: 12,
+            cols: 80,
+            rows: 24,
         }));
 
     let accepted = client
         .resize_with_pixels(9, 120, 40, Some(1920), Some(1080))
         .unwrap();
-    assert_eq!(accepted.stream_id, 9);
-    assert_eq!(accepted.cols, 120, "returns the server-accepted columns");
-    assert_eq!(accepted.rows, 40, "returns the server-accepted rows");
+    assert_eq!(accepted.stream_id, 12, "returns the server-accepted stream");
+    assert_eq!(accepted.cols, 80, "returns the server-accepted columns");
+    assert_eq!(accepted.rows, 24, "returns the server-accepted rows");
 
     let request = terminal_resize_of(rx.recv().unwrap());
     assert_eq!(request.stream_id, 9);
