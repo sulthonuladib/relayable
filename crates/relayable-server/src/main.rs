@@ -1,7 +1,15 @@
 //! Relayable server foreground binary.
 //!
 //! Usage: `relayable-server run` (foreground, no systemd unit, no forking). The
-//! only inputs are the environment read by [`relayable_server::ServerConfig`].
+//! only inputs are the environment: the variables read by
+//! [`relayable_server::ServerConfig`] (`RELAYABLE_SERVER`,
+//! `RELAYABLE_EVENT_RETENTION_EVENTS`, `RELAYABLE_IDLE_TIMEOUT_MILLIS`,
+//! `RELAYABLE_HEARTBEAT_INTERVAL_MILLIS`, `SHELL`), the state-directory inputs
+//! `RELAYABLE_STATE_DIR` / `XDG_STATE_HOME` / `HOME`, and the durable store
+//! retention overrides `RELAYABLE_STORE_{AUDIT_MAX_ROWS,AUDIT_MAX_AGE_MILLIS,`
+//! `TOMBSTONES_MAX_ROWS,TOMBSTONES_MAX_AGE_MILLIS,SESSIONS_MAX_ROWS,`
+//! `SESSIONS_MAX_AGE_MILLIS}` (read once at startup by
+//! `relayable_store::PruneLimits::from_env`).
 
 use std::process::ExitCode;
 
