@@ -30,6 +30,10 @@ path = "multi-client/main.rs"
 name = "events"
 path = "events/main.rs"
 
+[[test]]
+name = "flow-control"
+path = "flow-control/main.rs"
+
 [dependencies]
 relayable-model = { workspace = true }
 relayable-protocol = { workspace = true, features = ["transport-unix"] }
