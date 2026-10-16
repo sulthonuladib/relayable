@@ -77,6 +77,30 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 32 — User-approved per-user install on this host, verified live (2026-10-16)
+
+**Trigger:** the user approved running the installer so the app is ready to launch.
+
+**Command:** `bash scripts/install-user.sh --with-desktop` → exit 0. Built+installed
+`~/.local/bin/relayable`, `~/.local/bin/relayable-server`, `~/.local/bin/relayable-desktop` (26 MB),
+`~/.config/systemd/user/relayable-server.service` (loaded, **disabled**, inactive), and
+`~/.local/share/applications/relayable.desktop`. `systemctl --user daemon-reload` ran; the service was
+**not** enabled or started (installer policy). No `sudo`.
+
+**Live verification with the installed binaries:** started `~/.local/bin/relayable-server run`; socket
+`/run/user/1000/relayable/relayable.sock` (dir 0700/socket 0600); `relayable new` created a session and
+`relayable ls` listed it; `relayable-desktop` launched under Wayland and logged
+`connection state = Connected` → `session.created` → `block.attached stream_id=1 cols=80 rows=24` →
+`terminal.resize accepted 140x36` (bounded 8 s launch, exit 124 = still running). SIGTERM to the server
+exited 0 and removed the socket.
+
+**Host state now:** the app is installed for the user; the server is not running (the test server was
+stopped). Start it with `relayable-server run` or enable the user service, then launch `relayable-desktop`.
+
+**Next:** unchanged — integrate CLIENT-API-001 / STORE-001 / REF-006; then REF-007…010.
+
+---
+
 ## Checkpoint 31 — README quickstart for installing/running the app (2026-10-16)
 
 **Trigger:** the user asked how to install and start using the app on this machine and whether an
