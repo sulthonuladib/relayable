@@ -466,3 +466,18 @@ appears, so the credit window is the *other* bound, not the observed trigger; th
 was replaced with the measured value; the pre-migration comparison (`~31 KiB`/`47-297 KiB`) was withdrawn as
 unreproducible (no transcript, code deleted) — `data.rs.variantA` is byte-identical to `data.rs.orig`.
 Repaired in `b2d0510` (docs/comments only; desktop suite still 58 passed).
+
+## 2026-10-16 — UI-005 integrated: single keymap + shortcut overlay (INT-028)
+
+Environment: Linux `falcon` x86_64, `cargo`/`rustc` 1.99.1, desktop commands with
+`CARGO_NET_OFFLINE=true`. Reviewed branch `ui/ui-005-keymap-helper` (HEAD `217e51c`) and integrated it as
+`5abe262` (INT-028). Independent verifier verdict: **accept-with-nits**.
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 158 | verifier: desktop `fmt` / `clippy -D warnings` / `test --locked` / `check --locked` | clean; `72 passed / 0 failed` (65 + 7 `#[test]`, `tests.rs` +285/−0 → nothing removed) | 0 |
+| 159 | verifier mutations: swap two `handle_shortcut` arms; dead `KeyRoute::Shortcut(_) => {{}}` | `72 passed` — **not caught** (the disclosed gap, confirmed not refuted) | 0 |
+| 160 | verifier mutations: drop the toggle from `closes_overlay`; wrong normalization arm; edit/delete a README §11 row; duplicate a `keys` string | each FAILS the intended test (`71/1`, `69/3`, `readme_lists_every_shortcut_verbatim`, `the_keymap_table_has_no_duplicate_row`) | 101 (intended) |
+| 161 | verifier: `bash evidence/run-ui-005.sh` on `wayland-1` | `SCRIPT EXIT=0`, 30 `CHECK PASS`, 0 FAIL, `UI-005 CAPTURE OK`; **all 15 window-only PNGs byte-identical** to the committed ones | 0 |
+| 162 | verifier's own temporary probe of the toggle normalization | `Ctrl+Shift+/` → `ctrl=true shift=false key="?"`; `Ctrl+/` → `key="/"` (no edge); bare `?` → no edge and reaches the pane (`?` / `?^[` in the capture) | 0 |
+| 163 | lead: post-merge on `master` — `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206/0) / `SMOKE OK` / exit 0 / `72 passed / 0 failed` | 0 |

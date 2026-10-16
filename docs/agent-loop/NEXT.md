@@ -81,19 +81,15 @@ session. Do not move a child session; name the worktree path in the brief.
 
 ## In flight (lead session, 2026-10-16)
 
-- **TERM-003 stage A** — researcher (background at the time of writing): `docs/research/libghostty-adoption.md`
-  per **DEC-021** (user directive to adopt libghostty; clone authorised outside the tree). It must settle:
-  released-vs-`main` API surface, the Rust binding + its licence, the exact Zig requirement and whether
-  `mise` can supply it (**a Zig install needs the user's approval**), the adoption shape (replace
-  `alacritty_terminal`/`vte` in `apps/linux/src/term/**` vs additive), portability, attribution, and a
-  verifiable stage-B plan. Stage B (build/link spike) requires that evidence **plus an ADR-003 amendment**
-  (lead-owned); ADR-003's pins stay authoritative until then.
-- **Nothing else is in flight.** `master` is at `3fab2f0`, clean and pushed, and fully green:
+- **Nothing is in flight.** `master` is at **INT-028** (UI-005), clean and pushed, fully green:
   `scripts/validate.sh` exit 0 (step 4 = **206 passed / 0 failed**), `scripts/smoke.sh` → `SMOKE OK`,
-  `scripts/check-file-sizes.sh --strict` → exit 0, desktop `cargo test --locked` → **65 passed / 0 failed**,
-  live probe `PROBE_EXIT=0`, and **`scripts/ci.sh` → `OVERALL: PASS` (16 PASS / 0 FAIL / 3 SKIP)**.
-- **Only the main checkout exists** (`git worktree list` = one entry); every merged worktree has been removed
-  with its branch preserved.
+  `scripts/check-file-sizes.sh --strict` → exit 0, desktop `cargo test --locked` → **72 passed / 0 failed**,
+  live probe `PROBE_EXIT=0`, `scripts/ci.sh` → `OVERALL: PASS` (16/0/3).
+- **Closed this session:** REF-008, CLIENT-API-002, QA-HARNESS-001, REF-010, UI-004 stage 1, UI-003,
+  UI-005, DOC-003 (INT-022…INT-028 + `af72801`). **Five** of them were rejected or qualified by an
+  independent verifier first; each landed only after repair or with its nits recorded.
+- **Only the main checkout exists** apart from `ui-005` (merged, clean) — removable under the standing
+  cleanup authorization.
 
 ## Next queue (in order)
 

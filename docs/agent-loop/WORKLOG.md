@@ -77,6 +77,51 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 44 — UI-005 integrated (INT-028): one keymap + discoverable shortcut overlay (2026-10-16)
+
+**Objective:** deliver the keymap helper from `docs/architecture/ui-005-plan.md`, verify it independently,
+and integrate it.
+
+**Files changed:** `docs/agent-loop/**`; INT-028 brought `apps/linux/{README.md,src/main.rs,src/app*.rs,
+src/geometry/invented.rs,evidence/**}` onto `master`.
+
+### Commands run and observed results
+
+| Command | Observed |
+|---|---|
+| `git merge --no-ff ui/ui-005-keymap-helper` | INT-028 `5abe262` (6 commits, `8af76a4`…`217e51c`) |
+| post-merge `validate.sh` / `smoke.sh` / `--strict` / desktop `test --locked` | exit 0 (step 4 = 206/0) / `SMOKE OK` / exit 0 / `72 passed / 0 failed` |
+| verifier: `bash evidence/run-ui-005.sh` on `wayland-1` | `SCRIPT EXIT=0`, 30 `CHECK PASS`, 0 FAIL; all 15 window-only PNGs byte-identical to the committed ones |
+| verifier: 9 mutations of the routing/dispatch code | 7 caught; 2 (`handle_shortcut` arm swap, dead `KeyRoute::Shortcut` dispatch) not caught — the author's disclosed gap, confirmed |
+| verifier: own temporary probe of the toggle | `Ctrl+Shift+/` → `ctrl=true shift=false key="?"`; `Ctrl+/` → `key="/"`; bare `?` → no edge and reaches the pane |
+
+### Findings
+
+- **The keymap is now single-source in behaviour:** `handle_key` routes through `route_key(...)` and
+  dispatches `ShortcutId` → method; no workspace-level literal key match remains (the picker's keys and the
+  PTY byte table are pre-existing, and `closes_overlay` holds the one `"escape"` literal in the router).
+- **Fidelity is intact:** `render.rs` gains only the out-of-flow overlay child after the picker;
+  `geometry/{v1,v4}.rs`, `theme.rs`, `src/{api,term,ui,tokens}` untouched; the overlay is `.absolute()` +
+  `.occlude()`, every colour from `theme::`, new constants in `geometry/invented.rs` are `*_ORIGINAL`;
+  `cmp` of the pre/after captures reproduces "no trace in the in-flow layout"; the README labels it
+  Relayable-original.
+- **Disclosed gap (recorded, not hidden):** the 11 `ShortcutId` → method arms are covered only by the
+  compiler and live runs; two behaviour-breaking mutations keep all 72 tests green. `UI-005-FOLLOWUP` (e)
+  proposes covering them by making the id→action table a pure function.
+- **Scope allowance accepted by the lead:** `apps/linux/src/app/lifecycle.rs` gained one line
+  (`shortcuts_open: false,`). The plan assigned the field to `app.rs` while listing `lifecycle.rs` as
+  must-not-touch, but `WorkspaceView::new` (where the initialiser belongs) lives in `lifecycle.rs` — the plan
+  was self-inconsistent, and the feature cannot compile without the line.
+- Other nits recorded in `UI-005-FOLLOWUP`: the stale README §13 test count, the `helpers.rs` chord copy,
+  the doc-comment copies of chords, and the validation log's non-HEAD header.
+
+### Next
+
+1. **`UI-006`** (local token-driven theming; no gpui-kit), then `DOCS-001`/`DOC-004`, then the backlog.
+2. **`TERM-003` stage B is blocked on the user** (DEC-022 approvals A1–A3 + adoption shape).
+
+---
+
 ## Checkpoint 43 — UI-003 integrated (INT-027) with corrected documentation; queue handed off (2026-10-16)
 
 **Objective:** close the UI-003 thread — verify, repair the verifier's documentation findings, integrate,
