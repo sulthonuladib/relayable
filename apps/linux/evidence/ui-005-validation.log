@@ -1,0 +1,576 @@
+# UI-005 validation transcript
+generated_utc=2026-10-16T17:24:33Z
+worktree=/home/sulthonuladib/work/relayable-wt/ui-005
+head=7e9555f31c4064a88b4768fa68600f7cdefb5197
+
+## apps/linux — fmt / clippy / test / check (offline, --locked; no cargo update)
+
+### CARGO_NET_OFFLINE=true cargo fmt --check
+exit=0
+
+### CARGO_NET_OFFLINE=true cargo clippy --all-targets --locked -- -D warnings
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+exit=0
+
+### CARGO_NET_OFFLINE=true cargo test --locked
+running 72 tests
+test result: ok. 72 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+running 0 tests
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+running 0 tests
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+running 0 tests
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+### CARGO_NET_OFFLINE=true cargo check --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.15s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+exit=0
+
+### git -C apps/linux diff --exit-code Cargo.lock   (the TERM-002 libc 0.2.189 remedy must be intact)
+exit=0
+
+## repository root
+
+### bash scripts/validate.sh
+
+=== cargo fmt --all --check ===
+--- exit code: 0 ---
+
+=== cargo clippy --workspace --all-targets --offline -- -D warnings ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+--- exit code: 0 ---
+
+=== cargo build --workspace --offline ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+--- exit code: 0 ---
+
+=== cargo test --workspace --offline ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (target/debug/deps/relayable_cli-651d49d65e1d5c1d)
+
+running 31 tests
+test args::tests::extra_arguments_are_rejected ... ok
+test args::tests::help_and_version ... ok
+test args::tests::simple_commands ... ok
+test args::tests::unknown_command_is_a_usage_error ... ok
+test args::tests::missing_session_value_is_a_usage_error ... ok
+test exit::tests::local_client_errors_map_to_exit_codes ... ok
+test exit::tests::every_server_error_code_maps_to_a_documented_exit_code ... ok
+test json::tests::close_shape ... ok
+test args::tests::session_commands ... ok
+test exit::tests::server_codes_are_reported_verbatim ... ok
+test json::tests::ls_shape_matches_the_documented_sample ... ok
+test json::tests::error_shape ... ok
+test json::tests::version_shape ... ok
+test resolve::tests::full_id_wins_over_other_matches ... ok
+test resolve::tests::no_match_is_not_found ... ok
+test json::tests::new_shape ... ok
+test resolve::tests::no_target_defaults_to_the_only_session ... ok
+test resolve::tests::resolves_a_four_character_suffix ... ok
+test resolve::tests::an_ambiguous_label_stops_without_mutation ... ok
+test resolve::tests::resolves_a_full_id ... ok
+test resolve::tests::resolves_a_label_case_insensitively ... ok
+test json::tests::inspect_shape_and_nested_keys ... ok
+test resolve::tests::short_id_is_the_trailing_six_characters ... ok
+test resolve::tests::resolves_a_position ... ok
+test resolve::tests::short_targets_do_not_suffix_match ... ok
+test tests::help_exits_zero ... ok
+test tests::server_error_is_rendered_with_details ... ok
+test tests::unknown_command_exits_two ... ok
+test tests::cli_error_exit_codes ... ok
+test tests::version_is_offline ... ok
+test tests::incomplete_target_without_server_is_not_reachable_through_parse ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/relayable-f52f4e260bad7091)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_client-606789dbce3848c8)
+
+running 23 tests
+test tests::rpc::contains_matches_across_chunk_boundaries ... ok
+test tests::events::events_are_retained_across_control_rpcs_and_reachable_by_drain ... ok
+test tests::rpc::server_error_code_is_exposed ... ok
+test tests::rpc::list_sessions_returns_the_server_list ... ok
+test tests::output::zero_length_chunk_is_acked_exactly_once ... ok
+test tests::output::zero_timeout_serves_buffered_frames_without_blocking ... ok
+test tests::terminal::plain_resize_sends_no_pixel_dimensions_and_discards_the_geometry ... ok
+test tests::rpc::handshake_captures_hello_and_limits ... ok
+test tests::events::wait_for_event_surfaces_a_live_event ... ok
+test tests::output::next_output_returns_successive_target_frames_without_loss ... ok
+test tests::terminal::resize_with_pixels_sends_pixels_and_returns_the_accepted_geometry ... ok
+test tests::output::one_flow_control_ack_per_returned_chunk ... ok
+test tests::terminal::resize_with_pixels_omits_absent_pixel_dimensions ... ok
+test tests::terminal::resize_with_pixels_returns_the_server_error ... ok
+test tests::rpc::attach_sets_takeover_false_and_attach_with_takeover_sets_true ... ok
+test tests::rpc::resume_session_encodes_the_last_applied_sequence ... ok
+test tests::events::events_buffered_during_a_rpc_can_be_waited_for_later ... ok
+test tests::output::next_output_returns_none_on_timeout ... ok
+test tests::events::next_output_heartbeats_while_waiting_for_a_delayed_frame ... ok
+test tests::events::non_target_frames_are_retained_and_not_acked ... ok
+test tests::events::short_repeated_waits_accumulate_toward_the_heartbeat_cadence ... ok
+test tests::events::inbound_frames_do_not_starve_the_outbound_heartbeat ... ok
+test tests::rpc::control_rpc_times_out_when_the_server_never_replies ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.00s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_integration_tests-cfddcf5509995999)
+
+running 10 tests
+test harness::binary::tests::file_module_names_are_read_only_from_declarations ... ok
+test harness::binary::tests::staleness_flags_only_an_older_binary ... ok
+test harness::binary::tests::production_classification_prunes_a_directory_module_and_its_children ... ok
+test harness::binary::tests::module_child_directory_follows_rusts_file_module_rule ... ok
+test harness::binary::tests::source_scan_tolerates_a_missing_root ... ok
+test harness::binary::tests::cfg_test_is_recognized_only_as_a_gate ... ok
+test harness::binary::tests::file_modules_track_declarations_and_their_cfg_test_gate ... ok
+test harness::binary::tests::production_classification_ignores_test_only_paths ... ok
+test harness::binary::tests::nested_test_module_declarations_resolve_like_rustc ... ok
+test harness::binary::tests::this_checkout_cfg_test_modules_are_classified_as_test_only ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/bin/smoke-driver.rs (target/debug/deps/smoke_driver-dd9e5affe8a87740)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running client-output/main.rs (target/debug/deps/client_output-dfd21fb0e7b6c0a0)
+
+running 1 test
+test next_output_delivers_incremental_bytes_across_credit_windows ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+
+     Running context-resolution/main.rs (target/debug/deps/context_resolution-ae90423e46b9cab1)
+
+running 4 tests
+test relayable_session_resolves_without_flag ... ok
+test managed_terminal_exposes_relayable_context ... ok
+test explicit_flag_wins_over_relayable_session ... ok
+test no_context_does_not_guess ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running events/main.rs (target/debug/deps/events-6256047008f03755)
+
+running 13 tests
+test retry::replayed_resume_request_returns_the_original_outcome ... ok
+test replay::no_cursor_yields_snapshot_required_with_a_fresh_snapshot ... ok
+test replay::cursor_ahead_of_the_server_yields_snapshot_required ... ok
+test replay::cursor_below_the_retained_floor_yields_snapshot_required_with_no_replay ... ok
+test stream::event_stream_is_sequenced_and_contiguous_for_a_subscriber ... ok
+test connection_state::connection_state_events_are_emitted_for_negotiated_and_ready ... ok
+test stream::resume_response_frame_precedes_later_events_on_the_same_connection ... ok
+test terminal::terminal_child_exited_is_emitted_when_the_program_exits ... ok
+test replay::resume_replays_a_contiguous_suffix_with_no_gap_and_no_duplicate ... ok
+test lifecycle::transport_drop_marks_the_client_disconnected ... ok
+test lifecycle::idle_timeout_marks_the_client_disconnected ... ok
+test lifecycle::single_long_wait_does_not_trip_the_server_idle_timeout ... ok
+test stream::session_view_does_not_subscribe_to_the_event_stream ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.67s
+
+     Running flow-control/main.rs (target/debug/deps/flow_control-89e937652cfdd285)
+
+running 2 tests
+test slow_client_receives_at_most_credit_window_bytes_before_overflow ... ok
+test slow_client_output_overflow_detaches_with_flow_control_overflow ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running lifecycle/main.rs (target/debug/deps/lifecycle-2e9e583a7b0b20d9)
+
+running 4 tests
+test session_close_terminates_descendant_holding_the_slave ... ok
+test large_input_to_a_non_reading_program_stays_bounded ... ok
+test harness_environment_is_hermetic ... ok
+test core_001_vertical_slice ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+
+     Running multi-client/main.rs (target/debug/deps/multi_client-9b9ccaf8320512a6)
+
+running 4 tests
+test observer_receives_terminal_output_while_the_writer_holds_the_lease ... ok
+test writer_arbitration_and_observer_fanout ... ok
+test lease_release_on_disconnect_is_announced ... ok
+test writer_lease_takeover_is_announced_and_demotes_the_previous_holder ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s
+
+     Running protocol/main.rs (target/debug/deps/protocol-0dfe039e3c923982)
+
+running 8 tests
+test unknown_method_is_method_not_found ... ok
+test duplicate_request_id_is_rejected ... ok
+test request_before_handshake_is_bad_request ... ok
+test incompatible_version_is_rejected_then_closed ... ok
+test bad_and_unknown_session_ids_are_distinguished ... ok
+test stream_id_zero_is_handled_without_crashing ... ok
+test oversized_prefix_closes_but_server_survives ... ok
+test zero_length_and_truncated_frames_close_but_server_survives ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running reconnect/main.rs (target/debug/deps/reconnect-cb0824a8a4ebc5dd)
+
+running 3 tests
+test reconnect_preserves_identity_and_advances_the_stream ... ok
+test snapshot_at_s_plus_events_has_no_gap_no_duplicate_and_the_child_pid_survives ... ok
+test resume_without_a_snapshot_continues_the_event_stream ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_model-0d00a66211c92567)
+
+running 12 tests
+test tests::bad_uuids_are_rejected ... ok
+test tests::cross_kind_parse_is_rejected ... ok
+test tests::counters_behave_as_ordered_u64_wrappers ... ok
+test tests::connection_state_spelling_is_exact ... ok
+test tests::id_is_opaque_but_traceable_to_its_uuid ... ok
+test tests::terminal_size_default_is_80x24 ... ok
+test tests::id_round_trips_through_text ... ok
+test tests::try_from_str_matches_from_str ... ok
+test tests::missing_colon_is_rejected ... ok
+test tests::unknown_and_uppercase_kinds_are_rejected ... ok
+test tests::new_ids_are_uuid_v7 ... ok
+test tests::every_kind_has_the_expected_prefix ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_protocol-01b0e579ce2076e7)
+
+running 20 tests
+test codec::tests::clean_eof_yields_none ... ok
+test codec::tests::snapshot_required_resume_response_round_trips ... ok
+test codec::tests::malformed_body_is_decode_error ... ok
+test codec::tests::round_trips_an_envelope ... ok
+test codec::tests::oversized_frame_is_rejected_before_body_read ... ok
+test codec::tests::truncated_body_is_rejected ... ok
+test codec::tests::core_002_event_variants_round_trip_through_the_codec ... ok
+test codec::tests::truncated_prefix_is_rejected ... ok
+test codec::tests::zero_length_frame_is_rejected ... ok
+test codec::tests::writing_an_empty_envelope_is_rejected ... ok
+test error_code::tests::every_contract_name_is_exact ... ok
+test ids::tests::malformed_ids_are_rejected ... ok
+test limits::tests::defaults_are_the_documented_provisionals ... ok
+test ids::tests::all_id_kinds_round_trip ... ok
+test methods::tests::method_strings_are_exact ... ok
+test methods::tests::session_resume_resolves_via_the_method_registry ... ok
+test transport::tests::default_socket_path_ignores_empty_xdg_runtime_dir ... ok
+test transport::tests::bind_listener_creates_a_0600_socket_and_frames_round_trip ... ok
+test transport::tests::bind_listener_refuses_to_replace_a_live_listener ... ok
+test transport::tests::default_socket_path_uses_xdg_runtime_dir ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_pty-b75d0c51d5444015)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pty.rs (target/debug/deps/pty-f6f35ebcc8550af0)
+
+running 4 tests
+test short_lived_child_output_and_exit_code ... ok
+test exposes_process_id_and_tty_name ... ok
+test writer_can_only_be_taken_once ... ok
+test resize_reaches_child_and_shutdown_terminates_it ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_server-aa4156fab7256214)
+
+running 27 tests
+test config::tests::defaults_are_documented ... ok
+test events::tests::disconnect_reason_spellings_are_frozen ... ok
+test events::tests::empty_log_head_is_zero_and_floor_is_one ... ok
+test config::tests::zero_and_invalid_are_rejected ... ok
+test registry::tests::managed_terminal_environment_preserves_preexisting_term ... ok
+test connection::tests::major_version_parses ... ok
+test events::tests::retention_evicts_oldest_and_tracks_floor ... ok
+test registry::tests::managed_terminal_environment_defaults_term_when_unset ... ok
+test config::tests::explicit_values_are_applied ... ok
+test registry::tests::disconnect_emits_two_ordered_events ... ok
+test registry::tests::disconnected_client_records_are_removed ... ok
+test connection::tests::other_read_errors_classify_as_transport_error ... ok
+test session::output::tests::output_tail_drops_oldest_bytes ... ok
+test session::output::tests::output_tail_advances_sequence_per_chunk ... ok
+test connection::tests::request_window_evicts_oldest ... ok
+test connection::tests::request_window_rejects_duplicates ... ok
+test connection::tests::read_timeouts_classify_as_idle_timeout_in_both_shapes ... ok
+test signals::tests::install_is_idempotent_and_readable ... ok
+test session::process::tests::stat_session_parses_after_comm_with_spaces ... ok
+test events::tests::replayability_decision_table ... ok
+test config::tests::heartbeat_must_be_strictly_less_than_idle ... ok
+test snapshot::tests::failed_connection_state_is_transmitted_as_failed ... ok
+test events::tests::append_pair_sequences_are_consecutive_under_contention ... ok
+test session::block::tests::resize_updates_size_and_revision ... ok
+test registry::tests::create_list_view_close_round_trip ... ok
+test registry::tests::close_session_is_not_confirmed_when_child_survives ... ok
+test registry::tests::session_lifecycle_emits_state_change_events ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests src/main.rs (target/debug/deps/relayable_server-a93d977cdce41b32)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/server_e2e/main.rs (target/debug/deps/server_e2e-6f0aa6c6e320a83c)
+
+running 9 tests
+test lifecycle::disconnected_client_record_is_removed ... ok
+test block_validity::closed_session_block_and_streams_are_unknown ... ok
+test lifecycle::session_close_terminates_descendants_holding_the_slave ... ok
+test resume::resume_shapes_and_writer_takeover ... ok
+test lifecycle::graceful_shutdown_kills_live_children ... ok
+test flow_control::blocking_program_does_not_wedge_the_connection ... ok
+test end_to_end::server_end_to_end ... ok
+test heartbeat::idle_timeout_reason_is_reported_to_a_subscriber ... ok
+test snapshot::attach_snapshot_and_frames_are_contiguous ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.18s
+
+     Running tests/store_wiring.rs (target/debug/deps/store_wiring-a4dfc657d0972f94)
+
+running 8 tests
+test startup_reconciles_stale_active_rows_and_never_resurrects_them ... ok
+test second_writer_is_refused_at_the_server_boundary ... ok
+test without_a_state_directory_the_server_runs_without_persistence ... ok
+test state_dir_that_is_a_regular_file_degrades_instead_of_failing_startup ... ok
+test store_write_failure_does_not_fail_protocol_operations ... ok
+test startup_prune_honors_audit_max_rows_override ... ok
+test create_and_close_persist_metadata_without_terminal_bytes ... ok
+test close_prune_refreshes_age_anchor ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running unittests src/lib.rs (target/debug/deps/relayable_store-780174f87e5ddb4f)
+
+running 11 tests
+test model::tests::audit_kind_round_trips_privately ... ok
+test model::tests::from_env_falls_back_to_defaults ... ok
+test model::tests::from_env_reads_overrides_and_ignores_garbage ... ok
+test model::tests::session_state_round_trips ... ok
+test resolve::tests::home_fallback_uses_local_state ... ok
+test model::tests::with_current_time_moves_only_the_anchor ... ok
+test resolve::tests::relayable_state_dir_wins ... ok
+test resolve::tests::xdg_state_home_fallback_appends_relayable ... ok
+test resolve::tests::relative_values_are_unresolvable ... ok
+test resolve::tests::all_unset_is_unresolvable ... ok
+test resolve::tests::empty_values_are_ignored ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/store.rs (target/debug/deps/store-6e4b8815235530e0)
+
+running 11 tests
+test non_absolute_state_dir_is_rejected ... ok
+test resolve_state_dir_is_environment_driven ... ok
+test raw_database_round_trips_a_stored_label ... ok
+test reconcile_marks_active_rows_and_is_idempotent ... ok
+test second_open_is_locked_until_the_first_drops ... ok
+test schema_has_no_host_state_columns ... ok
+test prune_applies_age_and_row_limits_with_exact_counts ... ok
+test create_and_close_write_session_tombstone_and_audit ... ok
+test open_migrates_to_version_1_and_is_idempotent ... ok
+test broken_sessions_table_surfaces_sqlite_error ... ok
+test session_prune_row_cap_keeps_newest_non_active_and_never_deletes_active ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests relayable_cli
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_client
+
+running 1 test
+test crates/relayable-client/src/lib.rs - (line 38) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Doc-tests relayable_integration_tests
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_model
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_protocol
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_pty
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_server
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_store
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+--- exit code: 0 ---
+
+=== cargo test -p relayable-integration-tests --offline --test lifecycle -- --nocapture ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running lifecycle/main.rs (target/debug/deps/lifecycle-9e77e9315d126635)
+
+running 4 tests
+[CORE-001] property-0-start: server pid=697161 socket=/tmp/relayable-it-lN7pnD/relayable.sock mode=0600
+[CORE-001] regression-A-descendant-close: close returned in 38.35024ms; child 697188 and descendant 697212 reaped
+[CORE-001] property-2-session-id: session_id=session:01a145be-ac05-74c0-8969-2beced4d852f window/block/pty tagged, program_pid=697187, ls keys={session_id,label}, inspect stable
+test session_close_terminates_descendant_holding_the_slave ... ok
+[CORE-001] property-1-server-owned-pty: pid=697187 ppid=697161 fd0="/dev/pts/21" tty=/dev/pts/* stty='24 80'
+[CORE-001] property-3-io-round-trip: printf ROUNDTRIP-5 round-tripped; inspect cols=80 rows=24 running
+[CORE-001] regression-B-bounded-input: 8x130048B frames; max call 459.961µs; accepted 1040384; rate_limited=false; close 69.704117ms
+[CORE-001] property-1b-resize: resize(100,40) -> stty '40 100' and inspect cols=100 rows=40
+test large_input_to_a_non_reading_program_stays_bounded ... ok
+[CORE-001] m8-hermetic-env: parent RELAYABLE_SESSION did not leak (no -s -> exit 3 ambiguous); explicit -s wins
+test harness_environment_is_hermetic ... ok
+[CORE-001] property-4-disconnect-survival: client dropped; same pid=697187 observed active for 432.138092ms
+[CORE-001] property-5-reconnect: same session/block/pty/pid, state=active, cols=100 rows=40, writer lease re-acquired, survival nonce survival-aa341-18df1278b3914ada-0 recovered
+[CORE-001] property-6-close: session closed, ls empty, pid=697187 reaped
+[CORE-001] property-7-shutdown: SIGTERM -> exit=Some(0), socket removed
+[CORE-001] runtime: lifecycle acceptance test finished in 732.169341ms
+test core_001_vertical_slice ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+
+--- exit code: 0 ---
+
+=== bash scripts/check-dependency-direction.sh ===
+== ADR-001 dependency-direction check ==
+[1a] relayable-model DIRECT (depth-1) normal deps are exactly {thiserror, uuid}
+  OK: direct deps exactly {thiserror, uuid}
+[1b] relayable-model TRANSITIVE normal deps: no other relayable-*, none of {prost,bytes,serde,serde_json,portable-pty,gpui,alacritty_terminal,vte,tokio,nix}
+  allowed transitive: libc v0.2.190 <- getrandom v0.4.3 <- uuid v1.28.0 <- relayable-model (RNG syscall glue; no model API, transport, serialization, or async surface)
+  OK: no other relayable-* crate; only the documented libc via uuid's RNG is allowed
+[2] relayable-protocol: requires relayable-model; no client/server/pty/cli, no PTY/UI/serde/tokio
+  OK: relayable-model present; no forbidden dependency
+[3] relayable-client: requires relayable-model + relayable-protocol; no server/pty/cli
+  OK: relayable-model + relayable-protocol present; no forbidden dependency
+[4] relayable-server: requires relayable-model + relayable-protocol + relayable-pty + relayable-store; no client/cli
+  OK: relayable-model + relayable-protocol + relayable-pty + relayable-store present; no forbidden dependency
+[5] relayable-cli: requires relayable-model + relayable-protocol + relayable-client; no pty/server
+  OK: relayable-model + relayable-protocol + relayable-client present; no forbidden dependency
+[6] relayable-pty: no relayable-* crate at all
+  OK: no relayable-* crate in the relayable-pty tree
+[6b] relayable-store: no relayable-* crate at all
+  OK: no relayable-* crate in the relayable-store tree
+[7] cycle check: cargo metadata accepts the resolved graph (Cargo rejects cycles)
+  OK: cargo metadata resolved the workspace graph; no dependency cycle
+[8] DEC-010: Unix-socket symbols only in feature-gated src/transport.rs; default build compiles
+  n7 feature-unification note: a `cargo build --workspace` DOES enable transport-unix on
+  relayable-protocol (server/client/cli request it), so the no-Unix-symbols property is
+  only meaningful for a crate-alone build -- which is exactly what this step tests:
+  `cargo build -p relayable-protocol` with DEFAULT features. A future Android build must
+  depend on relayable-protocol WITHOUT transport-unix.
+  OK: all Unix-socket symbols are in crates/relayable-protocol/src/transport.rs, gated by cfg(feature = "transport-unix")
+  -> cargo build -p relayable-protocol --offline (default features)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+  OK: default-feature relayable-protocol builds without the socket module
+
+ADR-001 dependency-direction check passed.
+--- exit code: 0 ---
+
+=== bash scripts/check-file-sizes.sh --strict ===
+KIND     LINES     CAP  FILE
+----------------------------------------------------------------------
+entry      176     300  ./apps/linux/src/main.rs
+prod       572    1000  ./crates/relayable-server/src/connection.rs
+prod       509    1000  ./crates/relayable-server/src/dispatch.rs
+entry      234     300  ./crates/relayable-server/src/lib.rs
+prod       808    1000  ./crates/relayable-server/src/registry.rs
+prod       613    1000  ./crates/relayable-server/src/session/block.rs
+test       921    1200  ./crates/relayable-server/tests/store_wiring.rs
+prod       566    1000  ./crates/relayable-store/src/store.rs
+
+checked=151 files; over-hard-cap=0; over-target-but-under-cap=8
+mode=strict; see docs/architecture/code-organization.md
+--- exit code: 0 ---
+
+=== cargo build --offline ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
+--- exit code: 0 ---
+
+All CORE-001 validation checks passed.
+exit=0
+
+### bash scripts/smoke.sh
+[smoke] Relayable full.md §13.4 Linux smoke test
+[smoke] repo root: /home/sulthonuladib/work/relayable-wt/ui-005
+[smoke] workspace target dir: /home/sulthonuladib/work/relayable-wt/ui-005/target
+[smoke] step 1/9: cargo build --workspace --offline
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+[smoke] binaries: server=/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/relayable-server cli=/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/relayable driver=/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/smoke-driver
+[smoke] step 2/9: temp dir /tmp/relayable-smoke.N0EZGY, socket /tmp/relayable-smoke.N0EZGY/relayable.sock (no root, no system service)
+[smoke] step 3/9: launching foreground server (/home/sulthonuladib/work/relayable-wt/ui-005/target/debug/relayable-server run)
+scripts/smoke.sh: line 88: test: too many arguments
+[smoke] server pid: 698590
+[smoke] server ready on /tmp/relayable-smoke.N0EZGY/relayable.sock
+[smoke] step 4/9: creating a session via the CLI (relayable new --json)
+[smoke] session_id:  session:01a145be-b2e6-7297-8599-fd9c539b10a8
+[smoke] block_id:    block:01a145be-b2e6-7297-8599-fd9e28b90064
+[smoke] program_pid: 698598
+[smoke] step 5/9: sending input, verifying output, then disconnecting the client
+[smoke-driver] establish OK: SMOKE_VAR=relayable-698575-25770 round-tripped
+[smoke] step 6/9: reconnecting, then verifying the server-owned process continued
+[smoke-driver] resume OK: same shell still holds SMOKE_VAR=relayable-698575-25770
+[smoke] step 7/9: verifying session inspect reports the same pid and an active session
+[smoke] inspect OK: session active, program_pid=698598
+[smoke] step 8/9: closing the session, then shutting the server down with SIGTERM
+[smoke] session close exit code: 0
+[smoke] server exit code after SIGTERM: 0
+[smoke] server shut down cleanly and unlinked /tmp/relayable-smoke.N0EZGY/relayable.sock
+[smoke] step 9/9: removing temp dir /tmp/relayable-smoke.N0EZGY
+[smoke] steps that ran: build; server launch; session create; input/output round-trip; client disconnect; process survival; reconnect; session inspect; session close; SIGTERM shutdown; socket unlink; temp-dir cleanup
+SMOKE OK
+exit=0
+
+### bash scripts/check-file-sizes.sh --strict
+KIND     LINES     CAP  FILE
+----------------------------------------------------------------------
+entry      176     300  ./apps/linux/src/main.rs
+prod       572    1000  ./crates/relayable-server/src/connection.rs
+prod       509    1000  ./crates/relayable-server/src/dispatch.rs
+entry      234     300  ./crates/relayable-server/src/lib.rs
+prod       808    1000  ./crates/relayable-server/src/registry.rs
+prod       613    1000  ./crates/relayable-server/src/session/block.rs
+test       921    1200  ./crates/relayable-server/tests/store_wiring.rs
+prod       566    1000  ./crates/relayable-store/src/store.rs
+
+checked=151 files; over-hard-cap=0; over-target-but-under-cap=8
+mode=strict; see docs/architecture/code-organization.md
+exit=0
