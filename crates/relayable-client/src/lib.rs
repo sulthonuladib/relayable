@@ -579,8 +579,10 @@ impl Client {
     /// [`Client::wait_for_output`], an expired deadline is **not** an error:
     /// bytes are acknowledged only when they are returned in the same call, so
     /// a timeout never acknowledges and then discards output. A zero `timeout`
-    /// serves any already-buffered target bytes without performing a socket
-    /// read. Frames for other streams, events, and other control frames are
+    /// never waits on the deadline and performs no socket read: it serves any
+    /// already-buffered target bytes and otherwise returns `Ok(None)` promptly.
+    /// The only I/O it may still perform is the pending ack or heartbeat write.
+    /// Frames for other streams, events, and other control frames are
     /// retained in arrival order and never dropped; events stay reachable
     /// through [`Client::drain_events`], [`Client::wait_for_event`], and
     /// [`Client::collect_events`].
@@ -1993,7 +1995,10 @@ mod tests {
                 event_envelope(33),
                 terminal_data(target, 2, b"gamma"),
             ],
-            Duration::from_millis(500),
+            // Keep the stub alive for the whole test: the last ack writes happen
+            // well after the first read, so a loaded machine must not be able to
+            // race the stub's drain window and turn an ack into EPIPE.
+            Duration::from_secs(2),
         );
         client
             .attach_block(&BlockId::new(), AttachMode::Writer)
@@ -2037,7 +2042,11 @@ mod tests {
 
         let other_bytes = client
             .next_output(other, Duration::from_millis(500))
-            .unwrap()
+            .unwrap_or_else(|err| {
+                panic!(
+                    "next_output for the other stream failed (the stub may have exited early): {err:?}"
+                )
+            })
             .expect("other stream frame");
         assert_eq!(
             other_bytes, b"beta",
@@ -2115,6 +2124,13 @@ mod tests {
         assert!(
             heartbeats >= 1,
             "waiting for a delayed frame must keep the heartbeat cadence, got {heartbeats}"
+        );
+        // ~250 ms at a 50 ms cadence is at most ~5 sends; mirror the
+        // pre-existing cadence test and reject a runaway heartbeat loop without
+        // being timing-fragile.
+        assert!(
+            heartbeats <= 12,
+            "heartbeats must not be sent faster than the cadence, got {heartbeats}"
         );
 
         drop(client);
