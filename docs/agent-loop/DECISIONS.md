@@ -15,6 +15,7 @@ Detailed ADRs live under `docs/adr/`. Each ADR contains: context, options, decis
 | DEC-008 | Context-window policy: no automatic/manual compaction; repository files are authoritative; fresh bounded agent sessions; checkpoint-and-handoff at context pressure | **Accepted** | — |
 | DEC-009 | Herdr agent-provisioning fault remediation (stop sourcing the automatic-rename fish hook vs project-local lead tool overlay) | **Accepted — hook disabled + plugin uninstalled 2026-10-15** | — |
 | DEC-010 | Android client deferred from current scope; keep the model/protocol Android-ready | **Accepted** — user direction 2026-10-15; consistent with `full.md` §1.4/§1.5 | — |
+| DEC-011 | ADR-005 Decision 5 clarification: a **unique** session is not an ambiguous match, so the accepted CORE-001 CLI unique-session default is retained (flag → env → unique-default); zero/multiple sessions still fail with documented codes | **Accepted** — Manager reconciliation 2026-10-16 (addendum in ADR-005) | `docs/adr/ADR-005-environment-variable-namespace.md` |
 
 ## DEC-000 — Work state in-repository
 
@@ -142,6 +143,27 @@ evidence for whenever Android resumes. No Android dependency changes the default
 
 **Reconsider if:** the user asks to build the Android client, or a protocol change is needed for
 mobile.
+
+## DEC-011 — ADR-005 Decision 5 clarification (unique-session default)
+
+**Context:** ADR-005 Decision 5 (Accepted) says a target-requiring command **fails** when the relevant
+`RELAYABLE_*` variable is unset and no explicit target is given, and Decision 4 lists the precedence as
+flag → env → **no default**. The accepted CORE-001 CLI behavior (`core-001-cli-json.md`,
+`crates/relayable-cli/src/resolve.rs`) defaults to the single session when exactly one exists and
+otherwise errors (ambiguous → 3, missing → 2). The two documents disagreed.
+
+**Decision:** keep the accepted CORE-001 CLI behavior and read Decision 5 as applying to zero or
+**ambiguous** matches. A unique session is not an ambiguous match, so defaulting to it is not "guessing";
+the no-context failure still holds when zero or multiple sessions exist. Precedence is
+flag → `RELAYABLE_SESSION` → unique-session default. The clarification is recorded as an addendum in
+ADR-005; Decisions 1–4 and 6–7 are unchanged.
+
+**Consequences:** no `resolve_session` behavior change and no test churn; the §8.1 context-resolution
+test exercises zero-session and two-session no-context failures (CTX-001). `full.md` §8.1's
+"never guess silently" is still satisfied, and no REX compatibility claim is made.
+
+**Reconsider if:** `full.md` or the reference docs require strict failure on any unset context even with a
+unique match, or a user workflow shows the convenience default causing wrong targeting.
 
 ## Open questions requiring evidence (not yet decidable)
 

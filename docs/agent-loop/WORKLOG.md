@@ -77,6 +77,66 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 26 — Manager session restart: baseline green; CTX-001 + INSTALL-001 launched (2026-10-16)
+
+**Objective:** resume the Relayable loop from repository state alone (DEC-008), confirm the baseline is
+actually green, and drive the highest-value remaining work toward the user's primary goal — a locally
+installable/testable Linux app (server + GPUI client + user install path).
+
+**Recovery:** read `full.md`, `AGENTS.md`, `docs/agent-loop/{NEXT,STATUS,BACKLOG,TASKS,DECISIONS,TESTS}.md`,
+`WORKLOG.md` tail, `docs/architecture/interface-contract.md`, and ADR-005; inspected `git status`,
+`git log`, `git worktree list`, and the real CLI/server/PTY/test code. Trusted repo files over chat.
+
+### Commands run and observed results
+
+| # | Command | Observed result | Exit |
+|---|---|---|---|
+| 1 | `git status --short --branch` | `## master`, only untracked `docs/agent-loop/NEXT-SESSION-PROMPT.md` | 0 |
+| 2 | `git log --oneline -15` | tip `416fa51` (NEXT handoff); ADR-004 `9a3fb27` present | 0 |
+| 3 | `git worktree list` | primary `master` + 11 preserved Herdr task worktrees | 0 |
+| 4 | `cargo build --workspace --offline` | `Finished dev profile ... in 0.61s` (cached, clean) | 0 |
+| 5 | `cargo test --workspace --offline` | every suite `ok`, **0 failed** (matches recorded 150-pass baseline) | 0 |
+| 6 | `git worktree add /home/sulthonuladib/work/relayable-wt/ctx-001 -b ctx/ctx-001-context-env 416fa51` | worktree created at `416fa51` | 0 |
+| 7 | `git worktree add /home/sulthonuladib/work/relayable-wt/install-001 -b install/install-001-user-install 416fa51` | worktree created at `416fa51` | 0 |
+| 8 | `delegate_agent` implementer `ctx001` | session `01a142bc-9ed7-7691-989f-b96b8f3828d7` | 0 |
+| 9 | `delegate_agent` implementer `install001` | session `01a142bc-acd6-75ae-9972-d0c2f4ee520e` | 0 |
+
+### In-flight projects (one writer per branch/path)
+
+| Task | Branch | Worktree | Owned paths |
+|---|---|---|---|
+| CTX-001 | `ctx/ctx-001-context-env` | `/home/sulthonuladib/work/relayable-wt/ctx-001` | `crates/relayable-server/src/{registry,config}.rs`, `tests/Cargo.toml`, `tests/context-resolution/**` |
+| INSTALL-001 | `install/install-001-user-install` | `/home/sulthonuladib/work/relayable-wt/install-001` | `scripts/install-user.sh`, `packaging/**`, `README.md`, `docs/operations/user-install.md` |
+
+The branches have disjoint owned paths, so they can integrate independently. Neither branch may edit
+`docs/agent-loop/**` or `docs/adr/**`; the Manager integrates and owns those.
+
+### Findings / risks
+
+- **ADR-005 Decision 5 vs the accepted CLI default:** ADR-005 Decision 5 says a target-requiring
+  command "fails" when `RELAYABLE_*` is unset and no flag is given, but the accepted, documented
+  CORE-001 CLI behavior (`protocol/compatibility/core-001-cli-json.md:58-59`) resolves a **unique**
+  session when exactly one exists and otherwise errors (ambiguous → 3, missing → 2). The implemented
+  behavior is consistent with `full.md` §8.1 ("ambiguous targets fail before mutation; never guess
+  silently"); the strict reading of Decision 5 is not. The Manager retains the accepted CLI behavior
+  (no `resolve_session` change) and records a clarification addendum on ADR-005 rather than silently
+  weakening either document. CTX-001's no-context test therefore uses zero or two sessions.
+- **INSTALL-001 binary-name collision:** both `crates/relayable-cli` and `apps/linux` produce a
+  `relayable` binary. INSTALL-001 installs the CLI as `relayable` and the GPUI app as
+  `relayable-desktop`; it must not overwrite one with the other.
+- The GPUI release build (`apps/linux`, separate workspace, `gpui =0.2.2`) is heavy; INSTALL-001 may
+  defer it behind `--with-desktop` and must report that honestly.
+
+### Next tasks
+
+1. Review each returned project diff, run independent validation, and integrate to `master` (INT-015/INT-016).
+2. After CTX-001 is integrated, start **STORE-001** (`crates/relayable-store`, ADR-004) — it also touches
+   the server registry, so it must not run concurrently with CTX-001.
+3. Backlog: `CLIENT-API-001` (raw-byte streaming), `MEM-001` (memory baseline), `CI-HOST-001`, `REF-004`.
+4. Update `docs/agent-loop/**` after every integration.
+
+---
+
 ## Checkpoint 25 — ADR-004 integrated; DEC-005 Accepted (2026-10-15)
 
 **Objective:** decide process ownership and persistence guarantees.

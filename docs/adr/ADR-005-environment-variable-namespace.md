@@ -225,6 +225,26 @@ marked **Relayable-defined (no REX evidence)** inline.
    is ever added it must be a separate compatibility task with tests, documented as reference-behavior
    compatibility only and never as REX wire compatibility. *(Relayable-defined (no REX evidence).)*
 
+### Decision 5 clarification (addendum, 2026-10-16)
+
+**Manager reconciliation.** Decision 5 above says a target-requiring command **fails** when the relevant
+`RELAYABLE_*` variable is unset and no explicit target is given. The accepted, implemented CORE-001 CLI
+behavior is slightly more permissive and is documented in
+`protocol/compatibility/core-001-cli-json.md`: when neither an explicit `-s/--session` target nor
+`RELAYABLE_SESSION` is present, the command **defaults to the single session when exactly one exists** and
+otherwise errors (`ambiguous_target` → 3, `missing` → 2). That behavior is verified by
+`crates/relayable-cli/src/resolve.rs` unit tests and the `tests/context-resolution` integration tests.
+
+The implemented behavior still satisfies Decision 5's intent and `full.md` §8.1 ("Ambiguous targets fail
+before mutation; never guess silently"): a **unique** session is not an ambiguous match, so no ambiguous
+guess occurs, and the no-context case with zero or multiple sessions fails with a documented non-zero code.
+This addendum records that reading and does **not** change Decisions 1–4 or 6–7: the namespace stays
+`RELAYABLE_*`-only, the variables are still set in every managed terminal (Decision 2), and
+flag → env → unique-default remains the precedence order. Removing the unique-session default from
+`resolve_session` was considered and rejected: it would contradict the accepted CORE-001 CLI/JSON note
+without a spec requirement (`full.md` §8.1 only forbids guessing among ambiguous targets). Recorded as
+DEC-011 in `docs/agent-loop/DECISIONS.md`.
+
 ### §8.1 requirement mapping
 
 | `full.md` §8.1 requirement | This ADR's disposition |

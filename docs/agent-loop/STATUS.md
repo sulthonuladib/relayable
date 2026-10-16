@@ -1,8 +1,27 @@
 # STATUS — Relayable
 
-**Phase:** 0 — Repository, evidence audit, and architecture decisions
-**Milestone:** Phase 2 — **all five ADRs Accepted; core + reference workspace + QA tooling integrated. Remaining: CTX-001, STORE-001, and tracked backlog.**
-**Updated:** Manager integration session — see `WORKLOG.md` Checkpoint 17.
+**Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; packaging/user-install in progress)
+**Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling integrated. **In flight:** CTX-001 (context env vars + §8.1 test) and INSTALL-001 (user install path).
+**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoint 26.
+
+## Current execution (Manager session, 2026-10-16)
+
+- `master` clean at `416fa51`; baseline re-verified green: `cargo build --workspace --offline` and
+  `cargo test --workspace --offline` both exit 0 with 0 failures.
+- **CTX-001** in progress on `ctx/ctx-001-context-env` (implementer `ctx001`): set
+  `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals + the ADR-005 §8.1
+  context-resolution integration test (`tests/context-resolution/**`).
+- **INSTALL-001** in progress on `install/install-001-user-install` (implementer `install001`):
+  `scripts/install-user.sh`, `packaging/systemd/user/relayable-server.service`, `packaging/desktop/relayable.desktop`,
+  root `README.md`, `docs/operations/user-install.md` — the primary user goal (locally installable app).
+- **DEC-011** (2026-10-16): ADR-005 Decision 5 clarification — the accepted CORE-001 unique-session CLI
+  default is retained; no-context fails only for zero/ambiguous matches.
+- Next: integrate CTX-001/INSTALL-001, then STORE-001.
+
+---
+
+## Historical phase status (Phase 0 → first vertical slice, 2026-10-15)
+
 
 ## Objective (current)
 

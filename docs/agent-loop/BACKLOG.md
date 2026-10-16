@@ -2,22 +2,23 @@
 
 Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view plus current state.
 
-## Current execution state (Manager integration session, 2026-10-15)
+## Current execution state (Manager session, 2026-10-16)
 
-- **Repository:** `/home/sulthonuladib/work/relayable`, `master` clean and pushed at `d3e0286` (INT-008).
-- **Accepted:** ADR-001 (domain/dependency), ADR-002 (proto3+prost framing/transport), ADR-005
-  (`RELAYABLE_*`-only env namespace). **ADR-003** (terminal engine + GPUI pin) stays `Proposed` until
-  TERM-002 (engine) and UI-001 (GPUI pin).
-- **Integrated:** REVIEW-001 (`774d394`), DOC-002 (`16c8bc9`), ADR-FIX-001 (`f474c83`), ADR-005
-  (`74e7e20`), CORE-001 (`d3e0286`). The repo now has the full Cargo workspace + `crates/**` +
-  `protocol/schema/**` + `tests/**` + `scripts/validate.sh`.
-- **Live agents:** TERM-002 (`spike/term-002-engine-validation`) is the only active project; the
-  REVIEW-001/DOC-002/ADR-005/ADR-FIX-001/CORE-001 Leads are stopped (worktrees/branches preserved).
-- **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred
-  (DEC-010).
-- **Failing tests:** none — `scripts/validate.sh` passes on `master` (fmt/clippy/build/test 104,
-  dependency-direction, DEC-010 guard, spike build); evidence `TESTS.md` 76–78.
-- **Next integration step:** none pending.
+- **Repository:** `/home/sulthonuladib/work/relayable`, `master` clean and pushed at `416fa51`
+  (NEXT handoff). Baseline re-verified: `cargo build --workspace --offline` and
+  `cargo test --workspace --offline` both exit 0 with 0 failures.
+- **Accepted:** all five ADRs (ADR-001 domain, ADR-002 protocol, ADR-003 terminal engine + GPUI pin,
+  ADR-004 ownership/persistence, ADR-005 env namespace). DEC-011 (2026-10-16) clarifies ADR-005
+  Decision 5's unique-session default.
+- **In flight:** **CTX-001** (`ctx/ctx-001-context-env`, worktree `/home/sulthonuladib/work/relayable-wt/ctx-001`)
+  and **INSTALL-001** (`install/install-001-user-install`, worktree `/home/sulthonuladib/work/relayable-wt/install-001`).
+  Disjoint owned paths; Manager integrates.
+- **Primary user goal:** a locally installable/testable Linux app for personal use — a
+  `systemd --user`-runnable server + the GPUI client + a user install path (INSTALL-001).
+- **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred (DEC-010).
+- **Failing tests:** none.
+- **Next integration step:** review CTX-001 and INSTALL-001 diffs, run independent validation, merge to `master`
+  (INT-015/INT-016); then start STORE-001 (which shares `crates/relayable-server/src/registry.rs` with CTX-001).
 
 ## Priority order (next first)
 
@@ -27,9 +28,10 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 2 | CORE-002 — reconnect/events + reattach-snapshot hardening | `core/core-002-reconnect-events` | CORE-001 | DONE — `91662af` (148 tests) |
 | 3 | UI-002 — reference workspace (DONE `d46c66c`); UI-001 DONE `09928db` | `ui/ui-002-reference-workspace` | UI evidence + ADR-003 | DONE |
 | 4 | QA-001 — smoke/CI scripts + `QA-FLOW-001` (`SMOKE OK`, ci 15 PASS/3 SKIP) | `qa/qa-001-smoke-ci` | CORE-001 | DONE — `4a258c2` |
-| 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | TBD | ADR-005, CORE-001 | READY |
-| 6 | ADR-004 (DEC-005 ownership/persistence) | `adr/adr-004-ownership-persistence` | CORE-002 | DONE — `9a3fb27`; Accepted; store work → `STORE-001` |
-| 7 | CTX-001 / STORE-001 / MEM-001 / CI-HOST-001 / CLIENT-API-001 / REF-004 remainder | TBD | — | BACKLOG |
+| 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | `ctx/ctx-001-context-env` | ADR-005, CORE-001 | IN_PROGRESS (implementer `ctx001`) |
+| 6 | INSTALL-001 — user install path (script + systemd user unit + desktop entry + README) | `install/install-001-user-install` | CORE-001, UI-002 | IN_PROGRESS (implementer `install001`) |
+| 7 | ADR-004 (DEC-005 ownership/persistence) | `adr/adr-004-ownership-persistence` | CORE-002 | DONE — `9a3fb27`; Accepted; store work → `STORE-001` |
+| 9 | STORE-001 (after CTX-001) / MEM-001 / CI-HOST-001 / CLIENT-API-001 / REF-004 remainder | TBD | — | BACKLOG |
 | 8 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
 
 ## Operating rules

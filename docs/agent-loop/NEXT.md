@@ -19,34 +19,39 @@ git worktree list && git branch -a
 ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-audit docs/reviews
 ```
 
-## Current state (Manager integration session, 2026-10-15)
+## Current state (Manager session, 2026-10-16)
 
-`master` is clean and pushed at `f987dcf`. All Wave 1/2 research, the review/fix cycle, the core slices,
-the GPUI reference workspace, the QA tooling, and **all five ADRs** are integrated.
+`master` is clean at `416fa51`. Baseline re-verified: `cargo build --workspace --offline` and
+`cargo test --workspace --offline` both exit 0 with 0 failures. All Wave 1/2 research, the review/fix
+cycle, the core slices, the GPUI reference workspace, the QA tooling, and **all five ADRs** are
+integrated. **DEC-011** (2026-10-16) clarifies ADR-005 Decision 5.
 
-- **ADR-001** (domain/dependency), **ADR-002** (proto3+prost framing/transport), **ADR-003** (terminal
-  engine + GPUI pin), **ADR-004** (process ownership/persistence), **ADR-005** (`RELAYABLE_*` env
-  namespace) — **all Accepted**.
-- **REVIEW-001** (`774d394`, `docs/reviews/**`) and **DOC-002** citation repair (`16c8bc9`) integrated.
-- **Core:** `crates/relayable-{model,protocol,pty,server,client,cli}` + `protocol/schema` + `tests/**`;
-  CORE-001 (`d3e0286`) and CORE-002 (`91662af`) integrated; `cargo test --workspace` **150 pass**.
-- **UI:** `apps/linux` (separate workspace) builds/runs `gpui = "=0.2.2"` via a `libc 0.2.189` lockfile
-  hold; UI-001 (`09928db`) + UI-002 (`d46c66c`) integrated.
-- **QA:** `scripts/validate.sh`, `scripts/smoke.sh`, `scripts/ci.sh`; QA-001 (`4a258c2`).
-- **No live projects** — all Leads stopped. Next: **CTX-001**.
-- Host: `protoc` = `libprotoc 36.1`; both spike crates self-root (`[workspace]`); root workspace
-  `exclude = ["spikes"]`.
+**In flight (two disjoint-path implementer projects):**
+
+- **CTX-001** — `ctx/ctx-001-context-env`, worktree `/home/sulthonuladib/work/relayable-wt/ctx-001`:
+  set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005
+  Decision 2) + the §8.1 `tests/context-resolution` integration test. Owns
+  `crates/relayable-server/src/{registry,config}.rs`, `tests/Cargo.toml`, `tests/context-resolution/**`.
+- **INSTALL-001** — `install/install-001-user-install`, worktree
+  `/home/sulthonuladib/work/relayable-wt/install-001`: `scripts/install-user.sh`, a `systemd --user`
+  unit, a desktop entry, root `README.md`, and `docs/operations/user-install.md` (the primary user
+  goal). Owns those paths only.
+
+Neither in-flight branch may edit `docs/agent-loop/**` or `docs/adr/**`; the Manager integrates and owns
+those. **Do not run STORE-001 concurrently with CTX-001**: both touch
+`crates/relayable-server/src/registry.rs`.
 
 ## Open tasks, in order
 
-1. **CTX-001** — set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals and
-   add the ADR-005 §8.1 context-resolution test (currently not implemented).
-2. **STORE-001** — create `crates/relayable-store` (SQLite metadata/audit) + server start-up
-   reconciliation, `flock`, prune, write path per ADR-004 (designed, not implemented).
+1. **Integrate CTX-001 and INSTALL-001** — review each diff, run independent validation
+   (`bash scripts/validate.sh`, `bash scripts/smoke.sh`, `bash scripts/ci.sh`), merge to `master`,
+   update `docs/agent-loop/**`.
+2. **STORE-001** — `crates/relayable-store` (SQLite metadata/audit) + server start-up reconciliation,
+   `flock`, prune, write path per ADR-004 (designed, not implemented). Start only after CTX-001 lands.
 3. Backlog: `CLIENT-API-001` (client raw-byte streaming), `MEM-001` (memory baseline),
    `CI-HOST-001` (hosted CI), `REF-004` remainder (design-token calibration).
 4. **TERM-003 (proposed; user decision pending)** — libghostty-vt license / maintained-Rust-binding /
-   build evidence spike (ADR-003 reconsideration trigger #10).
+   build spike (ADR-003 reconsideration trigger #10).
 5. Update `docs/agent-loop/**` after every meaningful iteration.
 
 ## Review gates (do not skip)
