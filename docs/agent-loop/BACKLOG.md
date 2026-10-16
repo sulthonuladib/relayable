@@ -23,9 +23,9 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **Failing tests:** none.
 - **Primary user goal reached:** a locally installable/testable Linux app (server + CLI + GPUI client +
   user install path) is delivered and verified (`scripts/install-user.sh`, `systemd --user` unit).
-- **Two projects in flight:** STORE-001 (`store/...`, `w1J`) and REF-006 (`refactor/ref-006-free-crates`,
-  `w1M`). **CLIENT-API-001 integrated** (INT-017 `52433f7`): `Client::next_output` + `tests/client-output`.
-  Disjoint owned paths; Manager integrates.
+- **Three projects in flight:** STORE-001 (`store/...`, `w1J`), REF-006 (`refactor/ref-006-free-crates`,
+  `w1M`), and REF-007/009 (`refactor/ref-007-009-client-tests`, `w1N`). **CLIENT-API-001 integrated**
+  (INT-017 `52433f7`). Disjoint owned paths; Manager integrates.
 - **Code organization:** `docs/architecture/code-organization.md` + `scripts/check-file-sizes.sh`
   (REF-005 DONE). Queue: REF-006 (free paths, in flight), REF-007 (client, after CLIENT-API-001),
   REF-008 (server, after STORE-001), REF-009 (`tests/**`, after CLIENT-API-001), REF-010 (wire --strict).
@@ -45,7 +45,7 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 9 | CLIENT-API-001 — incremental terminal bytes | `client/client-api-001-incremental-output` | CORE-001 | DONE — `52433f7` (INT-017); `next_output`; 164 tests |
 | 10 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
 | 11 | REF-006 — split over-cap files on free paths (apps/linux, model, pty, cli) | `refactor/ref-006-free-crates` | REF-005 | IN_PROGRESS (Herdr `w1M`) |
-| 12 | REF-007/008/009 — split client / server / tests | TBD | REF-006 + feature merges | REF-007/009 READY; REF-008 blocked by STORE-001 |
+| 12 | REF-007/009 — split client + tests | `refactor/ref-007-009-client-tests` | REF-005, CLIENT-API-001 | IN_PROGRESS (Herdr `w1N`); REF-008 blocked by STORE-001 |
 | 13 | REF-010 — wire `check-file-sizes.sh --strict` into CI | TBD | REF-006..009 | BACKLOG |
 
 ## Operating rules
