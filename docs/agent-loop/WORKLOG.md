@@ -118,6 +118,9 @@ src/bin/live-probe.rs,evidence/ui-003-*.log}` onto `master`.
   which is the structural argument, not an observation).
 - `UI-004-STAGE2`, `CLIENT-API-003`, `QA-DESKTOP-001`, `TOOL-001/002`, `MEM-001`, `CI-HOST-001`,
   `QA-FLAKE-001`, `DOCS-001`, `DOC-004` remain in the backlog; `UI-005`/`UI-006` are the next queue items.
+- **Worktree cleanup:** `ui-003` and `ui-004-stage1` were removed with `git worktree remove` (each verified
+  `0` dirty files and merged into `master` first; branches preserved). Only the main checkout remains, so
+  `git worktree list` shows a single entry — a clean starting point for the next session.
 
 ### Next
 
