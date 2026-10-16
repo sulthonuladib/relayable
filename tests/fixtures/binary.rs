@@ -1,4 +1,22 @@
 //! Workspace binary location and the staleness freshness guard.
+//!
+//! # Known limitations
+//!
+//! The production-source classifier is deliberately path-based, bounded, and
+//! conservative. Its accepted gaps are recorded here rather than left implicit:
+//!
+//! * A scanned crate's own `Cargo.toml` counts as a source, although rustc's
+//!   production dep-info omits it (its contents genuinely can change the
+//!   compiled artifact, so counting it is the strict direction). The
+//!   workspace-root `Cargo.toml` is never scanned, because the walk is rooted at
+//!   `crates/<name>`.
+//! * No crate in this workspace has a real `benches/` or `examples/` tree, so the
+//!   `benches`/`examples` arms of [`is_separate_test_target`] are not exercised
+//!   by this checkout; only its `tests/` arm is.
+//! * [`test_only_module_roots`] re-reads every `src/**/*.rs` file of the crate on
+//!   each call, so one `bin()` invocation reads them once per guarded binary.
+//!   The scan is confined to one small crate tree; it is informational only, not
+//!   a correctness boundary.
 
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
@@ -213,43 +231,118 @@ fn is_separate_test_target(relative: &Path) -> bool {
 /// file and is deliberately left alone: pruning it would require parsing Rust,
 /// and leaving it counted can only make the guard stricter, never weaker (see
 /// [`is_production_source`]).
+///
+/// A declaration is resolved with rustc's own module-file rule
+/// ([`module_child_directory`]), **not** relative to the declaring file's own
+/// directory. Resolving `src/codec.rs`'s `mod tests;` to `src/tests.rs` instead
+/// of `src/codec/tests.rs` was QA-HARNESS-001 finding B1: the guard then counted
+/// a test-only file as production and refused a freshly built binary.
+///
+/// A file module declared *inside* an already test-only file is test-only in
+/// turn, so the closure is taken to a fixpoint. A declaration the resolver cannot
+/// find on disk is dropped, leaving that file production-relevant and the guard
+/// strict.
 fn test_only_module_roots(crate_root: &Path) -> Vec<PathBuf> {
     let src = crate_root.join("src");
-    let mut roots = Vec::new();
-    for file in collect_files(&src, is_rust_file) {
-        let Ok(source) = fs::read_to_string(&file) else {
-            continue;
-        };
-        let dir = file.parent().unwrap_or(&src);
-        for name in test_only_file_modules(&source) {
-            let module = dir.join(&name);
-            let owned = if module.join("mod.rs").exists() {
-                module // a directory module also owns everything below it
-            } else if dir.join(format!("{name}.rs")).exists() {
-                dir.join(format!("{name}.rs"))
-            } else {
-                continue;
-            };
-            if let Ok(relative) = owned.strip_prefix(crate_root) {
-                roots.push(relative.to_path_buf());
+    let declarations: Vec<(PathBuf, Vec<FileModule>)> = collect_files(&src, is_rust_file)
+        .into_iter()
+        .filter_map(|file| {
+            let source = fs::read_to_string(&file).ok()?;
+            Some((file, file_modules(&source)))
+        })
+        .collect();
+
+    // Absolute paths rustc provably drops from a non-test build. Grown to a
+    // fixpoint, because a test-only `mod.rs` or file module can declare
+    // test-only children of its own.
+    let mut owned: Vec<PathBuf> = Vec::new();
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for (file, modules) in &declarations {
+            let file_is_test_only = owned
+                .iter()
+                .any(|root| file == root || file.starts_with(root));
+            for module in modules {
+                if !module.test_gated && !file_is_test_only {
+                    continue;
+                }
+                let Some(path) = resolve_file_module(&src, file, &module.name) else {
+                    continue;
+                };
+                if !owned.contains(&path) {
+                    owned.push(path);
+                    changed = true;
+                }
             }
         }
     }
+
+    let mut roots: Vec<PathBuf> = owned
+        .iter()
+        .filter_map(|path| path.strip_prefix(crate_root).ok().map(Path::to_path_buf))
+        .collect();
+    roots.sort();
     roots
 }
 
-/// Module names declared as `#[cfg(test)] mod <name>;` in one source file.
-fn test_only_file_modules(source: &str) -> Vec<String> {
+/// One `mod <name>;` declaration in a source file, plus whether it is gated by
+/// `#[cfg(test)]`.
+struct FileModule {
+    name: String,
+    test_gated: bool,
+}
+
+/// Every file-module declaration in one source file, in source order.
+fn file_modules(source: &str) -> Vec<FileModule> {
     let lines: Vec<&str> = source.lines().collect();
-    let mut names = Vec::new();
+    let mut modules = Vec::new();
     for (index, &line) in lines.iter().enumerate() {
         if let Some(name) = file_module_name(line) {
-            if has_cfg_test_attribute(&lines[..index]) {
-                names.push(name);
-            }
+            modules.push(FileModule {
+                name,
+                test_gated: has_cfg_test_attribute(&lines[..index]),
+            });
         }
     }
-    names
+    modules
+}
+
+/// The directory rustc resolves file-module children of `file` against.
+///
+/// * A crate root (`src/lib.rs`, `src/main.rs`) owns its own directory, so
+///   `src/lib.rs`'s `mod foo;` is `src/foo.rs` or `src/foo/mod.rs`.
+/// * A `mod.rs` owns its own directory too: `src/tests/mod.rs`'s `mod events;`
+///   is `src/tests/events.rs`.
+/// * Every other file `src/foo.rs` owns the `src/foo/` directory, so its
+///   `mod bar;` is `src/foo/bar.rs`.
+///
+/// A `lib.rs`/`main.rs` that is not directly under the crate's `src` is not a
+/// crate root and is treated as an ordinary file module.
+fn module_child_directory(src: &Path, file: &Path) -> PathBuf {
+    let parent = file.parent().unwrap_or(src);
+    let name = file.file_name().and_then(|value| value.to_str());
+    let is_crate_root = parent == src && matches!(name, Some("lib.rs" | "main.rs"));
+    if is_crate_root || name == Some("mod.rs") {
+        return parent.to_path_buf();
+    }
+    match file.file_stem().and_then(|value| value.to_str()) {
+        Some(stem) => parent.join(stem),
+        None => parent.to_path_buf(),
+    }
+}
+
+/// Resolve one `mod <name>;` declaration in `file` to the path rustc owns, or
+/// `None` when neither the `name/mod.rs` directory module nor the `name.rs` file
+/// module exists. Preferring `name/mod.rs` mirrors rustc's search order.
+fn resolve_file_module(src: &Path, file: &Path, name: &str) -> Option<PathBuf> {
+    let dir = module_child_directory(src, file);
+    let directory_module = dir.join(name);
+    if directory_module.join("mod.rs").exists() {
+        return Some(directory_module);
+    }
+    let file_module = dir.join(format!("{name}.rs"));
+    file_module.exists().then_some(file_module)
 }
 
 /// The name of a `mod <name>;` declaration line, ignoring a visibility prefix.
@@ -432,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    fn test_only_file_modules_tracks_gated_declarations() {
+    fn file_modules_track_declarations_and_their_cfg_test_gate() {
         let source = "\
 mod production;
 
@@ -445,7 +538,90 @@ pub(crate) mod harness;
 #[cfg(unix)]
 mod platform;
 ";
-        assert_eq!(test_only_file_modules(source), vec!["tests", "harness"]);
+        let modules = file_modules(source);
+        let seen: Vec<(&str, bool)> = modules
+            .iter()
+            .map(|module| (module.name.as_str(), module.test_gated))
+            .collect();
+        assert_eq!(
+            seen,
+            vec![
+                ("production", false),
+                ("tests", true),
+                ("harness", true),
+                ("platform", false),
+            ]
+        );
+    }
+
+    #[test]
+    fn module_child_directory_follows_rusts_file_module_rule() {
+        let src = Path::new("crates/relayable-protocol/src");
+
+        // A crate root owns its own directory.
+        assert_eq!(
+            module_child_directory(src, &src.join("lib.rs")).as_path(),
+            src
+        );
+        assert_eq!(
+            module_child_directory(src, &src.join("main.rs")).as_path(),
+            src
+        );
+        // A `mod.rs` owns its own directory as well.
+        assert_eq!(
+            module_child_directory(src, &src.join("tests/mod.rs")).as_path(),
+            src.join("tests")
+        );
+        // Any other file `src/foo.rs` owns `src/foo/`: this is the B1 case.
+        assert_eq!(
+            module_child_directory(src, &src.join("codec.rs")).as_path(),
+            src.join("codec")
+        );
+        assert_eq!(
+            module_child_directory(src, &src.join("codec/tests.rs")).as_path(),
+            src.join("codec/tests")
+        );
+        // A `lib.rs` that is not the crate root is an ordinary file module.
+        assert_eq!(
+            module_child_directory(src, &src.join("vendor/lib.rs")).as_path(),
+            src.join("vendor/lib")
+        );
+    }
+
+    #[test]
+    fn nested_test_module_declarations_resolve_like_rustc() {
+        // A miniature crate: `src/lib.rs` declares `src/foo.rs`, which declares a
+        // test-only module, which in turn declares a nested one. rustc resolves
+        // those to `src/foo/tests.rs` and `src/foo/tests/helpers.rs`; resolving
+        // against the declaring file's own directory (the B1 bug) would look for
+        // `src/tests.rs` and `src/foo/helpers.rs` and find neither.
+        let dir = tempfile::tempdir().expect("temp dir");
+        let root = dir.path();
+        let write = |relative: &str, body: &str| {
+            let path = root.join(relative);
+            fs::create_dir_all(path.parent().expect("file has a parent")).expect("create dirs");
+            fs::write(path, body).expect("write source");
+        };
+        write("src/lib.rs", "mod foo;\n");
+        write("src/foo.rs", "pub fn f() {}\n\n#[cfg(test)]\nmod tests;\n");
+        write("src/foo/tests.rs", "#[cfg(test)]\nmod helpers;\n");
+        write("src/foo/tests/helpers.rs", "fn h() {}\n");
+
+        let roots = test_only_module_roots(root);
+        for expected in ["src/foo/tests.rs", "src/foo/tests/helpers.rs"] {
+            assert!(
+                roots.contains(&PathBuf::from(expected)),
+                "{expected:?} must be discovered, got {roots:?}"
+            );
+            assert!(
+                !is_production_source(root, &root.join(expected), &roots),
+                "{expected:?} must be pruned, got {roots:?}"
+            );
+        }
+        assert!(
+            is_production_source(root, &root.join("src/foo.rs"), &roots),
+            "the declaring file itself is production, got {roots:?}"
+        );
     }
 
     #[test]
@@ -507,42 +683,79 @@ mod platform;
         ));
     }
 
+    /// The `#[cfg(test)]` module roots this checkout actually has, as
+    /// `(crate, path relative to the crate root)`. Derived by hand from the
+    /// `#[cfg(test)] mod <name>;` declarations in `crates/*/src`, deliberately
+    /// *independent* of the classifier so a resolution bug fails the test
+    /// instead of agreeing with itself (QA-HARNESS-001 finding B2).
+    const CHECKOUT_TEST_ONLY_ROOTS: &[(&str, &str)] = &[
+        ("relayable-model", "src/tests.rs"),
+        ("relayable-client", "src/tests"),
+        ("relayable-protocol", "src/codec/tests.rs"),
+        ("relayable-cli", "src/json/tests.rs"),
+    ];
+
+    /// A file under one of those roots, plus the crate-root `tests/` trees that
+    /// are separate Cargo targets. Every entry must be pruned.
+    const CHECKOUT_TEST_ONLY_FILES: &[(&str, &str)] = &[
+        ("relayable-model", "src/tests.rs"),
+        ("relayable-client", "src/tests/mod.rs"),
+        ("relayable-client", "src/tests/harness.rs"),
+        ("relayable-protocol", "src/codec/tests.rs"),
+        ("relayable-cli", "src/json/tests.rs"),
+        ("relayable-pty", "tests/pty.rs"),
+        ("relayable-server", "tests/server_e2e.rs"),
+        ("relayable-server", "tests/store_wiring.rs"),
+        ("relayable-store", "tests/store.rs"),
+    ];
+
+    /// One production source per crate: it must keep counting, i.e. pruning the
+    /// test-only set must not drag real sources along with it.
+    const CHECKOUT_PRODUCTION_SOURCES: &[(&str, &str)] = &[
+        ("relayable-model", "src/ids.rs"),
+        ("relayable-client", "src/client.rs"),
+        ("relayable-protocol", "src/codec.rs"),
+        ("relayable-cli", "src/json.rs"),
+        ("relayable-pty", "src/handle.rs"),
+        ("relayable-server", "src/session.rs"),
+        ("relayable-store", "src/store.rs"),
+    ];
+
     #[test]
     fn this_checkout_cfg_test_modules_are_classified_as_test_only() {
         // Guards the regression QA-HARNESS-001 records: in this repo every
         // `tests` module under a crate's `src/` is `#[cfg(test)]`-gated, so an
-        // edit there must not count as staleness.
+        // edit there must not count as staleness. The expected set is written
+        // out by hand (not derived from the classifier), so it fails when the
+        // classifier misses a declaration — which is exactly B1.
         let repo = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
-        for crate_name in dependency_crates("relayable-server") {
-            let root = repo.join("crates").join(crate_name);
+        let crate_root = |name: &str| repo.join("crates").join(name);
+
+        for &(crate_name, path) in CHECKOUT_TEST_ONLY_ROOTS {
+            let root = crate_root(crate_name);
             let roots = test_only_module_roots(&root);
-            for module in &roots {
-                assert!(
-                    module.starts_with("src"),
-                    "{crate_name}: {module:?} should be a src module"
-                );
-                assert!(
-                    !is_production_source(&root, &root.join(module), &roots),
-                    "{crate_name}: {module:?} should be pruned"
-                );
-            }
+            assert!(
+                roots.contains(&PathBuf::from(path)),
+                "{crate_name}: expected {path:?} among the discovered test-only roots, got {roots:?}"
+            );
         }
 
-        let model = repo.join("crates/relayable-model");
-        let roots = test_only_module_roots(&model);
-        assert!(
-            roots.contains(&PathBuf::from("src/tests.rs")),
-            "relayable-model's `#[cfg(test)] mod tests;` should be pruned, got {roots:?}"
-        );
-        assert!(is_production_source(
-            &model,
-            &model.join("src/ids.rs"),
-            &roots
-        ));
-        assert!(!is_production_source(
-            &model,
-            &model.join("src/tests.rs"),
-            &roots
-        ));
+        for &(crate_name, path) in CHECKOUT_TEST_ONLY_FILES {
+            let root = crate_root(crate_name);
+            let roots = test_only_module_roots(&root);
+            assert!(
+                !is_production_source(&root, &root.join(path), &roots),
+                "{crate_name}: {path:?} is test-only and must not count as production, got {roots:?}"
+            );
+        }
+
+        for &(crate_name, path) in CHECKOUT_PRODUCTION_SOURCES {
+            let root = crate_root(crate_name);
+            let roots = test_only_module_roots(&root);
+            assert!(
+                is_production_source(&root, &root.join(path), &roots),
+                "{crate_name}: {path:?} is production and must still count, got {roots:?}"
+            );
+        }
     }
 }
