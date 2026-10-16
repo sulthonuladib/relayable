@@ -1,19 +1,13 @@
 use std::collections::{BTreeSet, HashMap};
+use std::path::Path;
 use std::sync::mpsc::Sender;
-use std::time::Instant;
+use std::time::Duration;
 
-use relayable_protocol::codec::CodecError;
-use relayable_protocol::methods;
-use relayable_protocol::transport::{FrameConnection, TransportError};
-use relayable_protocol::v1::{
-    envelope::Body, request::Operation, response::Result as ResponseResult, AttachMode,
-    BlockAttachRequest, BlockDetachRequest, Envelope, FlowControl, Handshake, Request,
-    TerminalInput, TerminalOutput, TerminalResize,
-};
-use relayable_protocol::{CONTROL_STREAM_ID, PROTOCOL_VERSION};
+use relayable_client::{AttachMode, Client, ClientConfig, ClientError};
+use relayable_model::{BlockId, SessionId};
 use vte::Parser;
 
-use super::types::{ApiEvent, POLL_INTERVAL, REQUEST_TIMEOUT, SNAPSHOT_TAIL_BYTES};
+use super::types::{ApiEvent, DATA_READ_WINDOW, SNAPSHOT_TAIL_BYTES};
 use super::wire::{emit, translate_wire_event};
 
 pub(super) use super::data_thread::data_thread;
@@ -23,21 +17,21 @@ pub(super) use super::osc::{OscPerformer, TitleTracker};
 
 // --- data plane ------------------------------------------------------------
 
-/// One data-plane read outcome.
-enum FrameOutcome {
-    /// A complete frame arrived (boxed: `Envelope` is large).
-    Frame(Box<Envelope>),
-    /// The read deadline expired with no frame (not a disconnect).
-    Idle,
-    /// The peer closed the connection cleanly.
-    Closed,
-}
-
-/// The private data-plane connection.
+/// The private data-plane connection: its own [`Client`], so the data plane and
+/// the control plane never share a socket or a writer lease.
+///
+/// Every wire concern the old hand-rolled frame client owned is now the client
+/// library's: the handshake, `block.attach` / `block.detach` / `terminal.input`
+/// / `terminal.resize` round trips, and **flow control** — [`Client::next_output`]
+/// acknowledges exactly the chunk it returns. The server charges its per-stream
+/// credit window by output payload byte and closes the *whole connection* when a
+/// subscriber exhausts it (`crates/relayable-server/src/session/subscriber.rs`,
+/// `deliver` / `overflow`), so this module sends no `FlowControl` frame itself and
+/// instead guarantees the window is refilled by draining every attached stream
+/// (see [`DataPlane::pump`]).
 pub(super) struct DataPlane {
-    conn: FrameConnection,
+    client: Client,
     events: Sender<ApiEvent>,
-    next_request_id: u64,
     /// Every stream this connection currently holds (`block.attach` succeeded and
     /// no `block.detach` has completed). N concurrent live attachments.
     stream_ids: BTreeSet<u64>,
@@ -54,160 +48,114 @@ struct StreamTitle {
 }
 
 impl DataPlane {
-    pub(super) fn connect(
-        path: &std::path::Path,
-        events: Sender<ApiEvent>,
-    ) -> Result<Self, String> {
-        let conn = FrameConnection::connect(path)
+    pub(super) fn connect(path: &Path, events: Sender<ApiEvent>) -> Result<Self, String> {
+        let client = Client::connect(path, ClientConfig::new("ui"))
             .map_err(|error| format!("could not connect to {}: {error}", path.display()))?;
-        conn.set_read_timeout(Some(POLL_INTERVAL))
-            .map_err(|error| format!("could not set read timeout: {error}"))?;
+        let limits = client.limits();
+        eprintln!(
+            "relayable-data: server advertised max_concurrent_streams={} credit_window_bytes={}",
+            limits.max_concurrent_streams, limits.credit_window_bytes
+        );
 
-        let mut plane = Self {
-            conn,
+        Ok(Self {
+            client,
             events,
-            next_request_id: 1,
             stream_ids: BTreeSet::new(),
             titles: HashMap::new(),
-        };
-        plane.perform_handshake()?;
-        Ok(plane)
+        })
     }
 
-    fn perform_handshake(&mut self) -> Result<(), String> {
-        let request_id = self.next_request_id;
-        self.next_request_id += 1;
-        let envelope = Envelope {
-            protocol_version: PROTOCOL_VERSION.to_string(),
-            request_id: Some(request_id),
-            stream_id: CONTROL_STREAM_ID,
-            body: Some(Body::Handshake(Handshake {
-                client_kind: "ui".to_string(),
-                platform: std::env::consts::OS.to_string(),
-                client_version: env!("CARGO_PKG_VERSION").to_string(),
-                protocol_version: PROTOCOL_VERSION.to_string(),
-                capabilities: Vec::new(),
-            })),
-            ..Envelope::default()
-        };
-        self.conn
-            .send(&envelope)
-            .map_err(|error| format!("handshake send failed: {error}"))?;
-        match self.await_result(request_id)? {
-            ResponseResult::Hello(hello) => {
-                if let Some(limits) = hello.limits.as_ref() {
-                    eprintln!(
-                        "relayable-data: server advertised max_concurrent_streams={} credit_window_bytes={}",
-                        limits.max_concurrent_streams, limits.credit_window_bytes
-                    );
-                }
-                Ok(())
-            }
-            ResponseResult::Error(error) => Err(format!("handshake rejected: {}", error.message)),
-            other => Err(format!("unexpected handshake response: {other:?}")),
-        }
-    }
+    /// Attach `block_id` to this connection as **WRITER**.
+    ///
+    /// `takeover` asks the server to transfer the single writer lease from its
+    /// current holder; `app/streams.rs` (`attach_pane`) passes `true` so a
+    /// re-attach after a data-plane-only reconnect wins the lease back from its
+    /// own dead connection. That path needs `attach_with_takeover`:
+    /// `Client::attach_block` hardcodes `takeover: false`.
+    ///
+    /// `session_id` is the wire session id of the block's session. `block.attach`
+    /// is addressed by `block_id` alone; the client takes the session for
+    /// call-site parity (`crates/relayable-client/src/client/terminal.rs`), and
+    /// passing it keeps the command's identity explicit for the caller that has
+    /// both ids.
+    pub(super) fn attach(
+        &mut self,
+        session_id: &str,
+        block_id: &str,
+        takeover: bool,
+    ) -> Result<(), String> {
+        let session = session_id
+            .parse::<SessionId>()
+            .map_err(|error| format!("bad session id {session_id:?}: {error}"))?;
+        let block = block_id
+            .parse::<BlockId>()
+            .map_err(|error| format!("bad block id {block_id:?}: {error}"))?;
 
-    pub(super) fn attach(&mut self, block_id: &str, takeover: bool) -> Result<(), String> {
-        let request_id = self.next_request_id;
-        self.next_request_id += 1;
-        let envelope = self.request_envelope(
-            request_id,
-            methods::BLOCK_ATTACH,
-            Operation::BlockAttach(BlockAttachRequest {
-                block_id: block_id.to_string(),
-                mode: AttachMode::Writer as i32,
-                takeover,
-            }),
+        let response = self
+            .client
+            .attach_with_takeover(&session, &block, AttachMode::Writer, takeover)
+            .map_err(|error| format!("block.attach failed: {error}"))?;
+
+        let snapshot = response.snapshot.unwrap_or_default();
+        let cols = clamp_dimension(snapshot.cols);
+        let rows = clamp_dimension(snapshot.rows);
+        let screen_bytes = tail(&snapshot.screen_bytes, SNAPSHOT_TAIL_BYTES);
+        self.stream_ids.insert(response.stream_id);
+        // Emit `Attached` before the snapshot's OSC title/cwd so a listener can
+        // attribute the following `PaneTitleChanged` to the stream that was just
+        // attached (the event carries no id itself).
+        emit(
+            &self.events,
+            ApiEvent::Attached {
+                stream_id: response.stream_id,
+                cols,
+                rows,
+                screen_bytes: screen_bytes.clone(),
+            },
         );
-        self.conn
-            .send(&envelope)
-            .map_err(|error| format!("block.attach send failed: {error}"))?;
-
-        match self.await_result(request_id)? {
-            ResponseResult::BlockAttach(response) => {
-                let snapshot = response.snapshot.unwrap_or_default();
-                let cols = clamp_dimension(snapshot.cols);
-                let rows = clamp_dimension(snapshot.rows);
-                let screen_bytes = tail(&snapshot.screen_bytes, SNAPSHOT_TAIL_BYTES);
-                self.stream_ids.insert(response.stream_id);
-                // Emit `Attached` before the snapshot's OSC title/cwd so a
-                // listener can attribute the following `PaneTitleChanged` to the
-                // stream that was just attached (the event carries no id itself).
-                emit(
-                    &self.events,
-                    ApiEvent::Attached {
-                        stream_id: response.stream_id,
-                        cols,
-                        rows,
-                        screen_bytes: screen_bytes.clone(),
-                    },
-                );
-                self.observe(response.stream_id, &screen_bytes);
-                Ok(())
-            }
-            ResponseResult::Error(error) => Err(format!("block.attach failed: {}", error.message)),
-            other => Err(format!("unexpected block.attach response: {other:?}")),
-        }
+        self.observe(response.stream_id, &screen_bytes);
+        Ok(())
     }
 
     pub(super) fn detach(&mut self, stream_id: u64) -> Result<(), String> {
-        let request_id = self.next_request_id;
-        self.next_request_id += 1;
-        let envelope = self.request_envelope(
-            request_id,
-            methods::BLOCK_DETACH,
-            Operation::BlockDetach(BlockDetachRequest { stream_id }),
-        );
-        self.conn
-            .send(&envelope)
-            .map_err(|error| format!("block.detach send failed: {error}"))?;
-        match self.await_result(request_id)? {
-            ResponseResult::BlockDetach(_) => {
-                self.stream_ids.remove(&stream_id);
-                self.titles.remove(&stream_id);
-                Ok(())
-            }
-            ResponseResult::Error(error) => Err(format!("block.detach failed: {}", error.message)),
-            other => Err(format!("unexpected block.detach response: {other:?}")),
-        }
+        self.client
+            .detach_block(stream_id)
+            .map_err(|error| format!("block.detach failed: {error}"))?;
+        self.stream_ids.remove(&stream_id);
+        self.titles.remove(&stream_id);
+        Ok(())
     }
 
     pub(super) fn send_input(&mut self, stream_id: u64, bytes: Vec<u8>) -> Result<(), String> {
-        let request_id = self.next_request_id;
-        self.next_request_id += 1;
-        let envelope = self.request_envelope(
-            request_id,
-            methods::TERMINAL_INPUT,
-            Operation::TerminalInput(TerminalInput {
-                stream_id,
-                bytes: bytes.clone(),
-            }),
+        let accepted = self
+            .client
+            .send_input(stream_id, &bytes)
+            .map_err(|error| format!("terminal.input failed: {error}"))?;
+        emit(
+            &self.events,
+            ApiEvent::ServerEvent {
+                kind: "TerminalInputAccepted".to_string(),
+                detail: format!("stream_id={stream_id} accepted_bytes={accepted}"),
+            },
         );
-        self.conn
-            .send(&envelope)
-            .map_err(|error| format!("terminal.input send failed: {error}"))?;
-        match self.await_result(request_id)? {
-            ResponseResult::TerminalInput(accepted) => {
-                emit(
-                    &self.events,
-                    ApiEvent::ServerEvent {
-                        kind: "TerminalInputAccepted".to_string(),
-                        detail: format!(
-                            "stream_id={} accepted_bytes={}",
-                            accepted.stream_id, accepted.accepted_bytes
-                        ),
-                    },
-                );
-                Ok(())
-            }
-            ResponseResult::Error(error) => {
-                Err(format!("terminal.input failed: {}", error.message))
-            }
-            other => Err(format!("unexpected terminal.input response: {other:?}")),
-        }
+        Ok(())
     }
 
+    /// Resize the pane and report back the geometry the **server** accepted.
+    ///
+    /// The pixel dimensions are forwarded for real: `terminal.resize` carries
+    /// `optional uint32 pixel_width/pixel_height`, the server applies them to the
+    /// block's PTY window size, and it rejects a resize whose pixel dimensions do
+    /// not fit 16 bits (`crates/relayable-server/src/dispatch.rs`,
+    /// `invalid_resize`) — which is why [`Client::resize_with_pixels`] takes
+    /// `Option<u16>`. The request carries the measured pane size as
+    /// `Option<u32>` (`app/resize.rs`); an out-of-range value saturates to
+    /// `u16::MAX` (an accepted value) rather than silently dropping the
+    /// dimension, and `None` stays `None` (the server substitutes `0`).
+    ///
+    /// [`relayable_client::TerminalResizeAccepted`] carries only
+    /// `stream_id`/`cols`/`rows`, so those are what is reported: never the
+    /// requested values as if the server had confirmed them.
     pub(super) fn send_resize(
         &mut self,
         stream_id: u64,
@@ -216,156 +164,142 @@ impl DataPlane {
         pixel_width: Option<u32>,
         pixel_height: Option<u32>,
     ) -> Result<(), String> {
-        let request_id = self.next_request_id;
-        self.next_request_id += 1;
-        let envelope = self.request_envelope(
-            request_id,
-            methods::TERMINAL_RESIZE,
-            Operation::TerminalResize(TerminalResize {
+        let accepted = self
+            .client
+            .resize_with_pixels(
                 stream_id,
-                cols: u32::from(cols),
-                rows: u32::from(rows),
-                pixel_width,
-                pixel_height,
-            }),
+                cols,
+                rows,
+                pixel_width.map(clamp_dimension),
+                pixel_height.map(clamp_dimension),
+            )
+            .map_err(|error| format!("terminal.resize failed: {error}"))?;
+
+        emit(
+            &self.events,
+            ApiEvent::Resized {
+                stream_id: accepted.stream_id,
+                cols: clamp_dimension(accepted.cols),
+                rows: clamp_dimension(accepted.rows),
+            },
         );
-        self.conn
-            .send(&envelope)
-            .map_err(|error| format!("terminal.resize send failed: {error}"))?;
-        match self.await_result(request_id)? {
-            ResponseResult::TerminalResize(accepted) => {
-                emit(
-                    &self.events,
-                    ApiEvent::Resized {
-                        stream_id: accepted.stream_id,
-                        cols: clamp_dimension(accepted.cols),
-                        rows: clamp_dimension(accepted.rows),
-                    },
-                );
-                emit(
-                    &self.events,
-                    ApiEvent::ServerEvent {
-                        kind: "TerminalResizeAccepted".to_string(),
-                        detail: format!(
-                            "stream_id={} cols={} rows={}",
-                            accepted.stream_id, accepted.cols, accepted.rows
-                        ),
-                    },
-                );
-                Ok(())
-            }
-            ResponseResult::Error(error) => {
-                Err(format!("terminal.resize failed: {}", error.message))
-            }
-            other => Err(format!("unexpected terminal.resize response: {other:?}")),
-        }
+        emit(
+            &self.events,
+            ApiEvent::ServerEvent {
+                kind: "TerminalResizeAccepted".to_string(),
+                detail: format!(
+                    "stream_id={} cols={} rows={}",
+                    accepted.stream_id, accepted.cols, accepted.rows
+                ),
+            },
+        );
+        Ok(())
     }
 
-    fn request_envelope(&self, request_id: u64, method: &str, operation: Operation) -> Envelope {
-        Envelope {
-            protocol_version: PROTOCOL_VERSION.to_string(),
-            request_id: Some(request_id),
-            stream_id: CONTROL_STREAM_ID,
-            body: Some(Body::Request(Request {
-                method: method.to_string(),
-                operation: Some(operation),
-            })),
-            ..Envelope::default()
-        }
-    }
-
-    /// Read until the response for `request_id`, handling output frames on the
-    /// way. Returns the response's `result`.
-    fn await_result(&mut self, request_id: u64) -> Result<ResponseResult, String> {
-        let deadline = Instant::now() + REQUEST_TIMEOUT;
-        loop {
-            if Instant::now() >= deadline {
-                return Err("timed out waiting for a server response".to_string());
-            }
-            match self.recv_frame()? {
-                FrameOutcome::Frame(envelope) => match envelope.body {
-                    Some(Body::Response(response)) if response.request_id == request_id => {
-                        return response
-                            .result
-                            .ok_or_else(|| "response carried no result".to_string());
-                    }
-                    Some(Body::TerminalData(output)) => self.handle_output(output),
-                    Some(Body::Response(_) | Body::Heartbeat(_) | Body::FlowControl(_)) => {}
-                    Some(Body::Event(event)) => {
-                        emit(&self.events, translate_wire_event(event));
-                    }
-                    _ => {}
-                },
-                FrameOutcome::Idle => {}
-                FrameOutcome::Closed => return Err("server closed the connection".to_string()),
-            }
-        }
-    }
-
-    /// One output pump; a read timeout is not an error.
+    /// One data-plane step: drain every attached stream to empty, one bounded
+    /// blocking read, drain again, then hand buffered events to the UI.
+    ///
+    /// # Why the drains sandwich the read
+    ///
+    /// The server charges its per-stream credit window by output payload byte
+    /// (`credit_window_bytes`, 256 KiB by default) and closes the **whole
+    /// connection** when a subscriber exhausts it (`Subscriber::overflow`,
+    /// `crates/relayable-server/src/session/subscriber.rs`) — the UI would see
+    /// that as a data-plane disconnect with every pane detached. Only
+    /// [`Client::next_output`] refunds that credit, and only for the single chunk
+    /// it returns, so every byte this plane receives must be handed back through
+    /// a `next_output` call:
+    ///
+    /// 1. **drain every attached stream to empty** with `Duration::ZERO` (serve
+    ///    what is already buffered; a zero timeout performs no socket read)
+    ///    *before* waiting for more;
+    /// 2. one bounded blocking read — [`Client::collect_events`] for
+    ///    [`DATA_READ_WINDOW`]. It pumps the socket for that whole window,
+    ///    moving output frames of **every** stream into the client's pending
+    ///    queue and returning only the events it saw. Reading this way, rather
+    ///    than targeting one stream with `next_output(stream, window)`, is what
+    ///    makes step 3 complete: a stream-targeted read returns after a single
+    ///    chunk of that stream and leaves every other stream's chunks in the
+    ///    pending queue, so their acknowledgement would depend on which stream
+    ///    the read happened to target. This read has no such preference.
+    ///
+    /// 3. **drain every attached stream again**, which is what actually
+    ///    acknowledges everything step 2 pulled — one cheap `next_output` per
+    ///    chunk, and no chunk is ever acknowledged without being delivered as
+    ///    [`ApiEvent::Output`] in the same call.
+    ///
+    /// The unacknowledged volume of a stream is therefore bounded by one window's
+    /// production (server rate x [`DATA_READ_WINDOW`]), not by how long the loop
+    /// runs; see that constant for the numbers and for the residual limit this
+    /// structure cannot remove.
+    ///
+    /// Both drain loops terminate: the client's pending queue only shrinks as
+    /// `next_output` consumes it, and a drained stream can only be refilled by the
+    /// server, whose per-stream credit this very call is refunding.
+    ///
+    /// # Errors
+    ///
+    /// A lost connection (`ClientError::Disconnected` / `ClientError::Transport`)
+    /// is an `Err`, which `data_thread` turns into [`ApiEvent::Disconnected`] plus
+    /// a reconnect. A read deadline is **not** an error: `collect_events` returns
+    /// the events it saw and `next_output` reports `Ok(None)`, and neither returns
+    /// [`ClientError::Timeout`] for an expired window.
     pub(super) fn pump(&mut self) -> Result<(), String> {
-        match self.recv_frame()? {
-            FrameOutcome::Frame(envelope) => {
-                match envelope.body {
-                    Some(Body::TerminalData(output)) => self.handle_output(output),
-                    Some(Body::Event(event)) => {
-                        emit(&self.events, translate_wire_event(event));
-                    }
-                    Some(Body::Heartbeat(_) | Body::FlowControl(_) | Body::Response(_)) => {}
-                    _ => {}
-                }
-                Ok(())
-            }
-            FrameOutcome::Idle => Ok(()),
-            FrameOutcome::Closed => Err("server closed the connection".to_string()),
+        self.drain_attached()?;
+
+        let events = self
+            .client
+            .collect_events(DATA_READ_WINDOW)
+            .map_err(describe_client_error)?;
+
+        self.drain_attached()?;
+        for event in events {
+            emit(&self.events, translate_wire_event(event));
         }
+
+        for event in self.client.drain_events() {
+            emit(&self.events, translate_wire_event(event));
+        }
+        Ok(())
     }
 
-    /// One read. A read-deadline expiry is [`FrameOutcome::Idle`]; a clean EOF is
-    /// [`FrameOutcome::Closed`]; anything else is an error.
-    fn recv_frame(&mut self) -> Result<FrameOutcome, String> {
-        match self.conn.recv() {
-            Ok(Some(envelope)) => Ok(FrameOutcome::Frame(Box::new(envelope))),
-            Ok(None) => Ok(FrameOutcome::Closed),
-            Err(TransportError::Io(error)) if is_timeout(&error) => Ok(FrameOutcome::Idle),
-            Err(TransportError::Codec(CodecError::Io(error))) if is_timeout(&error) => {
-                Ok(FrameOutcome::Idle)
+    /// Drain every attached stream down to an empty buffer.
+    ///
+    /// `next_output(stream, Duration::ZERO)` is the acknowledgement path: it
+    /// returns one already-buffered chunk per call and acks exactly that chunk.
+    /// Finishing with `Ok(None)` means every chunk the client holds for that
+    /// stream has been delivered and refunded.
+    fn drain_attached(&mut self) -> Result<(), String> {
+        // Snapshot the ids: `deliver` needs `&mut self`, and the set cannot
+        // change while this loop runs (attaches/detaches are separate calls).
+        for stream_id in self.stream_ids.clone() {
+            while let Some(bytes) = self.next_chunk(stream_id, Duration::ZERO)? {
+                self.deliver(stream_id, bytes);
             }
-            Err(error) => Err(error.to_string()),
         }
+        Ok(())
     }
 
-    fn handle_output(&mut self, output: TerminalOutput) {
-        let TerminalOutput {
-            stream_id,
-            stream_seq,
-            bytes,
-        } = output;
-        let ack = bytes.len() as u64;
-        // Emit the output first so the UI can associate the following
-        // `PaneTitleChanged` (which carries no stream id) with this stream.
+    /// One output chunk: emit it, then feed it to the stream's OSC tracker.
+    ///
+    /// The chunk has already been acknowledged by `next_output`; nothing here
+    /// acks again. The emit happens first so the UI can associate the following
+    /// `PaneTitleChanged` (which carries no stream id) with this stream.
+    fn deliver(&mut self, stream_id: u64, bytes: Vec<u8>) {
         emit(
             &self.events,
             ApiEvent::Output {
                 stream_id,
-                stream_seq,
                 bytes: bytes.clone(),
             },
         );
         self.observe(stream_id, &bytes);
-        if should_ack(&self.stream_ids, stream_id) && ack > 0 {
-            // The server charges its credit window per output payload byte.
-            let envelope = Envelope {
-                protocol_version: PROTOCOL_VERSION.to_string(),
-                stream_id,
-                body: Some(Body::FlowControl(FlowControl {
-                    stream_id,
-                    ack_bytes: ack,
-                })),
-                ..Envelope::default()
-            };
-            let _ = self.conn.send(&envelope);
-        }
+    }
+
+    fn next_chunk(&mut self, stream_id: u64, timeout: Duration) -> Result<Option<Vec<u8>>, String> {
+        self.client
+            .next_output(stream_id, timeout)
+            .map_err(describe_client_error)
     }
 
     /// Feed bytes to the lightweight OSC title/cwd tracker for one stream.
@@ -386,17 +320,16 @@ impl DataPlane {
 
 // --- data-plane helpers ----------------------------------------------------
 
-fn is_timeout(error: &std::io::Error) -> bool {
-    matches!(
-        error.kind(),
-        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
-    )
-}
-
-/// Whether an output frame's stream is one this connection currently holds and
-/// therefore must credit-ack. Pure so it can be unit-tested without a socket.
-pub(super) fn should_ack(attached: &BTreeSet<u64>, stream_id: u64) -> bool {
-    attached.contains(&stream_id)
+/// Render a client failure for the data thread.
+///
+/// The peer-closed case keeps the wording the previous raw transport produced, so
+/// `data_thread`'s `ApiEvent::Disconnected { reason }` text is unchanged; every
+/// other failure keeps the client library's own message.
+fn describe_client_error(error: ClientError) -> String {
+    match error {
+        ClientError::Disconnected => "server closed the connection".to_string(),
+        other => other.to_string(),
+    }
 }
 
 fn clamp_dimension(value: u32) -> u16 {

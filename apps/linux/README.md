@@ -243,24 +243,49 @@ verifies every PNG with `identify`, then tears down (disable the runtime rule, s
 The app consumes a **real `relayable-server`, never a mock core**, through a **two-connection**
 design in `src/api/mod.rs`:
 
-- **Data plane** — a private `relayable_protocol::transport::FrameConnection` speaking the
-  documented wire protocol on the public `relayable-protocol` transport: handshake, `block.attach`
-  as **WRITER**, then `TerminalData` with the **mandatory `FlowControl` acknowledgement for every
-  attached stream** (the server's credit window charges output payload bytes), plus
-  `terminal.input` and `terminal.resize`. It holds many concurrent attachments and acks output for
-  every attached stream, not just the focused one.
-- **Control plane** — the `relayable-client` crate (path dependency) on its own connection for
-  `session.create` / `session.list` / `session.view` and for `session.resume` events, which drive
-  the connection-state visuals. It never calls `block.attach`, so it never contends for a writer
-  lease (multi-client is supported).
+- **Data plane** — a second **`relayable_client::Client`** on its own connection
+  (`src/api/data.rs`): `attach_with_takeover` as **WRITER** (lease takeover, so a re-attach after a
+  data-plane-only reconnect wins the lease back from its own dead connection), `next_output` per
+  attached stream, `send_input`, and `resize_with_pixels` with the measured pane pixel size. It
+  holds many concurrent attachments (the server's advertised `max_concurrent_streams`, default 8).
+- **Control plane** — `relayable_client::Client` on its own connection for `session.create` /
+  `session.list` / `session.view` and for `session.resume` events, which drive the connection-state
+  visuals. It never calls `block.attach`, so it never contends for a writer lease (multi-client is
+  supported).
 
-**Required note — `relayable-client` cannot drive a live terminal view as shipped.** Its only
-raw-byte API, `Client::wait_for_output` (public at `crates/relayable-client/src/lib.rs:558`), is
-needle-based: `wait_for_output_inner` (`crates/relayable-client/src/lib.rs:794`) returns
-`Err(ClientError::Timeout)` when the needle is absent (lines 811/816) and **drops the
-`accumulated` bytes it has already read and credit-acked** (the ack is sent at line 845). There is
-no public incremental-bytes API. The `relayable-protocol` transport data plane is the workaround.
-This is a core-API gap; it is **reported here, not fixed** (core crates are outside this task).
+**Flow control is the client library's, and the data plane drains every attached stream.** The
+server charges its per-stream credit window per output payload byte
+(`Subscriber::deliver`/`try_consume`, `crates/relayable-server/src/session/subscriber.rs`;
+`credit_window_bytes` is 256 KiB) and closes the **whole connection** on
+`flow_control_overflow`. `Client::next_output` acknowledges exactly the chunk it returns, so
+`data.rs::pump` drains **every** attached stream to empty with `next_output(stream,
+Duration::ZERO)` before its one bounded blocking read and again after it: no chunk is left
+unacknowledged while another stream (or another wait) is being served. The handshake's advertised
+limits are logged at connect time (`relayable-data: server advertised …`).
+
+**The client API now exists.** UI-002 recorded a core-API gap: `relayable-client` had no
+incremental raw-byte API, so the data plane spoke `relayable-protocol` frames directly. That is no
+longer true — CLIENT-API-001 added `Client::next_output`
+(`crates/relayable-client/src/client/terminal.rs:245`) and CLIENT-API-002 added
+`Client::resize_with_pixels` (`crates/relayable-client/src/client/terminal.rs:159`), and the data
+plane uses both; no module under `src/api/` speaks raw protocol frames any more. `ApiEvent::Output`
+therefore carries no `stream_seq`: the raw plane copied `TerminalOutput.stream_seq` from a frame it
+read itself, `next_output` returns bytes only, and no consumer in this tree reads a sequence.
+
+**Measured limit (reported, not fixed; core crates are outside this task).** Acknowledging is
+one `next_output` call per chunk, so a child that writes *tiny* pieces very fast (line-buffered
+`yes x` produces ~15–50 byte frames) can out-run the client's ack rate and get the
+**whole data-plane connection** closed by the server. In all four recorded runs the trigger the
+server logged is the stream's bounded outbound queue: `subscriber client … stream 2 outbound
+channel full` (`OUTBOUND_QUEUE_MESSAGES`, 8192 messages,
+`crates/relayable-server/src/connection.rs`). The per-stream **256 KiB credit window** is the other
+bound in the same `Subscriber::deliver` (`credit_window_bytes`,
+`crates/relayable-server/src/session/subscriber.rs`); its `credit exhausted` line does not appear
+in these transcripts, so this README does not claim it as the observed trigger. Raw transcripts of
+four runs plus the exact
+reproduction: [`evidence/ui-003-flow-control.log`](./evidence/ui-003-flow-control.log). The
+acceptance burst (multi-KiB writes, > window) is unaffected:
+[`evidence/ui-003-live-probe.log`](./evidence/ui-003-live-probe.log).
 
 **`libc` situation.** UI-002 adds the path deps above plus `alacritty_terminal = "=0.26.0"` and
 `vte = "=0.15.0"`. `apps/linux` is its own workspace, so this cannot affect the root workspace or
@@ -308,6 +333,18 @@ rgb(138,109,26).
   bracketed paste, mouse reporting, IME, or text selection yet.
 - **Session picker** lists all server sessions but can only switch to sessions this app created (no
   `block_id` is exposed by the frozen client API for arbitrary sessions).
+- **Tiny-write output floods** (UI-003 measurement) — the data plane acknowledges one
+  `next_output` chunk per call, so a child that writes tiny pieces very fast (line-buffered
+  `yes x` on a tty produces ~15–50 byte frames) can out-run that ack rate. In the four recorded
+  runs the server's logged trigger is the stream's bounded outbound queue
+  (`stream 2 outbound channel full`; 8192 messages, `OUTBOUND_QUEUE_MESSAGES`), which closes the
+  **whole data-plane connection** (`Subscriber::overflow`, rendered as `flow_control_overflow`) and
+  which the app renders as its Relayable-original reconnect banner. The 256 KiB per-stream credit
+  window is the other bound in the same `Subscriber::deliver`, and is where a fix could also start;
+  its `credit exhausted` line does not appear in the recorded transcripts.
+  Raw transcripts: [`evidence/ui-003-flow-control.log`](./evidence/ui-003-flow-control.log).
+  Removing the limit needs a client/server change (batch or coalesce frame acknowledgements, a
+  larger outbound queue, or a larger credit window); core crates are outside this slice.
 - **~3 % desktop bleed** through the GPUI surface (see §5, deviation 6).
 
 ## 11. Keybindings (Relayable-original)

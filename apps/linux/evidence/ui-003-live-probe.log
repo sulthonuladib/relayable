@@ -1,0 +1,228 @@
+# UI-003 — live acceptance transcript (raw)
+
+Task: migrate the `apps/linux` data plane onto `relayable_client::Client`
+(`next_output` + `resize_with_pixels`), two-plane split kept.
+
+Host: Linux `falcon` x86_64; single monitor 1920x1080 @ scale 1.
+Worktree: `/home/sulthonuladib/work/relayable-wt/ui-003` (branch `ui/ui-003-next-output`).
+
+Harness: `/tmp/opencode/ui003-probe/accept.sh` — the commands below are exactly the
+commands it ran; every line that follows is real output. The scratch server used
+`RELAYABLE_SERVER` + a scratch `RELAYABLE_STATE_DIR` so it never shares state with
+the user's own server, and its socket/state dir were removed at teardown.
+
+Commands:
+
+```
+cd apps/linux
+CARGO_NET_OFFLINE=true cargo fmt --check                            # exit 0
+CARGO_NET_OFFLINE=true cargo clippy --all-targets --locked -- -D warnings   # exit 0
+CARGO_NET_OFFLINE=true cargo build --locked                         # exit 0
+CARGO_NET_OFFLINE=true cargo check --locked                         # exit 0
+CARGO_NET_OFFLINE=true cargo test --locked                          # exit 0, 58 passed
+
+cd <repo root>
+CARGO_NET_OFFLINE=true cargo build -p relayable-server --locked     # exit 0
+
+RELAYABLE_SERVER=<scratch sock> RELAYABLE_STATE_DIR=<scratch state> SHELL=/bin/bash \
+    ./target/debug/relayable-server run &
+cd apps/linux && RELAYABLE_SERVER=<scratch sock> timeout 60 cargo run --locked --bin live-probe
+```
+
+Raw transcript:
+
+```
+date_utc=2026-10-16T16:21:52Z
+cargo_version=cargo 1.99.1 (5f94df478 2026-08-27)
+rustc_version=rustc 1.99.1 (58cf8f9c3 2026-10-13)
+clippy_version=clippy 0.1.99 (58cf8f9c35 2026-10-13)
+rustfmt_version=rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)
+
+### command: cargo fmt --check
+--- fmt_check_exit=0 ---
+
+### command: cargo clippy --all-targets --locked -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- clippy_exit=0 ---
+
+### command: cargo build --locked
+   Compiling relayable-linux v0.0.0 (/home/sulthonuladib/work/relayable-wt/ui-003/apps/linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.14s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- build_exit=0 ---
+
+### command: cargo check --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.20s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+--- check_exit=0 ---
+
+### command: cargo test --locked
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running unittests src/lib.rs (target/debug/deps/relayable_linux-ba7d396c5615c9c0)
+
+running 58 tests
+test api::tests::api_handle_is_send_and_sync ... ok
+test api::tests::zero_timeout_drain_is_bounded_but_never_busy ... ok
+test api::tests::tail_bounds_a_long_snapshot ... ok
+test app::tests::control_shift_is_reserved_for_the_app ... ok
+test app::tests::home_prefix_is_shortened_to_tilde ... ok
+test api::tests::strip_file_uri_handles_host_and_bare_paths ... ok
+test geometry::tests::baseline_canvas_carries_the_no_conversion_caveat ... ok
+test app::tests::control_letters_become_control_bytes ... ok
+test app::tests::duplicate_tab_labels_get_the_reference_suffix ... ok
+test app::tests::font_family_is_always_chosen_from_installed_names ... ok
+test api::tests::mock_handle_is_labelled_and_non_blocking ... ok
+test app::tests::terminal_bytes_maps_special_keys ... ok
+test geometry::tests::baseline_canvas_matches_the_v1_window_tokens ... ok
+test geometry::tests::midpoints_are_inside_the_documented_ranges ... ok
+test api::tests::osc_tracker_records_title_and_cwd ... ok
+test geometry::tests::pane_extent_divides_equally_for_three_or_more_and_honours_the_two_pane_ratio ... ok
+test geometry::tests::rendered_chrome_uses_the_measured_one_pixel_separator ... ok
+test geometry::tests::split_panes_clamps_tiny_widths_and_ratios ... ok
+test geometry::tests::split_panes_reconstructs_the_total_width ... ok
+test geometry::tests::tab_leading_inset_matches_the_measured_pill_arithmetic ... ok
+test geometry::tests::pane_header_v1_stays_explicitly_unmeasured ... ok
+test geometry::tests::v1_chrome_columns_sum_to_the_inner_height ... ok
+test geometry::tests::workspace_columns_clamps_tiny_heights_without_panicking ... ok
+test geometry::tests::tab_pill_radius_is_the_documented_range_midpoint ... ok
+test term::tests::process_handles_partial_escape_and_invalid_utf8_without_panicking ... ok
+test term::tests::default_background_cells_report_bg_none ... ok
+test term::tests::explicit_background_is_reported ... ok
+test term::tests::sgr_red_sets_indexed_foreground_and_reset_clears_it ... ok
+test theme::tests::every_theme_colour_equals_its_token ... ok
+test term::tests::snapshot_at_clamps_beyond_history ... ok
+test theme::tests::font_preference_is_a_non_empty_ordered_list ... ok
+test term::tests::truecolor_foreground_is_rgb ... ok
+test theme::tests::relayable_original_chrome_is_clearly_separate_from_measured_tokens ... ok
+test theme::tests::rgb_u32_packs_hex ... ok
+test theme::tests::session_picker_selected_row_is_blue_and_palette_row_is_mint ... ok
+test tokens::tests::confidence_labels_match_document_vocabulary ... ok
+test tokens::tests::documented_colour_equals_exact_triple ... ok
+test theme::tests::relayable_original_rendering_tuning_stays_in_valid_ranges ... ok
+test tokens::tests::documented_ranges_are_not_collapsed ... ok
+test app::tests::reconnect_targets_only_panes_without_a_live_stream ... ok
+test tokens::tests::every_geometry_approx_is_ordered ... ok
+test tokens::tests::not_app_tokens_are_present_and_reasoned ... ok
+test tokens::tests::every_measured_token_has_non_empty_source_and_caveat ... ok
+test tokens::tests::rgb_packs_to_0x_rrggbb ... ok
+test tokens::tests::terminal_background_is_a_ramp_not_one_value ... ok
+test tokens::tests::unmeasured_categories_match_the_document ... ok
+test ui::palette::tests::base_colours_match_xterm ... ok
+test ui::palette::tests::cube_endpoints_are_black_and_white ... ok
+test ui::palette::tests::greyscale_ramp_endpoints ... ok
+test ui::palette::tests::every_index_is_defined_and_opaque ... ok
+test ui::terminal::tests::wide_continuation_cells_are_skipped ... ok
+test ui::tests::lerp_clamps_and_is_monotonic_on_one_channel ... ok
+test ui::tests::lerp_endpoints_are_exact ... ok
+test ui::terminal::tests::default_background_never_paints_a_run ... ok
+test ui::terminal::tests::runs_cover_the_whole_row_and_split_on_style_change ... ok
+test term::tests::scrollback_grows_and_snapshot_at_reads_history ... ok
+test api::tests::mock_replies_to_create_and_attach ... ok
+test term::tests::resize_changes_dimensions ... ok
+
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/live-probe.rs (target/debug/deps/live_probe-17eb5ece0b8f25ad)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/relayable-1326122f25183aba)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests relayable_linux
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+--- test_exit=0 ---
+
+### server build (repository root workspace)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+--- server_build_exit=0 ---
+
+server_pid=509314 socket_ready=yes
+
+### command: cd apps/linux && RELAYABLE_SERVER=/tmp/opencode/ui003-accept/relayable.sock timeout 60 cargo run --locked --bin live-probe
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+warning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running `target/debug/live-probe`
+live-probe: socket = /tmp/opencode/ui003-accept/relayable.sock
+relayable-data: server advertised max_concurrent_streams=8 credit_window_bytes=262144
+live-probe: connected
+live-probe: created session session:01a14585-265b-7290-9bac-49c2e52f8084 block block:01a14585-265b-7290-9bac-49c4d9fb1b0f
+live-probe: attached stream_id = 1
+live-probe: observed RELAYABLE-PROBE-OK and initial size 24 80
+live-probe: created second session session:01a14585-26c3-7734-a876-e377191a1697 block block:01a14585-26c3-7734-a876-e3796b74af6a
+live-probe: attached second stream_id = 2
+live-probe: flow-control burst stream_id=2 bytes=400290 delivered_in_ms=40 rate_mb_s=9.4
+live-probe: received output bytes = 401148
+live-probe: attached stream_ids = [1, 2]
+live-probe: bytes_by_stream = {1: 764, 2: 400384}
+live-probe: chunks_by_stream = {1: 26, 2: 104}
+live-probe: TerminalResizeAccepted = stream_id=1 cols=120 rows=40
+live-probe: burst stream_id=2 bytes=400384 chunks=104 elapsed_ms=64 delivered_ms=Some(40)
+live-probe: rendered screen (120x40), first 24 rows:
+|printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' OK; stty size|
+|RELAYABLE-PROBE-OK|
+|24 80|
+||
+|~ ❯ stty size|
+|40 120|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' TARGET|
+|RELAYABLE-PROBE-TARGET|
+||
+|~ ❯ printf 'RELAYABLE-PROBE-%s\n' ALIVE|
+|RELAYABLE-PROBE-ALIVE|
+||
+|~ ❯|
+||
+||
+||
+||
+||
+||
+||
+||
+PROBE_EXIT=0
+
+--- server stderr (/tmp/opencode/ui003-accept/server.log) ---
+relayable-server: listening on /tmp/opencode/ui003-accept/relayable.sock (protocol 1.0)
+
+--- stopping server ---
+server_wait_exit=0
+socket_dir_removed=yes
+```
+
+## Observed proof
+
+- apps/linux: `fmt --check`, `clippy --all-targets --locked -- -D warnings`,
+  `build --locked`, `check --locked`, `test --locked` all exit 0; 58 tests pass.
+- the handshake-advertised limits are logged by the data plane:
+  `max_concurrent_streams=8 credit_window_bytes=262144`.
+- `session.create` → `block.attach` (WRITER, `takeover: false`) on the data plane:
+  stream_id 1; the deterministic command and initial `stty size` are observed.
+- `terminal.resize` (cols=120 rows=40, pane pixels 1200x800) accepted by the
+  server: `TerminalResizeAccepted = stream_id=1 cols=120 rows=40`; the child's
+  own `stty size` then reports `40 120`.
+- two concurrent streams on one data-plane connection (stream_id 1 and 2); the
+  second stream's burst of 400384 bytes (larger than the 256 KiB per-stream
+  credit window) is delivered in 104 frames at 9.4 MB/s and the connection
+  survives; `RELAYABLE-PROBE-ALIVE` on the first stream proves it is still usable
+  afterwards.
+- `PROBE_EXIT=0`.

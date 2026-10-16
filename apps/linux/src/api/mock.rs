@@ -64,19 +64,13 @@ pub(super) fn mock_data_thread(commands: Receiver<ApiCommand>, events: Sender<Ap
                     &events,
                     ApiEvent::Output {
                         stream_id: 1,
-                        stream_seq: 1,
                         bytes: b"mock output\r\n".to_vec(),
                     },
                 );
             }
-            ApiCommand::Input { stream_id, bytes } => emit(
-                &events,
-                ApiEvent::Output {
-                    stream_id,
-                    stream_seq: 2,
-                    bytes,
-                },
-            ),
+            ApiCommand::Input { stream_id, bytes } => {
+                emit(&events, ApiEvent::Output { stream_id, bytes })
+            }
             ApiCommand::Resize {
                 stream_id,
                 cols,

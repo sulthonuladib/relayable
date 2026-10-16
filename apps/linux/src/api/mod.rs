@@ -8,11 +8,15 @@
 //!   and `collect_events`, so reconnect visuals are driven by **real** server
 //!   events. It never calls `block.attach`, so it never contends for a writer
 //!   lease (multi-client is supported).
-//! * **Data plane** — a private [`relayable_protocol::transport::FrameConnection`]
-//!   that mirrors the client library's handshake byte shape exactly, then
-//!   `block.attach` (WRITER), then reads `TerminalOutput` frames, sending the
-//!   mandatory per-frame `FlowControl` acknowledgement the server's credit
-//!   window requires (`crates/relayable-server/src/session.rs`).
+//! * **Data plane** — a **second** [`relayable_client::Client`] on its own
+//!   connection: `attach_with_takeover` (WRITER, lease takeover so a
+//!   post-reconnect re-attach wins the lease back),
+//!   [`relayable_client::Client::next_output`] per
+//!   attached stream, `send_input`, and `resize_with_pixels`. It never issues
+//!   `session.*`, so the two planes share no state but the socket path.
+//!
+//! Both planes are the public client library: no module here speaks raw
+//! `relayable_protocol` frames.
 //!
 //! # Threading
 //!
@@ -21,22 +25,19 @@
 //! I/O. Both planes are synchronous `std::io` over a Unix socket, matching
 //! ADR-002 (no async runtime).
 //!
-//! # Flow-control accounting (interpretation)
+//! # Flow control (delegated to the client, drained by this module)
 //!
-//! The server charges the credit window per **output payload byte**
-//! (`Subscriber::try_consume(bytes)`, `session.rs`; `add_credit(ack_bytes)`), and
-//! the reference client acknowledges `output.bytes.len()`
-//! (`relayable-client/src/lib.rs`, `wait_for_output_inner`). This module
-//! therefore acknowledges the exact `TerminalOutput.bytes` length — the byte
-//! length of the terminal-data frame's payload. Envelope/framing overhead is
-//! **not** acked; acking it would permanently pin the window at its cap.
-//!
-//! The data plane holds **many** concurrent attachments, so it acks output for
-//! every attached stream it currently holds, not just one. The server permits up
-//! to its advertised `max_concurrent_streams` (default 8) streams per connection
-//! (`crates/relayable-protocol/src/limits.rs`, enforced in
-//! `crates/relayable-server/src/dispatch.rs`); the handshake's advertised limit
-//! is logged at connect time.
+//! The server charges its per-stream credit window per **output payload byte**
+//! (`Subscriber::deliver` / `try_consume`,
+//! `crates/relayable-server/src/session/subscriber.rs`) and closes the **whole
+//! connection** on `flow_control_overflow`.
+//! [`relayable_client::Client::next_output`] acknowledges
+//! exactly the chunk it returns, so the data plane never sends a `FlowControl`
+//! frame itself; instead it drains **every** attached stream to empty before any
+//! bounded blocking read and again after it (`data.rs::pump`). The data plane
+//! holds many concurrent attachments (up to the server's advertised
+//! `max_concurrent_streams`, default 8); the handshake's advertised limits are
+//! logged at connect time.
 //!
 //! # Reconnect policy (client-side, Relayable-original)
 //!

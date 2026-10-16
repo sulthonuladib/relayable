@@ -77,9 +77,13 @@ pub(super) fn data_thread(path: PathBuf, commands: Receiver<ApiCommand>, events:
                     shutdown = true;
                     break;
                 }
-                ApiCommand::AttachBlock { block_id, takeover } => {
+                ApiCommand::AttachBlock {
+                    session_id,
+                    block_id,
+                    takeover,
+                } => {
                     if let Some(plane) = plane.as_mut() {
-                        if let Err(error) = plane.attach(&block_id, takeover) {
+                        if let Err(error) = plane.attach(&session_id, &block_id, takeover) {
                             emit(&events, ApiEvent::Error { message: error });
                         }
                     }

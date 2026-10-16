@@ -47,9 +47,14 @@ impl WorkspaceView {
     /// Focus does **not** detach anything: every pane keeps its stream until it
     /// is explicitly closed. `takeover: true` makes a re-attach robust against a
     /// lease still held by the previous (now dead) connection; Relayable is the
-    /// only writer client for these sessions.
+    /// only writer client for these sessions. The session id travels with the
+    /// block id because the data plane attaches through the public client API,
+    /// which names both (`relayable_client::Client::attach_with_takeover`).
     pub(super) fn attach_pane(&mut self, pane_id: u64) {
-        let Some(block_id) = self.pane(pane_id).map(|pane| pane.block_id.clone()) else {
+        let Some((session_id, block_id)) = self
+            .pane(pane_id)
+            .map(|pane| (pane.session_id.clone(), pane.block_id.clone()))
+        else {
             return;
         };
         if self.pending_attach.contains(&pane_id) {
@@ -57,6 +62,7 @@ impl WorkspaceView {
         }
         self.pending_attach.push_back(pane_id);
         self.api.send(ApiCommand::AttachBlock {
+            session_id,
             block_id,
             takeover: true,
         });
