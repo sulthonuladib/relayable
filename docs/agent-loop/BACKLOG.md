@@ -2,21 +2,21 @@
 
 Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view plus current state.
 
-## Current execution state (Manager session, 2026-10-16)
+## Current execution state (lead session, 2026-10-16)
 
-- **Repository:** `/home/sulthonuladib/work/relayable`, `master` clean and pushed at `416fa51`
-  (NEXT handoff). Baseline re-verified: `cargo build --workspace --offline` and
-  `cargo test --workspace --offline` both exit 0 with 0 failures.
+- **Repository:** `/home/sulthonuladib/personal/relayable`, `master` at `1819f1f` (DEC-015 OpenCode
+  migration checkpoint; see `WORKLOG.md` Checkpoint 38). Baseline re-verified: `cargo build --workspace
+  --offline` and `cargo test --workspace --offline` both exit 0 with 0 failures.
+  (Earlier entries in this file recorded the pre-move path `/home/sulthonuladib/work/relayable`.)
 - **Accepted:** all five ADRs (ADR-001 domain, ADR-002 protocol, ADR-003 terminal engine + GPUI pin,
   ADR-004 ownership/persistence, ADR-005 env namespace). DEC-011 (2026-10-16) clarifies ADR-005
-  Decision 5's unique-session default.
-- **In flight:** **INSTALL-001**
-  (`install/install-001-user-install`, worktree `/home/sulthonuladib/work/relayable-wt/install-001`).
-  **CTX-001 integrated** (`dd1b986`, INT-015): managed terminals now receive
+  Decision 5's unique-session default. DEC-015 moves the agent runtime to OpenCode.
+- **In flight:** none. INSTALL-001 integrated (`39e5d49`, INT-016) + `a3ff5c0`; **CTX-001 integrated**
+  (`dd1b986`, INT-015): managed terminals now receive
   `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` (ADR-005 Decision 2) and
   `tests/context-resolution/**` proves env resolution, flag precedence, and no-context failure.
-- **Blocked:** STORE-001 needs an SQLite binding decision (no SQLite crate is in the offline cargo cache;
-  system `libsqlite3` 3.53.4 is present). See `NEXT.md` "Decision needed by the user".
+- **Blocked:** none. STORE-001's SQLite binding was decided (DEC-012: `rusqlite =0.40.2` bundled) and
+  integrated (INT-018 `f4d59f8`).
 - **Primary user goal:** a locally installable/testable Linux app for personal use — a
   `systemd --user`-runnable server + the GPUI client + a user install path (INSTALL-001).
 - **Approval gates:** none active — Android SDK/emulator install + project JDK pin are deferred (DEC-010).
@@ -24,7 +24,8 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 - **Primary user goal reached:** a locally installable/testable Linux app (server + CLI + GPUI client +
   user install path) is delivered and verified (`scripts/install-user.sh`, `systemd --user` unit).
 - **Integrated:** CLIENT-API-001 (INT-017), STORE-001 (INT-018), REF-007/009 (INT-019), REF-006 (INT-020).
-- **In flight:** only **RESEARCH-001/002** (`research/gpui-kit-libghostty`, Herdr `w1P`) — docs-only.
+- **In flight:** none. **RESEARCH-001/002** (`research/gpui-kit-libghostty`) integrated (INT-021 `96b4180`);
+  the gpui-kit / libghostty decision remains with the user (DEC-014).
 - **Refactor queue:** REF-005/006/007/009 DONE; **REF-008** (server) is the last hard-cap blocker before
   **REF-010** (`--strict` CI gate); over-hard-cap now 2 (`relayable-server/src/session.rs`, `.../tests/server_e2e.rs`).
 - **Merged worktrees removed** (branches preserved).
@@ -48,19 +49,21 @@ Acceptance criteria live in `TASKS.md`. This file is the ordered actionable view
 | 5 | CTX-001 — ADR-005 context env vars in managed terminals + §8.1 test | `ctx/ctx-001-context-env` | ADR-005, CORE-001 | DONE — `dd1b986` (INT-015); 4 integration + 2 unit tests |
 | 6 | INSTALL-001 — user install path (script + systemd user unit + desktop entry + README) | `install/install-001-user-install` | CORE-001, UI-002 | DONE — `39e5d49` (INT-016) + `a3ff5c0`; sandbox install + live round-trip; `--with-desktop` builds |
 | 7 | ADR-004 (DEC-005 ownership/persistence) | `adr/adr-004-ownership-persistence` | CORE-002 | DONE — `9a3fb27`; Accepted; store work → `STORE-001` |
-| 8 | STORE-001 — `crates/relayable-store` (SQLite metadata/audit) + reconcile/flock/prune/write path per ADR-004 | `store/store-001-sqlite-metadata` | ADR-004 | IN_PROGRESS (Herdr `w1J`); DEC-012 `rusqlite =0.40.2` bundled |
+| 8 | STORE-001 — `crates/relayable-store` (SQLite metadata/audit) + reconcile/flock/prune/write path per ADR-004 | `store/store-001-sqlite-metadata` | ADR-004 | DONE — INT-018 `f4d59f8`; DEC-012 `rusqlite =0.40.2` bundled |
 | 9 | CLIENT-API-001 — incremental terminal bytes | `client/client-api-001-incremental-output` | CORE-001 | DONE — `52433f7` (INT-017); `next_output`; 164 tests |
 | 10 | TERM-003 (proposed) — libghostty-vt license/binding/build spike | TBD | user decision | PROPOSED |
-| 11 | REF-006 — split over-cap files on free paths (apps/linux, model, pty, cli) | `refactor/ref-006-free-crates` | REF-005 | IN_PROGRESS (Herdr `w1M`) |
-| 12 | REF-007/009 — split client + tests | `refactor/ref-007-009-client-tests` | REF-005, CLIENT-API-001 | IN_PROGRESS (Herdr `w1N`); REF-008 blocked by STORE-001 |
-| 13 | REF-010 — wire `check-file-sizes.sh --strict` into CI | TBD | REF-006..009 | BACKLOG |
+| 11 | REF-006 — split over-cap files on free paths (apps/linux, model, pty, cli) | `refactor/ref-006-free-crates` | REF-005 | DONE — INT-020 `ba92c51` |
+| 12 | REF-007/009 — split client + tests | `refactor/ref-007-009-client-tests` | REF-005, CLIENT-API-001 | DONE — INT-019 `54fe220`; REF-008 no longer blocked |
+| 13 | REF-010 — wire `check-file-sizes.sh --strict` into CI | TBD | REF-008 | BACKLOG |
 
 ## Operating rules
 
-- One writer per branch and per path; `docs/agent-loop/**` is Manager-owned.
+- One writer per branch and per path; `docs/agent-loop/**` is orchestrator-owned.
 - Fresh bounded agent sessions per task; concise handoffs; do not inject full reports or `full.md`
-  into briefs.
-- Before any agent delegation: DEC-009 is resolved (option A applied). The wake-daemon stopgap is
-  documented fallback only; restart it if delegation regresses (see `NEXT.md`).
+  into briefs. Roles and their write permissions: `.opencode/agents/` (`AGENTS.md`
+  "Agent roles (OpenCode)"). Delegation is one level deep.
+- No polling: a background subagent session notifies its parent on completion. DEC-009 and its
+  wake-daemon fallback are historical — orchestration is OpenCode now (DEC-015), so that fault
+  cannot recur and the daemon must not be restarted.
 - Update `BACKLOG.md`, `TESTS.md`, `WORKLOG.md`, `NEXT.md`, `STATUS.md`, and `DECISIONS.md` after
   every meaningful iteration.

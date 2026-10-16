@@ -238,7 +238,61 @@ implemented inside `apps/linux` against the existing `gpui = "=0.2.2"` pin and t
 **Reconsider if:** the user decides to re-open the GPUI artifact / fund a Zig toolchain pin (ADR-003
 reconsideration triggers), or libghostty ships its terminal API in a tagged, stable, licensed release.
 
-## Open questions requiring evidence (not yet decidable)
+## DEC-015 — Agent runtime migrated from herdr + Pi to OpenCode
+
+**Context:** the loop was built on Pi (agent harness, `pi-herdsman` extension) hosted in herdr
+(terminal workspace manager). That stack's costs are recorded in DEC-007/DEC-009: assignment records,
+`delegate_project` glue, an `agent_pane_busy` provisioning fault caused by a plugin's shell hook, a
+wake-daemon fallback, and Pi-only context retirement. The user asked whether the loop should use
+OpenCode instead.
+
+**Decision:**
+
+- OpenCode (2.0.30) is the agent runtime and orchestrator for this repository.
+  `opencode.json` sets `default_agent: orchestrator`, `compaction.auto: false` (replacing
+  `.pi/settings.json` → `compaction.enabled: false`, preserving DEC-008), and a worktree directory.
+- Five roles live in `.opencode/agents/`: `orchestrator` (primary) plus subagents `planner`,
+  `researcher`, `implementer`, `verifier`. Role mapping: Manager → orchestrator, worker → implementer,
+  independent review (REVIEW-001 pattern) → verifier, Wave 1 research streams → researcher.
+- The former middle tier (Lead) is **removed**: OpenCode's subagent nesting depth is 1, so delegation
+  is one level deep. The orchestrator spawns each role directly; peer sessions are started by the user.
+- Resumption is file-based, as before: `scripts/agent-loop.sh` runs the loop as a sequence of **fresh**
+  orchestrator sessions (no `--continue`), reading `docs/agent-loop/NEXT.md`.
+- `.pi/settings.json` was removed from the repository.
+- **herdr is not a dependency of this repository** and no repo file requires it. Host-level herdr
+  configuration was left untouched. herdr is a terminal-multiplexing layer, not an agent runtime, and
+  the two compose: `herdr integration install opencode` is available if simultaneous on-screen agent
+  panes or SSH-attached terminal sessions are wanted later. Recorded as optional, reversible, and
+  outside the repository.
+
+**Verified facts (2026-10-16):**
+
+- `herdr integration status` lists `opencode` as a supported integration target
+  (`~/.config/opencode/plugins/herdr-agent-state.js`) — evidence that herdr supervises agents it hosts
+  rather than orchestrating them itself.
+- Installed `herdr` is **0.9.1** (`pacman -Qi herdr`), not the 0.9.5 recorded in `AGENTS.md`; the
+  environment table was corrected.
+- The published config schema (`https://opencode.ai/config.json`) defines the encoded agent form with
+  `permissions` (an ordered `{action, resource, effect}` ruleset) and `additionalProperties: false`, so
+  the deprecated `permission` key would be rejected. `subagent_depth` defaults to 1 and is marked
+  deprecated, which is why the flat single-level delegation above is a constraint rather than a
+  tunable.
+- `opencode debug agents` lists all five roles with the intended modes and merged permission rules;
+  `opencode debug config` confirms the project config is discovered and merged over the global one.
+- No `herdr`/`pi` references exist in `scripts/*.sh`; the tracked Pi config file was the only
+  repository-side dependency.
+
+**Consequences:** Pi/Herdr-specific history in `DECISIONS.md`, `WORKLOG.md`, `TESTS.md`, and the
+captured logs under `apps/linux/evidence/**` is **frozen evidence and is not rewritten**. New records
+use OpenCode vocabulary. Requirements previously met by the herdr+Pi stack (worktrees, bounded
+delegation, completion notification without polling, persistent sessions) now come from OpenCode
+features; the capability that has no direct equivalent is a human-facing multi-pane terminal view.
+
+**Reconsider if:** concurrent on-screen agent panes or SSH-attached terminal sessions become a real
+workflow need (add the host-level herdr integration), or OpenCode makes nesting depth >1 non-deprecated
+and a genuine three-tier org chart is required.
+
+
 
 - Terminal engine: which maintained Rust-compatible engine meets §5.4 coverage/licensing/API-stability bar.
 - Protocol: protobuf vs alternatives, and TLS vs QUIC vs WebSocket-over-TLS for remote (§6.1, §6.2).

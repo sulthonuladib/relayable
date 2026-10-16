@@ -1,7 +1,9 @@
-# NEXT-SESSION PROMPT — copy/paste into a fresh Pi session
+# NEXT-SESSION PROMPT — copy/paste into a fresh OpenCode session
 
-> Durable prompt to start the next Relayable Manager session. `master` is clean and pushed at `269673b`
-> when this was written. Compaction is disabled (DEC-008); repo files are authoritative.
+> Durable prompt to start the next Relayable lead session. `master` was clean when this was written;
+> check `git log` for the current tip. Compaction is disabled (`opencode.json` → `compaction.auto:
+> false`, DEC-008/DEC-015); repo files are authoritative. `scripts/agent-loop.sh` runs this prompt as
+> a sequence of fresh sessions.
 
 ---
 
@@ -46,15 +48,16 @@ pin. Evidence: `docs/research/gpui-kit.md`, `docs/research/libghostty.md`.
 
 **First command:**
 ```bash
-cd /home/sulthonuladib/work/relayable && git status --short --branch && git log --oneline -8 && \
+cd /home/sulthonuladib/personal/relayable && git status --short --branch && git log --oneline -8 && \
   cat docs/agent-loop/NEXT.md && git worktree list
 ```
 
 **Constraints:** no `sudo`, no global installs, no system-config or firewall changes without explicit user
 approval; no network dependency for builds (only the pre-fetched `rusqlite` cache); never invent CLI/API
 flags (`full.md` §0.3.5); no REX wire/binary compatibility claims (§3); no GoRex source/asset reuse (§2.6);
-never claim server-crash or host-reboot session survival (§6.3); one writer per branch/path; the Manager
-owns `docs/agent-loop/**`, `docs/adr/**`, `AGENTS.md`, root `Cargo.toml`, and integration.
+never claim server-crash or host-reboot session survival (§6.3); one writer per branch/path; the
+orchestrator owns `docs/agent-loop/**`, `docs/adr/**`, `AGENTS.md`, `opencode.json`, root `Cargo.toml`,
+and integration (`.opencode/agents/`).
 
 **Approval gates:** none active. Android remains deferred (DEC-010). TERM-003 / engine change is gated on
 the user's DEC-014 decision.

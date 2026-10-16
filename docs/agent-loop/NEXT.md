@@ -4,29 +4,36 @@ Read `full.md` completely, then `AGENTS.md`, `STATUS.md`, `BACKLOG.md`, `TASKS.m
 `TESTS.md`, `WORKLOG.md` (tail), `docs/architecture/interface-contract.md`, `docs/adr/ADR-001..005`,
 and this file. Trust repo state over chat.
 
-> **Restart trigger (DEC-008 — compaction is disabled):** if this session approaches its context
+> **State note (2026-10-16, after the DEC-015 OpenCode migration checkpoint):** the "In flight" list
+> below predates `STATUS.md` and `NEXT-SESSION-PROMPT.md` and is **not** current — CTX-001,
+> INSTALL-001, CLIENT-API-001, STORE-001, REF-006/007/009, and RESEARCH-001/002 are integrated.
+> Reconcile actual task state from `git log`, `git worktree list`, and `STATUS.md` before acting.
+> Only the harness statement below and the ordered work in `NEXT-SESSION-PROMPT.md` are current.
+
+> **Restart trigger (DEC-008/015 — compaction is disabled):** if this session approaches its context
 > limit, STOP launching new work, finish a safe checkpoint (commit + push + update
 > `docs/agent-loop/**`), and tell the user to start a fresh session with the next-session prompt.
 > Repository files are authoritative; never rely on conversation memory. Project work is durable by
-> Git branch, so a restart loses nothing. Manager auto-start is enabled, so a fresh session opened in
-> the primary workspace re-takes the Manager role; otherwise the user pastes the prompt.
+> Git branch, so a restart loses nothing. `opencode.json` sets `default_agent: orchestrator`, so a
+> fresh session opened in this workspace re-takes the lead role; `scripts/agent-loop.sh` runs that as
+> a sequence of fresh sessions; otherwise paste `NEXT-SESSION-PROMPT.md`.
 
 ## First commands
 
 ```bash
-cd /home/sulthonuladib/work/relayable && git status --short --branch && git log --oneline -8
+cd /home/sulthonuladib/personal/relayable && git status --short --branch && git log --oneline -8
 git worktree list && git branch -a
 ls docs/adr docs/architecture spikes/terminal-engine docs/compatibility/doc-002-audit docs/reviews
 ```
 
-## Current state (Manager session, 2026-10-16)
+## Current state (lead session, 2026-10-16)
 
 `master` is clean at `416fa51`. Baseline re-verified: `cargo build --workspace --offline` and
 `cargo test --workspace --offline` both exit 0 with 0 failures. All Wave 1/2 research, the review/fix
 cycle, the core slices, the GPUI reference workspace, the QA tooling, and **all five ADRs** are
 integrated. **DEC-011** (2026-10-16) clarifies ADR-005 Decision 5.
 
-**In flight (two disjoint-path implementer projects):**
+**Historical — superseded (both projects below are integrated; kept for path-ownership history):**
 
 - **CTX-001** — `ctx/ctx-001-context-env`, worktree `/home/sulthonuladib/work/relayable-wt/ctx-001`:
   set `RELAYABLE_SESSION`/`RELAYABLE_BLOCK`/`RELAYABLE_SERVER` in managed terminals (ADR-005
@@ -45,8 +52,8 @@ those. **Do not run STORE-001 concurrently with CTX-001**: both touch
 
 1. **Integrated & green:** CTX-001 (INT-015), INSTALL-001 (INT-016), CLIENT-API-001 (INT-017), STORE-001
    (INT-018 `f4d59f8`).
-2. **In flight:** **RESEARCH-001/002** (`research/gpui-kit-libghostty`, Herdr `w1P`). Earlier refactors are
-   integrated: REF-006 (INT-020 `ba92c51`), REF-007/009 (INT-019 `54fe220`).
+2. **Integrated:** RESEARCH-001/002 (INT-021 `96b4180`); REF-006 (INT-020 `ba92c51`), REF-007/009
+   (INT-019 `54fe220`). The gpui-kit / libghostty adoption decision (DEC-014) is still with the user.
 3. **Next-phase plan:** `docs/architecture/next-phase-plan.md`. **REF-008** (server split) is the last
    file-size blocker before **REF-010** (`--strict` CI gate). After RESEARCH-001/002: **TERM-003**
    (libghostty-rs spike + ADR-003 amendment), then **UI-004/005/006** (auto-session on open, keymap helper,
@@ -84,16 +91,17 @@ builds stay `--offline`**. Recorded as **DEC-012**. No `unsafe` FFI (option B) a
 
 ## Environment / cleanup
 
-- Steering can use fresh bounded agents again; one writer per branch/path.
-- DEC-009 is resolved (the automatic-rename fish hook block was removed from
-  `~/.config/fish/config.fish`; backup `/tmp/relayable-config.fish.bak`) **and the
-  `herdr-automatic-rename` plugin is uninstalled** (`herdr plugin list` → `No plugins installed.`;
-  residual dirs at `/tmp/herdr-automatic-rename-removed/`). If delegation fails with `agent_pane_busy`,
-  restart the fallback daemon:
-  `setsid python3 /tmp/relayable-wake-daemon.py /tmp/relayable-wake-daemon.stop 3600 <ids…>`.
+- Delegation uses fresh bounded agents; one writer per branch/path. Agent roles and their write
+  permissions are defined in `.opencode/agents/` (see `AGENTS.md` "Agent roles (OpenCode)").
+- **Orchestration is OpenCode (DEC-015).** The herdr + Pi stack is no longer used by this repository:
+  `.pi/settings.json` was removed and no script depends on herdr. DEC-009's `agent_pane_busy` fault and
+  its `/tmp/relayable-wake-daemon.py` fallback are historical and must not be restarted — the
+  mechanism they worked around no longer exists. Host-level herdr configuration was left untouched;
+  if on-screen agent panes or SSH-attached sessions are wanted later, that is a host-level choice
+  (`herdr integration install opencode`), not a repository dependency.
 - Worktree cleanup (AGENTS.md "Worktree lifecycle / cleanup"): done+merged task worktrees may be removed
-  by the Manager, preserving branches. In-flight worktrees (`client/...`, `store/...`) are kept. Check
-  `git worktree list` after any cleanup and record it in `WORKLOG.md`.
+  by the lead, preserving branches. Check `git worktree list` after any cleanup and record it in
+  `WORKLOG.md`.
 
 ## If context pressure hits
 

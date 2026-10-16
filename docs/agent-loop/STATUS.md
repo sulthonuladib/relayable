@@ -2,9 +2,9 @@
 
 **Phase:** 1–2 (Linux server + CLI + GPUI reference workspace delivered; **user install path delivered**)
 **Milestone:** All five ADRs Accepted; core + reference workspace + QA tooling + packaging/user-install integrated. **In flight:** none.
-**Updated:** Manager session 2026-10-16 — see `WORKLOG.md` Checkpoints 26–33.
+**Updated:** lead session 2026-10-16 — OpenCode migration (DEC-015, `WORKLOG.md` Checkpoint 38); earlier work in Checkpoints 26–37.
 
-## Current execution (Manager session, 2026-10-16)
+## Current execution (lead session, 2026-10-16)
 
 - `master` is clean; CTX-001 (`dd1b986`) and INSTALL-001 (`39e5d49` + `a3ff5c0`) are integrated and the
   canonical suite is green (`scripts/validate.sh`, `scripts/smoke.sh` both exit 0).
@@ -63,17 +63,21 @@ preserved) so new agents start on fresh worktrees. All three Wave 2 Leads were s
 
 ## Context-window policy (DEC-008)
 
-- `.pi/settings.json` → `compaction.enabled: false`; never invoke `/compact` unless the user asks.
+- `opencode.json` → `compaction.auto: false`; never compact a session unless the user asks.
 - Repository files are authoritative; fresh bounded agents; concise handoffs; checkpoint and hand
-  off before context pressure.
+  off before context pressure. `scripts/agent-loop.sh` resumes in fresh sessions (DEC-015).
 
 ## Blockers / approval gates
 
-- **Herdr agent provisioning (DEC-009) — RESOLVED 2026-10-15:** the automatic-rename fish hook block
+- **Agent runtime (DEC-015) — migrated 2026-10-16:** orchestration is OpenCode; `.pi/settings.json` was
+  removed and no repository script depends on herdr. The historical herdr provisioning fault below is
+  resolved and cannot recur.
+- **Herdr agent provisioning (DEC-009) — HISTORICAL, 2026-10-15:** the automatic-rename fish hook block
   was removed from `~/.config/fish/config.fish` and the `herdr-automatic-rename` plugin
-  **uninstalled** (residual dirs cleared; `herdr plugin list` → `No plugins installed.`); verified
-  with `fish -n` and a successful `delegate_project`. The Option D wake daemon remains a documented
-  fallback. Details: `DECISIONS.md` DEC-009, `WORKLOG.md` Checkpoints 7 and 10.
+  **uninstalled** (`herdr plugin list` → `No plugins installed.`); verified
+  with `fish -n` and a successful `delegate_project`. Superseded by DEC-015 — the herdr/Pi delegation
+  path it repaired is no longer used, and its wake-daemon fallback must not be restarted. Details:
+  `DECISIONS.md` DEC-009, `WORKLOG.md` Checkpoints 7 and 10.
 - **Android — DEFERRED (DEC-010, 2026-10-15):** Android apps are out of scope for now; no SDK/
   emulator install, JDK pin, or Gradle work is required. ENV-001's inventory remains as evidence:
   `docs/operations/android-toolchain.md`. The model/protocol must stay Android-ready (§1.3.6).

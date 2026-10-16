@@ -77,7 +77,70 @@ None. No build system exists yet. No test claimed.
 
 ---
 
-## Checkpoint 37 — REF-006 integrated; refactor queue complete but REF-008 (INT-020) (2026-10-16)
+## Checkpoint 38 — Agent runtime migrated from herdr + Pi to OpenCode (DEC-015) (2026-10-16)
+
+**Objective:** replace the Pi + herdr orchestration stack with OpenCode, and record the migration
+without rewriting historical evidence.
+
+**Files changed:**
+
+- Added `opencode.json` (root) — `default_agent: orchestrator`, `compaction.auto: false`,
+  `worktree.directory: ../relayable-wt`.
+- Added `.opencode/agents/{orchestrator,planner,researcher,implementer,verifier}.md`.
+- Added `scripts/agent-loop.sh` (executable) — fresh-session loop driver.
+- Removed `.pi/settings.json` (`git rm`); the `.pi/` directory is gone.
+- `AGENTS.md` — compaction policy, environment table, agent-coordination wording, worktree-removal
+  wording, new "Agent roles (OpenCode)" section.
+- `docs/agent-loop/DECISIONS.md` — new DEC-015.
+
+**Exact commands + results:**
+
+| Command | Result |
+|---|---|
+| `herdr integration status` | lists `opencode` as a supported integration target (`~/.config/opencode/plugins/herdr-agent-state.js`) |
+| `pacman -Qi herdr` | herdr **0.9.1**-2 (the `AGENTS.md` table had recorded 0.9.5) |
+| `opencode debug config` | project `opencode.json` discovered and merged over the global config |
+| `opencode debug agents` | all five roles listed; modes and merged `permissions` rules as intended |
+| `git grep -n herdr\|pi scripts/*.sh` | no repository-side herdr/Pi dependency in scripts |
+| `bash scripts/check-file-sizes.sh` | exit 0, `mode=report`, over-hard-cap = 2 (`relayable-server/src/session.rs` 1037, `.../tests/server_e2e.rs` 1472) — unchanged by this checkpoint, still REF-008's target |
+
+**Findings worth keeping:**
+
+- The published config schema defines the encoded agent form with `permissions`
+  (`{action, resource, effect}` ruleset) and `additionalProperties: false`, so the deprecated
+  `permission` key would be silently rejected. Verified before writing the agent files.
+- `subagent_depth` defaults to 1 **and is marked deprecated**, so one-level delegation is a hard
+  constraint, not a tunable. The former Manager → Lead → worker tree cannot be reproduced inside a
+  single session; the orchestrator spawns each role directly.
+- herdr is a terminal-multiplexing layer, not an agent runtime — the two compose. It was therefore
+  not deleted from the host; it is simply no longer a repository dependency.
+
+**Not done (deliberately):**
+
+- Host-level herdr/Pi configuration was **left untouched** (no deletion, no backup taken).
+- The plugin-driven automatic handoff (`ctx.session.hook("context")` → `ctx.session.create`) was not
+  built; the user chose the file + fresh-session path first. It remains an open spike.
+- `docs/agent-loop/{NEXT,NEXT-SESSION-PROMPT,STATUS,BACKLOG}.md` still carry older Pi/Herdr vocabulary
+  and the stale `/home/sulthonuladib/work/relayable` path; scheduled immediately after this checkpoint.
+
+**Risks / caveats:**
+
+- `scripts/agent-loop.sh` has not been run end-to-end (it would start a new orchestrator session and
+  spend tokens); only its guards and command construction were reviewed. Run it deliberately, once.
+- Role configuration is verified as *parsed and registered*, not yet as *exercised* by a real
+  delegated task.
+
+**Next tasks:**
+
+1. Finish the doc-vocabulary migration (`NEXT.md`, `NEXT-SESSION-PROMPT.md`, `STATUS.md`,
+   `BACKLOG.md`) and fix the stale `work/relayable` paths.
+2. **REF-008** — split `relayable-server/src/session.rs` and `tests/server_e2e.rs`; then **REF-010**
+   (`--strict` CI gate). This is the last hard-cap blocker.
+3. Task UI-003/UI-004/UI-005/UI-006 remain as ordered in `NEXT.md` (desktop UX, no new deps).
+
+---
+
+
 
 **Objective:** integrate the refactor of oversized files on the free paths.
 

@@ -22,8 +22,8 @@ conversation.
 
 ## Context-window policy
 
-- Automatic compaction is disabled (`.pi/settings.json` → `compaction.enabled: false`). Never
-  invoke `/compact` unless the user explicitly asks.
+- Automatic compaction is disabled (`opencode.json` → `compaction.auto: false`), per DEC-008. Never
+  compact a session unless the user explicitly asks.
 - Project knowledge lives in the `docs/agent-loop/` files above, not in conversation summaries.
 - Delegate bounded work to fresh agent sessions. Handoffs must be concise: files changed, validation
   actually run, findings/decisions, risks, remaining work. Do not inject full research reports or
@@ -33,6 +33,9 @@ conversation.
   session alive.
 - A resumed session reads `full.md`, repository instructions, `NEXT.md`, `BACKLOG.md`,
   `DECISIONS.md`, and Git state, then continues at the next incomplete acceptance criterion.
+- `scripts/agent-loop.sh` continues the loop as a sequence of **fresh** orchestrator sessions
+  (deliberately no `--continue`), so context never accumulates across iterations. It refuses to
+  start on a dirty tree. `NEXT-SESSION-PROMPT.md` is the manual equivalent.
 
 ## Loop (summary of §15)
 
@@ -53,7 +56,7 @@ See `docs/agent-loop/WORKLOG.md` for raw output. Summary:
 | gradle | **absent** — use the Gradle wrapper, never a system Gradle |
 | ffmpeg / yt-dlp / chromium | present — video frame extraction and browsing are feasible |
 | OS | Linux `falcon` 7.2.5-3-omarchy, x86_64 |
-| herdr | 0.9.5 |
+| opencode | 2.0.30 — agent runtime and orchestrator; replaced the herdr + Pi stack (DEC-015) |
 
 Android Studio is **not** required and must not be a build dependency (§10).
 
@@ -69,12 +72,31 @@ refactor a path while another task owns it (`docs/architecture/code-organization
 
 ## Agent coordination (no polling)
 
-- **Never poll peers.** Do not sleep-wait, status-check, or `list_agents`/`list_staff` another agent to see
-  whether it finished. Agents are pinged immediately when a dependency settles (event-driven).
+- **Never poll peers.** Do not sleep-wait or status-check another agent to see whether it finished.
+  A background `subagent` session notifies its parent on completion (event-driven). Reading the
+  session list is for a real control or recovery decision, never a progress poll.
 - While waiting on a dependency, do independent bounded work on your owned paths, or stop and let the
   completion notification resume you. Do not invent work merely to stay active.
 - Use ownership/status reads only for a real control or recovery decision, never as a progress poll.
-- Report once at a natural boundary; the Manager integrates returning work.
+- Report once at a natural boundary; the orchestrator integrates returning work.
+
+## Agent roles (OpenCode)
+
+Defined in `.opencode/agents/`; the orchestrator is the project `default_agent` (`opencode.json`).
+Delegation is **one level deep** — OpenCode's subagent nesting depth is 1, so subagents cannot spawn
+subagents. The orchestrator spawns these directly.
+
+| Agent | Mode | May | Must not |
+|---|---|---|---|
+| `orchestrator` | primary | select the next slice; spawn the roles below; integrate; own the lead paths | read `full.md` into its own context by reflex; paste reports into chat |
+| `planner` | subagent | read everything; return bounded briefs naming owned paths | edit any file |
+| `researcher` | subagent | read + web; author `docs/research/**`, `docs/compatibility/**` | edit code, `AGENTS.md`, `docs/agent-loop/**`, `docs/adr/**`; invent APIs |
+| `implementer` | subagent | edit + shell on its assigned paths; run real validation | touch `AGENTS.md`, `Cargo.toml`, `rust-toolchain.toml`, `opencode.json`, `docs/agent-loop/**`, `docs/adr/**`, `crates/relayable-model/**`, `.opencode/**` |
+| `verifier` | subagent | read + run read-only validation; report findings by severity | edit anything |
+
+Subagents inherit their own configured permissions, not the parent's. A role that needs a
+lead-owned path may write it **only** when the brief names that path explicitly; the orchestrator
+still integrates. Peer sessions (a second lead) are started by the user, not by an agent.
 
 ## Path ownership
 
@@ -84,14 +106,15 @@ Workers own only the paths named in their assignment.
 
 ## Worktree lifecycle / cleanup
 
-The Manager keeps the checkout set tidy. A task's worktree may be removed **only** when its work is merged
-into `master` and pushed and the task is recorded `DONE`; the Git branch and Pi conversation are preserved.
+The lead keeps the checkout set tidy. A task's worktree may be removed **only** when its work is merged
+into `master` and pushed and the task is recorded `DONE`; the Git branch and the OpenCode session are
+preserved.
 
 - Never remove a worktree whose task is in flight/unmerged, and never remove one with uncommitted changes.
-- **Standing user authorization (2026-10-16):** for done+merged worktrees the Manager removes them
-  automatically with **no per-removal confirmation**. Use plain `git worktree remove <path>` (no prompt);
-  use `remove_worktree` only when you also want the Herdsman assignment retired. Both preserve the Git
-  branch. `scripts/cleanup-worktrees.sh <branch>...` (add `--apply` for real removal) does a checked,
+- **Standing user authorization (2026-10-16):** for done+merged worktrees the lead removes them
+  automatically with **no per-removal confirmation**. Use plain `git worktree remove <path>` (no prompt),
+  or the `worktree_remove` tool for a worktree OpenCode created. Both preserve the Git branch.
+  `scripts/cleanup-worktrees.sh <branch>...` (add `--apply` for real removal) does a checked,
   non-interactive cleanup of explicitly named, merged, clean branches.
 - After removing, re-check `git worktree list`, keep `docs/agent-loop/NEXT.md` current, and record the
   cleanup in `WORKLOG.md`.
