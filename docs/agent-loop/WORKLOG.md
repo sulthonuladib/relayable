@@ -125,8 +125,15 @@ environment changes that affect what can be proven offline.
 
 ### Risks / notes
 
-- `ci.sh` overall PASS is not currently reproducible on this host (phase-2 spike row) — the new
-  `file-sizes` row itself is PASS, and its failure path was demonstrated.
+- `ci.sh` overall PASS is not currently reproducible on this host: post-INT-025 the matrix is
+  **15 PASS / 1 FAIL / 3 SKIP**, where the only FAIL is `spike-terminal-engine-phase2` (`avt` absent from
+  the offline cache — DEC-018). The new `file-sizes` row is PASS and its failure path was demonstrated;
+  all five `desktop-*` rows (including the `libc 0.2.189` pin guard) are PASS.
+- **Worktree cleanup:** `ref-008`, `ref-010`, `client-api-002`, `qa-harness-001` removed with
+  `git worktree remove` (each verified `0` dirty files first; branches preserved) — only the in-flight
+  `ui-003` worktree remains. Note: `scripts/cleanup-worktrees.sh <branches> --apply` stayed in **dry-run**
+  and printed `SKIP --apply: no linked worktree`, so the lead used plain `git worktree remove`
+  (permitted by the standing authorization); the script's `--apply` handling is recorded as **TOOL-001**.
 - `stat`-level toolchain drift (1.99.1) is host-level; the workspace, `validate.sh` and the desktop
   workspace all build and test green on it.
 

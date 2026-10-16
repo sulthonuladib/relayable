@@ -419,6 +419,8 @@ plus the lead's doc-accuracy commit `1a54cc4`), `refactor/ref-010-strict-gate` (
 | 140 | post-INT-024/025 `bash scripts/smoke.sh` | `SMOKE OK` | 0 |
 | 141 | `cd apps/linux && CARGO_NET_OFFLINE=true cargo build --locked` | exit 0 (~60 s) — desktop dependency set cached again | 0 |
 | 142 | `cd spikes/terminal-engine-phase2 && CARGO_NET_OFFLINE=true cargo build` | `no matching package named 'avt' found` — cache gap, pre-existing, unrelated to REF-010 | 101 |
+| 143 | post-INT-025 `bash scripts/ci.sh` (full matrix, `CARGO_NET_OFFLINE=true`) | **15 PASS / 1 FAIL / 3 SKIP**: `file-sizes` PASS, all five `desktop-*` rows PASS (incl. `desktop-libc-pin`); the single FAIL is `spike-terminal-engine-phase2` (`avt` uncached, DEC-018) | 1 |
+| 144 | `git worktree remove` for `ref-008`, `ref-010`, `client-api-002`, `qa-harness-001` (each `0` dirty files) | all four removed, branches preserved; only the in-flight `ui-003` worktree remains | 0 |
 
 **Decisions recorded:** DEC-017 (client resize parity before UI-003) — implemented and integrated;
 DEC-018 (offline cache drift / toolchain bump; no further agent-initiated network fetch); DEC-019
