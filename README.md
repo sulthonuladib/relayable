@@ -13,6 +13,46 @@ under `apps/linux`. Remote transport and the Android client are not implemented 
 > reference (paths, environment variables, systemd commands, uninstall,
 > troubleshooting) is [`docs/operations/user-install.md`](docs/operations/user-install.md).
 
+## Is it runnable now?
+
+**Yes.** On this host the foreground server (`relayable-server`), the CLI (`relayable`), and the GPUI
+desktop app (`apps/linux`) all build and run. The committed screenshots under
+`apps/linux/evidence/ui-002-*.png` are real captures of the desktop app running, not mock-ups.
+
+## Quick start (this machine)
+
+```sh
+# 1. Build + install per-user. No root, no system-wide changes, and the service
+#    is installed but NOT started/enabled. --with-desktop also builds the GPUI app.
+scripts/install-user.sh --with-desktop
+
+# 2. Ensure the install dir is on PATH (it usually already is):
+export PATH="$HOME/.local/bin:$PATH"
+
+# 3. Start the server (foreground; leave it running in this terminal or background it):
+relayable-server run
+
+# 4. In another terminal, create and list sessions with the CLI:
+relayable new          # prints the new session/window/block ids
+relayable ls
+relayable session inspect -s <session-id>
+relayable session close   -s <session-id>
+
+# 5. Launch the desktop app (connects to the running server):
+relayable-desktop
+```
+
+No install needed? Build and run straight from the checkout instead:
+
+```sh
+cargo build --release --offline --bin relayable --bin relayable-server
+./target/release/relayable-server run            # terminal 1
+(cd apps/linux && cargo run --bin relayable)      # terminal 2 (desktop app)
+```
+
+Run the desktop app offline with synthetic data (useful to see the UI without a server):
+`(cd apps/linux && cargo run --bin relayable -- --mock)` — it shows a visible `MOCK` banner.
+
 ## Prerequisites
 
 - **Linux** with a user `systemd` manager (for the optional background service).

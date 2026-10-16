@@ -77,6 +77,26 @@ None. No build system exists yet. No test claimed.
 
 ---
 
+## Checkpoint 31 — README quickstart for installing/running the app (2026-10-16)
+
+**Trigger:** the user asked how to install and start using the app on this machine and whether an
+installation README exists.
+
+**Finding:** `README.md` and `docs/operations/user-install.md` already existed (INSTALL-001) and the local
+app is runnable (server + CLI verified live; the `apps/linux/evidence/ui-002-*.png` screenshots are real
+GPUI captures).
+
+**Change:** added an explicit **"Is it runnable now?"** answer and a copy-paste **"Quick start (this
+machine)"** block to `README.md` (install with `scripts/install-user.sh --with-desktop`, run
+`relayable-server run`, use `relayable new/ls/inspect/close`, launch `relayable-desktop`, plus a
+no-install checkout path and the `--mock` offline mode). Confirmed `~/.local/bin` is on `PATH` on this host,
+so `packaging/desktop/relayable.desktop` (`Exec=relayable-desktop`) works from the application menu; no
+change needed there.
+
+**Next:** unchanged — integrate CLIENT-API-001 / STORE-001 / REF-006 as they return.
+
+---
+
 ## Checkpoint 30 — Code-organization ruling + file-size checker; REF-006 launched (2026-10-16)
 
 **Trigger:** the user dislikes oversized single source files and asked for a better ruling plus a plan that
